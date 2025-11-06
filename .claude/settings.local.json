@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/weiruan/.claude/**)",
+      "Bash(powershell -Command:*)",
+      "Read(//c/Users/weiruan/**)",
+      "Bash(dir /b)",
+      "Bash(claude mcp)",
+      "Bash(claude mcp list)",
+      "Bash(claude mcp add --transport stdio context7 -- npx -y @anthropic/claude-code-context7)",
+      "Bash(claude mcp add:*)",
+      "Bash(npx:*)",
+      "Bash(where:*)",
+      "Bash(npm search:*)",
+      "Bash(claude mcp remove:*)",
+      "Bash(npm view:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(uvx --from git+https://github.com/oraios/serena serena start-mcp-server)",
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(del:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
