@@ -20,8 +20,8 @@ on:
         default: 'false'
       perf_p95_ms:
         description: "Perf budget P95 (ms), 0 to skip"
-        type: number
-        default: 0
+        type: string
+        default: "0"
 
 jobs:
   quality:
@@ -125,10 +125,14 @@ jobs:
         shell: pwsh
         run: ./scripts/ci/run_dotnet_tests.ps1 -Solution 'Game.sln'
 
+      - name: Enable demo tests (optional)
+        if: ${{ inputs.include_demo == 'true' }}
+        shell: pwsh
+        run: |
+          "TEMPLATE_DEMO=1" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
       - name: GdUnit4 tests
         shell: pwsh
-        env:
-          TEMPLATE_DEMO: ${{ inputs.include_demo == 'true' && '1' || '' }}
         run: |
           $env:Path = "$HOME\.dotnet;" + $env:Path
           ./scripts/ci/run_gdunit_tests.ps1 -GodotBin "$env:GODOT_BIN"
@@ -149,7 +153,7 @@ jobs:
         run: ./scripts/ci/smoke_exe.ps1 -ExePath build\Game.exe -TimeoutSec 5
 
       - name: Perf budget gate
-        if: ${{ inputs.perf_p95_ms != 0 }}
+        if: ${{ inputs.perf_p95_ms != '' && inputs.perf_p95_ms != '0' }}
         shell: pwsh
         run: ./scripts/ci/check_perf_budget.ps1 -MaxP95Ms ${{ inputs.perf_p95_ms }}
 
