@@ -21,6 +21,17 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+      - name: Pin .NET SDK/Runtime and export DOTNET_ROOT
+        shell: pwsh
+        run: |
+           = "C:\Users\weiruan/dotnet-install.ps1"
+          Invoke-WebRequest -UseBasicParsing -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile 
+          # Install specific SDK + Runtime that Godot 4.5.1 expects
+          & powershell -NoProfile -ExecutionPolicy Bypass -File  -Version 8.0.401 -InstallDir "C:\Users\weiruan/.dotnet"
+          & powershell -NoProfile -ExecutionPolicy Bypass -File  -Runtime dotnet -Version 8.0.21 -InstallDir "C:\Users\weiruan/.dotnet"
+          "DOTNET_ROOT=C:\Users\weiruan/.dotnet" | Out-File -FilePath  -Append -Encoding utf8
+          "C:\Users\weiruan/.dotnet" | Out-File -FilePath  -Append -Encoding utf8
+          dotnet --info
 
       - name: Ensure DOTNET_ROOT and PATH
         shell: pwsh
@@ -94,6 +105,12 @@ jobs:
           $env:Path = "$HOME\.dotnet;" + $env:Path
           & "$env:GODOT_BIN" --headless --path . --build-solutions --quit
 
+
+      - name: Restore & Build C# (Release)
+        shell: pwsh
+        run: |
+          dotnet restore GodotGame.csproj
+          dotnet build GodotGame.csproj -c Release -v minimal
       - name: Export Windows EXE
         shell: pwsh
         run: |
@@ -107,4 +124,5 @@ jobs:
           path: |
             build/Game.exe
             logs/ci/**
+
 

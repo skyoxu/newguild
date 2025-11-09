@@ -35,6 +35,16 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+      - name: Pin .NET SDK/Runtime and export DOTNET_ROOT
+        shell: pwsh
+        run: |
+           = "C:\Users\weiruan/dotnet-install.ps1"
+          Invoke-WebRequest -UseBasicParsing -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile 
+          & powershell -NoProfile -ExecutionPolicy Bypass -File  -Version 8.0.401 -InstallDir "C:\Users\weiruan/.dotnet"
+          & powershell -NoProfile -ExecutionPolicy Bypass -File  -Runtime dotnet -Version 8.0.21 -InstallDir "C:\Users\weiruan/.dotnet"
+          "DOTNET_ROOT=C:\Users\weiruan/.dotnet" | Out-File -FilePath  -Append -Encoding utf8
+          "C:\Users\weiruan/.dotnet" | Out-File -FilePath  -Append -Encoding utf8
+          dotnet --info
 
       - name: Ensure DOTNET_ROOT and PATH
         shell: pwsh
@@ -142,4 +152,5 @@ jobs:
         if: ${{ inputs.perf_p95_ms != 0 }}
         shell: pwsh
         run: ./scripts/ci/check_perf_budget.ps1 -MaxP95Ms ${{ inputs.perf_p95_ms }}
+
 
