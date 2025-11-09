@@ -26,18 +26,43 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Download Godot .NET (Windows)
+      - name: Download Godot .NET (Windows) with fallback
         shell: pwsh
         run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           New-Item -ItemType Directory -Force -Path godot | Out-Null
-          Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/godotengine/godot/releases/download/${env:GODOT_VERSION}-stable/Godot_v${env:GODOT_VERSION}-stable_mono_win64.zip" -OutFile godot\godot.zip
-          Expand-Archive godot\godot.zip -DestinationPath godot -Force
+          $zip = "godot/godot.zip"
+          $urls = @(
+            "https://github.com/godotengine/godot/releases/download/${env:GODOT_VERSION}-stable/Godot_v${env:GODOT_VERSION}-stable_mono_win64.zip",
+            "https://downloads.tuxfamily.org/godotengine/${env:GODOT_VERSION}/mono/Godot_v${env:GODOT_VERSION}-stable_mono_win64.zip"
+          )
+          $ok = $false
+          for ($i=1; $i -le 3 -and -not $ok; $i++) {
+            foreach ($u in $urls) {
+              Write-Host "Attempt #$i: downloading $u"
+              try { Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $zip; $ok = $true; break } catch { Write-Warning $_; Start-Sleep -Seconds (3*$i) }
+            }
+          }
+          if (-not $ok) { throw 'Failed to download Godot after retries.' }
+          Expand-Archive $zip -DestinationPath godot -Force
 
-      - name: Install Export Templates
+      - name: Install Export Templates (with fallback)
         shell: pwsh
         run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           $tpz = "godot/export_templates.tpz"
-          Invoke-WebRequest -UseBasicParsing -Uri "https://downloads.tuxfamily.org/godotengine/${env:GODOT_VERSION}/Godot_v${env:GODOT_VERSION}-stable_export_templates.tpz" -OutFile $tpz
+          $urls = @(
+            "https://github.com/godotengine/godot/releases/download/${env:GODOT_VERSION}-stable/Godot_v${env:GODOT_VERSION}-stable_export_templates.tpz",
+            "https://downloads.tuxfamily.org/godotengine/${env:GODOT_VERSION}/Godot_v${env:GODOT_VERSION}-stable_export_templates.tpz"
+          )
+          $ok = $false
+          for ($i=1; $i -le 3 -and -not $ok; $i++) {
+            foreach ($u in $urls) {
+              Write-Host "Attempt #$i: downloading templates $u"
+              try { Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $tpz; $ok = $true; break } catch { Write-Warning $_; Start-Sleep -Seconds (3*$i) }
+            }
+          }
+          if (-not $ok) { throw 'Failed to download export templates after retries.' }
           $temp = "godot/templates_unpacked"
           Expand-Archive $tpz -DestinationPath $temp -Force
           $ver = "${env:GODOT_VERSION}.stable.mono"

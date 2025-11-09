@@ -21,25 +21,49 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Download Godot .NET (mono)
+      - name: Download Godot .NET (mono) with fallback
         shell: pwsh
         run: |
           $Version = '4.5.1'
-          $Uri = "https://downloads.tuxfamily.org/godotengine/$Version/mono/Godot_v$Version-stable_mono_win64.zip"
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           New-Item -ItemType Directory -Force -Path godot | Out-Null
-          Invoke-WebRequest -Uri $Uri -OutFile godot\godot.zip
-          Expand-Archive godot\godot.zip -DestinationPath godot -Force
+          $zip = "godot/godot.zip"
+          $urls = @(
+            "https://github.com/godotengine/godot/releases/download/${Version}-stable/Godot_v${Version}-stable_mono_win64.zip",
+            "https://downloads.tuxfamily.org/godotengine/${Version}/mono/Godot_v${Version}-stable_mono_win64.zip"
+          )
+          $ok = $false
+          for ($i=1; $i -le 3 -and -not $ok; $i++) {
+            foreach ($u in $urls) {
+              Write-Host "Attempt #$i: downloading $u"
+              try { Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $zip; $ok = $true; break } catch { Write-Warning $_; Start-Sleep -Seconds (3*$i) }
+            }
+          }
+          if (-not $ok) { throw 'Failed to download Godot after retries.' }
+          Expand-Archive $zip -DestinationPath godot -Force
           $exe = Get-ChildItem godot -Recurse -Filter *win64*.exe | Select-Object -First 1
           if (-not $exe) { throw 'Godot exe not found after download.' }
           "GODOT_BIN=$($exe.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "GODOT_BIN=$($exe.FullName)"
 
-      - name: Install Export Templates
+      - name: Install Export Templates (with fallback)
         shell: pwsh
         run: |
           $Version = '4.5.1'
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           $tpz = "godot/export_templates.tpz"
-          Invoke-WebRequest -UseBasicParsing -Uri "https://downloads.tuxfamily.org/godotengine/$Version/Godot_v$Version-stable_export_templates.tpz" -OutFile $tpz
+          $urls = @(
+            "https://github.com/godotengine/godot/releases/download/${Version}-stable/Godot_v${Version}-stable_export_templates.tpz",
+            "https://downloads.tuxfamily.org/godotengine/${Version}/Godot_v${Version}-stable_export_templates.tpz"
+          )
+          $ok = $false
+          for ($i=1; $i -le 3 -and -not $ok; $i++) {
+            foreach ($u in $urls) {
+              Write-Host "Attempt #$i: downloading templates $u"
+              try { Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $tpz; $ok = $true; break } catch { Write-Warning $_; Start-Sleep -Seconds (3*$i) }
+            }
+          }
+          if (-not $ok) { throw 'Failed to download export templates after retries.' }
           $temp = "godot/templates_unpacked"
           Expand-Archive $tpz -DestinationPath $temp -Force
           $ver = "$Version.stable.mono"
