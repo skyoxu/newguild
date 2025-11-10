@@ -47,11 +47,30 @@ if ($exitCode -ne 0) {
   Write-Warning "Export-release failed with exit code $exitCode. Trying export-debug as fallback."
   $exitCode = Invoke-Export 'debug'
   if ($exitCode -ne 0) {
-    Write-Error "Export failed (release & debug) with exit code $exitCode. Ensure export templates are installed in Godot. See log: $glog"
+    Write-Warning "Both release and debug export failed, trying export-pack as fallback."
+    $pck = ($Output -replace '\.exe$','.pck')
+    $out = Join-Path $dest ("godot_export.pack.out.log")
+    $err = Join-Path $dest ("godot_export.pack.err.log")
+    $args = @('--headless','--verbose','--path','.', '--export-pack', $Preset, $pck)
+    $p = Start-Process -FilePath $GodotBin -ArgumentList $args -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
+    $ok = $p.WaitForExit(600000)
+    if (-not $ok) { Write-Warning 'Godot export-pack timed out'; Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+    Add-Content -Encoding UTF8 -Path $glog -Value ("=== export-pack @ " + (Get-Date).ToString('o'))
+    if (Test-Path $out) { Get-Content $out -ErrorAction SilentlyContinue | Add-Content -Encoding UTF8 -Path $glog }
+    if (Test-Path $err) { Get-Content $err -ErrorAction SilentlyContinue | Add-Content -Encoding UTF8 -Path $glog }
+    $exitCode = $p.ExitCode
+    if ($exitCode -eq 0) {
+      Write-Warning "EXE export failed but PCK fallback succeeded: $pck"
+    } else {
+      Write-Error "Export failed (release & debug & pack) with exit code $exitCode. See log: $glog"
+    }
   }
 }
 
 # Collect artifacts
-Copy-Item -Force $Output $dest 2>$null
-Write-Host "Export artifact copied to $dest (log: $glog)"
+if (Test-Path $Output) { Copy-Item -Force $Output $dest 2>$null }
+$maybePck = ($Output -replace '\.exe$','.pck')
+if (Test-Path $maybePck) { Copy-Item -Force $maybePck $dest 2>$null }
+if (Test-Path $glog) { Write-Host "--- godot_export.log (tail) ---"; Get-Content $glog -Tail 200 }
+Write-Host "Export artifacts copied to $dest (log: $glog)"
 exit $exitCode
