@@ -1,4 +1,4 @@
-name: Windows CI (Godot + GdUnit4)
+﻿name: Windows CI (Godot + GdUnit4)
 
 # Notes:
 # - Smoke markers recognized by scripts:
@@ -44,7 +44,7 @@ jobs:
             }
           }
           if (-not $ok) { throw 'Failed to download Godot after retries.' }
-          Expand-Archive $zip -DestinationPath godot -Force
+          \ \ \ \ \ \ \ \ \ \ Expand-Archive\ \ -DestinationPath\ godot\ -Force`n\ \ \ \ \ \ \ \ \ \ \ =\ Get-ChildItem\ godot\ -Recurse\ -Filter\ \*win64\*\.exe\ \|\ Select-Object\ -First\ 1`n\ \ \ \ \ \ \ \ \ \ if\ \(-not\ \)\ \{\ throw\ 'Godot\ exe\ not\ found\ after\ download\.'\ }`n\ \ \ \ \ \ \ \ \ \ "GODOT_BIN="\ \|\ Out-File\ -FilePath\ \ -Append\ -Encoding\ utf8`n\ \ \ \ \ \ \ \ \ \ Write-Host\ "GODOT_BIN="
 
       - name: Install Export Templates (with fallback)
         shell: pwsh
@@ -85,7 +85,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~\AppData\Local\Temp\NuGetScratch
+            ~\AppData\Local\Temp`nuGetScratch
             ~\.nuget\packages
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
 
@@ -128,3 +128,5 @@ jobs:
           path: |
             build\Game.exe
             logs\ci\**\*
+
+
