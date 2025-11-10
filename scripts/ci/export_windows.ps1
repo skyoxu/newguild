@@ -30,10 +30,15 @@ $glog = Join-Path $dest 'godot_export.log'
 
 function Invoke-Export([string]$mode) {
   Write-Host "Invoking export: $mode"
+  $out = Join-Path $dest ("godot_export.$mode.out.log")
+  $err = Join-Path $dest ("godot_export.$mode.err.log")
   $args = @('--headless','--verbose','--path','.', "--export-$mode", $Preset, $Output)
-  $p = Start-Process -FilePath $GodotBin -ArgumentList $args -PassThru -RedirectStandardOutput $glog -RedirectStandardError $glog -WindowStyle Hidden
+  $p = Start-Process -FilePath $GodotBin -ArgumentList $args -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
   $ok = $p.WaitForExit(600000)
   if (-not $ok) { Write-Warning 'Godot export timed out; killing process'; Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+  Add-Content -Encoding UTF8 -Path $glog -Value ("=== export-$mode @ " + (Get-Date).ToString('o'))
+  if (Test-Path $out) { Get-Content $out -ErrorAction SilentlyContinue | Add-Content -Encoding UTF8 -Path $glog }
+  if (Test-Path $err) { Get-Content $err -ErrorAction SilentlyContinue | Add-Content -Encoding UTF8 -Path $glog }
   return $p.ExitCode
 }
 
