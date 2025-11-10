@@ -27,6 +27,11 @@
 - 备选信号：`[DB] opened`（数据库就绪）
 - 兜底：若无法采集日志，脚本视为“INCONCLUSIVE”但不阻断导出（模板级宽松标准）
 
+## 模板安装说明 / Notes
+- 官方 `export_templates.tpz` 有时包含顶层 `templates/` 目录；本仓库工作流会自动探测并从该目录复制。
+- Godot 可能从 `4.5.1.stable` 或 `4.5.1.stable.mono` 目录读取模板；工作流会同时复制到两处（`templates/` 与 `export_templates/`）。
+- 若 `--export-release` 失败，导出脚本会自动回退尝试 `--export-debug` 并输出 `--verbose` 日志以便定位问题。
+
 ## 环境变量 / Env
 - `GODOT_BIN`：指向 Godot .NET（mono）可执行文件。
 - `GODOT_DB_BACKEND=plugin|managed`：可控 DB 后端（默认插件优先）。

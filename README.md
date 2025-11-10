@@ -1,4 +1,6 @@
-﻿# Godot Windows-only Template (C#)
+﻿[![Windows Export Slim](https://github.com/skyoxu/godotgame/actions/workflows/windows-export-slim.yml/badge.svg)](https://github.com/skyoxu/godotgame/actions/workflows/windows-export-slim.yml) [![Windows Release](https://github.com/skyoxu/godotgame/actions/workflows/windows-release.yml/badge.svg)](https://github.com/skyoxu/godotgame/actions/workflows/windows-release.yml) [![Windows Quality Gate](https://github.com/skyoxu/godotgame/actions/workflows/windows-quality-gate.yml/badge.svg)](https://github.com/skyoxu/godotgame/actions/workflows/windows-quality-gate.yml)
+
+# Godot Windows-only Template (C#)
 
 即开即用，可复制的 Godot 4 + .NET（Windows-only）项目模板。
 
@@ -48,3 +50,4 @@ One‑liner（已在 Editor 安装 Export Templates 后）：
   - 多项：`setx GAME_FEATURES "demo_screens,perf_overlay"`
 - 文件配置：`user://config/features.json`（示例：`{"demo_screens": true}`）
 - 代码示例：`if (FeatureFlags.IsEnabled("demo_screens")) { /* ... */ }`
+
