@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using Game.Core.Ports;
 using Godot;
+using Godot.Collections;
 using Microsoft.Data.Sqlite;
 
 namespace Game.Godot.Adapters;
@@ -102,11 +103,11 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             var ok = _pluginDb!.Call("Query", s).AsBool();
             if (!ok) throw new InvalidOperationException("SQL query failed (plugin)");
             var resultObj = _pluginDb.Get("QueryResult");
-            var arr = resultObj.As<Godot.Collections.Array>();
+            var arr = resultObj.As<Array>();
             var list = new List<Dictionary<string, object?>>();
             foreach (var item in arr)
             {
-                var row = item.As<Godot.Collections.Dictionary>();
+                var row = item.As<Dictionary>();
                 var dict = new Dictionary<string, object?>();
                 foreach (var key in row.Keys)
                 {
@@ -187,11 +188,18 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     {
         // Support Godot paths (user://, res://). If engine not initialized, fallback to absolute.
         try { return ProjectSettings.GlobalizePath(path); } catch { }
-        return path.Replace("user://", System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Godot", "app_userdata", GetAppName()) + System.IO.Path.DirectorySeparatorChar);
+        return path.Replace("user://", System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Godot", "app_userdata", GetAppName()) + System.IO.Path.DirectorySeparatorChar);
     }
 
     private static string GetAppName()
-        => (string)(ProjectSettings.GetSetting("application/config/name") ?? "GodotGame");
+    {
+        try
+        {
+            var v = ProjectSettings.GetSetting("application/config/name");
+            return v.VariantType == Variant.Type.Nil ? "GodotGame" : v.AsString();
+        }
+        catch { return "GodotGame"; }
+    }
 
     private static void EnsureParentDir(string absPath)
     {
@@ -291,6 +299,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         return cmd;
     }
 }
+
 
 
 

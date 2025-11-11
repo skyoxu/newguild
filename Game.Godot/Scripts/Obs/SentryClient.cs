@@ -14,7 +14,7 @@ public partial class SentryClient : Node
     {
         if (string.IsNullOrWhiteSpace(Dsn))
         {
-            var env = Environment.GetEnvironmentVariable("SENTRY_DSN");
+            var env = System.Environment.GetEnvironmentVariable("SENTRY_DSN");
             if (!string.IsNullOrWhiteSpace(env))
             {
                 Dsn = env;
@@ -77,6 +77,6 @@ public partial class SentryClient : Node
         Directory.CreateDirectory(dir);
         var path = Path.Combine(dir, $"events-{DateTime.UtcNow:yyyyMMdd}.jsonl");
         var json = JsonSerializer.Serialize(evt);
-        File.AppendAllText(path, json + Environment.NewLine);
+        File.AppendAllText(path, json + System.Environment.NewLine);
     }
 }

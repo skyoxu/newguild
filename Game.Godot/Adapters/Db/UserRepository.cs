@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Game.Core.Domain.Entities;
 using Game.Core.Ports;
@@ -27,12 +27,13 @@ public class UserRepository : IUserRepository
         var r = rows[0];
         var u = new User
         {
-            Id = r.GetValueOrDefault("id")?.ToString() ?? string.Empty,
-            Username = r.GetValueOrDefault("username")?.ToString() ?? string.Empty,
-            CreatedAt = Convert.ToInt64(r.GetValueOrDefault("created_at") ?? 0),
-            LastLogin = r["last_login"] == null ? null : Convert.ToInt64(r["last_login"]) 
+            Id = (r.TryGetValue("id", out var idVal) ? idVal : null)?.ToString() ?? string.Empty,
+            Username = (r.TryGetValue("username", out var nameVal) ? nameVal : null)?.ToString() ?? string.Empty,
+            CreatedAt = Convert.ToInt64(r.TryGetValue("created_at", out var createdVal) ? (createdVal ?? 0) : 0),
+            LastLogin = (r.TryGetValue("last_login", out var lastVal) && lastVal != null) ? Convert.ToInt64(lastVal) : (long?)null 
         };
         return Task.FromResult<User?>(u);
     }
 }
+
 

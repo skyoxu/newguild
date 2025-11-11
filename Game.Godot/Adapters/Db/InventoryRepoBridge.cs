@@ -1,3 +1,4 @@
+using System.Linq;
 using Godot;
 using Game.Core.Ports;
 
@@ -21,4 +22,3 @@ public partial class InventoryRepoBridge : Node
         return list.Select(x => $"{x.ItemId}:{x.Qty}").ToArray();
     }
 }
-

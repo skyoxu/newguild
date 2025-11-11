@@ -24,7 +24,7 @@ public partial class FeatureFlags : Node
         if (string.IsNullOrWhiteSpace(name)) return false;
         // Immediate env override takes precedence (FEATURE_<NAME>)
         var envKey = $"FEATURE_{name}".ToUpperInvariant();
-        var envVal = Environment.GetEnvironmentVariable(envKey);
+        var envVal = System.Environment.GetEnvironmentVariable(envKey);
         if (!string.IsNullOrEmpty(envVal))
             return ParseBool(envVal);
 
@@ -77,7 +77,7 @@ public partial class FeatureFlags : Node
         try
         {
             // GAME_FEATURES=name1,name2 => enable listed flags
-            var list = Environment.GetEnvironmentVariable("GAME_FEATURES");
+            var list = System.Environment.GetEnvironmentVariable("GAME_FEATURES");
             if (!string.IsNullOrWhiteSpace(list))
             {
                 foreach (var raw in list.Split(',', StringSplitOptions.RemoveEmptyEntries))
@@ -88,7 +88,7 @@ public partial class FeatureFlags : Node
             }
 
             // FEATURE_<NAME>=1|0|true|false to force a value
-            foreach (System.Collections.DictionaryEntry e in Environment.GetEnvironmentVariables())
+            foreach (System.Collections.DictionaryEntry e in System.Environment.GetEnvironmentVariables())
             {
                 var key = e.Key?.ToString() ?? string.Empty;
                 if (key.StartsWith("FEATURE_", StringComparison.OrdinalIgnoreCase))
@@ -109,4 +109,3 @@ public partial class FeatureFlags : Node
         return v is "1" or "true" or "on" or "yes";
     }
 }
-

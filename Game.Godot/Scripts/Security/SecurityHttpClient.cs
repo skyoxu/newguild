@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using System;
 using System.IO;
 using System.Linq;
@@ -75,3 +75,4 @@ public partial class SecurityHttpClient : Node
         catch { /* ignore audit failures */ }
     }
 }
+
