@@ -52,6 +52,7 @@ function Resolve-Preset([string]$requested) {
     }
   }
   if ($names.Count -eq 0) { return $requested }
+  try { if ($glog) { Add-Content -Encoding UTF8 -Path $glog -Value ("Detected presets: " + ($names -join ', ')) } } catch {}
   # exact match
   if ($names -contains $requested) { return $requested }
   # common alias mapping: 'Windows' -> first name containing 'Windows'
@@ -79,7 +80,7 @@ function Invoke-BuildSolutions() {
   $args = @('--headless','--verbose','--path', $ProjectDir, '--build-solutions', '--quit')
   $argStr = ($args | ForEach-Object { Quote-Arg $_ }) -join ' '
   try {
-    $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
+    $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -WorkingDirectory $ProjectDir -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
   } catch {
     Add-Content -Encoding UTF8 -Path $glog -Value ("Start-Process failed (build-solutions): " + $_.Exception.Message)
     throw
@@ -138,7 +139,7 @@ function Invoke-Export([string]$mode) {
   $args = @('--headless','--verbose','--path', $ProjectDir, "--export-$mode", $resolved, $Output)
   $argStr = ($args | ForEach-Object { Quote-Arg $_ }) -join ' '
   try {
-    $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
+    $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -WorkingDirectory $ProjectDir -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
   } catch {
     Add-Content -Encoding UTF8 -Path $glog -Value ("Start-Process failed (export-"+$mode+"): " + $_.Exception.Message)
     throw
@@ -169,7 +170,7 @@ if ($exitCode -ne 0) {
     Add-Content -Encoding UTF8 -Path $glog -Value ("Using preset (pack): '" + $resolved + "' output: '" + $pck + "'")
     $args = @('--headless','--verbose','--path', $ProjectDir, '--export-pack', $resolved, $pck)
     $argStr = ($args | ForEach-Object { Quote-Arg $_ }) -join ' '
-    $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
+    $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -WorkingDirectory $ProjectDir -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
     $ok = $p.WaitForExit(600000)
     if (-not $ok) { Write-Warning 'Godot export-pack timed out'; Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
     Add-Content -Encoding UTF8 -Path $glog -Value ("=== export-pack @ " + (Get-Date).ToString('o'))
