@@ -60,13 +60,22 @@ function Resolve-Preset([string]$requested) {
   return ($names | Select-Object -First 1)
 }
 
+# Quote arguments for Start-Process -ArgumentList to preserve spaces
+function Quote-Arg([string]$a) {
+  if ($null -eq $a) { return '""' }
+  if ($a -match '^[A-Za-z0-9_./\\:-]+$') { return $a }
+  $q = '"' + ($a -replace '"', '\"') + '"'
+  return $q
+}
+
 function Invoke-BuildSolutions() {
   Write-Host "Pre-building C# solutions via Godot (--build-solutions)"
   $out = Join-Path $dest ("godot_build_solutions.out.log")
   $err = Join-Path $dest ("godot_build_solutions.err.log")
   $args = @('--headless','--verbose','--path','.', '--build-solutions', '--quit')
+  $argStr = ($args | ForEach-Object { Quote-Arg $_ }) -join ' '
   try {
-    $p = Start-Process -FilePath $GodotBin -ArgumentList $args -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
+    $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
   } catch {
     Add-Content -Encoding UTF8 -Path $glog -Value ("Start-Process failed (build-solutions): " + $_.Exception.Message)
     throw
@@ -119,10 +128,13 @@ function Invoke-Export([string]$mode) {
   Write-Host "Invoking export: $mode"
   $out = Join-Path $dest ("godot_export.$mode.out.log")
   $err = Join-Path $dest ("godot_export.$mode.err.log")
-  $args = @('--headless','--verbose','--path','.', "--export-$mode", $Preset, $Output)
-  Add-Content -Encoding UTF8 -Path $glog -Value ("Using preset: '" + $Preset + "' output: '" + $Output + "'")
+  $resolved = Resolve-Preset $Preset
+  Add-Content -Encoding UTF8 -Path $glog -Value ("Using preset: '" + $resolved + "' output: '" + $Output + "'")
+  if ($resolved -ne $Preset) { Add-Content -Encoding UTF8 -Path $glog -Value ("Requested preset '" + $Preset + "' resolved to '" + $resolved + "'") }
+  $args = @('--headless','--verbose','--path','.', "--export-$mode", $resolved, $Output)
+  $argStr = ($args | ForEach-Object { Quote-Arg $_ }) -join ' '
   try {
-    $p = Start-Process -FilePath $GodotBin -ArgumentList $args -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
+    $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
   } catch {
     Add-Content -Encoding UTF8 -Path $glog -Value ("Start-Process failed (export-"+$mode+"): " + $_.Exception.Message)
     throw
@@ -149,8 +161,11 @@ if ($exitCode -ne 0) {
     $pck = ($Output -replace '\.exe$','.pck')
     $out = Join-Path $dest ("godot_export.pack.out.log")
     $err = Join-Path $dest ("godot_export.pack.err.log")
-    $args = @('--headless','--verbose','--path','.', '--export-pack', $Preset, $pck)
-    $p = Start-Process -FilePath $GodotBin -ArgumentList $args -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
+    $resolved = Resolve-Preset $Preset
+    Add-Content -Encoding UTF8 -Path $glog -Value ("Using preset (pack): '" + $resolved + "' output: '" + $pck + "'")
+    $args = @('--headless','--verbose','--path','.', '--export-pack', $resolved, $pck)
+    $argStr = ($args | ForEach-Object { Quote-Arg $_ }) -join ' '
+    $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
     $ok = $p.WaitForExit(600000)
     if (-not $ok) { Write-Warning 'Godot export-pack timed out'; Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
     Add-Content -Encoding UTF8 -Path $glog -Value ("=== export-pack @ " + (Get-Date).ToString('o'))
