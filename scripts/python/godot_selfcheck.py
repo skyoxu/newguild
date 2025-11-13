@@ -67,7 +67,7 @@ def ensure_autoload(project_path: str) -> bool:
 
 
 def run_cmd(args: list[str], cwd: str | None = None, timeout: int = 120000) -> tuple[int, str]:
-    p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='ignore')
     try:
         out, _ = p.communicate(timeout=timeout/1000.0)
     except subprocess.TimeoutExpired:
@@ -90,14 +90,15 @@ def run_selfcheck(godot_bin: str, project_godot: str, build_solutions: bool) -> 
         'status': 'fail',
     }
 
+    ts = dt.datetime.now().strftime('%H%M%S%f')
     if build_solutions:
-        rc, out = run_cmd([godot_bin, '--headless', '--no-window', '--build-solutions'], cwd=root, timeout=300000)
-        with open(os.path.join(out_dir, 'godot-buildsolutions.txt'), 'w', encoding='utf-8') as f:
+        rc, out = run_cmd([godot_bin, '--headless', '--no-window', '--build-solutions'], cwd=root, timeout=600000)
+        with open(os.path.join(out_dir, f'godot-buildsolutions-{ts}.txt'), 'w', encoding='utf-8') as f:
             f.write(out)
         summary['build_rc'] = rc
 
     rc, out = run_cmd([godot_bin, '--headless', '--no-window', '-s', 'res://Game.Godot/Scripts/Diagnostics/CompositionRootSelfCheck.gd'], cwd=root, timeout=120000)
-    console_path = os.path.join(out_dir, 'godot-selfcheck-console.txt')
+    console_path = os.path.join(out_dir, f'godot-selfcheck-console-{ts}.txt')
     with open(console_path, 'w', encoding='utf-8') as f:
         f.write(out)
     summary['selfcheck_rc'] = rc
@@ -161,4 +162,3 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-

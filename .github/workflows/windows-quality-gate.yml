@@ -8,6 +8,7 @@ jobs:
     runs-on: windows-latest
     env:
       GODOT_VERSION: '4.5.1'
+      PYTHONIOENCODING: 'utf-8'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -103,16 +104,38 @@ jobs:
           dotnet restore GodotGame.csproj
           dotnet build GodotGame.csproj -c Release -v minimal
 
-      - name: Dotnet tests
-        shell: pwsh
-        run: ./scripts/ci/run_dotnet_tests.ps1 -Solution 'Game.sln'
+      - name: Setup Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-      - name: Dotnet coverage (soft gate)
+      - name: Dotnet tests (Python runner)
+        shell: pwsh
+        run: |
+          py -3 scripts/python/run_dotnet.py --solution Game.sln --configuration Debug
+
+      - name: Dotnet coverage (soft gate via Python, thresholds optional)
         shell: pwsh
         continue-on-error: true
+        env:
+          COVERAGE_LINES_MIN: '60'
+          COVERAGE_BRANCHES_MIN: '60'
         run: |
-          ./scripts/ci/run_dotnet_coverage.ps1 -Solution 'Game.sln'
-          if ($LASTEXITCODE -ne 0) { Write-Warning 'Coverage step non-zero exit (soft gate)'; exit 0 }
+          py -3 scripts/python/run_dotnet.py --solution Game.sln --configuration Debug
+          if ($LASTEXITCODE -ne 0) { Write-Warning 'Coverage soft gate failed'; exit 0 }
+
+      - name: Godot self-check (Python)
+        shell: pwsh
+        run: |
+          py -3 scripts/python/godot_selfcheck.py fix-autoload --project project.godot
+          py -3 scripts/python/godot_selfcheck.py run --godot-bin "$env:GODOT_BIN" --build-solutions
+
+      - name: Upload self-check logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selfcheck-logs
+          path: logs/e2e/**
 
       - name: GdUnit4 tests
         shell: pwsh

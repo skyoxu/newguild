@@ -1,4 +1,4 @@
-name: Windows CI (Godot + GdUnit4)
+﻿name: Windows CI (Godot + GdUnit4)
 
 on:
   push:
@@ -12,6 +12,8 @@ jobs:
     env:
       GODOT_VERSION: '4.5.1'
       EXPORT_SIZE_MAX_MB: '150'
+      PYTHONIOENCODING: 'utf-8'
+      PYTHONUTF8: '1'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,6 +47,11 @@ jobs:
           if (-not $exe) { throw 'Godot exe not found after download.' }
           "GODOT_BIN=$($exe.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "GODOT_BIN=$($exe.FullName)"
+
+      - name: Setup Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
       - name: Install Export Templates (GitHub Releases)
         shell: pwsh
@@ -80,6 +87,12 @@ jobs:
           $env:Path = "$HOME\.dotnet;" + $env:Path
           $env:GODOT_DOTNET_CLI = (Get-Command dotnet).Path
           dotnet restore GodotGame.csproj
+
+      - name: Dotnet tests (Python runner)
+        shell: pwsh
+        run: |
+          py -3 scripts/python/run_dotnet.py --solution Game.sln --configuration Debug
+
           dotnet build GodotGame.csproj -c Release -v minimal
           try { & "$env:GODOT_BIN" --headless --path . --quit } catch { Write-Warning $_ }
 
@@ -87,6 +100,19 @@ jobs:
         shell: pwsh
         run: |
           ./scripts/ci/prepare_gd_tests.ps1 -ProjectPath 'Tests.Godot' -RuntimeDir 'Game.Godot'
+
+      - name: Godot self-check (Python)
+        shell: pwsh
+        run: |
+          py -3 scripts/python/godot_selfcheck.py fix-autoload --project project.godot
+          py -3 scripts/python/godot_selfcheck.py run --godot-bin "$env:GODOT_BIN"
+
+      - name: Upload self-check logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selfcheck-logs
+          path: logs/e2e/**
 
       - name: Run GdUnit4 tests
         continue-on-error: true
@@ -132,3 +158,4 @@ jobs:
           path: |
             build/Game.exe
             logs/ci/**
+
