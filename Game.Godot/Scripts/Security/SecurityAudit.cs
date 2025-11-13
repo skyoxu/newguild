@@ -11,6 +11,19 @@ public partial class SecurityAudit : Node
     {
         try
         {
+            bool hasSqlite = false;
+            try
+            {
+                // Avoid engine error log by checking class list before probing
+                var classes = ClassDB.GetClassList();
+                foreach (var c in classes)
+                {
+                    var s = c.AsStringName().ToString();
+                    if (s == "SQLite") { hasSqlite = true; break; }
+                }
+            }
+            catch { hasSqlite = false; }
+
             var info = new
             {
                 ts = DateTime.UtcNow.ToString("O"),
@@ -19,7 +32,7 @@ public partial class SecurityAudit : Node
                 godot = Engine.GetVersionInfo()["string"].AsStringName().ToString(),
                 db_backend = System.Environment.GetEnvironmentVariable("GODOT_DB_BACKEND") ?? "default",
                 demo = (System.Environment.GetEnvironmentVariable("TEMPLATE_DEMO") ?? "0").ToLowerInvariant() == "1",
-                plugin_sqlite = ClassDB.CanInstantiate("SQLite"),
+                plugin_sqlite = hasSqlite,
             };
 
             var json = JsonSerializer.Serialize(info);
