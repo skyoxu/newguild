@@ -63,7 +63,6 @@ jobs:
 
       - name: Ensure GdUnit4 plugin
         shell: pwsh
-        continue-on-error: true
         run: |
           py -3 scripts/python/ensure_gdunit_plugin.py --project Tests.Godot --version v6.0.0
           if (Test-Path 'Tests.Godot/addons/gdUnit4/bin/GdUnitCmdTool.gd') { Write-Host 'GDUNIT_PLUGIN_READY' } else { Write-Warning 'GDUNIT_PLUGIN_MISSING after ensure' }
@@ -134,4 +133,3 @@ jobs:
           name: gdunit-reports
           path: logs/e2e/**/gdunit-reports/**
           if-no-files-found: ignore
-

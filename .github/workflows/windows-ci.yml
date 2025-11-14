@@ -43,7 +43,6 @@ jobs:
           python-version: '3.x'
 
       - name: Ensure GdUnit4 plugin
-        continue-on-error: true
         shell: pwsh
         run: |
           py -3 scripts/python/ensure_gdunit_plugin.py --project Tests.Godot --version v6.0.0

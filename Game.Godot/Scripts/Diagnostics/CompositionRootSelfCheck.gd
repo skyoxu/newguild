@@ -14,6 +14,14 @@ func _run() -> void:
             "dataStore": false,
             "logger": false,
             "eventBus": false,
+        },
+        "ui": {
+            "main": false,
+            "mainMenu": false,
+            "hud": false,
+            "settingsPanel": false,
+            "screenNavigator": false,
+            "menuStartPublishes": false,
         }
     }
 
@@ -64,7 +72,41 @@ func _run() -> void:
         var t = FileAccess.open("res://project.godot", FileAccess.READ)
         result["ports"]["resourceLoader"] = t != null
 
+    # UI/glue quick probe (best-effort)
+    var packed := load("res://Game.Godot/Scenes/Main.tscn")
+    if packed:
+        result["ui"]["main"] = true
+        var sandbox := Node.new()
+        sandbox.name = "SelfCheckSandbox"
+        get_root().add_child(sandbox)
+        var main := packed.instantiate()
+        sandbox.add_child(main)
+        await process_frame
+        var has_node := func(path: String) -> bool:
+            return main.get_node_or_null(path) != null
+        result["ui"]["mainMenu"] = has_node.call("MainMenu")
+        result["ui"]["hud"] = has_node.call("HUD")
+        result["ui"]["settingsPanel"] = has_node.call("SettingsPanel")
+        result["ui"]["screenNavigator"] = has_node.call("ScreenNavigator")
+        # Publish probe on menu start (if menu present)
+        var published := false
+        var bus := get_root().get_node_or_null("/root/EventBus")
+        if bus:
+            bus.connect("DomainEventEmitted", Callable(self, "_on_sc_domain_evt").bind(result))
+        if result["ui"]["mainMenu"]:
+            var btn := main.get_node("MainMenu/VBox/BtnPlay") if main.has_node("MainMenu/VBox/BtnPlay") else null
+            if btn:
+                btn.emit_signal("pressed")
+                await process_frame
+        # read flag written by _on_sc_domain_evt
+        result["ui"]["menuStartPublishes"] = bool(_sc_published)
+        sandbox.queue_free()
     _write_and_quit(result)
+
+var _sc_published := false
+func _on_sc_domain_evt(type, _source, _data_json, _id, _spec, _ct, _ts, result: Dictionary) -> void:
+    if str(type) == "ui.menu.start":
+        _sc_published = true
 
 func _write_and_quit(result: Dictionary) -> void:
     var d = Time.get_date_dict_from_system()
