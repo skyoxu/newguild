@@ -104,6 +104,25 @@ def main():
             sc_out = m.group(2)
             sc_sum = {'status': sc_status, 'out': sc_out, 'note': 'parsed-from-stdout'}
     # as ultimate fallback, trust process rc (0==ok)
+    # Copy Godot selfcheck raw console/stderr into ci logs if present
+    try:
+        e2e_dir = os.path.join('logs', 'e2e', date)
+        ci_dir = os.path.join('logs', 'ci', date)
+        cons = [p for p in os.listdir(e2e_dir) if p.startswith('godot-selfcheck-console-')]
+        if cons:
+            cons.sort()
+            src = os.path.join(e2e_dir, cons[-1])
+            with io.open(src, 'r', encoding='utf-8', errors='ignore') as rf, io.open(os.path.join(ci_dir, 'selfcheck-console.txt'), 'w', encoding='utf-8') as wf:
+                wf.write(rf.read())
+        errs = [p for p in os.listdir(e2e_dir) if p.startswith('godot-selfcheck-stderr-')]
+        if errs:
+            errs.sort()
+            src = os.path.join(e2e_dir, errs[-1])
+            with io.open(src, 'r', encoding='utf-8', errors='ignore') as rf, io.open(os.path.join(ci_dir, 'selfcheck-stderr.txt'), 'w', encoding='utf-8') as wf:
+                wf.write(rf.read())
+    except Exception:
+        pass
+
     sc_ok = (sc_sum.get('status') == 'ok') or (rc2 == 0)
     summary['selfcheck'] = sc_sum or {'status': 'fail', 'note': 'no-summary'}
     if not sc_ok:

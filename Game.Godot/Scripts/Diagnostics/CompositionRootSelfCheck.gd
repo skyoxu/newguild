@@ -22,6 +22,7 @@ func _run() -> void:
             "settingsPanel": false,
             "screenNavigator": false,
             "menuStartPublishes": false,
+            "error": ""
         }
     }
 
@@ -72,35 +73,40 @@ func _run() -> void:
         var t = FileAccess.open("res://project.godot", FileAccess.READ)
         result["ports"]["resourceLoader"] = t != null
 
-    # UI/glue quick probe (best-effort)
+    # UI/glue quick probe (best-effort, never aborts selfcheck)
     var packed := load("res://Game.Godot/Scenes/Main.tscn")
-    if packed:
-        result["ui"]["main"] = true
+    if packed != null:
         var sandbox := Node.new()
         sandbox.name = "SelfCheckSandbox"
         get_root().add_child(sandbox)
-        var main := packed.instantiate()
-        sandbox.add_child(main)
-        await process_frame
-        var has_node := func(path: String) -> bool:
-            return main.get_node_or_null(path) != null
-        result["ui"]["mainMenu"] = has_node.call("MainMenu")
-        result["ui"]["hud"] = has_node.call("HUD")
-        result["ui"]["settingsPanel"] = has_node.call("SettingsPanel")
-        result["ui"]["screenNavigator"] = has_node.call("ScreenNavigator")
-        # Publish probe on menu start (if menu present)
-        var published := false
-        var bus := get_root().get_node_or_null("/root/EventBus")
-        if bus:
-            bus.connect("DomainEventEmitted", Callable(self, "_on_sc_domain_evt").bind(result))
-        if result["ui"]["mainMenu"]:
-            var btn := main.get_node("MainMenu/VBox/BtnPlay") if main.has_node("MainMenu/VBox/BtnPlay") else null
-            if btn:
-                btn.emit_signal("pressed")
-                await process_frame
-        # read flag written by _on_sc_domain_evt
-        result["ui"]["menuStartPublishes"] = bool(_sc_published)
+        var main = packed.instantiate()
+        if main != null:
+            result["ui"]["main"] = true
+            sandbox.add_child(main)
+            await get_tree().process_frame
+            if typeof(main) == TYPE_OBJECT:
+                var has_menu := main.get_node_or_null("MainMenu") != null
+                var has_hud := main.get_node_or_null("HUD") != null
+                var has_settings := main.get_node_or_null("SettingsPanel") != null
+                var has_nav := main.get_node_or_null("ScreenNavigator") != null
+                result["ui"]["mainMenu"] = has_menu
+                result["ui"]["hud"] = has_hud
+                result["ui"]["settingsPanel"] = has_settings
+                result["ui"]["screenNavigator"] = has_nav
+                var bus = get_root().get_node_or_null("/root/EventBus")
+                if bus != null:
+                    bus.connect("DomainEventEmitted", Callable(self, "_on_sc_domain_evt").bind(result))
+                if has_menu and main.has_node("MainMenu/VBox/BtnPlay"):
+                    var btn = main.get_node_or_null("MainMenu/VBox/BtnPlay")
+                    if btn != null:
+                        btn.emit_signal("pressed")
+                        await get_tree().process_frame
+                result["ui"]["menuStartPublishes"] = bool(_sc_published)
+        else:
+            result["ui"]["error"] = "Main instantiation returned null"
         sandbox.queue_free()
+    else:
+        result["ui"]["error"] = "Main.tscn not found"
     _write_and_quit(result)
 
 var _sc_published := false
