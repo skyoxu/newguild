@@ -43,13 +43,35 @@ jobs:
           python-version: '3.x'
 
       - name: Ensure GdUnit4 plugin
-        shell: pwsh
-        run: |
-          py -3 scripts/python/ensure_gdunit_plugin.py --project Tests.Godot --version v6.0.0
-          if (Test-Path 'Tests.Godot/addons/gdUnit4/bin/GdUnitCmdTool.gd') { Write-Host 'GDUNIT_PLUGIN_READY' } else { Write-Warning 'GDUNIT_PLUGIN_MISSING after ensure' }
-          Get-ChildItem -Recurse -File 'Tests.Godot/addons/gdUnit4' -ErrorAction SilentlyContinue | Select-Object -First 10 FullName
-
-      - name: Install Export Templates (GitHub Releases)
+  shell: pwsh
+  run: |
+    $ErrorActionPreference = 'Continue'
+    $date = Get-Date -Format 'yyyy-MM-dd'
+    $ciDir = "logs/ci/$date"
+    New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
+    $diag = Join-Path $ciDir 'ensure-gdunit4-diag.txt'
+    "CWD=$(Get-Location)" | Out-File -FilePath $diag -Encoding utf8
+    $pyv = (& py -3 -V 2>&1)
+    "PY3=$pyv" | Out-File -FilePath $diag -Append -Encoding utf8
+    $pyinfo = (& py -3 -c "import sys,os; print(sys.executable); print(os.getcwd())" 2>&1)
+    "PYINFO=$pyinfo" | Out-File -FilePath $diag -Append -Encoding utf8
+    if (-not (Test-Path 'scripts/python/ensure_gdunit_plugin.py')) {
+      'MISSING scripts/python/ensure_gdunit_plugin.py' | Out-File -FilePath $diag -Append -Encoding utf8
+      Get-ChildItem -Recurse scripts/python -ErrorAction SilentlyContinue | Select-Object -First 100 FullName | Out-File -FilePath $diag -Append -Encoding utf8
+      Write-Error 'ensure_gdunit_plugin.py missing'; exit 1
+    }
+    & py -3 scripts/python/ensure_gdunit_plugin.py --project Tests.Godot --version v6.0.0 *>&1 | Tee-Object -FilePath (Join-Path $ciDir 'ensure-gdunit4-stdout.txt') | Out-Null
+    if (Test-Path 'Tests.Godot/addons/gdUnit4/bin/GdUnitCmdTool.gd') {
+      'GDUNIT_PLUGIN_READY' | Out-File -FilePath $diag -Append -Encoding utf8
+    }
+    else {
+      'GDUNIT_PLUGIN_MISSING after ensure' | Out-File -FilePath $diag -Append -Encoding utf8
+      'Tree addons/gdUnit4:' | Out-File -FilePath $diag -Append -Encoding utf8
+      Get-ChildItem -Recurse 'Tests.Godot/addons/gdUnit4' -ErrorAction SilentlyContinue | Select-Object -First 200 FullName | Out-File -FilePath $diag -Append -Encoding utf8
+      'Tree Tests.Godot (first 200):' | Out-File -FilePath $diag -Append -Encoding utf8
+      Get-ChildItem -Recurse 'Tests.Godot' -ErrorAction SilentlyContinue | Select-Object -First 200 FullName, Length | Out-File -FilePath $diag -Append -Encoding utf8
+      Write-Error 'GDUNIT_PLUGIN_MISSING after ensure'; exit 1
+    }- name: Install Export Templates (GitHub Releases)
         shell: pwsh
         run: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
