@@ -123,8 +123,8 @@ jobs:
         shell: pwsh
         continue-on-error: true
         env:
-          COVERAGE_LINES_MIN: '60'
-          COVERAGE_BRANCHES_MIN: '60'
+          COVERAGE_LINES_MIN: '75'
+          COVERAGE_BRANCHES_MIN: '70'
         run: |
           py -3 scripts/python/run_dotnet.py --solution Game.sln --configuration Debug
           if ($LASTEXITCODE -ne 0) { Write-Warning 'Coverage soft gate failed'; exit 0 }
