@@ -1,11 +1,11 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
 func _db() -> Node:
-    var s = preload("res://Game.Godot/Adapters/SqliteDataStore.cs")
     var db = null
-    if s.can_instance():
-        db = s.new()
+    if ClassDB.class_exists("SqliteDataStore"):
+        db = ClassDB.instantiate("SqliteDataStore")
     else:
+        var s = load("res://Game.Godot/Adapters/SqliteDataStore.cs")
         db = Node.new()
         db.set_script(s)
     db.name = "SqlDb"
