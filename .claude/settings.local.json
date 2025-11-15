@@ -40,7 +40,9 @@
       "Bash(claude plugin list)",
       "Bash(claude plugin --help:*)",
       "Bash(claude plugin marketplace list)",
-      "Read(//c/buildgame/vitegame/docs/**)"
+      "Read(//c/buildgame/vitegame/docs/**)",
+      "Bash(dotnet test:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
