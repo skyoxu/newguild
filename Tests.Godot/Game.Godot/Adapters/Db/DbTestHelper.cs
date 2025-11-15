@@ -92,4 +92,32 @@ public partial class DbTestHelper : Node
         var db = GetDb();
         db.Execute(sql, p0, p1);
     }
+
+    public int QueryScalarInt(string sql)
+    {
+        var db = GetDb();
+        var rows = db.Query(sql);
+        if (rows.Count == 0) return 0;
+        var row = rows[0];
+        foreach (var kv in row)
+        {
+            if (kv.Value == null) continue;
+            try { return Convert.ToInt32(kv.Value); } catch { }
+        }
+        return 0;
+    }
+
+    public int QueryScalarInt(string sql)
+    {
+        var db = GetDb();
+        var rows = db.Query(sql);
+        if (rows.Count == 0) return 0;
+        var row = rows[0];
+        foreach (var kv in row)
+        {
+            if (kv.Value == null) continue;
+            try { return Convert.ToInt32(kv.Value); } catch { }
+        }
+        return 0;
+    }
 }
