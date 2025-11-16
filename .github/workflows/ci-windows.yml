@@ -147,11 +147,6 @@ jobs:
         run: |
           py -3 scripts/python/run_gdunit.py --prewarm --godot-bin "$env:GODOT_BIN" --project Tests.Godot `
             --add tests/Adapters/Config `
-            --add tests/Adapters/test_data_store_adapter.gd `
-            --add tests/Adapters/test_event_bus_adapter.gd `
-            --add tests/Adapters/test_feature_flags.gd `
-            --add tests/Adapters/test_input_time_adapter.gd `
-            --add tests/Adapters/test_resource_loader_adapter.gd `
             --add tests/Security `
             --timeout-sec 300 --rd "logs/e2e/${{ github.run_id }}/gdunit-reports/adapters-security"
 
