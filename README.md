@@ -1,4 +1,4 @@
-[![Windows Export Slim](https://github.com/skyoxu/godotgame/actions/workflows/windows-export-slim.yml/badge.svg)](https://github.com/skyoxu/godotgame/actions/workflows/windows-export-slim.yml) [![Windows Release](https://github.com/skyoxu/godotgame/actions/workflows/windows-release.yml/badge.svg)](https://github.com/skyoxu/godotgame/actions/workflows/windows-release.yml) [![Windows Quality Gate](https://github.com/skyoxu/godotgame/actions/workflows/windows-quality-gate.yml/badge.svg)](https://github.com/skyoxu/godotgame/actions/workflows/windows-quality-gate.yml)
+[![Windows Export Slim](https://github.com/skyoxu/newguild/actions/workflows/windows-export-slim.yml/badge.svg)](https://github.com/skyoxu/newguild/actions/workflows/windows-export-slim.yml) [![Windows Release](https://github.com/skyoxu/newguild/actions/workflows/windows-release.yml/badge.svg)](https://github.com/skyoxu/newguild/actions/workflows/windows-release.yml) [![Windows Quality Gate](https://github.com/skyoxu/newguild/actions/workflows/windows-quality-gate.yml/badge.svg)](https://github.com/skyoxu/newguild/actions/workflows/windows-quality-gate.yml)
 
 # Godot Windows-only Template (C#)
 
@@ -42,6 +42,13 @@ One‑liner（已在 Editor 安装 Export Templates 后）：
 ## Notes
 - DB 后端：默认插件优先；`GODOT_DB_BACKEND=plugin|managed` 可控。
 - 示例 UI/测试：默认关闭；设置 `TEMPLATE_DEMO=1` 启用（Examples/**）。
+
+## 仓库名与内部项目名对应关系
+
+- GitHub 仓库名：`skyoxu/newguild` —— 对外链接、Actions badge、协作入口统一使用此名。
+- Godot 主工程：`GodotGame.csproj` / `GodotGame.sln` —— Godot .NET 入口工程，CI 构建命令中仍使用该名称。
+- 领域与适配层工程：`Game.Core`、`Game.Godot`、`Game.Core.Tests`、`Game.Godot.Tests` 等 —— .NET 解决方案内部的逻辑拆分。
+- 约定：文档或脚本中提到 “newguild” 时，指当前这一套模板/游戏项目；提到 `GodotGame` 时，指该项目内的 Godot .NET 主工程文件，而不是另一个仓库。
 
 ## Feature Flags（特性旗标）
 - Autoload：`/root/FeatureFlags`（文件：`Game.Godot/Scripts/Config/FeatureFlags.cs`）

@@ -19,7 +19,7 @@
 # scripts/install-gdunit4.ps1
 
 param(
-    [string]$ProjectRoot = "C:\buildgame\godotgame"
+    [string]$ProjectRoot = "C:\buildgame\newguild"
 )
 
 Write-Host "瀹夎 GdUnit4..." -ForegroundColor Green
@@ -892,7 +892,7 @@ Game.Godot/Tests/
 
 ```powershell
 param(
-    [string]$ProjectRoot = "C:\buildgame\godotgame",
+    [string]$ProjectRoot = "C:\buildgame\newguild",
     [switch]$OpenReport = $false,
     [string]$TestFilter = "*",
     [switch]$Headless = $false
@@ -1081,3 +1081,4 @@ if __name__ == '__main__':
 # Phase 11 鈥?鍦烘櫙闆嗘垚娴嬭瘯锛圖eprecated锛?
 > 鐘舵€侊細Deprecated锛堟湰椤靛凡搴熷純锛屼粎浣滃巻鍙插弬鑰冿級銆傝闃呰骞朵互 REVISED 鐗堟湰涓哄敮涓€鍙ｅ緞锛歚docs/migration/Phase-11-Scene-Integration-Tests-REVISED.md`銆?
 鏈〉淇濈暀鏄负浜嗚拷婧縼绉绘€濊矾鐨勬紨杩涖€傚疄闄呮墽琛屼笌楠屾敹浠?REVISED 鏂囨。涓哄噯銆?
+

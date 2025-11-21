@@ -9,13 +9,13 @@
 
 ## 目标
 
-将 vitegame 的 React 19 + Tailwind CSS UI 迁移到 godotgame 的 Godot Control 节点系统，保持功能等价性与可测试性。
+将 vitegame 的 React 19 + Tailwind CSS UI 迁移到 newguild 的 Godot Control 节点系统，保持功能等价性与可测试性。
 
 ---
 
 ## 技术栈对比
 
-| 层次 | vitegame (Web) | godotgame (Godot) |
+| 层次 | vitegame (Web) | newguild (Godot) |
 |-----|---------------|------------------|
 | UI框架 | React 19 (JSX) | Godot Control 节点 (.tscn) |
 | 布局系统 | Flexbox / CSS Grid | Container 节点 (VBoxContainer, HBoxContainer, GridContainer) |
@@ -102,7 +102,7 @@ export function PrimaryButton({
 }
 ```
 
-**Godot (godotgame)**:
+**Godot (newguild)**:
 
 **场景文件** (`Game.Godot/Scenes/UI/PrimaryButton.tscn`):
 
@@ -253,7 +253,7 @@ export function TextInput({ label, error, ...props }: TextInputProps) {
 }
 ```
 
-**Godot (godotgame)**:
+**Godot (newguild)**:
 
 **场景文件** (`Game.Godot/Scenes/UI/TextInput.tscn`):
 
@@ -480,7 +480,7 @@ export function UserCard({ username, level, avatar }: UserCardProps) {
 }
 ```
 
-**Godot Container (godotgame)**:
+**Godot Container (newguild)**:
 
 **场景文件** (`Game.Godot/Scenes/UI/UserCard.tscn`):
 
@@ -638,7 +638,7 @@ export function HealthBar({ maxHealth = 100 }: { maxHealth?: number }) {
 }
 ```
 
-**Godot Properties (godotgame)**:
+**Godot Properties (newguild)**:
 
 **场景文件** (`Game.Godot/Scenes/UI/HealthBar.tscn`):
 
@@ -1012,7 +1012,7 @@ export function LoginForm() {
 }
 ```
 
-**Godot Form (godotgame)**:
+**Godot Form (newguild)**:
 
 **场景文件** (`Game.Godot/Scenes/UI/LoginForm.tscn`):
 
@@ -1164,7 +1164,7 @@ export function UserList({ users }: { users: User[] }) {
 }
 ```
 
-**Godot List (godotgame)**:
+**Godot List (newguild)**:
 
 **场景文件** (`Game.Godot/Scenes/UI/UserList.tscn`):
 

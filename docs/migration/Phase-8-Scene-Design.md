@@ -17,7 +17,7 @@
 
 ### Godot 场景树 vs React 组件树
 
-| 概念 | React (vitegame) | Godot (godotgame) |
+| 概念 | React (vitegame) | Godot (newguild) |
 |-----|-----------------|------------------|
 | 基本单元 | Component (函数/类) | Node (场景节点) |
 | 组织方式 | JSX 嵌套 | Scene Tree 树形结构 |

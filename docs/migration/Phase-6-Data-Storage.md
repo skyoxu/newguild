@@ -9,13 +9,13 @@
 
 ## 目标
 
-将 vitegame 的 better-sqlite3 数据库迁移到 godotgame 的 godot-sqlite，建立类型安全的仓储层和迁移系统。
+将 vitegame 的 better-sqlite3 数据库迁移到 newguild 的 godot-sqlite，建立类型安全的仓储层和迁移系统。
 
 ---
 
 ## 技术栈对比
 
-| 功能 | vitegame (Node.js) | godotgame (Godot) |
+| 功能 | vitegame (Node.js) | newguild (Godot) |
 |-----|-------------------|------------------|
 | 库 | better-sqlite3 | godot-sqlite (GDNative) |
 | 初始化 | `new Database('game.db')` | `SQLite.new() + open_db()` |
@@ -69,7 +69,7 @@ CREATE TABLE schema_version (
 );
 ```
 
-### 目标 Schema (godotgame)
+### 目标 Schema (newguild)
 
 保持相同结构，但添加：
 

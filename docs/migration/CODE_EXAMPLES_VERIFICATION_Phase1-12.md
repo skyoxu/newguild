@@ -161,7 +161,7 @@ if (!(Test-Path "addons/gut/plugin.cfg")) {
 
 ```ini
 [application]
-config/name="godotgame"
+config/name="newguild"
 run/main_scene="res://src/scenes/MainScene.tscn"
 config/icon="res://assets/icon.svg"
 

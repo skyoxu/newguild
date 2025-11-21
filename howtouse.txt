@@ -1,0 +1,167 @@
+  一、AI 想搞清楚“基建全貌”，先读哪些文档？
+
+  在 C:\buildgame\newguild 下，优先顺序可以这样：
+
+  1. 顶层协作约定（AI 行为规则）
+      - CLAUDE.md
+      - AGENTS.md
+      - （如果有）mcpuse.md、.codex/config.toml
+        作用：
+      - 定义多助手协作方式、语言要求（中文文档、英文代码）、安全约束、Windows-only 等；
+      - 告诉 BMAD / task-master-ai / Claude Code / Codex 应该怎么遵守 ADR / Phase / Backlog 的规则。
+  2. Godot+C# 模板专用快速入口
+      - docs/TEMPLATE_GODOT_GETTING_STARTED.md
+        作用（特别关键给 AI 用）：
+      - 明确这个仓库是 Windows-only Godot 4.5.1 + C# 模板，而不是 Electron/vitegame；
+      - 列出技术前提 SSoT：
+          - 三层结构：Game.Core / Game.Godot / Tests.Godot;
+          - Settings SSoT = ConfigFile → user://settings.cfg（ADR‑0023）；
+          - 数据存储 = SQLite + SqliteDataStore 限制 user:// 路径（ADR‑0006）；
+          - 事件命名 = ui.menu.*、screen.*.*、core.*.*；
+      - 定义从 PRD → tasks.json 的约束（layer/adr_refs/chapter_refs 等）；
+      - 列出 统一命令入口：dev_cli.py 子命令（下面单独说）。
+  3. 整体能力和蓝图 vs 实现状态
+      - docs/PROJECT_CAPABILITIES_STATUS.md
+        作用：
+      - 按主题列出：
+          - 哪些能力 已实现（Implemented）；
+          - 哪些能力在 Backlog（设计过但未落地，如 Sentry Release Health、Perf 高级门禁）；
+          - 哪些是 vitegame/Electron 专用、不适用于 Godot 模板。
+      - 这是 AI 判断“可以直接用的东西”和“不要轻易承诺的蓝图”的总览。
+  4. 架构基座：ARC42 + ADR
+      - docs/PROJECT_DOCUMENTATION_INDEX.md（只做索引，不要逐行啃）
+      - docs/architecture/base/**（CH01–CH07 为主）
+      - docs/adr/**（至少看：ADR‑0001/0004/0005/0006/0023/0011）
+        推荐 AI 的抓取方式：
+      - 对 BMAD：把 CH01–CH07 + ADR‑0004/0005/0006/0023/0011 当作架构与约束的 SSoT；
+      - 对 task-master-ai：在生成 tasks 时，把 adr_refs 和 chapter_refs 对齐到这些文档。
+  5. 迁移/Phase 文档（了解每个 Phase 做了什么）
+      - 主目录：docs/migration/
+      - 关键几份（Godot 变体相关）：
+          - Phase‑3 / Phase‑4 / Phase‑5：项目结构 + Domain/Adapters。
+          - Phase‑6：Phase-6-Data-Storage.md（ConfigFile + SQLite 口径）。
+          - Phase‑8：Phase-8-Scene-Design.md + Phase-8-Vertical-Slice-Template.md（场景骨架 + 纵向切片 Story 模板）。
+          - Phase‑9：Signal System（事件命名、EventBusAdapter）。
+          - Phase‑10/11：单测与场景集成测试（xUnit + GdUnit4）。
+          - Phase‑13/14/15：质量门禁、安全、性能预算 Backlog。
+            用法：
+      - BMAD 用这些来确保 PRD 不违背既有 Phase/ADR 口径；
+      - task-master-ai 结合 Phase‑8 的 Vertical Slice 模板，直接生成符合规范的 tasks.json。
+  6. 测试框架与实践
+      - docs/testing-framework.md
+        作用：
+      - 讲清楚三层测试金字塔：
+          - xUnit（Game.Core）；
+          - GdUnit4 场景测试（Tests.Godot）；
+          - E2E/Smoke；
+      - 给出 UI/Glue 测试的规范：禁止依赖真实 InputEvents，使用信号和方法调用、限制轮询帧数等。
+
+  ———
+
+  二、AI 想实际“用起现有功能”，要看哪些代码和脚本？
+
+  按你模板当前基建，AI 需要理解的关键模块和入口是：
+
+  1. 解决方案与项目结构
+      - 根目录：
+          - Game.sln
+          - GodotGame.csproj（或对应名字）
+          - project.godot（主 Godot 工程）
+      - 代码结构：
+          - Game.Core/：纯 C# 域模型/服务；
+          - Game.Core.Tests/：xUnit 测试；
+          - Game.Godot/：Godot C# 脚本、Adapters、Scenes；
+          - Tests.Godot/：GdUnit4 测试工程（场景集成测试）。
+  2. 典型“完整链路”示例代码
+
+  AI 想在 newguild 上新增玩法时，最值得参考的现有代码（按链路）：
+
+  - 事件和 HUD 更新：
+      - Game.Godot/Scripts/UI/HUD.cs
+          - 订阅 EventBusAdapter.DomainEventEmitted；
+          - 处理 core.score.updated / core.health.updated / 旧事件名的 JSON；
+          - 提供 SetScore/SetHealth 方法作为白盒兜底。
+      - Game.Godot/Scripts/Main.gd
+          - _on_add_score() / _on_lose_hp() 中发出 core.score.updated / core.health.updated 事件；
+          - _on_domain_event(...) 中响应 ui.menu.start/settings/quit 等 UI 事件；
+          - 是典型的场景 Glue 层例子。
+      - Game.Godot/Adapters/EventBusAdapter.cs
+          - 实现 DomainEventEmitted Signal；
+          - PublishAsync 中把 C# 的 DomainEvent 转成 Godot Signal 参数。
+      - GdUnit UI/集成测试：
+          - Tests.Godot/tests/UI/test_hud_updates_on_events.gd
+          - Tests.Godot/tests/Integration/test_hud_integration.gd
+          - Tests.Godot/tests/Integration/test_screen_navigation_flow.gd
+  - 持久化和路径安全：
+      - Game.Godot/Adapters/SqliteDataStore.cs
+          - 只允许 user:// 路径、禁止 ..，失败写审计 JSONL；
+          - 提供 TryOpen, Execute, Query 等；
+      - Game.Godot/Adapters/Security/SafeConfig.gd
+          - 封装 ConfigFile 的安全保存 user:// 路径。
+      - 对应测试：
+          - Tests.Godot/tests/Security/Hard/test_db_path_rejection.gd
+          - Tests.Godot/tests/Security/Hard/test_db_open_denied_writes_audit_log.gd
+          - Tests.Godot/tests/Security/Hard/test_settings_config_security.gd
+  - Feature Flags & Perf：
+      - Game.Godot/Scripts/Config/FeatureFlags.*（C# + GDScript 变体）
+      - Game.Godot/Scripts/Perf/PerformanceTracker.*
+      - 对应 GdUnit 用例：Tests.Godot/tests/Adapters/test_feature_flags.gd 等。
+
+  这些文件对 AI 来说，是“如何按模板期望写新逻辑”的最直接示范。
+
+  3. 统一命令入口（dev_cli.py）
+
+  AI 在 newguild 里跑测试/质量门禁，应该调用：
+
+  - scripts/python/dev_cli.py
+      - run-ci-basic：
+          - py -3 scripts/python/dev_cli.py run-ci-basic --godot-bin "<Godot exe>"
+          - 跑 dotnet 测试 + CompositionRoot 自检 + 编码扫描。
+      - run-quality-gates：
+          - py -3 scripts/python/dev_cli.py run-quality-gates --godot-bin "<Godot exe>" --gdunit-hard --smoke
+          - 在 ci_pipeline 基础上再跑硬门禁 GdUnit 小集 + 严格 Smoke。
+      - run-gdunit-hard / run-gdunit-full / run-smoke-strict：
+          - 分别对应 Adapters+Security Hard 集、全量 GdUnit 集、Main 场景 Smoke。
+
+  这对 SuperClaude / Claude Code / Codex CLI 都是“命令 SSoT”：
+  不要再从工具层自己拼 run_gdunit.py 参数，统一用 dev_cli 子命令。
+
+  4. 如何在 newguild 上新增功能（AI 行动建议）
+
+  结合你想要的 BMAD → task-master-ai → SuperClaude 流程，AI 应该：
+
+  - BMAD：
+      - 读：CLAUDE.md、AGENTS.md、TEMPLATE_GODOT_GETTING_STARTED.md、CH01–CH07、关键 ADR；
+      - 生成 PRD 时，把输入/输出/状态/存储都设计成适配 Godot 场景 + C# Core + ConfigFile/SQLite，而不是 Web/Electron。
+  - task-master-ai：
+      - 读：TEMPLATE_GODOT_GETTING_STARTED.md 第 2 节 + Phase-8-Vertical-Slice-Template.md；
+      - 根据 Story 生成 tasks.json：
+          - 每个任务写 id / story_id / layer / adr_refs / chapter_refs / overlay_refs / depends_on；
+          - 分解为 Core / Adapter / Scene / Test 四种层。
+      - 把 tasks.json 放在 docs/tasks/tasks.json（或你约定的路径）。
+  - SuperClaude / Claude Code / Codex：
+      - 从 tasks.json 读取任务：
+          - layer=core → 改 Game.Core + Game.Core.Tests；
+          - layer=adapter → 改 Game.Godot/Adapters；
+          - layer=scene → 改 Game.Godot/Scenes + Game.Godot/Scripts；
+          - layer=test → 改 Game.Core.Tests 或 Tests.Godot/tests。
+      - 每一批任务完成后，用：
+          - dev_cli run-ci-basic 做快速验证；
+          - 按需 dev_cli run-quality-gates --gdunit-hard --smoke 做严格门禁。
+
+  ———
+
+  三、总结一句话
+
+  在 newguild 里，AI 要理解“这个模板能做什么、怎么用”，最少需要读取：
+
+  - 规则/协作：CLAUDE.md, AGENTS.md
+  - Godot 入口：docs/TEMPLATE_GODOT_GETTING_STARTED.md
+  - 能力总览：docs/PROJECT_CAPABILITIES_STATUS.md
+  - 架构/ADR：docs/architecture/base/**, docs/adr/**
+  - Phase & 竖切模板：docs/migration/Phase-*.md，尤其 Phase-8-Vertical-Slice-Template.md
+  - 测试规范：docs/testing-framework.md
+  - 代码示例：Game.Core/**, Game.Godot/**, Tests.Godot/** 中的 HUD/Main/EventBus/SqliteDataStore/Security/FeatureFlags 等
+  - 命令入口：scripts/python/dev_cli.py
+
+  只要把这些当作“基建 SSoT”，你后面的 BMAD+task-master-ai+SuperClaude 流程，在 newguild 上就能比较安全地展开新游戏逻辑开发。

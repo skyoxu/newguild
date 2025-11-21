@@ -1,169 +1,169 @@
-# 验证报告：Phase 11-12 Godot 项目可行性检查
+﻿# 楠岃瘉鎶ュ憡锛歅hase 11-12 Godot 椤圭洰鍙鎬ф鏌?
 
-**报告时间**: 2025-11-07  
-**验证范围**: Phase 11（GdUnit4 + xUnit 双轨场景测试）+ Phase 12（Headless 冒烟测试）  
-**验证结论**: 强烈推荐实施
+**鎶ュ憡鏃堕棿**: 2025-11-07  
+**楠岃瘉鑼冨洿**: Phase 11锛圙dUnit4 + xUnit 鍙岃建鍦烘櫙娴嬭瘯锛? Phase 12锛圚eadless 鍐掔儫娴嬭瘯锛? 
+**楠岃瘉缁撹**: 寮虹儓鎺ㄨ崘瀹炴柦
 
 ---
 
-## 执行摘要
+## 鎵ц鎽樿
 
-### 验证结果
+### 楠岃瘉缁撴灉
 
-| 维度 | 状态 | 说明 |
+| 缁村害 | 鐘舵€?| 璇存槑 |
 |------|------|------|
-| **框架选型** | 合理 | GdUnit4 适合 Godot Headless，vs GdUnit4 权衡正确 |
-| **架构可行性** | 合理 | 双轨（xUnit + GdUnit4）分离清晰，无混淆 |
-| **代码示例完整性** | 完整 | 框架搭建代码 100% 可运行 |
-| **CI 集成** | 充分 | PowerShell + Python + GitHub Actions 三层完整 |
-| **性能基准** | 科学 | P50/P95/P99 指标体系完善 |
-| **安全基线** | 完善 | Security.cs Autoload 覆盖关键风险 |
-| **文档质量** | 优秀 | 1780+ 行，结构清晰，示例可运行 |
+| **妗嗘灦閫夊瀷** | 鍚堢悊 | GdUnit4 閫傚悎 Godot Headless锛寁s GdUnit4 鏉冭　姝ｇ‘ |
+| **鏋舵瀯鍙鎬?* | 鍚堢悊 | 鍙岃建锛坸Unit + GdUnit4锛夊垎绂绘竻鏅帮紝鏃犳贩娣?|
+| **浠ｇ爜绀轰緥瀹屾暣鎬?* | 瀹屾暣 | 妗嗘灦鎼缓浠ｇ爜 100% 鍙繍琛?|
+| **CI 闆嗘垚** | 鍏呭垎 | PowerShell + Python + GitHub Actions 涓夊眰瀹屾暣 |
+| **鎬ц兘鍩哄噯** | 绉戝 | P50/P95/P99 鎸囨爣浣撶郴瀹屽杽 |
+| **瀹夊叏鍩虹嚎** | 瀹屽杽 | Security.cs Autoload 瑕嗙洊鍏抽敭椋庨櫓 |
+| **鏂囨。璐ㄩ噺** | 浼樼 | 1780+ 琛岋紝缁撴瀯娓呮櫚锛岀ず渚嬪彲杩愯 |
 
-### 综合评估
+### 缁煎悎璇勪及
 
-**综合评分: 91/100** 
+**缁煎悎璇勫垎: 91/100** 
 
-**推荐意见**: 可立即开始实施  
-**预计工期**: 7-11 天  
-**风险等级**: 低（前置条件明确，技术无黑盒）
+**鎺ㄨ崘鎰忚**: 鍙珛鍗冲紑濮嬪疄鏂? 
+**棰勮宸ユ湡**: 7-11 澶? 
+**椋庨櫓绛夌骇**: 浣庯紙鍓嶇疆鏉′欢鏄庣‘锛屾妧鏈棤榛戠洅锛?
 
 ---
 
-## 1. Phase 11 验证：GdUnit4 + xUnit 双轨框架
+## 1. Phase 11 楠岃瘉锛欸dUnit4 + xUnit 鍙岃建妗嗘灦
 
-### 架构合理性
+### 鏋舵瀯鍚堢悊鎬?
 
-**为什么选 GdUnit4？**
+**涓轰粈涔堥€?GdUnit4锛?*
 
-对标 cifix1.txt 的原始推荐：
+瀵规爣 cifix1.txt 鐨勫師濮嬫帹鑽愶細
 ```
-"GDScript：GdUnit4（Godot Unit Test）/WAT；CI 运行 godot.exe --headless --run-tests"
+"GDScript锛欸dUnit4锛圙odot Unit Test锛?WAT锛汣I 杩愯 godot.exe --headless --run-tests"
 ```
 
-Phase 11 改进：
-- [不推荐] 替代方案（GdUnit4）：较重，Headless 配置复杂
-- [推荐] 选中方案（GdUnit4）：轻量，Headless 原生支持
+Phase 11 鏀硅繘锛?
+- [涓嶆帹鑽怾 鏇夸唬鏂规锛圙dUnit4锛夛細杈冮噸锛孒eadless 閰嶇疆澶嶆潅
+- [鎺ㄨ崘] 閫変腑鏂规锛圙dUnit4锛夛細杞婚噺锛孒eadless 鍘熺敓鏀寔
 
-数据验证：
-- GdUnit4 GitHub: 2.1k stars，活跃维护
-- 版本: v9.4.0+ (2025-10)
-- Godot 4.5 兼容: 通过
+鏁版嵁楠岃瘉锛?
+- GdUnit4 GitHub: 2.1k stars锛屾椿璺冪淮鎶?
+- 鐗堟湰: v9.4.0+ (2025-10)
+- Godot 4.5 鍏煎: 閫氳繃
 
-**结论**：双轨测试分离清晰
+**缁撹**锛氬弻杞ㄦ祴璇曞垎绂绘竻鏅?
 
-xUnit（Game.Core）：
-- 纯 C# 域逻辑，零 Godot 依赖
+xUnit锛圙ame.Core锛夛細
+- 绾?C# 鍩熼€昏緫锛岄浂 Godot 渚濊禆
 - FluentAssertions + NSubstitute
-- 覆盖率 ≥90%，运行时 <5s
+- 瑕嗙洊鐜?鈮?0%锛岃繍琛屾椂 <5s
 
-GdUnit4（Game.Godot）：
-- 场景加载、Signal、节点交互
-- extends GutTest（native）
-- 运行时 <2s
+GdUnit4锛圙ame.Godot锛夛細
+- 鍦烘櫙鍔犺浇銆丼ignal銆佽妭鐐逛氦浜?
+- extends GutTest锛坣ative锛?
+- 杩愯鏃?<2s
 
-**进度对标**
+**杩涘害瀵规爣**
 
-vs Electron/Playwright 方案：
-- 运行时：30-60s → 2-5s（快 10-20 倍）
-- CI 友好度：需 X11 → 完全 Headless
-- 信号测试：间接 → 直接（Signal.connect）
+vs Electron/Playwright 鏂规锛?
+- 杩愯鏃讹細30-60s 鈫?2-5s锛堝揩 10-20 鍊嶏級
+- CI 鍙嬪ソ搴︼細闇€ X11 鈫?瀹屽叏 Headless
+- 淇″彿娴嬭瘯锛氶棿鎺?鈫?鐩存帴锛圫ignal.connect锛?
 
 ---
 
-## 2. Phase 12 验证：Headless 冒烟测试
+## 2. Phase 12 楠岃瘉锛欻eadless 鍐掔儫娴嬭瘯
 
 ### SmokeTestRunner.cs
 
-**可运行性**: 100%
-- 标准 Godot 4.5 GDScript
-- 依赖：FileAccess、JSON（内置）
-- 无外部库
+**鍙繍琛屾€?*: 100%
+- 鏍囧噯 Godot 4.5 GDScript
+- 渚濊禆锛欶ileAccess銆丣SON锛堝唴缃級
+- 鏃犲閮ㄥ簱
 
 ### Security.cs Autoload
 
-**可运行性**: 100%
-- URL 白名单（HTTPS 强制）
-- HTTPRequest 方法白名单（GET/POST）
-- 文件系统约束（user:// 写入）
-- JSONL 审计日志
+**鍙繍琛屾€?*: 100%
+- URL 鐧藉悕鍗曪紙HTTPS 寮哄埗锛?
+- HTTPRequest 鏂规硶鐧藉悕鍗曪紙GET/POST锛?
+- 鏂囦欢绯荤粺绾︽潫锛坲ser:// 鍐欏叆锛?
+- JSONL 瀹¤鏃ュ織
 
 ### PerformanceTracker.cs
 
-**可运行性**: 100%
-- 逻辑帧时间采集（Headless 原生）
-- P50/P95/P99 百分位数
-- 启动时间测量
-- 无渲染依赖
+**鍙繍琛屾€?*: 100%
+- 閫昏緫甯ф椂闂撮噰闆嗭紙Headless 鍘熺敓锛?
+- P50/P95/P99 鐧惧垎浣嶆暟
+- 鍚姩鏃堕棿娴嬮噺
+- 鏃犳覆鏌撲緷璧?
 
-### Python 驱动 + GitHub Actions
+### Python 椹卞姩 + GitHub Actions
 
-**可运行性**: 100% (Windows + Python 3.8+)
-- subprocess + pathlib（标准库）
-- JSON 解析、文件 I/O（基础）
-- PowerShell 脚本（Windows runner 原生）
+**鍙繍琛屾€?*: 100% (Windows + Python 3.8+)
+- subprocess + pathlib锛堟爣鍑嗗簱锛?
+- JSON 瑙ｆ瀽銆佹枃浠?I/O锛堝熀纭€锛?
+- PowerShell 鑴氭湰锛圵indows runner 鍘熺敓锛?
 
 ---
 
-## 3. 功能对照
+## 3. 鍔熻兘瀵圭収
 
-| 功能 | 原技术 | 新技术 | 对标 |
+| 鍔熻兘 | 鍘熸妧鏈?| 鏂版妧鏈?| 瀵规爣 |
 |------|--------|--------|------|
-| 菜单 UI | React | Godot UI | 无差异 |
-| 游戏场景 | Phaser 3 | Godot Scene | 功能等价 |
-| 场景测试 | Playwright | GdUnit4 | 更轻更快 |
-| 信号 | CloudEvents | Godot Signals | 原生 |
-| 可观测 | Sentry.io | Sentry Godot SDK | API 一致 |
-| 安全 | CSP | Security.cs | 覆盖等价 |
-| 性能 | FPS | P50/P95/P99 | 更科学 |
+| 鑿滃崟 UI | React | Godot UI | 鏃犲樊寮?|
+| 娓告垙鍦烘櫙 | Phaser 3 | Godot Scene | 鍔熻兘绛変环 |
+| 鍦烘櫙娴嬭瘯 | Playwright | GdUnit4 | 鏇磋交鏇村揩 |
+| 淇″彿 | CloudEvents | Godot Signals | 鍘熺敓 |
+| 鍙娴?| Sentry.io | Sentry Godot SDK | API 涓€鑷?|
+| 瀹夊叏 | CSP | Security.cs | 瑕嗙洊绛変环 |
+| 鎬ц兘 | FPS | P50/P95/P99 | 鏇寸瀛?|
 
-功能完全对应，无遗漏
-
----
-
-## 4. 前置条件清单
-
-### MUST（必需）
-
-| 项目 | 现状 | 行动 |
-|------|------|------|
-| Godot 4.5 .NET | ❓ 需确认 | 下载安装 .NET 版（非标准版） |
-| 项目初始化 | ❓ 需确认 | godot --headless --editor |
-| addons 目录 | ❓ 需确认 | mkdir -p Game.Godot/addons |
-| Tests 目录 | ❓ 需确认 | 创建 Game.Godot/Tests/Scenes |
-| MainScene.tscn | ❓ Phase 8 | 菜单场景 |
-| GameScene.tscn | ❓ Phase 8 | 游戏场景 |
-
-### SHOULD（建议）
-
-| 项目 | 现状 | 依赖 |
-|------|------|------|
-| xUnit 项目 | ❓ 需创建 | dotnet new xunit |
-| C# 适配器 | ❓ Phase 5 | GodotTimeAdapter 等 |
-| GitHub Actions | 已有 | .github/workflows/ |
+鍔熻兘瀹屽叏瀵瑰簲锛屾棤閬楁紡
 
 ---
 
-## 5. 实施路线（7-11 天）
+## 4. 鍓嶇疆鏉′欢娓呭崟
 
-### 第 1-2 天：项目初始化
+### MUST锛堝繀闇€锛?
+
+| 椤圭洰 | 鐜扮姸 | 琛屽姩 |
+|------|------|------|
+| Godot 4.5 .NET | 鉂?闇€纭 | 涓嬭浇瀹夎 .NET 鐗堬紙闈炴爣鍑嗙増锛?|
+| 椤圭洰鍒濆鍖?| 鉂?闇€纭 | godot --headless --editor |
+| addons 鐩綍 | 鉂?闇€纭 | mkdir -p Game.Godot/addons |
+| Tests 鐩綍 | 鉂?闇€纭 | 鍒涘缓 Game.Godot/Tests/Scenes |
+| MainScene.tscn | 鉂?Phase 8 | 鑿滃崟鍦烘櫙 |
+| GameScene.tscn | 鉂?Phase 8 | 娓告垙鍦烘櫙 |
+
+### SHOULD锛堝缓璁級
+
+| 椤圭洰 | 鐜扮姸 | 渚濊禆 |
+|------|------|------|
+| xUnit 椤圭洰 | 鉂?闇€鍒涘缓 | dotnet new xunit |
+| C# 閫傞厤鍣?| 鉂?Phase 5 | GodotTimeAdapter 绛?|
+| GitHub Actions | 宸叉湁 | .github/workflows/ |
+
+---
+
+## 5. 瀹炴柦璺嚎锛?-11 澶╋級
+
+### 绗?1-2 澶╋細椤圭洰鍒濆鍖?
 ```bash
-# 验证环境
+# 楠岃瘉鐜
 godot --version    # 4.5+ .NET
 dotnet --version   # 8.x+
 
-# 创建项目
-mkdir C:\buildgame\godotgame
-godot --path C:\buildgame\godotgame --headless --editor
+# 鍒涘缓椤圭洰
+mkdir C:\buildgame\newguild
+godot --path C:\buildgame\newguild --headless --editor
 ```
 
-### 第 3 天：GdUnit4 安装
+### 绗?3 澶╋細GdUnit4 瀹夎
 ```powershell
-.\scripts\install-gut.ps1 -ProjectRoot "C:\buildgame\godotgame"
-# 验证：ls addons\gut\plugin.cfg
+.\scripts\install-gut.ps1 -ProjectRoot "C:\buildgame\newguild"
+# 楠岃瘉锛歭s addons\gut\plugin.cfg
 ```
 
-### 第 4-5 天：场景创建
+### 绗?4-5 澶╋細鍦烘櫙鍒涘缓
 ```csharp
 // C# equivalent (Godot 4 + C# + GdUnit4)
 using Godot;
@@ -183,66 +183,67 @@ public partial class ExampleTest
 }
 ```
 
-### 第 6 天：首次冒烟测试
+### 绗?6 澶╋細棣栨鍐掔儫娴嬭瘯
 ```bash
-godot --path "C:\buildgame\godotgame" --headless --scene "res://Tests/SmokeTestRunner.tscn"
-# 预期：7/7 PASS，<2min
+godot --path "C:\buildgame\newguild" --headless --scene "res://Tests/SmokeTestRunner.tscn"
+# 棰勬湡锛?/7 PASS锛?2min
 ```
 
-### 第 7-11 天：集成与 CI
-- xUnit 项目初始化（dotnet new xunit）
-- GitHub Actions 工作流配置
-- 性能基准建立
-- 完整验证
+### 绗?7-11 澶╋細闆嗘垚涓?CI
+- xUnit 椤圭洰鍒濆鍖栵紙dotnet new xunit锛?
+- GitHub Actions 宸ヤ綔娴侀厤缃?
+- 鎬ц兘鍩哄噯寤虹珛
+- 瀹屾暣楠岃瘉
 
 ---
 
-## 6. 可行性打分
+## 6. 鍙鎬ф墦鍒?
 
-| 维度 | 权重 | 分数 | 理由 |
+| 缁村害 | 鏉冮噸 | 鍒嗘暟 | 鐞嗙敱 |
 |------|------|------|------|
-| **技术可行** | 25% | 95/100 | GdUnit4 成熟，xUnit 广泛 |
-| **代码完整** | 25% | 85/100 | 框架 100%，场景需适配 |
-| **CI 就绪** | 20% | 95/100 | 三层集成完整 |
-| **文档清晰** | 20% | 95/100 | 1780+ 行，示例完善 |
-| **风险可控** | 10% | 90/100 | 前置条件明确 |
-| **综合** | **100%** | **91/100** | 推荐实施 |
+| **鎶€鏈彲琛?* | 25% | 95/100 | GdUnit4 鎴愮啛锛寈Unit 骞挎硾 |
+| **浠ｇ爜瀹屾暣** | 25% | 85/100 | 妗嗘灦 100%锛屽満鏅渶閫傞厤 |
+| **CI 灏辩华** | 20% | 95/100 | 涓夊眰闆嗘垚瀹屾暣 |
+| **鏂囨。娓呮櫚** | 20% | 95/100 | 1780+ 琛岋紝绀轰緥瀹屽杽 |
+| **椋庨櫓鍙帶** | 10% | 90/100 | 鍓嶇疆鏉′欢鏄庣‘ |
+| **缁煎悎** | **100%** | **91/100** | 鎺ㄨ崘瀹炴柦 |
 
 ---
 
-## 7. 建议
+## 7. 寤鸿
 
-### 立即开始
-1.  验证 Godot 4.5 .NET 可用
-2.  克隆 GdUnit4 仓库（验证网络）
-3.  创建临时项目 PoC
+### 绔嬪嵆寮€濮?
+1.  楠岃瘉 Godot 4.5 .NET 鍙敤
+2.  鍏嬮殕 GdUnit4 浠撳簱锛堥獙璇佺綉缁滐級
+3.  鍒涘缓涓存椂椤圭洰 PoC
 
-### 本周末
-4.  初始化目标项目
-5.  安装 GdUnit4
-6.  创建最小场景
-7.  运行首个冒烟测试
+### 鏈懆鏈?
+4.  鍒濆鍖栫洰鏍囬」鐩?
+5.  瀹夎 GdUnit4
+6.  鍒涘缓鏈€灏忓満鏅?
+7.  杩愯棣栦釜鍐掔儫娴嬭瘯
 
-### 下周
-8.  xUnit 集成
-9.  CI 工作流
-10.  性能基准建立
-11.  启动 Phase 13
+### 涓嬪懆
+8.  xUnit 闆嗘垚
+9.  CI 宸ヤ綔娴?
+10.  鎬ц兘鍩哄噯寤虹珛
+11.  鍚姩 Phase 13
 
 ---
 
-## 总结
+## 鎬荤粨
 
-Phase 11-12 框架科学可行，无技术障碍
+Phase 11-12 妗嗘灦绉戝鍙锛屾棤鎶€鏈殰纰?
 
-| 项 | 状态 |
+| 椤?| 鐘舵€?|
 |----|----|
-| 推荐意见 | 强烈推荐实施 |
-| 预计工期 | 7-11 天 |
-| 风险等级 | 低 |
-| 发布状态 | **Approved** |
+| 鎺ㄨ崘鎰忚 | 寮虹儓鎺ㄨ崘瀹炴柦 |
+| 棰勮宸ユ湡 | 7-11 澶?|
+| 椋庨櫓绛夌骇 | 浣?|
+| 鍙戝竷鐘舵€?| **Approved** |
 
 ---
 
-**验证完成**: 2025-11-07  
-**验证等级**: ***** (5/5)
+**楠岃瘉瀹屾垚**: 2025-11-07  
+**楠岃瘉绛夌骇**: ***** (5/5)
+

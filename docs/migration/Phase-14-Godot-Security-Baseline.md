@@ -59,7 +59,7 @@ window.webContents.session.webRequest.onBeforeSendHeaders(
 
 ### 2.0 Godot+C# 鍙樹綋锛堝綋鍓嶆ā鏉垮疄鐜帮級
 
-> 鏈妭鎻忚堪鐨勬槸 **godotgame 妯℃澘宸茬粡钀藉湴鐨勫畨鍏ㄥ熀绾垮疄鐜?*锛岀敤浜庡榻?ADR鈥?002/0006 涓庤繍琛屾椂浠ｇ爜銆備笅鏂囩粰鍑虹殑澶у彿 `Security : Node` 绀轰緥浠嶇劧鏄摑鍥剧骇鍙傝€冿紝涓嶄唬琛ㄥ綋鍓嶄粨搴撶殑鍞竴瀹炵幇褰㈠紡銆?
+> 鏈妭鎻忚堪鐨勬槸 **newguild 妯℃澘宸茬粡钀藉湴鐨勫畨鍏ㄥ熀绾垮疄鐜?*锛岀敤浜庡榻?ADR鈥?002/0006 涓庤繍琛屾椂浠ｇ爜銆備笅鏂囩粰鍑虹殑澶у彿 `Security : Node` 绀轰緥浠嶇劧鏄摑鍥剧骇鍙傝€冿紝涓嶄唬琛ㄥ綋鍓嶄粨搴撶殑鍞竴瀹炵幇褰㈠紡銆?
 - 鑷涓庡璁★紙鍚姩鍩虹嚎锛夛細
   - Autoload锛歚SecurityAudit="res://Game.Godot/Scripts/Security/SecurityAudit.cs"` 宸插湪 `project.godot` 涓厤缃紱
   - 鍚姩鏃跺啓鍏?`user://logs/security/security-audit.jsonl`锛岃褰曪細

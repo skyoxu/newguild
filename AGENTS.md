@@ -15,7 +15,7 @@ This file provides guidance to Codex Cli when working with code in this reposito
 
 ## 设计原则：
 
-- 本项目是 Windows only 的 Godot + C# 游戏模板，开箱即用、可复制。以下规范用于保障一致性与可维护性。
+- 本项目是 Windows only 的 Godot + C# 游戏项目。
 - AI 优先 + arc42/C4 思维：按 不可回退 → 跨切面 → 运行时骨干 → 功能纵切 顺序
 - 删除无用代码，修改功能不保留旧的兼容性代码
 - **完整实现**，禁止MVP/占位/TODO，必须完整可运行

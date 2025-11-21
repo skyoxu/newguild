@@ -65,7 +65,7 @@ py -3 scripts/python/dev_cli.py run-smoke-strict \
 - `run-quality-gates`
   - 璋冪敤 `quality_gates.py all`锛屽彲閫?`--gdunit-hard` 涓?`--smoke`锛?    - `--gdunit-hard`锛氳繍琛?Adapters/Config + Security GdUnit 灏忛泦锛堢‖闂ㄧ锛夈€?    - `--smoke`锛氳繍琛屼弗鏍?headless Smoke锛堥渶瑕佹娴嬪埌 `[TEMPLATE_SMOKE_READY]` 鎴?`[DB] opened`锛夈€?
 - `run-gdunit-hard`
-  - 鐩存帴璋冪敤 `run_gdunit.py`锛屽彧璺?`tests/Adapters/Config` 涓?`tests/Security` 闆嗗悎锛屾姤鍛婅緭鍑哄埌 `logs/e2e/dev-cli/gdunit-hard`銆?
+  - 鐩存帴璋冪敤 `run_gdunit.py`锛屽彧璺?`tests/Adapters/Config` 涓?`tests/Security/Hard` 闆嗗悎锛屾姤鍛婅緭鍑哄埌 `logs/e2e/dev-cli/gdunit-hard`銆?
 - `run-gdunit-full`
   - 鐩存帴璋冪敤 `run_gdunit.py`锛岃窇 Adapters + Security + Integration + UI 闆嗗悎锛屾姤鍛婅緭鍑哄埌 `logs/e2e/dev-cli/gdunit-full`銆?
 - `run-smoke-strict`

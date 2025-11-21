@@ -9,13 +9,13 @@
 
 ## 目标
 
-将 vitegame 的 Jest + TypeScript 单元测试迁移到 godotgame 的 xUnit + C# 单元测试，建立类型安全的测试套件与 AI-first 覆盖率门禁。
+将 vitegame 的 Jest + TypeScript 单元测试迁移到 newguild 的 xUnit + C# 单元测试，建立类型安全的测试套件与 AI-first 覆盖率门禁。
 
 ---
 
 ## 技术栈对比
 
-| 功能 | vitegame (Node.js) | godotgame (.NET 8) |
+| 功能 | vitegame (Node.js) | newguild (.NET 8) |
 |-----|-------------------|-------------------|
 | 测试框架 | Jest 29 | xUnit 2.x |
 | 断言库 | Jest expect() | FluentAssertions |
@@ -136,7 +136,7 @@ describe('Player', () => {
 
 ## xUnit 测试结构
 
-### 等价 xUnit 测试 (godotgame)
+### 等价 xUnit 测试 (newguild)
 
 ```csharp
 // Game.Core.Tests/Domain/Entities/PlayerTests.cs
@@ -1534,7 +1534,7 @@ jobs:
         with:
           files: ./TestResults/**/coverage.cobertura.xml
           flags: unittests
-          name: codecov-godotgame
+          name: codecov-newguild
 ```
 
 ---
