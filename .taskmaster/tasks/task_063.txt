@@ -1,0 +1,11 @@
+# Task ID: 63
+# Title: Design Alliance Management System
+# Status: pending
+# Dependencies: 62
+# Priority: medium
+# Description: Implement the temporary alliance system for guilds to collaborate during World Boss events.
+# Details:
+Develop the AllianceManagement interface with methods for proposing alliances, tracking active alliances, and managing shared strategies.
+
+# Test Strategy:
+Simulate alliance formation and dissolution to test system stability and data integrity.

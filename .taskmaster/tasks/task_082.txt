@@ -1,0 +1,11 @@
+# Task ID: 82
+# Title: Implement Member Management and Attribute System
+# Status: pending
+# Dependencies: 81
+# Priority: medium
+# Description: Develop the system for managing guild members and their attributes.
+# Details:
+Create a database schema for member data. Implement CRUD operations for member management. Develop an attribute system to track member stats and roles.
+
+# Test Strategy:
+Use unit tests to verify CRUD operations. Conduct integration tests to ensure attribute updates reflect correctly in the system.

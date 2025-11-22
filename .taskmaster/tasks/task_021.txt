@@ -1,0 +1,11 @@
+# Task ID: 21
+# Title: Create Combat Simulation System
+# Status: pending
+# Dependencies: 16, 17
+# Priority: medium
+# Description: Develop a system for simulating combat outcomes in PVE and PVP.
+# Details:
+Implement the CombatSimulation interface to calculate combat results based on member attributes, tactics, and random factors.
+
+# Test Strategy:
+Run combat simulations to validate result accuracy and balance.

@@ -1,0 +1,1196 @@
+3.8 世界Boss系统设计
+
+3.8.1 功能要求
+
+系统概述： 设计跨公会竞争的世界Boss系统，提供大型共享PVE内容，促进公会间的合作与竞争，增加游戏的社交层面和长期挑战性。
+
+    /* 世界Boss系统完整设计 */
+    interface WorldBossSystem {
+      // Boss管理
+      activeBosses: Map<string, WorldBoss>          // 当前活跃的世界Boss
+      bossSchedule: BossSpawnSchedule               // Boss刷新计划
+      bossTemplates: Map<string, WorldBossTemplate> // Boss模板库
+      
+      // 跨公会机制
+      guildParticipation: Map<string, GuildParticipation> // 公会参与状态
+      allianceSystem: AllianceManagement            // 临时联盟系统
+      competitionRanking: CompetitionRanking        // 竞争排行榜
+      
+      // 奖励系统
+      rewardDistribution: RewardDistributionSystem  // 奖励分配系统
+      achievementSystem: WorldBossAchievements      // 世界Boss专属成就
+      
+      // 动态难度
+      difficultyScaling: DynamicDifficultySystem    // 动态难度调整
+      adaptiveChallenge: AdaptiveChallengeSystem    // 自适应挑战机制
+    }
+
+    // 世界Boss实体定义
+    interface WorldBoss {
+      id: string                                    // Boss唯一ID
+      name: string                                  // Boss名称
+      title: string                                 // Boss称号
+      lore: string                                  // 背景故事
+      
+      // Boss状态
+      currentHealth: number                         // 当前生命值
+      maxHealth: number                            // 最大生命值
+      phase: BossPhase                             // 当前阶段
+      enrageTimer: number                          // 狂暴计时器
+      
+      // Boss能力
+      abilities: Map<string, BossAbility>           // Boss技能集
+      phases: BossPhase[]                          // 阶段机制
+      mechanics: BossMechanic[]                    // 特殊机制
+      
+      // 参与统计
+      participatingGuilds: Map<string, GuildContribution> // 参与公会贡献
+      damageLeaderboard: DamageRecord[]            // 伤害排行榜
+      
+      // 时间管理
+      spawnTime: Date                              // 出现时间
+      duration: number                             // 持续时间
+      nextSpawnPrediction: Date                    // 下次出现预测
+      
+      // 奖励池
+      rewardPool: WorldBossRewardPool              // 奖励池
+      guaranteedDrops: GuaranteedDrop[]            // 保底奖励
+      rareDrops: RareDrop[]                        // 稀有掉落
+    }
+
+    // Boss阶段机制
+    interface BossPhase {
+      phaseNumber: number                          // 阶段编号
+      healthThreshold: number                      // 触发生命值阈值
+      phaseName: string                           // 阶段名称
+      
+      // 阶段特征
+      newAbilities: string[]                       // 新增技能
+      disabledAbilities: string[]                  // 禁用技能
+      mechanicChanges: MechanicChange[]            // 机制变化
+      
+      // 视觉效果
+      visualEffects: PhaseVisualEffect[]           // 视觉特效
+      audioCues: AudioCue[]                       // 音频提示
+      environmentChanges: EnvironmentChange[]      // 环境变化
+      
+      // 时间限制
+      phaseTimeLimit: number                       // 阶段时间限制
+      enrageCondition: EnrageCondition            // 狂暴条件
+    }
+
+    // 公会参与系统
+    interface GuildParticipation {
+      guildId: string                             // 公会ID
+      participationStatus: ParticipationStatus    // 参与状态
+      
+      // 贡献统计
+      totalDamageContribution: number              // 总伤害贡献
+      healingContribution: number                  // 治疗贡献
+      supportContribution: number                  // 支援贡献
+      tacticalContribution: number                 // 战术贡献
+      
+      // 参与成员
+      activeMembers: Map<string, MemberContribution> // 活跃成员贡献
+      reserves: string[]                           // 预备成员
+      
+      // 联盟关系
+      allies: string[]                            // 盟友公会
+      rivals: string[]                            // 竞争对手
+      
+      // 策略规划
+      strategy: GuildBossStrategy                  // 公会策略
+      coordination: CoordinationPlan               // 协调计划
+    }
+
+    enum ParticipationStatus {
+      PREPARING = "准备中",                        // 正在准备参与
+      ACTIVE = "积极参与",                         // 正在积极战斗
+      SUPPORTING = "支援模式",                     // 提供支援和治疗
+      COMPETING = "竞争模式",                      // 与其他公会竞争
+      WITHDRAWING = "撤退中",                      // 正在撤退
+      OBSERVING = "观战模式"                       // 观察其他公会表现
+    }
+
+    // 临时联盟系统
+    interface AllianceManagement {
+      // 联盟形成
+      proposedAlliances: AllianceProposal[]        // 联盟提案
+      activeAlliances: TempAlliance[]              // 活跃联盟
+      allianceHistory: AllianceRecord[]            // 联盟历史
+      
+      // 联盟协调
+      sharedStrategy: SharedStrategy               // 共享策略
+      resourceSharing: ResourceSharingAgreement    // 资源共享协议
+      communicationChannels: AllianceCommunication // 联盟通讯渠道
+      
+      // 利益分配
+      contributionTracking: ContributionTracker    // 贡献追踪
+      rewardSharingRules: RewardSharingProtocol    // 奖励分享协议
+    }
+
+    // 临时联盟定义
+    interface TempAlliance {
+      allianceId: string                          // 联盟ID
+      allianceName: string                        // 联盟名称
+      leaderGuild: string                         // 领导公会
+      memberGuilds: string[]                      // 成员公会
+      
+      // 联盟协议
+      formationTime: Date                         // 成立时间
+      duration: number                            // 联盟持续时间
+      objectives: AllianceObjective[]             // 联盟目标
+      rules: AllianceRule[]                       // 联盟规则
+      
+      // 协调机制
+      commandStructure: AllianceCommandStructure  // 指挥结构
+      decisionMaking: DecisionMakingProcess       // 决策流程
+      conflictResolution: ConflictResolutionMechanism // 冲突解决机制
+      
+      // 绩效追踪
+      alliancePerformance: AlliancePerformanceMetrics // 联盟表现指标
+      memberContributions: Map<string, AllianceContribution> // 成员贡献
+    }
+
+    // 奖励分配系统
+    interface RewardDistributionSystem {
+      // 分配规则
+      distributionAlgorithm: RewardAlgorithm       // 奖励算法
+      contributionWeights: ContributionWeight[]    // 贡献权重
+      
+      // 奖励类型
+      guilds: GuildReward[]                       // 公会奖励
+      individuals: IndividualReward[]             // 个人奖励
+      achievements: AchievementReward[]           // 成就奖励
+      
+      // 特殊奖励
+      firstKillBonus: FirstKillReward             // 首杀奖励
+      speedKillBonus: SpeedKillReward             // 快速击杀奖励
+      mvpRewards: MVPReward[]                     // MVP奖励
+      
+      // 历史记录
+      distributionHistory: RewardDistributionRecord[] // 分配历史
+    }
+
+    // 动态难度系统
+    interface DynamicDifficultySystem {
+      // 难度评估
+      participationAnalyzer: ParticipationAnalyzer // 参与度分析器
+      skillLevelAssessment: SkillAssessment        // 技能水平评估
+      
+      // 难度调整
+      difficultyModifiers: DifficultyModifier[]    // 难度修正器
+      scalingAlgorithms: ScalingAlgorithm[]        // 缩放算法
+      
+      // 平衡机制
+      balanceTargets: BalanceTarget[]             // 平衡目标
+      adaptiveAdjustments: AdaptiveAdjustment[]    // 自适应调整
+    }
+
+    // 世界Boss管理器
+    class WorldBossManager {
+      /* 生成世界Boss */
+      spawnWorldBoss(template: WorldBossTemplate, location: WorldLocation): WorldBoss
+      
+      /* 管理Boss战斗逻辑 */
+      manageBossFight(bossId: string): BossFightState
+      
+      /* 处理公会参与 */
+      handleGuildParticipation(guildId: string, bossId: string): ParticipationResult
+      
+      /* 分配奖励 */
+      distributeRewards(bossId: string): RewardDistributionResult
+      
+      /* 记录战斗数据 */
+      recordBattleData(bossId: string, battleData: BattleData): void
+    }
+
+3.8.2 技术规格
+
+跨公会协调算法：
+
+    // 智能联盟匹配系统
+    class AllianceMatchingEngine {
+      /* 推荐潜在联盟伙伴 */
+      recommendAlliancePartners(guild: Guild, boss: WorldBoss): AllianceRecommendation[] {
+        const compatibleGuilds = this.findCompatibleGuilds(guild, boss)
+        const complementarySkills = this.analyzeComplementarySkills(guild, compatibleGuilds)
+        const relationshipHistory = this.evaluateRelationshipHistory(guild, compatibleGuilds)
+        
+        return this.generateRecommendations(compatibleGuilds, complementarySkills, relationshipHistory)
+      }
+      
+      /* 评估联盟成功概率 */
+      evaluateAllianceSuccess(proposedAlliance: AllianceProposal): SuccessProbability {
+        const skillComplementarity = this.calculateSkillComplementarity(proposedAlliance.memberGuilds)
+        const trustLevel = this.calculateTrustLevel(proposedAlliance.memberGuilds)
+        const resourceBalance = this.evaluateResourceBalance(proposedAlliance.memberGuilds)
+        const leadershipQuality = this.assessLeadershipQuality(proposedAlliance.leaderGuild)
+        
+        return {
+          overallProbability: (skillComplementarity + trustLevel + resourceBalance + leadershipQuality) / 4,
+          strengthFactors: this.identifyStrengthFactors(proposedAlliance),
+          riskFactors: this.identifyRiskFactors(proposedAlliance),
+          recommendations: this.generateImprovementRecommendations(proposedAlliance)
+        }
+      }
+    }
+
+    // 动态难度调整引擎
+    class DifficultyAdjustmentEngine {
+      /* 实时分析参与情况并调整难度 */
+      adjustDifficultyRealtime(boss: WorldBoss): DifficultyAdjustment {
+        const currentParticipation = this.analyzeCurrentParticipation(boss)
+        const performanceMetrics = this.calculatePerformanceMetrics(boss)
+        const progressRate = this.evaluateProgressRate(boss)
+        
+        if (progressRate < this.targetProgressRate) {
+          return this.generateDifficultyReduction(boss, performanceMetrics)
+        } else if (progressRate > this.maxProgressRate) {
+          return this.generateDifficultyIncrease(boss, performanceMetrics)
+        }
+        
+        return { adjustmentType: 'NONE', reason: 'Balanced progression rate' }
+      }
+    }
+
+3.8.3 验收标准
+
+功能验收：
+
+-  支持多公会同时参与世界Boss战斗
+-  临时联盟系统运作流畅
+-  公平的奖励分配机制
+-  动态难度调整有效性
+-  跨公会通讯和协调功能
+
+质量验收：
+
+-  世界Boss战斗的挑战性和趣味性
+-  公会间互动的深度和多样性
+-  系统性能在大量公会参与时的稳定性
+-  反作弊和公平竞争机制的有效性
+
+3.9 PVP系统设计
+
+3.9.1 功能要求
+
+系统概述： 设计单机环境下的模拟PVP系统，通过AI驱动的虚拟对手公会提供真实的PVP体验，包括公会战、竞技场、排位赛等多种PVP模式。
+
+    /* 单机模拟PVP系统设计 */
+    interface SimulatedPVPSystem {
+      // AI对手系统
+      virtualOpponents: Map<string, VirtualGuild>    // 虚拟对手公会
+      opponentGenerator: OpponentGenerator           // 对手生成器
+      aiPersonalities: Map<string, PVPPersonality>   // AI个性档案
+      
+      // PVP模式
+      pvpModes: Map<PVPMode, PVPModeConfiguration>   // PVP模式配置
+      matchmaking: MatchmakingSystem                 // 匹配系统
+      
+      // 战斗系统
+      battleSimulator: PVPBattleSimulator            // PVP战斗模拟器
+      tacticsEngine: PVPTacticsEngine               // 战术引擎
+      
+      // 排名和奖励
+      rankingSystem: PVPRankingSystem               // 排名系统
+      seasonSystem: PVPSeasonSystem                 // 赛季系统
+      rewardSystem: PVPRewardSystem                 // 奖励系统
+      
+      // 历史记录
+      battleHistory: PVPBattleHistory               // 战斗历史
+      performanceAnalytics: PVPAnalyticsSystem      // 表现分析
+    }
+
+    // 虚拟对手公会
+    interface VirtualGuild {
+      id: string                                    // 虚拟公会ID
+      name: string                                  // 公会名称
+      reputation: number                            // 声誉等级
+      
+      // AI特征
+      aiPersonality: PVPPersonality                 // AI个性特征
+      playstyle: PVPPlaystyle                      // 游戏风格
+      adaptability: AdaptabilityLevel              // 适应性等级
+      
+      // 公会实力
+      overallRating: number                        // 综合评分
+      memberComposition: VirtualMemberComposition  // 成员构成
+      strengths: GuildStrength[]                   // 公会优势
+      weaknesses: GuildWeakness[]                  // 公会弱点
+      
+      // 战术偏好
+      preferredTactics: TacticalPreference[]       // 偏好战术
+      adaptiveBehavior: AdaptiveBehaviorPattern[]  // 适应性行为模式
+      learningCapability: LearningCapability       // 学习能力
+      
+      // 历史表现
+      winRate: number                              // 胜率
+      battleHistory: VirtualBattleRecord[]         // 战斗记录
+      evolutionHistory: GuildEvolutionRecord[]     // 进化历史
+    }
+
+    // AI个性特征定义
+    interface PVPPersonality {
+      aggressiveness: number                       // 侵略性 (0-1)
+      defensiveness: number                        // 防守性 (0-1)
+      risktaking: number                          // 冒险倾向 (0-1)
+      adaptability: number                        // 适应能力 (0-1)
+      
+      // 战术偏好
+      tacticalFocus: TacticalFocus                // 战术重点
+      decisionMaking: DecisionMakingStyle         // 决策风格
+      resourceManagement: ResourceManagementStyle // 资源管理风格
+      
+      // 心理特征
+      pressureResistance: number                  // 抗压能力
+      teamworkOrientation: number                 // 团队合作倾向
+      innovativeness: number                      // 创新能力
+      stubbornness: number                        // 固执程度
+    }
+
+    enum PVPMode {
+      GUILD_WAR = "公会战争",                      // 大规模公会对战
+      ARENA_COMBAT = "竞技场对战",                 // 小队竞技场
+      RANKED_BATTLE = "排位战",                    // 排位系统对战
+      TOURNAMENT = "锦标赛",                      // 淘汰赛制锦标赛
+      SIEGE_WARFARE = "攻城战",                   // 攻防战模式
+      SKIRMISH = "遭遇战",                        // 快速小规模战斗
+      CHAMPIONSHIP = "冠军赛"                     // 赛季总决赛
+    }
+
+    // PVP战斗模拟器
+    interface PVPBattleSimulator {
+      // 战斗引擎
+      combatEngine: CombatEngine                  // 战斗计算引擎
+      tacticProcessor: TacticProcessor            // 战术处理器
+      
+      // 模拟算法
+      battleSimulation: BattleSimulationAlgorithm // 战斗模拟算法
+      outcomePredictor: OutcomePredictor          // 结果预测器
+      
+      // 动态要素
+      battleEvents: BattleEvent[]                 // 战斗事件
+      criticalMoments: CriticalMoment[]           // 关键时刻
+      turnOfEvents: TurnOfEvents[]                // 战局转折
+      
+      // 平衡机制
+      balanceAdjustment: BalanceAdjustment        // 平衡调整
+      rubberbandMechanic: RubberbandMechanic     // 橡皮筋机制
+    }
+
+    // 匹配系统
+    interface MatchmakingSystem {
+      // 匹配算法
+      matchingAlgorithm: MatchingAlgorithm        // 匹配算法
+      ratingSystem: EloRatingSystem              // ELO评分系统
+      
+      // 匹配条件
+      matchCriteria: MatchCriteria               // 匹配条件
+      balanceFactors: BalanceFactor[]            // 平衡因素
+      
+      // 对手生成
+      opponentPool: OpponentPool                 // 对手池
+      dynamicAdjustment: DynamicOpponentAdjustment // 动态对手调整
+      
+      // 匹配历史
+      matchHistory: MatchRecord[]                // 匹配历史
+      performance_tracking: PerformanceTracking  // 表现追踪
+    }
+
+    // PVP战术引擎
+    class PVPTacticsEngine {
+      /* 分析战术有效性 */
+      analyzeTacticalEffectiveness(playerTactics: Tactics, opponentTactics: Tactics): TacticalAnalysis
+      
+      /* 生成对手应对策略 */
+      generateCounterStrategy(playerStrategy: Strategy, opponentPersonality: PVPPersonality): CounterStrategy
+      
+      /* 实时战术调整 */
+      adjustTacticsRealtime(battleState: BattleState, aiPersonality: PVPPersonality): TacticalAdjustment
+      
+      /* 学习玩家行为模式 */
+      learnPlayerPatterns(playerHistory: PlayerBattleHistory): BehaviorPattern[]
+    }
+
+    // 排名系统
+    interface PVPRankingSystem {
+      // 排名等级
+      rankTiers: RankTier[]                      // 段位等级
+      currentSeason: PVPSeason                   // 当前赛季
+      
+      // 评分机制
+      ratingCalculation: RatingCalculation       // 评分计算
+      pointSystem: PointSystem                   // 积分系统
+      
+      // 晋升机制
+      promotionRules: PromotionRule[]            // 晋升规则
+      relegationRules: RelegationRule[]          // 降级规则
+      
+      // 奖励分配
+      rankRewards: Map<RankTier, RankReward[]>   // 段位奖励
+      seasonRewards: SeasonReward[]              // 赛季奖励
+    }
+
+    enum RankTier {
+      BRONZE = "青铜",                           // 青铜段位
+      SILVER = "白银",                           // 白银段位
+      GOLD = "黄金",                            // 黄金段位
+      PLATINUM = "铂金",                        // 铂金段位
+      DIAMOND = "钻石",                         // 钻石段位
+      MASTER = "大师",                          // 大师段位
+      GRANDMASTER = "宗师",                     // 宗师段位
+      CHALLENGER = "王者"                       // 王者段位
+    }
+
+    // 虚拟对手生成器
+    class OpponentGenerator {
+      /* 生成匹配的虚拟对手 */
+      generateMatchedOpponent(playerGuild: Guild, difficulty: DifficultyLevel): VirtualGuild {
+        const baseTemplate = this.selectBaseTemplate(playerGuild.overallRating)
+        const personalityProfile = this.generatePersonality(difficulty)
+        const memberComposition = this.generateMemberComposition(playerGuild, difficulty)
+        const tacticalPreferences = this.generateTacticalPreferences(personalityProfile)
+        
+        return this.assembleVirtualGuild(baseTemplate, personalityProfile, memberComposition, tacticalPreferences)
+      }
+      
+      /* 基于历史表现调整对手 */
+      adaptOpponentBasedOnHistory(opponent: VirtualGuild, playerHistory: PlayerBattleHistory): VirtualGuild {
+        const playerWeaknesses = this.identifyPlayerWeaknesses(playerHistory)
+        const playerPatterns = this.analyzePlayerPatterns(playerHistory)
+        
+        // 让AI学习和适应玩家的策略
+        opponent.adaptiveBehavior = this.generateCounterPatterns(playerPatterns)
+        opponent.tacticalFocus = this.focusOnPlayerWeaknesses(playerWeaknesses)
+        
+        return opponent
+      }
+    }
+
+3.9.2 技术规格
+
+AI智能对手算法：
+
+    // 自适应AI对手系统
+    class AdaptiveAIOpponent {
+      /* 基于玩家表现动态调整AI行为 */
+      adaptBehavior(playerPerformance: PlayerPerformance, battleContext: BattleContext): AIBehaviorAdjustment {
+        const playerStrengths = this.analyzePlayerStrengths(playerPerformance)
+        const playerWeaknesses = this.analyzePlayerWeaknesses(playerPerformance)
+        const playerTendencies = this.identifyPlayerTendencies(playerPerformance)
+        
+        // 生成有针对性的AI策略
+        const counterStrengths = this.generateCounterStrategies(playerStrengths)
+        const exploitWeaknesses = this.generateExploitationTactics(playerWeaknesses)
+        const patternBreaking = this.generatePatternBreakingBehavior(playerTendencies)
+        
+        return {
+          strategicFocus: this.combineTacticalElements(counterStrengths, exploitWeaknesses, patternBreaking),
+          difficultyAdjustment: this.calculateDifficultyAdjustment(playerPerformance),
+          personalityShift: this.calculatePersonalityAdjustment(battleContext)
+        }
+      }
+      
+      /* 实时学习玩家战术 */
+      learnPlayerTactics(currentBattle: OngoingBattle): LearningResult {
+        const tacticPatterns = this.identifyTacticPatterns(currentBattle.playerActions)
+        const decisionPatterns = this.analyzeDecisionPatterns(currentBattle.playerDecisions)
+        const timingPatterns = this.extractTimingPatterns(currentBattle.actionTimeline)
+        
+        return {
+          learnedPatterns: [...tacticPatterns, ...decisionPatterns, ...timingPatterns],
+          confidenceLevel: this.calculateLearningConfidence(currentBattle),
+          adaptationStrategies: this.generateAdaptationStrategies(tacticPatterns)
+        }
+      }
+    }
+
+    // 战斗结果生成器
+    class BattleOutcomeGenerator {
+      /* 生成逼真的战斗结果 */
+      generateRealisticOutcome(playerGuild: Guild, opponentGuild: VirtualGuild, tactics: BattleTactics): BattleResult {
+        // 基础胜率计算
+        const baseWinRate = this.calculateBaseWinRate(playerGuild, opponentGuild)
+        const tacticalModifier = this.calculateTacticalModifier(tactics, opponentGuild.preferredTactics)
+        const randomFactor = this.generateRandomFactor()
+        
+        // 生成关键战斗时刻
+        const keyMoments = this.generateKeyBattleMoments(playerGuild, opponentGuild, tactics)
+        const battleProgression = this.simulateBattleProgression(keyMoments)
+        
+        // 确定最终结果
+        const finalWinRate = Math.min(0.95, Math.max(0.05, baseWinRate + tacticalModifier + randomFactor))
+        const outcome = this.determineOutcome(finalWinRate, battleProgression)
+        
+        return {
+          winner: outcome.winner,
+          winMargin: outcome.margin,
+          battleProgression: battleProgression,
+          keyMoments: keyMoments,
+          playerPerformance: this.evaluatePlayerPerformance(outcome, tactics),
+          lessonsLearned: this.extractLessonsLearned(outcome, tactics)
+        }
+      }
+    }
+
+3.9.3 验收标准
+
+功能验收：
+
+-  支持7种不同的PVP模式
+-  智能AI对手系统运作良好
+-  排名系统公平性和准确性
+-  战斗结果的合理性和多样性
+-  虚拟对手的个性化和适应性
+
+质量验收：
+
+-  PVP战斗的挑战性和娱乐性
+-  AI对手行为的真实感和不可预测性
+-  排名系统的激励效果
+-  长期游戏体验的可持续性
+
+3.10 分阶段公会排名系统
+
+3.10.1 功能要求
+
+系统概述： 设计与游戏进程紧密关联的分阶段公会排名系统，从服务器内竞争逐步扩展到全球排名，提供递进式的挑战目标和成就感。
+
+    /* 分阶段公会排名系统完整设计 */
+    interface PhaseBasedRankingSystem {
+      // 排名阶段管理
+      currentPhase: GamePhase              // 当前游戏阶段
+      phaseConfiguration: Map<GamePhase, PhaseConfig> // 各阶段配置
+      
+      // 排名数据
+      rankings: Map<GamePhase, GuildRanking> // 各阶段排名数据
+      rankingHistory: RankingHistoryRecord[] // 历史排名记录
+      
+      // 公会分类
+      aiDrivenGuilds: Set<string>          // AI驱动的活跃公会 (10-20个)
+      displayGuilds: Set<string>           // 展示型公会 (填充排名用)
+      playerGuild: string                  // 玩家公会ID
+      
+      // 排名计算
+      rankingAlgorithm: RankingAlgorithm   // 排名算法引擎
+      scoreCalculator: ScoreCalculator     // 评分计算器
+      
+      // 奖励系统
+      phaseRewards: Map<GamePhase, PhaseReward[]> // 阶段奖励
+      rankingRewards: RankingRewardSystem  // 排名奖励分配
+    }
+
+    // 游戏阶段定义
+    enum GamePhase {
+      SERVER_PHASE = 1,      // 服务器阶段 - 初始竞争范围
+      BATTLEZONE_PHASE = 2,  // 战区阶段 - 区域性扩展
+      NATIONAL_PHASE = 3,    // 国服阶段 - 全国性竞争
+      GLOBAL_PHASE = 4       // 全球阶段 - 最高级竞争
+    }
+
+    // 阶段配置
+    interface PhaseConfig {
+      phaseName: string                    // 阶段名称
+      totalGuilds: number                  // 参与排名的公会总数
+      aiActiveGuilds: number               // AI驱动的活跃公会数量
+      displayOnlyGuilds: number            // 仅展示用的公会数量
+      
+      // 阶段特性
+      competitionIntensity: CompetitionLevel // 竞争激烈程度
+      rankingUpdateFrequency: UpdateFrequency // 排名更新频率
+      phaseUnlockRequirements: UnlockRequirement[] // 阶段解锁要求
+      
+      // 阶段独有功能
+      specialFeatures: PhaseSpecialFeature[] // 阶段特殊功能
+      crossPhaseInteraction: boolean       // 是否允许跨阶段互动
+    }
+
+    // 阶段配置映射
+    const PHASE_CONFIGURATIONS: Map<GamePhase, PhaseConfig> = new Map([
+      [GamePhase.SERVER_PHASE, {
+        phaseName: "服务器排名",
+        totalGuilds: 20,
+        aiActiveGuilds: 10,                // 10个AI驱动公会
+        displayOnlyGuilds: 9,              // 9个展示公会 + 1个玩家公会
+        competitionIntensity: CompetitionLevel.MODERATE,
+        rankingUpdateFrequency: UpdateFrequency.WEEKLY,
+        phaseUnlockRequirements: [],       // 初始阶段，无解锁要求
+        specialFeatures: [PhaseSpecialFeature.LOCAL_EVENTS],
+        crossPhaseInteraction: false
+      }],
+      
+      [GamePhase.BATTLEZONE_PHASE, {
+        phaseName: "战区排名", 
+        totalGuilds: 50,
+        aiActiveGuilds: 15,                // 15个AI驱动公会
+        displayOnlyGuilds: 34,             // 34个展示公会 + 1个玩家公会
+        competitionIntensity: CompetitionLevel.HIGH,
+        rankingUpdateFrequency: UpdateFrequency.BI_WEEKLY,
+        phaseUnlockRequirements: [
+          { type: "guildLevel", value: 15 },
+          { type: "serverRanking", value: 5 }  // 服务器排名前5
+        ],
+        specialFeatures: [PhaseSpecialFeature.CROSS_SERVER_BATTLES],
+        crossPhaseInteraction: true
+      }],
+      
+      [GamePhase.NATIONAL_PHASE, {
+        phaseName: "国服排名",
+        totalGuilds: 100, 
+        aiActiveGuilds: 20,                // 20个AI驱动公会
+        displayOnlyGuilds: 79,             // 79个展示公会 + 1个玩家公会
+        competitionIntensity: CompetitionLevel.VERY_HIGH,
+        rankingUpdateFrequency: UpdateFrequency.DAILY,
+        phaseUnlockRequirements: [
+          { type: "guildLevel", value: 25 },
+          { type: "battlezoneRanking", value: 3 } // 战区排名前3
+        ],  
+        specialFeatures: [PhaseSpecialFeature.NATIONAL_TOURNAMENTS],
+        crossPhaseInteraction: true
+      }],
+      
+      [GamePhase.GLOBAL_PHASE, {
+        phaseName: "全球排名",
+        totalGuilds: 500,
+        aiActiveGuilds: 25,                // 25个AI驱动公会  
+        displayOnlyGuilds: 474,            // 474个展示公会 + 1个玩家公会
+        competitionIntensity: CompetitionLevel.EXTREME,
+        rankingUpdateFrequency: UpdateFrequency.REAL_TIME,
+        phaseUnlockRequirements: [
+          { type: "guildLevel", value: 30 },
+          { type: "nationalRanking", value: 1 }   // 国服排名第1
+        ],
+        specialFeatures: [PhaseSpecialFeature.WORLD_CHAMPIONSHIPS],
+        crossPhaseInteraction: true
+      }]
+    ]);
+
+    // 公会排名数据结构
+    interface GuildRanking {
+      phase: GamePhase                     // 所属阶段
+      rankings: RankingEntry[]             // 排名条目
+      lastUpdateTime: Date                 // 最后更新时间
+      
+      // 排名统计
+      totalParticipants: number            // 参与公会总数
+      averageScore: number                 // 平均分数
+      competitionTrend: TrendAnalysis      // 竞争趋势分析
+      
+      // 玩家相关
+      playerGuildRank: number              // 玩家公会排名
+      playerGuildScore: number             // 玩家公会得分
+      rankingChange: RankingChange         // 排名变化情况
+    }
+
+    // 排名条目
+    interface RankingEntry {
+      rank: number                         // 当前排名
+      guildId: string                      // 公会ID
+      guildName: string                    // 公会名称
+      guildTag: string                     // 公会标签
+      
+      // 排名数据
+      totalScore: number                   // 总分
+      scoreBreakdown: ScoreBreakdown       // 分数详细构成
+      
+      // 公会状态
+      guildType: GuildType                 // 公会类型 (AI驱动/展示型/玩家)
+      isActive: boolean                    // 是否活跃
+      lastActivityTime: Date               // 最后活跃时间
+      
+      // 排名变化
+      previousRank?: number                // 上次排名
+      rankChange: number                   // 排名变化 (+上升/-下降)
+      trendDirection: TrendDirection       // 趋势方向
+      
+      // 展示信息
+      guildLevel: number                   // 公会等级
+      memberCount: number                  // 成员数量
+      legendaryMemberCount: number         // 传奇成员数量
+      guildReputation: number              // 公会声望
+      specialAchievements: string[]        // 特色成就
+    }
+
+    enum GuildType {
+      PLAYER_GUILD = "玩家公会",           // 玩家控制的公会
+      AI_DRIVEN = "AI驱动",               // AI控制的活跃公会
+      DISPLAY_ONLY = "展示公会"           // 仅用于展示的静态公会
+    }
+
+    enum CompetitionLevel {
+      MODERATE = "适中",                  // 适中的竞争强度
+      HIGH = "激烈",                      // 激烈的竞争
+      VERY_HIGH = "极为激烈",             // 极为激烈的竞争
+      EXTREME = "终极竞争"                // 最高级别的竞争
+    }
+
+    enum UpdateFrequency {
+      WEEKLY = "每周更新",                // 每周更新排名
+      BI_WEEKLY = "半周更新",             // 每3-4天更新
+      DAILY = "每日更新",                 // 每天更新排名
+      REAL_TIME = "实时更新"              // 实时更新排名
+    }
+
+    // 阶段特殊功能
+    enum PhaseSpecialFeature {
+      LOCAL_EVENTS = "本地事件",          // 服务器内特殊事件
+      CROSS_SERVER_BATTLES = "跨服战斗",  // 跨服务器对战
+      NATIONAL_TOURNAMENTS = "全国锦标赛", // 国家级锦标赛
+      WORLD_CHAMPIONSHIPS = "世界冠军赛"  // 世界冠军赛
+    }
+
+    // 排名算法引擎
+    class RankingAlgorithm {
+      /* 计算公会综合得分 */
+      calculateGuildScore(guild: Guild, phase: GamePhase): number {
+        const baseScore = this.calculateBaseScore(guild)
+        const phaseModifier = this.getPhaseModifier(phase)
+        const activityBonus = this.calculateActivityBonus(guild, phase)
+        const achievementBonus = this.calculateAchievementBonus(guild)
+        
+        return (baseScore + activityBonus + achievementBonus) * phaseModifier
+      }
+      
+      /* 更新排名 */
+      updateRankings(phase: GamePhase): GuildRanking {
+        const guilds = this.getGuildsForPhase(phase)
+        const scoredGuilds = guilds.map(guild => ({
+          guild,
+          score: this.calculateGuildScore(guild, phase)
+        }))
+        
+        // 按分数排序
+        scoredGuilds.sort((a, b) => b.score - a.score)
+        
+        return this.generateRankingData(scoredGuilds, phase)
+      }
+      
+      /* 处理阶段升级 */
+      handlePhaseUpgrade(guild: Guild, newPhase: GamePhase): PhaseUpgradeResult {
+        const requirements = PHASE_CONFIGURATIONS.get(newPhase)?.phaseUnlockRequirements
+        const meetsRequirements = this.checkRequirements(guild, requirements)
+        
+        if (meetsRequirements) {
+          return this.promoteToPhase(guild, newPhase)
+        } else {
+          return { success: false, missingRequirements: this.getMissingRequirements(guild, requirements) }
+        }
+      }
+    }
+
+3.10.2 技术规格
+
+阶段管理算法：
+
+    // 阶段升级管理器
+    class PhaseUpgradeManager {
+      /* 检查阶段升级资格 */
+      checkUpgradeEligibility(guildId: string): PhaseUpgradeEligibility {
+        const guild = this.getGuild(guildId)
+        const currentPhase = guild.currentPhase
+        const nextPhase = this.getNextPhase(currentPhase)
+        
+        if (!nextPhase) {
+          return { eligible: false, reason: "已达到最高阶段" }
+        }
+        
+        const requirements = PHASE_CONFIGURATIONS.get(nextPhase)?.phaseUnlockRequirements
+        const eligibilityCheck = this.evaluateRequirements(guild, requirements)
+        
+        return {
+          eligible: eligibilityCheck.allMet,
+          nextPhase,
+          progress: eligibilityCheck.progress,
+          missingRequirements: eligibilityCheck.missing
+        }
+      }
+      
+      /* 自动处理阶段升级 */
+      processAutomaticUpgrade(guildId: string): UpgradeResult {
+        const eligibility = this.checkUpgradeEligibility(guildId)
+        
+        if (eligibility.eligible) {
+          return this.executePhaseUpgrade(guildId, eligibility.nextPhase)
+        }
+        
+        return { success: false, reason: "不满足升级条件" }
+      }
+    }
+
+    // 展示型公会生成器
+    class DisplayGuildGenerator {
+      /* 生成展示型公会 */
+      generateDisplayGuilds(phase: GamePhase, count: number): DisplayGuild[] {
+        const phaseConfig = PHASE_CONFIGURATIONS.get(phase)
+        const guilds: DisplayGuild[] = []
+        
+        for (let i = 0; i < count; i++) {
+          const guild = this.createDisplayGuild(phase, i)
+          guild.staticData = this.generateStaticGuildData(phase)
+          guild.rankingPosition = this.calculateDisplayRankPosition(phase, i)
+          guilds.push(guild)
+        }
+        
+        return guilds
+      }
+      
+      /* 确保展示型公会数据一致性 */
+      private createDisplayGuild(phase: GamePhase, index: number): DisplayGuild {
+        const nameGenerator = this.getNameGenerator(phase)
+        const strengthTier = this.calculateStrengthTier(phase, index)
+        
+        return {
+          id: `display_${phase}_${index}`,
+          name: nameGenerator.generateName(),
+          guildType: GuildType.DISPLAY_ONLY,
+          staticScore: this.generateStaticScore(strengthTier),
+          memberData: this.generateStaticMemberData(strengthTier),
+          achievements: this.generateStaticAchievements(strengthTier),
+          lastUpdateTime: new Date(), // 初始化时间，之后不再更新
+          isStatic: true // 标记为静态数据
+        }
+      }
+    }
+
+    // 跨阶段交互管理器
+    class CrossPhaseInteractionManager {
+      /* 处理跨阶段挑战 */
+      handleCrossPhaseChallenge(challengerGuild: string, targetGuild: string): ChallengeResult {
+        const challenger = this.getGuild(challengerGuild)
+        const target = this.getGuild(targetGuild)
+        
+        // 检查跨阶段交互规则
+        const interactionAllowed = this.checkCrossPhaseRules(challenger.currentPhase, target.currentPhase)
+        
+        if (!interactionAllowed) {
+          return { allowed: false, reason: "不允许跨阶段交互" }
+        }
+        
+        // 应用阶段差异调整
+        const challengeModifier = this.calculatePhaseModifier(challenger.currentPhase, target.currentPhase)
+        
+        return this.executeCrossPhaseChallenge(challenger, target, challengeModifier)
+      }
+    }
+
+3.10.3 验收标准
+
+功能验收：
+
+-  支持4个不同的游戏阶段和排名规模
+-  AI驱动公会和展示型公会正确分类和管理
+-  阶段升级条件检查和自动升级功能
+-  排名算法的公平性和准确性
+-  展示型公会数据的一致性和静态特性
+
+质量验收：
+
+-  排名系统的激励效果和进程感
+-  不同阶段间的竞争强度递增
+-  系统性能在大量公会参与时的稳定性
+-  跨阶段交互的平衡性和公平性
+
+3.11 数据管理规格
+
+3.11.1 数据架构
+
+    /gamedata (本地JSON存储)
+    ├── /events_ecosystem          # 事件系统数据
+    │   ├── event_templates.json   # 事件模板库（200+）
+    │   ├── event_chains.json      # 事件链和任务系统
+    │   ├── trigger_conditions.json # 触发条件库
+    │   └── effect_mechanisms.json # 效果机制库
+    ├── /ai_personalities          # AI生态数据
+    │   ├── guild_ai_config.json   # NPC公会配置（10-20个）
+    │   ├── guild_archetypes.json  # 公会原型池（25-30个）
+    │   ├── member_ai_traits.json  # 成员AI特质库
+    │   └── interaction_matrix.json # AI互动规则矩阵
+    ├── /progression_systems       # 进度系统数据
+    │   ├── achievements.json      # 成就定义和配置
+    │   ├── experience_config.json # 经验系统参数
+    │   └── proficiency_rules.json # 熟练度计算规则
+    ├── /dynamic_world            # 动态世界状态
+    │   ├── world_state.json      # 实时世界状态
+    │   ├── active_effects.json   # 当前生效效果
+    │   ├── achievement_progress.json # 玩家成就进度
+    │   └── relationship_graph.json # 关系网络数据
+    ├── /extension_interfaces     # 扩展接口预留
+    │   ├── card_system_schema.json # 卡牌系统接口定义
+    │   ├── skill_tree_schema.json  # 技能树接口定义
+    │   └── reputation_schema.json  # 声望系统接口定义
+    └── /game_content            # 游戏内容数据
+        ├── guilds.json          # 公会信息
+        ├── members.json         # 成员档案
+        └── activities.json      # 活动配置
+
+3.11.2 数据完整性要求
+
+- 备份机制: 自动备份和恢复功能
+- 数据验证: JSON结构和内容的完整性检查
+- 版本控制: 支持数据格式的版本迁移
+- 并发安全: 防止数据损坏的锁定机制
+
+3.11.3 数据统计模块勾稽关系设计
+
+3.11.3.1 统计模块核心架构
+
+    // 数据统计模块核心接口
+    interface DataStatisticsModule {
+      playerGuildAnalytics: PlayerGuildAnalytics       // 玩家公会分析
+      npcGuildAnalytics: NPCGuildAnalytics             // NPC公会分析
+      memberAnalytics: MemberAnalytics                 // 会员数据分析
+      crossReferenceEngine: CrossReferenceEngine       // 勾稽关系引擎
+      reportGenerator: StatisticsReportGenerator       // 报告生成器
+      realTimeTracker: RealTimeDataTracker             // 实时数据追踪
+    }
+
+    // 勾稽关系引擎
+    interface CrossReferenceEngine {
+      /* 建立数据实体间的交叉引用关系 */
+      establishReferences(): Promise<ReferenceMap>
+      
+      /* 验证数据一致性 */
+      validateDataConsistency(): ConsistencyReport
+      
+      /* 追踪数据变更影响 */
+      trackDataImpact(changeEvent: DataChangeEvent): ImpactAnalysis
+      
+      /* 生成关联度报告 */
+      generateCorrelationReport(): CorrelationMatrix
+    }
+
+3.11.3.2 玩家公会统计勾稽设计
+
+    // 玩家公会数据分析
+    interface PlayerGuildAnalytics {
+      guildId: string                                  // 公会ID
+      memberCount: number                              // 成员数量
+      legendaryMemberCount: number                     // 传奇成员数量
+      
+      // 勾稽关系映射
+      crossReferences: {
+        // 与NPC公会的关系
+        rivalNPCGuilds: NPCGuildReference[]           // 竞争对手NPC公会
+        allyNPCGuilds: NPCGuildReference[]            // 盟友NPC公会
+        diplomaticRelations: DiplomaticRelationStats  // 外交关系统计
+        
+        // 与NPC会员的关系
+        recruitedFromNPCGuilds: RecruitmentTracker[]  // 从NPC公会招募记录
+        interactionHistory: NPCInteractionLog[]       // NPC交互历史
+        contributionComparisons: ContributionMatrix   // 贡献度对比
+      }
+      
+      // 统计指标
+      performanceMetrics: {
+        rankingHistory: RankingProgressTracker        // 排名变化历史
+        activityParticipation: ActivityStats          // 活动参与统计
+        memberDevelopment: MemberProgressStats        // 成员发展统计
+        resourceManagement: ResourceUtilizationStats  // 资源管理统计
+      }
+      
+      // 预测分析
+      predictiveAnalytics: {
+        growthProjection: GrowthForecast              // 成长预测
+        competitionAnalysis: CompetitionInsights      // 竞争分析
+        optimizationSuggestions: OptimizationAdvice[] // 优化建议
+      }
+    }
+
+    // NPC公会引用映射
+    interface NPCGuildReference {
+      npcGuildId: string                              // NPC公会ID
+      relationshipType: DiplomaticAttitude            // 关系类型
+      interactionFrequency: number                    // 交互频率
+      competitionLevel: CompetitionIntensity          // 竞争程度
+      influenceScore: number                          // 影响力评分 (0-100)
+    }
+
+3.11.3.3 NPC公会统计勾稽设计
+
+    // NPC公会数据分析
+    interface NPCGuildAnalytics {
+      npcGuildId: string                              // NPC公会ID
+      archetypeId: string                             // 原型ID
+      isAIDriven: boolean                             // 是否AI驱动
+      
+      // 勾稽关系映射
+      crossReferences: {
+        // 与玩家公会的关系
+        playerGuildRelations: PlayerGuildInteraction[] // 玩家公会关系
+        competitiveMetrics: CompetitiveAnalysis        // 竞争指标
+        diplomaticHistory: DiplomaticEventLog[]        // 外交事件历史
+        
+        // 与其他NPC公会的关系
+        npcGuildNetwork: NPCGuildNetworkMap           // NPC公会网络
+        allianceParticipation: AllianceStats          // 联盟参与情况
+        conflictHistory: ConflictRecord[]             // 冲突记录
+        
+        // 成员相关统计
+        memberFlowAnalysis: MemberTransferAnalysis    // 成员流动分析
+        recruitmentPattern: RecruitmentPatternStats   // 招募模式统计
+        memberContributions: NPCMemberContributions   // 成员贡献统计
+      }
+      
+      // AI行为统计（仅限AI驱动公会）
+      aiBehaviorMetrics?: {
+        decisionPatterns: AIDecisionAnalysis           // AI决策模式
+        adaptationRate: AdaptationMetrics             // 适应性指标
+        learningProgress: LearningCurveData           // 学习曲线
+        performanceEvolution: PerformanceTimeline     // 表现演变
+      }
+      
+      // 影响力分析
+      influenceMetrics: {
+        serverImpact: ServerInfluenceScore            // 服务器影响力
+        economicContribution: EconomicImpactStats     // 经济贡献
+        socialNetworkCentrality: NetworkCentrality   // 社交网络中心度
+        eventTriggerFrequency: EventTriggerStats      // 事件触发频率
+      }
+    }
+
+3.11.3.4 NPC会员统计勾稽设计
+
+    // NPC会员综合数据分析
+    interface MemberAnalytics {
+      totalMemberCount: number                        // 总会员数量
+      activeNPCMembers: number                        // 活跃NPC会员数
+      legendaryNPCMembers: number                     // 传奇NPC会员数
+      
+      // 勾稽关系映射
+      crossReferences: {
+        // 公会归属分析
+        guildDistribution: {
+          playerGuildMembers: MemberDistribution      // 玩家公会成员分布
+          aiDrivenGuildMembers: MemberDistribution    // AI公会成员分布
+          displayOnlyGuildMembers: MemberDistribution // 展示用公会成员分布
+        }
+        
+        // 交互关系网络
+        interactionNetwork: {
+          playerInteractions: PlayerNPCInteractionMap // 玩家-NPC交互
+          npcInterInternalNetworks: NPCInternalNetwork // NPC内部关系网络
+          crossGuildConnections: CrossGuildNetwork     // 跨公会连接
+        }
+        
+        // 贡献度关联分析
+        contributionAnalysis: {
+          individualContributions: NPCContributionProfile[] // 个体贡献概况
+          guildContributionImpact: GuildImpactMatrix        // 公会贡献影响
+          activityParticipationPatterns: ActivityPatternAnalysis // 活动参与模式
+        }
+      }
+      
+      // 会员行为统计
+      behaviorMetrics: {
+        loyaltyAnalysis: LoyaltyMeasurement            // 忠诚度分析
+        skillDevelopmentTrends: SkillProgressAnalysis  // 技能发展趋势
+        socialInfluenceMapping: SocialInfluenceGraph   // 社交影响力映射
+        performanceCorrelations: PerformanceMatrix     // 表现相关性
+      }
+      
+      // 人才流动分析
+      talentFlowAnalysis: {
+        recruitmentSources: RecruitmentSourceAnalysis  // 招募来源分析
+        retentionRates: RetentionAnalytics             // 留存率分析
+        transferPatterns: TransferPatternInsights      // 转会模式洞察
+        talentPoolOptimization: TalentOptimizationAdvice // 人才库优化建议
+      }
+    }
+
+    // 贡献度交叉分析
+    interface NPCContributionProfile {
+      npcMemberId: string                             // NPC会员ID
+      parentGuildId: string                           // 所属公会ID
+      contributionScore: number                       // 贡献分数
+      
+      // 跨实体贡献影响
+      contributionImpact: {
+        toPlayerGuild: ContributionInfluence          // 对玩家公会的贡献影响
+        toAINPCGuilds: ContributionInfluence[]        // 对AI NPC公会的贡献影响
+        toGameEcosystem: EcosystemContribution        // 对游戏生态的整体贡献
+      }
+      
+      // 互动质量评估
+      interactionQuality: {
+        playerSatisfactionScore: number               // 玩家满意度评分
+        aiCooperationEfficiency: number              // AI合作效率
+        conflictResolutionAbility: number            // 冲突解决能力
+      }
+    }
+
+3.11.3.5 实时数据同步与一致性保障
+
+    // 实时数据追踪器
+    interface RealTimeDataTracker {
+      /* 监控数据变更 */
+      monitorDataChanges(): void
+      
+      /* 同步统计数据 */
+      synchronizeStatistics(entity: EntityType): Promise<SyncResult>
+      
+      /* 触发勾稽关系更新 */
+      triggerReferenceUpdate(changeSet: DataChangeSet): void
+      
+      /* 生成实时报告 */
+      generateRealTimeReport(): LiveStatisticsReport
+    }
+
+    // 数据一致性验证
+    interface ConsistencyReport {
+      overallHealth: DataHealthStatus                 // 整体数据健康状态
+      referenceIntegrity: ReferenceIntegrityCheck     // 引用完整性检查
+      crossValidationResults: CrossValidationResult[] // 交叉验证结果
+      anomalyDetection: AnomalyReport[]               // 异常检测报告
+      
+      // 修复建议
+      repairRecommendations: {
+        criticalIssues: RepairAction[]                // 关键问题修复
+        optimizationSuggestions: OptimizationAction[] // 优化建议
+        preventiveMeasures: PreventiveAction[]        // 预防措施
+      }
+    }
+
+    // 统计报告生成器
+    interface StatisticsReportGenerator {
+      /* 生成综合分析报告 */
+      generateComprehensiveReport(): ComprehensiveAnalyticsReport
+      
+      /* 生成勾稽关系图表 */
+      generateReferenceChart(): CrossReferenceVisualization
+      
+      /* 生成趋势分析报告 */
+      generateTrendAnalysis(timeRange: TimeRange): TrendAnalysisReport
+      
+      /* 生成预测报告 */
+      generatePredictiveReport(): PredictiveAnalyticsReport
+    }
+
+3.11.3.6 数据存储架构扩展
+
+    // 扩展数据存储结构以支持统计模块
+    const StatisticsDataSchema = {
+      // 统计数据存储
+      "/statistics_data": {
+        "cross_references.json": "CrossReferenceMap",      // 勾稽关系映射
+        "analytics_cache.json": "AnalyticsCacheData",      // 分析缓存数据
+        "real_time_metrics.json": "RealTimeMetrics",       // 实时指标
+        "historical_trends.json": "HistoricalTrendData"    // 历史趋势数据
+      },
+      
+      // 报告生成缓存
+      "/reports_cache": {
+        "daily_reports/": "DailyAnalyticsReports",         // 日报缓存
+        "weekly_reports/": "WeeklyAnalyticsReports",       // 周报缓存
+        "custom_reports/": "CustomReportTemplates"         // 自定义报告模板
+      },
+      
+      // 数据一致性日志
+      "/consistency_logs": {
+        "validation_history.json": "ValidationHistory",    // 验证历史
+        "sync_operations.json": "SyncOperationLog",        // 同步操作日志
+        "anomaly_alerts.json": "AnomalyAlertLog"          // 异常警报日志
+      }
+    }
+
+------------------------------------------------------------------------

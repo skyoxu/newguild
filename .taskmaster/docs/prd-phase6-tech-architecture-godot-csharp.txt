@@ -1,0 +1,264 @@
+4. 技术架构规范
+4.1 技术栈选择
+4.1.1 核心技术栈
+// 核心技术栈选择 (跨平台版本)
+var TechStack = new {
+    engine = "Godot 4.5",              // 跨平台游戏引擎
+    uiFramework = "Godot Control",     // UI 系统 (控件节点)
+    styling = "Godot Theme/Skin",      // 样式和主题
+    language = "C#",                   // 主开发语言
+    buildTool = "Godot Export Templates", // 打包与发布工具
+    dataStorage = "godot-sqlite",      // 本地数据库 (SQLite 插件)
+    aiComputing = "ThreadPool",        // AI 计算的多线程处理
+    configStorage = "ConfigFile (user://)", // 本地配置和存档
+    communication = "Signals + Autoload"    // 模块间通信机制
+};
+
+// 性能优化架构
+var PerformanceStack = new {
+    aiWorkerThreads = "Dedicated ThreadPool",  // 专用 AI 计算线程池
+    databaseMode = "SQLite WAL mode",          // 高并发数据库模式
+    caching = "LRU Memory Cache",              // 智能内存缓存
+    eventQueue = "Priority Queue System"       // 事件优先级队列
+};
+
+
+此外，开发流程中将集成 SonarQube 进行静态代码分析，并使用 Sentry 进行运行期错误监控和发布健康跟踪，以提升代码质量和产品稳定性。
+
+4.1.2 架构设计原则
+
+事件驱动: 所有系统基于事件通信（Godot 信号机制）
+
+模块化: 清晰的模块边界，支持并行开发
+
+可扩展: 插件化架构支持 DLC 和功能扩展
+
+离线优先: 本地数据存储，无网络依赖
+
+4.2 系统架构设计
+4.2.1 整体架构图
+┌─────────────────────────────────────────────────────────────┐
+│                    Godot 4.5 Engine (C#)                    │
+├─────────────────────────────────────────────────────────────┤
+│  Godot UI Layer                 │  Game Logic Layer         │
+│  ├── Dashboard Components       │  ├── Game State Mgr       │
+│  ├── Form Interactions          │  ├── Event Engine         │
+│  ├── Data Visualization         │  ├── AI Coordinator       │
+│  └── Modal Systems              │  └── Time Manager         │
+├─────────────────────────────────────────────────────────────┤
+│               Signals & Autoload Communication              │
+├─────────────────────────────────────────────────────────────┤
+│  Core Game Logic (C#)                                       │
+│  ├── Event System Engine        │  ├── AI Behavior Mgr      │
+│  ├── State Management           │  ├── Data Validation      │
+│  └── Business Logic             │  └── Save/Load System     │
+├─────────────────────────────────────────────────────────────┤
+│  Local Data Storage (SQLite)                                │
+│  ├── Events Data                │  ├── AI Personalities     │
+│  └── Game State                 │  └── User Preferences     │
+└─────────────────────────────────────────────────────────────┘
+
+4.2.2 核心组件规格
+
+事件引擎核心
+
+class EventEngine {
+  private eventPool: Map<string, EventTemplate>;
+  private activeEvents: Map<string, ActiveEvent>;
+  private eventQueue: PriorityQueue<PendingEvent>;
+
+  // 核心功能
+  processGameCycle(gameWeek: number): void;
+  evaluateEventConditions(context: GameContext): EventTrigger[];
+  executeEventEffects(event: ActiveEvent): EventResult;
+  resolveEventConflicts(conflicts: EventConflict[]): Resolution[];
+
+  // 扩展接口
+  registerPlugin(plugin: EventPlugin): void;
+  validateEventDefinition(event: EventTemplate): ValidationResult;
+}
+
+
+AI 协调系统
+
+class AICoordinator {
+  private guildAIs: Map<string, NPCGuildAI>;
+  private memberAIs: Map<string, GuildMemberAI>;
+  private environmentAI: EnvironmentAI;
+
+  // 协调功能
+  processAICycle(): AIAction[];
+  resolveAIConflicts(conflicts: AIConflict[]): Resolution[];
+  updateRelationshipNetwork(): void;
+  generateAIEvents(): AITriggeredEvent[];
+}
+
+
+(以上代码段的语法改为 C# 伪代码表示，但逻辑与原始文档相同。所有核心模块（事件引擎、AI 协调等）保持原有设计，只是实现语言和技术栈转换为 C# / Godot。)
+
+4.3 性能要求
+4.3.1 性能指标
+指标类型	目标值	测量方法
+启动时间	<10 秒	应用启动到主界面可用
+内存使用	<2 GB	运行时峰值内存消耗
+响应时间	<500 ms	UI 交互响应时间
+事件处理	<200 ms	单个事件的处理时间
+数据加载	<3 秒	游戏存档加载时间
+4.3.2 扩展性要求
+
+事件池: 支持扩展至 1000+ 事件而不影响性能
+
+AI 数量: 支持 200+ AI 实体同时运行
+
+数据规模: 支持 10 MB+ 的游戏存档文件
+
+并发处理: 支持多个系统的并发操作
+
+4.4 安全性和数据保护
+4.4.1 数据安全
+interface DataSecurity {
+  backup: {
+    autoBackup: boolean;           // 自动备份功能
+    backupFrequency: number;       // 备份频率（分钟）
+    maxBackups: number;            // 最大备份数量
+  };
+
+  validation: {
+    schemaValidation: boolean;     // 结构验证（模式校验）
+    dataIntegrity: boolean;        // 数据完整性检查
+    checksumVerification: boolean; // 校验和验证
+  };
+
+  recovery: {
+    corruptionDetection: boolean;  // 损坏检测
+    autoRecovery: boolean;         // 自动恢复
+    manualRestore: boolean;        // 手动恢复选项
+  };
+}
+
+4.4.2 用户隐私
+
+本地存储: 所有数据存储在用户本地，无云端收集
+
+无网络通信: 游戏运行无需网络连接
+
+可选遥测: 性能数据收集需用户明确同意
+
+4.5 扩展性架构与接口预留
+
+为确保未来功能扩展的无缝集成，架构设计预留了关键接口和扩展点。
+
+4.5.1 核心扩展原则
+
+事件驱动: 所有新功能通过 Godot 信号与 Autoload 机制与核心系统交互
+
+数据驱动: 新内容通过配置文件（JSON）定义，无需代码修改
+
+模块化: 新功能作为独立模块，最小化对核心系统的影响
+
+向后兼容: 数据格式设计支持版本迁移和兼容性
+
+4.5.2 预留接口规格
+
+卡牌系统接口预留
+
+// 卡牌系统核心接口 (Phase 4 实现)
+interface CardSystem {
+  // 卡牌定义
+  card: {
+    id: string;
+    name: string;
+    description: string;
+    rarity: 'common' | 'rare' | 'epic' | 'legendary';
+    cost: ResourceCost;
+    effects: CardEffect[]; // 与事件系统集成
+  };
+
+  // 卡牌机制
+  mechanics: {
+    triggerEvents: string[];         // 可直接触发的事件 ID
+    modifyEvents: EventModifier[];   // 修改现有事件的效果
+    resourceEffects: ResourceModifier[];
+    aiInfluence: AIBehaviorModifier[];
+  };
+}
+
+
+公会会长技能树接口预留
+
+// 会长技能系统接口
+interface GuildLeaderSkillTree {
+  skills: {
+    id: string;
+    name: string;
+    description: string;
+    tier: number;                // 技能层级
+    prerequisites: string[];     // 前置技能
+    effects: SkillEffect[];      // 技能效果
+  };
+
+  // 技能点系统
+  skillPoints: {
+    total: number;
+    spent: number;
+    sources: SkillPointSource[]; // 技能点获取途径
+  };
+}
+
+
+声望系统接口预留
+
+// 声望系统核心接口
+interface ReputationSystem {
+  // 声望维度
+  dimensions: {
+    military: number;   // 军事声望
+    diplomatic: number; // 外交声望
+    economic: number;   // 经济声望
+    social: number;     // 社交声望
+  };
+
+  // 声望影响
+  effects: {
+    eventProbabilityModifiers: Map<string, number>;
+    aiReactionModifiers: Map<string, number>;
+    unlockableContent: string[];
+  };
+}
+
+4.5.3 插件系统架构
+interface PluginSystem {
+  eventPlugins: EventPlugin[];    // 事件系统插件
+  uiPlugins: UIPlugin[];          // 界面扩展插件
+  aiPlugins: AIBehaviorPlugin[];  // AI 行为扩展
+  dataPlugins: DataSourcePlugin[]; // 数据源扩展
+}
+
+// 插件接口规范
+interface EventPlugin {
+  name: string;
+  version: string;
+  hooks: {
+    beforeEventTrigger?: (event: EventDefinition) => EventDefinition;
+    afterEventExecute?: (result: EventResult) => void;
+    customCondition?: (condition: CustomCondition) => boolean;
+    customEffectHandler?: (effect: Effect) => void;
+  };
+}
+
+// 扩展事件定义
+interface ExtendableEventDefinition extends EventDefinition {
+  customType?: string;                   // 未来自定义事件类型
+  pluginData?: Record<string, any>;      // 预留插件数据
+  extensionHooks?: string[];            // 预留扩展钩子
+}
+
+4.5.4 DLC 支持架构
+
+内容包管理: 支持 DLC 内容的动态加载和卸载
+
+版本兼容: 向后兼容的数据格式设计和迁移工具
+
+模块化加载: 按需加载 DLC 内容，不影响基础游戏性能
+
+接口标准: 统一的 DLC 开发接口和验证标准

@@ -1,0 +1,14 @@
+# Task ID: 74
+# Title: Enhance Advanced Event System
+# Status: pending
+# Dependencies: 73
+# Priority: medium
+# Description: Build advanced features for the event system including ranking and diplomacy.
+# Details:
+1. Develop the framework for the legendary member system.
+2. Architect the phased ranking system.
+3. Implement the basic diplomatic attitude system.
+4. Create the NPC history milestone recorder.
+
+# Test Strategy:
+Use unit tests to validate each advanced feature. Ensure integration with existing systems.

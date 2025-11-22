@@ -1,0 +1,499 @@
+# NOTE
+# 本文件是基于《PRD-Guild-Manager》和后续架构讨论整理的
+# 「技术架构图标 / 数据模型规范」补充，不是原始 PRD 正文。
+# Task Master 在拆任务时，请将其视为技术设计约束。
+
+数据模型规范
+
+下面根据PRD文档提取各功能域的数据结构，采用类/接口形式描述其字段、类型和关系，并结合Godot 4.5+C#架构给出实现说明。
+
+角色与成员域 (Character Domain)
+
+角色对象分为两类：会长 (GuildLeader) 和公会成员 (GuildMember)，均继承自基础角色属性。玩家扮演会长，公会成员包括普通成员和传奇成员等NPC。
+
+BaseCharacter (基础角色): 提供通用属性:
+
+id: string：角色唯一ID
+
+avatar: string：头像资源标识
+
+level: int：等级（如1-60级）
+
+gearScore: int：装备评分（反映装备实力）
+
+activityStats: ActivityStats：活动统计数据，包括累计参与活动数、胜率、MVP次数、最近活动时间等。
+
+GuildLeader (会长) extends BaseCharacter:
+
+基本信息: name: string 名称，title: string 称号，race: string 种族，class: string 职业。
+
+核心属性 (1-100): leadership 领导力（影响士气和效率）, charisma 魅力（影响招募成功率和外交）, strategy 策略（影响战术制定和活动规划）, management 管理（影响公会运营效率）。
+
+经验系统: experience: MemberExperienceSystem 会长经验进度（等级、经验值等，可用于解锁技能）。
+
+会长专属能力: leadershipSkills: LeadershipSkill[] 会长专有技能列表，用于提升管理效果或特殊指挥能力。这些技能可通过技能树升级（技能树结构见后述“技能域”）。
+
+声望: reputation: number 个人声望值（会长在游戏世界中的知名度，可影响外交和事件）。
+
+社交关系: intimacyMap: Map<string, number> 与其他角色（成员或NPC）的亲密度映射, contactList: ContactEntry[] 联系人列表（亲密度达到一定阈值的角色进入通讯录）。会长可通过事件、邮件与这些角色互动，亲密度变化会触发特殊事件。
+
+GuildMember (公会成员) extends BaseCharacter:
+
+基础信息: name: string 名字，race: string 种族，class: string 职业，specialization: string 专精方向（坦克/治疗/输出），guild: string 所属公会ID引用，assess: string 公会对该成员的评价或评语。
+
+传奇属性 (Legendary Member Fields): legendary: boolean 是否传奇成员标识；若true则可能具有：
+
+legendaryType?: LegendaryType 传奇成员类型（如战斗大师、战术天才、社交达人等分类),
+
+legendaryAbilities?: LegendaryAbility[] 传奇专属能力列表,
+
+legendaryBackstory?: string 背景故事描述。
+
+rarity: MemberRarity 成员稀有度（普通、稀有、精英、传奇，用于区分成员品质)。传奇成员往往是极低概率出现的顶尖成员，占比约0.5%。
+
+核心属性 (1-100): skill 技能水平（影响活动中的表现输出）, loyalty 忠诚度（影响成员流失概率）, teamwork 团队配合度（影响团队活动效果）, ambition 野心值（影响成长欲望和内部竞争）。这些属性随事件和培训改变。
+
+状态属性: satisfaction 满意度（0-100, 影响是否有离队倾向）, fatigue 疲劳度（0-100, 影响出勤和表现）, morale 士气（0-100, 受领导力和战果影响）, availability 可用性（0-100, 取决于现实时间安排或伤病情况）。
+
+经验: experience: MemberExperienceSystem 成员经验（跟随活动获取经验升级）。
+
+社交关系: intimacyWithLeader: number 与会长亲密度, memberRelationships: Map<string, number> 与其他成员的关系值映射。公会成员之间也有关系网络，会长可通过这些关系洞察内部团结情况。
+
+AI特性: （针对NPC成员）personality: PersonalityTrait[] 性格特质列表（如勇敢、忠诚、自私等，用于AI决策偏好）, aiGoals: PersonalGoal[] 个人目标（NPC成员的长期动机，如晋升官员、获得传奇装备等）, behaviorPattern: BehaviorPattern 行为模式（AI状态机当前偏态）。这些字段由AI系统利用，以模拟成员的自主行为和事件触发。
+
+游戏机制相关: recruitmentSource: RecruitmentSource 招募来源（该成员是通过何种途径加入，如公开招募、事件引入、朋友推荐等）, joinDate: Date 加入日期, currentRole: GuildRole 当前公会职务/角色（会长、官员、普通成员等，在GuildRank枚举中定义）。
+
+实现说明: 在Godot+C#中，会长和成员可实现为继承同一Character基类的两个类，或使用单一类包含标识区分。成员数据通常在内存中以对象形式管理，并在事件引擎作用下实时更新属性（例如完成一次Raid可能提升skill属性)。成员的社交关系网可由图或邻接表表示，由AI每周或每月批量更新。Godot引擎可通过信号在UI上显示成员心情或状态变化（如疲劳过高时UI警告）。由于成员数量可达数十上百，涉及大量属性更新，需注意性能；可以将耗时的AI性格计算放入线程后台批处理，以确保主线程流畅。
+
+技能与能力域 (Skill/Ability Domain)
+
+技能系统涵盖会长技能树和传奇成员能力两部分，提供特殊效果来增强公会管理或战斗力。
+
+LeadershipSkill (会长技能): 会长独有技能，按照技能树解锁。每个技能有：
+
+id: string 技能ID，
+
+name: string 技能名称，
+
+description: string 技能描述，
+
+tier: int 技能所处层级（技能树的深度），需要达到对应会长等级或解锁前置技能，
+
+prerequisites: string[] 前置技能ID列表（解锁此技能需要已掌握的技能）,
+
+effects: SkillEffect[] 技能效果列表（对游戏机制的具体增益，比如提高招募成功率、减少成员流失等）。
+会长通过提升等级获得技能点，在技能树中解锁这些LeadershipSkill。
+
+GuildLeaderSkillTree (会长技能树): 组织所有LeadershipSkill的结构:
+
+skills: { [id: string]: LeadershipSkill } 技能集合，按ID索引技能节点，包含技能层级、描述、效果等。
+
+skillPoints: { total: int, spent: int, sources: SkillPointSource[] } 技能点管理：total为总可用技能点，spent为已使用点数，sources列举技能点的获取来源（如升级、任务奖励等）。
+（实现注：可将技能树表示为图结构，用邻接表表示技能解锁依赖关系。在Godot中，技能树UI可用Tree或GraphNode展示。）
+
+LegendaryAbility (传奇能力): 传奇成员所特有的强力技能/能力，每个传奇成员可有一组:
+
+id: string 能力ID
+
+name: string 名称
+
+description: string 描述
+
+type: LegendaryAbilityType 能力类型（被动Passive、主动Active、光环Aura、条件触发Conditional 等)。
+
+能力效果: effects: AbilityEffect[] 效果列表，每个效果定义对某目标属性的增减:
+
+AbilityEffect.target: TargetType 效果作用目标（自身、自身团队、公会整体、活动/对战等),
+
+AbilityEffect.attribute: string 影响的属性名,
+
+AbilityEffect.modifier: number 修正值（正为增益负为减益）,
+
+可选的duration: number 持续时间、conditions: string[] 生效条件等。
+
+可选参数: cooldown?: number 冷却时间（回合数或时间间隔）, cost?: ResourceCost 使用成本（如触发需要消耗某资源）。
+
+触发条件: triggerConditions?: TriggerCondition[] 特定情况下自动触发的条件（仅对Conditional类型），passiveBonus?: PassiveBonus 被动加成属性（仅对Passive类型）。
+例如，“战斗大师”类型传奇可能有主动技能提高全团伤害20%持续30秒（Active类型，有冷却），或被动技能永久提高自身攻击力等。
+
+MemberSkill/Ability: （可扩展）普通成员的技能系统未详细展开，默认为成员的skill属性表示其总体技能水平。具体技能招式没有列出，但战斗模块定义了Boss技能等。如果需要，可引入成员职业技能表，由AI在战斗模拟中使用。但当前PRD聚焦于战术和传奇能力，故普通技能系统略过。
+
+实现说明: 技能树和传奇能力可在C#中建模为类和枚举。LeadershipSkill和LegendaryAbility的数据可来源于配置文件（例如leader_skills.json、legendary_abilities.json），游戏初始化时加载。这些技能效果在逻辑层通过事件机制应用：如某LeadershipSkill提升招募成功率，则在执行招募逻辑时检查会长已解锁技能并增加成功概率。传奇能力在战斗模拟时由AI检测触发条件并执行效果。由于Godot使用C#，可以利用反射或注册表将技能ID映射到具体效果函数，也可以在定义AbilityEffect时直接附带lambda逻辑（或脚本化定义）。技能冷却和持续时间可以结合Godot的帧定时或计时器Timer节点管理。总之，技能系统在架构上与成员和战斗系统联动，通过事件引擎调度技能触发、通过战斗模块计算技能影响结果。
+
+公会及管理域 (Guild Domain)
+
+公会是核心实体，包括玩家公会和NPC公会。下面以**玩家公会 (PlayerGuild)**的数据结构为主进行规范，NPC公会在此基础上有扩展差异。公会数据涵盖基本信息、成员列表、设施、活动进度、外交关系和经济等方面。
+
+PlayerGuild (玩家公会) extends BaseGuild: 玩家所管理的公会，包含：
+
+基础信息:
+
+id: string 公会唯一ID
+
+name: string 公会名称
+
+tag: string 公会标签（简称代号，用于标识，如[TAG]）
+
+realm: string 服务器/世界名称（例如所属服务器，大部分单机情况下可固定）
+
+faction: Faction 阵营（如魔兽世界的联盟/部落/中立阵营概念）。
+
+公会等级与声望:
+
+guildLevel: int 公会等级，提升可解锁更多功能（例如等级上限25，借鉴魔兽世界公会等级机制）。
+
+reputation: int 公会总声望值（在全服的名望，用于排名等）。
+
+reputationLevel: int 声望等级（1-10级，根据声望值区间）。
+
+experience: int 公会经验值（用于升级公会等级）。
+
+核心管理:
+
+leader: GuildLeader 会长对象，引用玩家角色详细信息。
+
+foundedDate: Date 创建日期。
+
+motto: string 公会格言。
+
+description: string 公会描述/简介。
+
+成员管理:
+
+members: Map<string, GuildMember> 公会成员列表（键为成员ID，值为成员对象）。
+
+memberRoster: GuildRoster 公会花名册（成员概览统计），包括总人数、在线人数、按职位/职业/等级等分组，以及传奇成员清单和计数。花名册还包含排序过滤选项以及成员备注等。
+
+memberLimit: int 成员上限（随公会等级提升，可增长）。
+
+公会设施与资源:
+
+guildHall: GuildHall 公会大厅（基地核心设施，包含大厅等级、已建设施列表、升级队列等）。
+
+facilities: Map<FacilityType, GuildFacility> 各类公会设施的集合，键为设施类型枚举（指挥中心、训练场、战术室等），值为设施对象。每个GuildFacility记录设施等级、建造/升级耗时和资源、属性加成、解锁功能以及维护成本等。设施类型和六大模块一一对应，例如指挥中心对应公会管理模块，训练场对应作战模块等。
+
+guildBank: GuildBank 公会银行/仓库（公会的物品库存，详见“道具与背包域”）。
+
+resources: GuildResources 公会资源，如gold金币、supplies补给等基础货币/材料储量。GuildResources定义了公会可支配的各类资源数值，用于建造设施、活动花费等。
+
+活动进度:
+
+raidProgress: Map<string, RaidProgress> 副本进度记录（每个RaidDungeon的通关状态，例如已击杀Boss列表、最好成绩等）。
+
+pvpRating: PVPRating PVP评级（战场/竞技场的段位或积分）。
+
+achievements: AchievementProgress[] 公会成就完成情况列表。
+
+公会管理机制:
+
+officerSystem: OfficerSystem 官员体系信息（如现有官员列表、职位设置；官员AI由后端管理，但这里保存结果）。
+
+guildPolicies: GuildPolicy[] 公会政策（玩家制定的公会规章/策略列表，如分配战利品规则、公会守则等）。
+
+recruitmentSettings: RecruitmentConfig 招募配置（是否开放招募、新人筛选条件等）。
+
+社交外交:
+
+alliances: GuildAlliance[] 公会联盟列表（与其他公会的结盟关系）。
+
+rivalries: GuildRivalry[] 公会敌对关系列表。
+
+reputation_external: Map<string, number> 对外声望映射（其他特定公会或阵营对本公会的声望值）。
+
+公会经济:
+
+treasury: GuildTreasury 公会财政库，记录资金收入支出情况。
+
+taxSettings: TaxConfiguration 税收设置（如公会税率，用于从成员收入提成）。
+
+budgetAllocation: BudgetPlan 预算分配方案（公会资源在各项支出上的分配计划，如活动经费、建设投入等）。
+
+NPCGuild (NPC公会): 与PlayerGuild共享大部分结构，但由AI控制，无真人会长。通常以NPCGuildArchetype原型生成:
+
+NPC公会也有id, name, tier, reputation等基本属性，其中tier相当于公会等级，用于匹配游戏阶段和难度。
+
+strategy: GuildStrategy 公会发展策略（AI倾向，如激进扩张型、和平发展型）。
+
+initialMembers: MemberTemplate[], initialOfficers: OfficerTemplate[] 初始成员和官员配置，用于生成开局阵容。
+
+specialties: string[] 专精领域（NPC公会擅长的方面，如PVP高手、公会战专家等）。
+
+personality: AIPersonalityTrait[] AI性格特质，与成员AI类似，用于决定公会行为风格。
+
+feud: string 世仇公会ID（与哪个公会天生对立）。
+
+homebase: string 公会基地所在地。
+
+传奇展示: legendaryMembers: LegendaryMemberInfo[] 传奇成员列表（NPC公会的传奇成员概览，用于展示）、legendaryMemberCount: number 传奇成员数量。
+
+历史记录: historyMilestones: GuildHistoryRecord[] 公会历史里程碑事件记录（如首杀、排名突破等重大事件), achievementHistory: GuildAchievement[] 历史成就列表, legacyRanking: HistoricalRanking 历史最高排名数据（包含曾达到的巅峰排名及时间线）。
+
+联赛赛事: leagueSchedule: GuildLeagueSchedule 公会联赛日程（如果有定期联赛比赛), competitionHistory: CompetitionRecord[] 比赛历史, leagueStanding: LeagueStanding 当前联赛排名状态。
+
+外交态度: diplomaticAttitude: DiplomaticAttitude 该NPC公会对玩家公会的初始外交态度（-100仇恨到+100友好), diplomaticModifiers: DiplomaticModifier[] 态度影响因素（如历史事件导致的加减值）, eventPool: DiplomaticEventPool 可触发的外交事件池, relationshipHistory: DiplomaticHistory[] 外交关系变化历史。这些用于模拟NPC公会与玩家和其他公会之间的长期关系演变。
+
+NPC公会的成员也为GuildMember，但全部由AI控制，其GuildLeader相当于NPC会长（在实现中可用GuildMember或专门的NPCLeader表示）。
+
+实现说明: 公会对象在游戏中是一个全局重要数据结构。C#中可将PlayerGuild和NPCGuild都继承自一个抽象BaseGuild类，或通过组合包含公会公共属性和区别属性。由于NPC公会数量有限（启动时随机生成约9-15个对手公会），可以将它们集中保存在一个集合中（如List<NPCGuild>），并由AI系统更新其状态。玩家公会作为Singleton单例（或Autoload节点）存在，供各界面和系统随时访问修改。模块与公会数据交互频繁：例如战斗模块更新raidProgress，论坛模块根据公会声望产生新闻，事件引擎修改公会历史记录等。需要保证并发安全：虽然大部分逻辑在主线程顺序执行，但若引入多线程AI更新，需要采用锁或Godot的MainThreadInvoker确保对公会数据的修改是原子操作。数据持久化方面，公会和成员的信息将序列化到存档JSON中——可以设计独立的GuildDTO和MemberDTO数据传输结构，用来与JSON互相转化。Godot的File或JSON工具可用于读写，或者使用C#的JsonSerializer。在加载存档时，需要先根据保存的数据重建公会对象及其成员、设施等关联对象，再注入各系统。
+
+任务与事件域 (Quest/Event Domain)
+
+事件系统驱动游戏的各种任务、随机事件和剧情线。每个事件/任务定义触发条件、参与主体及结果影响。该域通过事件池和事件链机制实现公会管理的剧情推进和随机挑战。
+
+EventDefinition (事件定义): 核心事件数据结构：
+
+id: string 事件唯一ID。
+
+category: EventCategory 事件类别（主线任务、随机事件、周常事件等)。例如 MAINLINE 表示主线剧情任务，RANDOM表示随机触发事件，WEEKLY为每周例行事件等。此外还有TIME_SENSITIVE限时任务、CUSTOM自定义类别等扩展。
+
+subjects: SubjectConfiguration 事件涉及的参与主体配置。primary列出主要参与者类型（如玩家公会、本公会成员、某NPC公会等），secondary为次要影响者，relationship_matrix可描述参与者之间关系对事件的影响。
+
+triggers: TriggerConditions 触发条件集合。支持多种触发方式：时间驱动（每日/每周定时事件）、条件驱动（满足某条件，如成员数达到上限）、概率驱动（随机发生）或事件链驱动（前置事件完成后触发后续）。具体结构包括逻辑表达式、阈值判断、前置事件引用等。
+
+mechanisms: EventMechanisms 事件机制影响。定义事件对游戏状态的改变，例如状态效果（buff/debuff）、资源变化、关系变化等。一些复杂事件会附带buff/debuff影响，可在mechanisms中描述其持续时间和叠加规则。
+
+outcomes: EventOutcomes 事件可能的结果集合。包括立即结果（例如资源奖励、成员属性变化）、延迟结果（事件结束后若干时间触发的后果）、奖励内容（物品、声望、技能点等），以及后续事件链触发。EventOutcomes可以有多分支，用于决策型事件：玩家选择不同选项会导致不同outcome和后续事件。
+
+EventCategory 枚举: 列举事件类型:
+
+MAINLINE 主线任务事件（通常一次性，推动剧情进展）,
+
+RANDOM 随机事件（可重复，不定期发生）,
+
+WEEKLY 周常事件（每周例行，例如每周公会挑战）,
+
+TIME_SENSITIVE 限时任务（带有截止时间的任务，需要及时处理）,
+
+... 其他还有自定义等。
+
+EventChain (事件链): 将多个EventDefinition串联形成一个剧情线或任务链。通过在EventOutcomes中指定下一个事件ID实现。例如主线任务由一系列子任务组成，需要按顺序完成。配置上，可能通过event_chains.json定义事件链。
+
+DiplomaticEvent / 特殊事件: 公会外交及联盟相关的事件定义。PRD中定义了DiplomaticEventType枚举包括贸易协定、军事同盟、和平谈判等事件类型。这些事件也是EventDefinition的一种，但多发生在NPC公会之间或NPC公会与玩家公会之间，触发后会影响DiplomaticAttitude等关系值。
+
+任务进度与决策: 某些事件会要求玩家决策（如公会收到NPC的联盟请求，玩家可接受或拒绝）。事件系统应跟踪pendingEvents（待处理事件）以及玩家在限定时间内是否响应。决策结果通过EventOutcomes分支实现。如果超时未处理，可设定默认消极结果。
+
+执行与并发: 事件引擎需支持多个事件并行存在，特别是随机事件和周常任务可能同时发生。AI会检查冲突并进行协调（如两个重大事件冲突时，可能推迟一个）。系统还应避免同一时间线发生逻辑矛盾的事件，通过EventConflictRules定义冲突排除规则。
+
+实现说明: 事件域是系统“大脑”，可实现为独立的EventManager服务。C#中可定义EventDefinition类对应上述结构，并从配置JSON（如events.json）加载所有事件模板（PRD要求至少1000+事件，扩展到2000+）。EventManager运行一个调度循环，每个游戏日/周检查定时触发，同时监听来自各模块的条件触发（例如成员数变化由MemberModule通知）。当条件满足时，创建事件实例，将其加入会长邮箱或直接作用。玩家通过UI查看会长邮箱中事件通知，并可选择响应（此时EventManager调用对应EventDefinition的Outcome逻辑）。可以使用Godot的信号将事件通知UI，例如EventManager.EmitSignal("NewEvent", eventId)，UI脚本收到后在邮箱界面生成一封新邮件。决策超时可借助Godot的Timer实现，倒计时结束后EventManager自动执行默认Outcome。对于并发冲突，EventManager需要维护当前活动事件列表，依据冲突矩阵（可由interaction_matrix.json提供）决定延迟或取消某事件。总之，事件域的数据与逻辑解耦：数据定义在配置，逻辑由EventManager解释执行，并通过通信机制影响其他模块的数据（如奖励物品则调用Economy模块添加，道具消耗则扣减资源等），实现模块间协同。
+
+背包与道具域 (Inventory/Item Domain)
+
+本域管理游戏中的各类道具物品，以及公会的物资库存（公会银行）和交易系统。道具既包括Raid掉落的装备物品，也包括消耗品、资源材料等。
+
+Item (道具): 抽象物品对象，主要属性:
+
+itemId: string 物品ID（唯一标识）。
+
+itemName: string 名称。
+
+type: ItemType 类型（例如装备、消耗品、材料、任务物品等分类，可扩展枚举）。
+
+rarity: ItemRarity 稀有度（普通、优秀、稀有、史诗、传奇五档)。
+
+itemLevel: number 物品等级（衡量强度的数值，如装等）。
+
+stats: ItemStats 属性加成（如果是装备，则有具体属性，如力量+5等；如果是消耗品，则可能有使用效果）。
+
+requirements: ItemRequirement[] 装备/使用需求（如需要等级、职业限制等）。
+
+注: 具体道具如黑龙头颅（消耗品，使用后全团火抗+伤害提升）在配置中定义。
+
+GuildBank (公会银行): 公会的公共库存，包含公会所有道具和资源存放:
+
+slots: List<BankSlot> 银行格子列表，每个格子可能包含:
+
+item: Item 放置的物品
+
+quantity: int 堆叠数量（对可堆叠物品）
+
+slotIndex: int 格位索引或位置
+（实际实现中，可用一个List<ItemStack>表示，每个ItemStack含itemId和quantity）。
+
+capacity: int 总容量（格数），可通过升级**金库 (Treasury)**设施或公会等级提高。
+
+说明: 公会银行存放团队共享的物品，例如Raid掉落装备、资源材料等。玩家可从银行中提取物资用于公会建设或拍卖行出售。
+
+Inventory (个人背包): （如有） 玩家会长个人物品背包。如果设计需要，玩家个人可有独立背包，但在公会管理游戏中，个人背包意义不大，大部分物品归公会集体所有。因此本规范假定主要使用公会银行作为物品存储。如果需要个人背包，可类似GuildBank结构，实现PlayerInventory用于存储绑定个人的消耗品道具。
+
+AuctionHouseSystem (拍卖行系统): 后勤模块的一部分，用于物品交易。主要涉及:
+
+AuctionListing 拍卖物品挂牌:
+
+auctionId: string 拍卖ID,
+
+sellerId: string 卖家（可以是玩家公会或NPC公会的ID，如果实现跨公会交易的话）,
+
+item: Item 拍卖的物品（或引用，例如 itemId + quantity）,
+
+startingPrice: number 起拍价, buyoutPrice?: number 一口价,
+
+currentBid: number 当前最高出价, currentBidder?: string 当前最高出价者ID,
+
+listingTime: Date 上架时间, duration: AuctionDuration 拍卖持续时长（2h/8h/24h等), 计算得到expirationTime,
+
+bidHistory: BidRecord[] 历史出价记录, bidCount: number 出价次数。
+
+PlayerAuctionManager 玩家拍卖管理器，提供创建拍卖(createAuction(item, price))，取消拍卖，出价，直购等方法。这些方法会相应创建或修改AuctionListing，并更新拍卖行列表。
+
+SystemMarketplace 系统市场，由AI定期刷新一定物品供交易:
+
+getSystemListings(phase: GamePhase): SystemItem[] 获取当前阶段可购买的物品列表，
+
+refreshMarketplace() 刷新物品（可能每日刷新不同物品）,
+
+adjustItemQuality(gamePhase) 随游戏阶段调整系统物品品质（越到后期，系统出售物品越高品质）。
+
+SystemItem 定义系统出售物品：包含itemId, itemName, itemQuality, itemLevel等，以及basePrice基础价，currentPrice当前价格（随供需浮动），stockQuantity库存，refreshTimer下次刷新剩余时间，requiredGamePhase需要达到的游戏阶段才能购买等属性。
+
+AIPurchaseEngine AI购买引擎，模拟NPC自动竞拍与购买:
+
+simulateAIPurchase() 随机让NPC参与竞买,
+
+calculatePurchaseProbability(listing) 计算某拍卖NPC出手概率,
+
+evaluateItemValue(item) 评估物品价值用于决定出价高低,
+
+systemRecycle(listing) 系统回收机制（若拍卖流拍，系统可能以折扣价自动收购）。
+
+AIPurchaseEngine基于配置的AIPurchaseBehavior参数决定行为。例如每小时购买频率、对不同品质和类型物品的偏好权重、价格容忍度区间等。
+
+PriceOracle 价格预言机，用于根据历史数据和当前供需给出建议价格。
+
+经济资源: 除物品外，游戏还有货币及资源:
+
+GuildResources 提到公会gold金币和supplies等，这些可以看作数值资源，不作为物品管理，但在经济系统中起作用。
+
+ResourceCost 用于表示资源花费，例如设施升级需要ResourceCost（包含若干种资源及数量）。
+
+实现说明: 在实现上，道具和背包系统需要与Godot资源管理结合。可以将每种物品的图标、模型等资源与itemId关联，加载配置时缓存至字典。公会银行可用一个Dictionary<itemId, quantity>简单处理，或更拟真地实现容器类支持分栏/分页等。在UI上，应提供公会仓库界面，支持排序和筛选（例如按rarity、类型）。由于本游戏侧重管理而非角色扮演，不需要复杂的装备穿戴界面，但在战术模块中可能需要选择特定道具作为战术消耗品（如上述黑龙头挂饰）。拍卖行系统相对复杂，若实现，可简化为NPC定期将物品从公会银行买走或卖入公会银行，以模拟市场。AIPurchaseEngine可能每过一段时间扫描拍卖列表，对感兴趣物品调用placeBid。此过程可异步处理，并通过事件触发UI更新（如“某NPC出价竞拍您的物品”提示）。在存档中，公会银行物品和拍卖行列表都需要保存，特别是拍卖行若跨存档可能失效，因此也可在退出时清空拍卖行（或保存并在下次加载时继续拍卖计时）。所有物品交易最终都反映为GuildResources或GuildBank变化，所以Economy模块需要与GuildModule通信更新公会金库余额等数据。
+
+NPC与AI域 (NPC & AI Domain)
+
+本域涵盖NPC公会、NPC成员及AI行为配置。NPC作为游戏内模拟的竞争对手和伙伴，由AI驱动其决策和行动。
+
+NPC Guild (NPC公会): 结构已在公会域中描述，其数据大致与玩家公会相同，但有AI特有的附加字段（策略、性格、外交态度等）和无玩家控制的限制。每个NPC公会由AI公会控制器（NPCGuildAI）管理。主要数据：
+
+archetypeId: string 所基于的原型ID（对应一个NPCGuildArchetype模版）,
+
+isAIDriven: boolean 标记是否由AI控制（NPC公会恒为true）,
+
+diplomaticAttitude: int 当前对玩家公会的态度值(-100~100)，会随外交事件变化,
+
+其他如成员列表、资源等动态更新。
+
+NPC公会在世界生成时被创建：根据预定义的NPCGuildArchetype池随机选择若干作为初始竞争者。确保风格多样：如某些偏好PVP对抗，某些热衷发展经济。其后的AI将按照各自策略演化。
+
+NPCGuildArchetype (NPC公会原型): 定义NPC公会模板的静态配置:
+
+包含公会的预设属性和行为偏好：
+
+基础: id, name, tier(起始等级), 初始reputation对玩家态度,
+
+strategy 发展策略枚举,
+
+初始成员和官员构成（MemberTemplate / OfficerTemplate 包含成员大致能力分布）,
+
+专精领域、性格特质等决定AI倾向,
+
+世仇公会等特殊关系设定,
+
+展示用传奇成员列表（不一定实际有这些成员，只用于信息显示）。
+
+扩展: 公会历史/荣誉（historyMilestones, achievementHistory等）可以在原型中给出一些预先达成的成就，营造背景深度。
+
+外交相关初始值（diplomaticAttitude等）也在原型中定义，使有的NPC天生友好或敌对。
+
+GuildMemberAI (公会成员AI): 管理NPC成员个人行为的AI模块。每个NPC成员有:
+
+personality: PersonalityTraits 个性 trait 列表（如外向、胆小、贪婪等）,
+
+relationships: RelationshipMap 关系网络（该成员与其他成员、会长的关系亲密度）,
+
+currentState: MemberState 当前状态（例如“愉快”“疲惫”“不满”等，PRD提到10种状态）,
+
+aiGoals: PersonalGoal[] 个人目标清单（短期或长期目标，如升职、复仇等）,
+
+核心方法:
+
+makeAutonomousDecisions(): AIAction[] 自主决策生成（如决定请假、要求晋升等行动),
+
+reactToEvents(events: GameEvent[]): Reaction[] 对发生的游戏事件作出反应（如对会长某决定表示不满）,
+
+formAndUpdateRelationships(): void 动态更新人际关系,
+
+triggerPersonalEvents(): EventTrigger[] 根据个 人情况触发私人事件（如传奇成员对决事件）。
+
+NPCGuildAI (NPC公会AI): 管理整个NPC公会层面的AI：
+
+监控公会资源、成员状态、与玩家交互等，
+
+决策内容包括：是否向玩家公会宣战或结盟，是否在论坛发帖挑衅，如何分配公会资源（提升某设施或招募新人）等。
+
+可利用NPCGuildArchetype的strategy和personality决定行为风格。例如Aggressive策略的AI公会更可能频繁挑战玩家PVP。
+
+实现上，可为每个NPC公会运行一个ProcessNPCGuildTurn()函数，每游戏周或月调用，内部执行一系列决策：更新外交态度（基于最近事件）、进行资源分配、对重要事件做出响应等。
+
+EnvironmentAI / FanAI / MediaAI: 除公会和成员外，PRD还提到环境层的AI，用于模拟媒体报道、粉丝舆论等。这些AI会根据玩家公会表现生成新闻（影响声誉）或论坛帖子。一些数据结构：
+
+NewsSystem 和 ForumSystem 控制官方新闻和全服论坛版块，
+
+AICommentGenerator 生成NPC评论内容，
+
+FanSystemAI 模拟粉丝互动（如粉丝来信、应援等），
+
+MediaAI 模拟媒体机构报道。
+
+这些系统主要产生文本内容，不涉及数值模型，但会读取公会声望、排名等数据以生成符合情境的消息。
+
+实现说明: NPC与AI域几乎完全由算法驱动。为可扩展性，AI决策逻辑应与数据分离，例如通过配置表决定NPC行为概率和阈值。成员AI可以为每个NPC成员创建一个C#对象定期更新，但数量可能很多，优化上可以只重点模拟关键NPC（如传奇成员、官员），普通成员简单模拟满意度即可。公会AI则可按公会创建对象，重要决策（外交、宣战）通过事件系统实现（如触发DiplomaticEvent事件，由玩家决定回应）。在Godot中，AI逻辑可放在独立的Server线程或利用Task.Run后台处理，每X秒或游戏内每DayTick运行一次AI循环，然后同步结果到主线程更新数据。需要注意线程安全，尤其当AI在后台修改公会或成员对象时，要使用锁或Godot的CallDeferred到主线程改变。为了调试和可控，AI行为可记录日志（在开发模式下输出），或者提供AI调节参数在配置文件中（例如npc_aggressiveness:50影响所有NPC倾 agres）。NPC数据如性格traits、购买偏好等大量静态数据可存放JSON配置（PRD中提供了member_ai_traits.json, guild_ai_config.json等文件）。这些在初始化时读入对应结构，如性格Trait定义一个枚举及描述影响。总而言之，NPC与AI域使游戏世界生动，对应的数据结构与算法复杂但相对独立，确保这些不会与UI直接耦合，而是通过事件和数据影响其他模块（例如AI发帖通过Forum模块接口添加帖子，AI购买物品通过Economy模块接口修改资源）。
+
+存档与配置域 (Save/Config Domain)
+
+该域涉及游戏的数据存储格式，包括静态配置数据和动态存档数据两部分。为保证开发和玩家体验，需要规范存档结构和配置管理机制。
+
+静态配置数据: 游戏在启动时加载的初始数据，一般保存在JSON文件，可能包括:
+
+guild_archetypes.json 公会原型池，包含25-30个NPCGuildArchetype模板。
+
+guild_ai_config.json NPC公会全局AI参数配置（如不同难度级别AI的资源加成、行为频率）。
+
+member_ai_traits.json 成员AI性格特质库，每个trait的效果定义。
+
+interaction_matrix.json 互动规则矩阵，定义事件冲突和多主体交互规则。
+
+achievements.json 成就定义（名称、条件、奖励等）。
+
+experience_config.json 经验系统参数（升级所需经验、经验获取倍率等）。
+
+proficiency_rules.json 熟练度计算规则（可能用于成员在某领域的成长曲线）。
+
+其他：tactics_library.json 战术招数定义、items.json 道具数据库、events.json 事件池等。
+这些配置通过ConfigLoader在游戏初始化时解析为相应的数据结构，并缓存在内存中供各系统使用。由于配置量较大（如事件上千条），可以考虑按需加载（如论坛内容可能逐渐生成，无需初始全部载入）。
+
+动态存档数据: 反映玩家当前游戏进度的可变数据。采用JSON或二进制格式存储在本地文件（单机版）或云端（若未来扩展在线功能）。存档结构应包含:
+
+playerGuild: 玩家公会的完整数据对象（包含会长、成员列表及其属性、公会设施状态、资源、外交关系等所有字段）。
+
+npcGuilds: NPC公会列表，每个包含NPCGuild当前状态（成员简化信息、资源、与玩家关系值、近期事件历史等）。
+
+worldState: 世界状态，记录当前游戏时间、阶段（例如游戏处于第几阶段/赛季）、全球排名快照等。
+
+eventsState: 事件系统状态，包括已发生的主线任务进度（哪些主线事件完成了）、当前未决事件列表及其剩余处理时间等。
+
+forumState: 论坛及媒体相关数据，如已发布的新闻帖子列表、粉丝关注度等（可选）。
+
+economyState: 经济系统状态，如拍卖行当前挂牌列表、市场价格波动参数。
+
+version: 存档版本号，用于兼容未来更新。如果架构或数据结构改变，可通过版本进行迁移适配。
+
+存档大小可能较大（支持10MB以上），需要优化序列化。可以使用纯JSON格式，或Godot提供的PackedScene/Resource保存（不过JSON更直观易调试）。由于JSON可读性，易受损坏风险，需要做好备份和校验。例如每次保存先写入临时文件，成功后再替换正式存档，以防止意外中断导致文件损坏。另外提供自动备份机制（如保留上两个存档副本）以及数据校验（启动加载时验证关键字段存在），提升存档安全。
+
+通信与读写: 存档读写由前述SaveManager统一管理，定期（比如每游戏月或玩家手动保存时）序列化数据。采用异步IO避免卡顿：在后台线程执行JSON序列化和文件写入，完成后通知主线程。加载时在进入游戏界面前执行，同样要处理潜在的I/O延迟。由于数据模型庞大，序列化和反序列化需要一定优化，可使用循环保留对象（如游戏运行中始终用同一对象，直接赋值更新，不频繁创建销毁）来减少GC压力。
+
+配置更新与扩展: 考虑Godot+C#架构的热重载和DLC机制:
+
+可以支持热加载配置：开发和测试时修改JSON配置后无需重启游戏即可生效（Godot编辑器下通过工具脚本实现，正式版则不需要）。
+
+为DLC/Mod留接口：如论坛帖子生成、AI行为等，可以通过插件机制扩展。例如提供一个插件接口，允许外部DLL添加新的事件类型或技能效果。存档格式也需考虑向后兼容，保留未知字段而不损坏（使用JsonSerializer设置忽略未知字段等）。
+
+实现说明: 在C#中，可使用内置System.Text.Json或Newtonsoft.Json来读写JSON到对象。推荐定义数据传输用的DTO类或结构，与游戏内部对象分离（比如Guild数据很多引用其他对象，直接序列化可能循环引用，DTO用ID代替引用）。保存时，用DTO收集所有需要保存的数据，序列化为JSON文件。加载时，反序列化DTO再重建游戏内对象并建立引用（如根据guildId把成员放入对应公会的members字典）。对于配置JSON，体量较大时可考虑分片存储（例如每个NPC公会一个JSON文件，在生成竞争对手时随机选取文件），以便于管理和拓展。线程机制方面，Godot的Mono运行时支持多线程IO，因此SaveManager完全可以使用await File.WriteAllTextAsync()非阻塞保存。确保在游戏退出和场景切换时正确保存，避免数据丢失。最后，开发中应大量测试异常场景（断电、强退）对存档的影响，确保下次能可靠恢复。

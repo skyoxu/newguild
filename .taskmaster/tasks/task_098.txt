@@ -1,0 +1,11 @@
+# Task ID: 98
+# Title: Develop LegendaryAbility Class
+# Status: pending
+# Dependencies: 96
+# Priority: medium
+# Description: Create the LegendaryAbility class for legendary members.
+# Details:
+Implement LegendaryAbility with properties such as id, name, description, type, effects, cooldown, cost, triggerConditions, and passiveBonus. Ensure compatibility with GuildMember attributes.
+
+# Test Strategy:
+Test ability activation and cooldown management. Validate effects on target attributes and ensure conditions trigger correctly.

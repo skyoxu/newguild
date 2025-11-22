@@ -1,0 +1,11 @@
+# Task ID: 36
+# Title: Develop Guild Rank System
+# Status: pending
+# Dependencies: 33
+# Priority: medium
+# Description: Implement the GuildRank enum to define guild ranks.
+# Details:
+Define ranks such as GUILD_MASTER, OFFICER, VETERAN, MEMBER, INITIATE, and TRIAL.
+
+# Test Strategy:
+Ensure ranks are correctly assigned and managed within the guild system.

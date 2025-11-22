@@ -1,0 +1,11 @@
+# Task ID: 60
+# Title: Design World Boss System Interface
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create the interface for the World Boss System, including boss management, guild participation, and reward systems.
+# Details:
+Implement the WorldBossSystem interface with properties for active bosses, boss schedule, guild participation, and reward distribution. Use TypeScript for type safety and clarity.
+
+# Test Strategy:
+Unit test each interface property to ensure correct data types and initial values.

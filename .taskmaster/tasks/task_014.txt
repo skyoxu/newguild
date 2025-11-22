@@ -1,0 +1,11 @@
+# Task ID: 14
+# Title: Design Guild Management Module
+# Status: pending
+# Dependencies: 11, 12
+# Priority: medium
+# Description: Build the guild management interface and functionalities.
+# Details:
+Implement the WorkPanel interface to provide real-time updates on guild status, finances, and member activities. Integrate with the event system for notifications.
+
+# Test Strategy:
+Conduct UI/UX testing to ensure information is displayed accurately and intuitively.

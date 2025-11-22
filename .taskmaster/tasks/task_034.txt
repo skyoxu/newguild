@@ -1,0 +1,11 @@
+# Task ID: 34
+# Title: Develop Guild Roster System
+# Status: pending
+# Dependencies: 33
+# Priority: medium
+# Description: Implement the GuildRoster interface to manage guild members.
+# Details:
+Define properties for totalMembers, onlineMembers, membersByRank, membersByClass, membersByLevel, membersByRarity, legendaryMembers, legendaryMemberCount, membersByLegendaryType, sortOptions, filterOptions, memberNotes, officerNotes, legendaryShowcase, and legendaryMemberHighlights.
+
+# Test Strategy:
+Test member management functions, including sorting, filtering, and legendary member features.

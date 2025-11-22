@@ -1,0 +1,6048 @@
+Product Requirements Document - Guild Manager
+
+版本: 2.0
+日期: 2025-07-14
+状态: 初稿
+作者: 产品团队
+
+目录
+
+执行摘要
+
+用户研究与需求分析
+
+功能规格说明
+
+技术架构规范
+
+开发计划与里程碑
+
+成功指标与验收标准
+
+1. 执行摘要
+1.1 产品概述
+
+《公会经理》是一款深度生态模拟游戏，玩家作为 MMO 公会会长，管理一个完整的虚拟公会生态系统。不同于传统的简单管理游戏，本产品创造了一个“活着的世界”，其中 10-20 个 NPC 公会、数百名 AI 成员、媒体和粉丝群体都在自主行动并相互影响。
+
+1.2 核心价值主张
+
+深度策略体验: 媲美 Football Manager 的策略深度，专注 MMO 公会管理垂直领域
+
+生态模拟创新: 庞大事件池系统（200+ 事件）驱动的多主体 AI 生态
+
+长期可玩性: 复杂的 AI 互动和社交系统提供持续的新鲜体验
+
+模块化扩展: 支持 DLC 和插件的可持续商业模式
+
+1.3 市场定位
+
+目标市场: MMO 公会管理细分市场（相对空白）
+
+参考标杆: Football Manager 系列（年销量数百万）
+
+差异化: 首款深度 MMO 公会生态模拟游戏
+
+市场规模: 细分但精准的高价值用户群体
+
+1.4 成功标准概览
+
+技术可行性: 8-9/10（基于多模型专家评估）
+
+市场潜力: 中等但精准（Football Manager 案例验证）
+
+开发周期: 10 个月（4 个阶段）
+
+投资回报: 通过深度体验和 DLC 扩展实现长期价值
+
+2. 用户研究与需求分析
+
+2.1 用户故事与使用场景
+核心用户故事
+作为一名前 MMO 公会会长，
+我希望能够在单机环境中体验完整的公会管理，
+以便重温策略决策和团队管理的乐趣，
+而不需要承担在线公会管理的时间压力和人际复杂性。
+
+关键使用场景
+
+日常管理: 查看公会状态，处理邮件事件，制定周计划
+
+战略决策: 设定中长期目标，调整发展方针，管理资源分配
+
+人员管理: 招募新成员，配置阵容，处理内部关系
+
+活动规划: 安排 PVE/PVP 活动，制定战术策略，分析表现
+
+社交互动: 参与论坛讨论，管理公会声誉，应对媒体和粉丝
+
+2.2 需求优先级
+优先级	需求类型	具体需求	理由
+P0	核心功能	事件系统、基础 AI、6 大模块	产品核心价值
+P1	用户体验	新手引导、数据可视化	降低学习成本
+P2	可扩展性	DLC 支持、插件系统	商业模式延伸
+P2	内容深度	200+ 事件内容、传奇成员	长期可玩性
+P3	社交元素	媒体互动、玩家社区元素	额外加分项
+
+3. 功能规格说明
+
+3.0 核心游戏循环设计
+
+3.0.1 回合制系统架构
+
+《公会经理》采用回合制游戏机制，每个回合代表游戏内一周时间。与传统复杂的多阶段回合制不同，本游戏采用简洁高效的3阶段回合制：
+
+    // 回合制系统核心接口
+    interface GameTurnSystem {
+      currentWeek: number
+      currentPhase: TurnPhase
+      
+      // 三阶段循环
+      executeResolutionPhase(): ResolutionResult    // 阶段1：结算上回合结果
+      executePlayerPhase(): PlayerActionResult     // 阶段2：玩家决策和管理
+      executeAIPhase(): AISimulationResult         // 阶段3：AI执行和世界演进
+    }
+
+    enum TurnPhase {
+      RESOLUTION = "结算阶段",    // 处理延时事件，展示上回合结果
+      PLAYER = "玩家阶段",        // 玩家处理邮件和管理公会
+      AI_SIMULATION = "AI模拟阶段" // 所有AI实体行动和事件触发
+    }
+
+阶段1：结算阶段
+
+- 处理上回合的延时事件和效果
+- 展示PVE/PVP活动结果和AI评价反馈
+- 更新公会状态、成员属性、资源变化
+- 触发基于结果的新事件
+
+阶段2：玩家阶段
+
+- 玩家处理会长邮箱中的事件和决策
+- 管理公会设施、成员、战术配置
+- 安排下一周的活动和计划
+- 处理联系人清单中的社交互动
+
+阶段3：AI模拟阶段
+
+- 所有NPC公会根据AI策略执行行动
+- 成员AI根据个性和关系进行自主行为
+- 环境AI（媒体、粉丝）生成反馈和事件
+- 计算活动结果，准备下回合的结算数据
+
+3.0.2 强制决策点机制
+
+游戏中的关键事件不会强制阻塞回合进行，而是通过关键决策点机制处理：
+
+    interface CriticalDecision {
+      id: string
+      urgency: UrgencyLevel           // 紧急程度
+      deadline?: number               // 截止回合数
+      consequences: ConsequenceMap    // 不同选择的后果
+      autoResolve?: AutoResolveRule   // 超时自动处理规则
+    }
+
+    enum UrgencyLevel {
+      LOW = "低优先级",      // 可无限延期，轻微负面影响
+      MEDIUM = "中优先级",   // 可延期3回合，中等负面影响  
+      HIGH = "高优先级",     // 可延期1回合，严重负面影响
+      CRITICAL = "关键决策"  // 本回合必须处理，否则严重后果
+    }
+
+设计原则：
+
+- 玩家始终保持行动自由，可以选择忽略任何决策
+- 忽略决策会有明确的负面后果，但不会阻止游戏进行
+- 关键决策点通过UI高亮和邮件系统提醒玩家
+- 超时未处理的决策按最保守/负面的选项自动执行
+
+3.1 核心系统架构
+
+3.1.1 庞大事件池系统 (核心引擎)
+
+    // 事件系统核心规格
+    interface EventDefinition {
+      id: string                    // 唯一标识
+      category: EventCategory       // 主线/随机/周常
+      subjects: SubjectConfiguration // 单/多主体参与者
+      triggers: TriggerConditions   // 复杂触发条件
+      mechanisms: EventMechanisms   // 状态变化/buff/资源/关系
+      outcomes: EventOutcomes       // 立即/延迟/奖励/事件链
+    }
+
+    // 事件类型分类
+    enum EventCategory {
+      MAINLINE = "主线任务",    // 一次性，推动游戏进程
+      RANDOM = "随机事件",      // 可重复，基于概率触发
+      WEEKLY = "周常事件"       // 固定周期，例行触发
+    }
+
+    // 多主体参与配置
+    interface SubjectConfiguration {
+      primary: SubjectType[]     // 主要参与者
+      secondary?: SubjectType[]  // 次要影响者
+      relationship_matrix: RelationshipImpact[] // 关系影响矩阵
+    }
+
+功能要求:
+
+- 事件池规模: 最少1000+事件，支持扩展至2000+
+- 触发机制: 支持时间、条件、概率、事件链等多种触发方式
+- 状态管理: 复杂的buff/debuff叠加和冲突处理
+- AI协调: 多主体事件的并发处理和冲突解决
+
+3.1.2 AI生态系统
+
+    // 三层AI架构
+    class AIEcosystem {
+      // Layer 1: 公会成员AI
+      memberAIs: GuildMemberAI[]    // 个体行为和关系管理
+      
+      // Layer 2: NPC公会AI  
+      npcGuildAIs: NPCGuildAI[]     // 10-20个竞争对手公会
+      
+      // Layer 3: 环境AI
+      environmentAI: EnvironmentAI  // 媒体、粉丝、环境因素
+    }
+
+    // 成员AI行为规格
+    class GuildMemberAI {
+      personality: PersonalityTraits    // 性格特质
+      relationships: RelationshipMap    // 人际关系网络
+      currentState: MemberState        // 当前状态（10种状态）
+      aiGoals: PersonalGoal[]          // 个人目标和野心
+      
+      // 核心AI行为
+      makeAutonomousDecisions(): AIAction[]
+      reactToEvents(events: GameEvent[]): Reaction[]
+      formAndUpdateRelationships(): void
+      triggerPersonalEvents(): EventTrigger[]
+    }
+
+AI行为要求:
+
+- 智能程度: AI能够做出合理的自主决策
+- 个性化: 每个AI都有独特的性格和行为模式
+- 关系动态: AI间关系会动态变化并影响游戏
+- 事件参与: AI能主动触发和参与事件
+
+3.2 六大功能模块规格
+
+3.2.1 公会管理模块
+
+工作面板 - 信息中枢
+
+    interface WorkPanel {
+      newsDigest: NewsDigest           // 实时新闻简报
+      financialSummary: FinancialData  // 财政状况总览
+      goalTracking: GoalProgress[]     // 目标进度追踪
+      guildRanking: RankingInfo        // 服务器排名
+      memberOverview: MemberSummary    // 成员状态概览
+      activityPerformance: ActivityStats // 活动表现分析
+      schedulePreview: UpcomingEvents  // 赛程预览
+    }
+
+会长邮箱 - 事件驱动中心
+
+- 事件邮件: 所有新事件自动生成邮件通知
+- AI互动: 成员通过邮件表达意见、抱怨、建议
+- 外部联系: 陌生人邮件、外交邀请、媒体采访
+- 预告系统: 重要活动和潜在冲突的提前通知
+
+3.2.2 作战大厅模块
+
+Raid副本和怪物设计
+
+参考魔兽世界副本设计理念，构建完整的PVE挑战系统：
+
+    // Raid副本数据结构
+    interface RaidDungeon {
+      id: string                    // 副本唯一ID
+      name: string                  // 副本名称
+      description: string           // 副本描述
+      
+      // 基础信息
+      minLevel: number              // 最低等级要求
+      recommendedLevel: number      // 推荐等级
+      playerCount: PlayerCountRange // 人数要求
+      difficulty: DifficultyLevel   // 难度等级
+      estimatedDuration: number     // 预计耗时(分钟)
+      
+      // 副本结构
+      encounters: Encounter[]       // Boss战列表
+      trashMobs: TrashMob[]        // 小怪组
+      mechanics: DungeonMechanic[]  // 副本机制
+      
+      // 奖励系统
+      rewards: RaidReward[]         // 掉落奖励
+      experienceReward: number      // 经验奖励
+      reputationReward: number      // 声望奖励
+      
+      // 解锁和前置
+      unlockRequirements: Requirement[] // 解锁条件
+      prerequisiteDungeons: string[]    // 前置副本
+      
+      // 重置和CD
+      resetPeriod: ResetPeriod      // 重置周期
+      lockoutType: LockoutType      // 锁定类型
+    }
+
+    // Boss战设计
+    interface Encounter {
+      id: string                    // Boss唯一ID
+      name: string                  // Boss名称
+      description: string           // Boss背景描述
+      
+      // Boss属性
+      level: number                 // Boss等级
+      health: number                // 生命值
+      armor: number                 // 护甲值
+      resistances: DamageResistance[] // 抗性
+      
+      // 战斗机制
+      phases: EncounterPhase[]      // 阶段机制
+      abilities: BossAbility[]      // Boss技能
+      enrageTimer: number          // 狂暴计时(秒)
+      
+      // 战术要求
+      requiredRoles: RoleRequirement[] // 职业需求
+      difficultyFactors: DifficultyFactor[] // 难度因素
+      
+      // 奖励
+      lootTable: LootEntry[]        // 掉落表
+      firstKillBonus: FirstKillReward // 首杀奖励
+      
+      // AI战术
+      encounterTactics: EncounterTactic[] // 推荐战术
+    }
+
+    // Boss技能设计
+    interface BossAbility {
+      id: string                    // 技能ID
+      name: string                  // 技能名称
+      description: string           // 技能描述
+      
+      castTime: number              // 施法时间
+      cooldown: number              // 冷却时间
+      range: number                 // 施法距离
+      
+      damageType: DamageType        // 伤害类型
+      targetType: TargetType        // 目标类型
+      effects: AbilityEffect[]      // 技能效果
+      
+      counterMeasures: CounterMeasure[] // 应对方法
+      difficultyScaling: DifficultyScaling // 难度缩放
+    }
+
+    // 小怪设计
+    interface TrashMob {
+      id: string                    // 小怪ID
+      name: string                  // 小怪名称
+      type: MobType                 // 怪物类型
+      
+      // 基础属性
+      level: number
+      health: number
+      damage: number
+      
+      // 特殊能力
+      abilities: MobAbility[]       // 小怪技能
+      behaviorPattern: MobBehavior  // 行为模式
+      packSize: number             // 成群数量
+      
+      // 掉落
+      lootChance: number           // 掉落几率
+      possibleLoot: LootEntry[]    // 可能掉落
+    }
+
+    // 枚举定义
+    enum DifficultyLevel {
+      NORMAL = "普通",
+      HEROIC = "英雄",
+      EPIC = "史诗",
+      LEGENDARY = "传奇"
+    }
+
+    enum PlayerCountRange {
+      SMALL_GROUP = "5人",
+      NORMAL_RAID = "10人",
+      LARGE_RAID = "25人",
+      EPIC_RAID = "40人",
+      FLEXIBLE = "10-30人"
+    }
+
+    enum DamageType {
+      PHYSICAL = "物理",
+      MAGICAL = "魔法",
+      FIRE = "火焰",
+      ICE = "冰霜",
+      POISON = "毒素",
+      HOLY = "神圣",
+      SHADOW = "暗影"
+    }
+
+    enum MobType {
+      HUMANOID = "人型",
+      BEAST = "野兽",
+      UNDEAD = "亡灵",
+      DEMON = "恶魔",
+      ELEMENTAL = "元素",
+      DRAGON = "龙类",
+      CONSTRUCT = "构造体"
+    }
+
+    // 奖励系统
+    interface RaidReward {
+      itemId: string               // 物品ID
+      itemName: string             // 物品名称
+      rarity: ItemRarity           // 稀有度
+      dropChance: number           // 掉落几率
+      
+      // 物品属性
+      itemLevel: number            // 物品等级
+      stats: ItemStats             // 属性加成
+      requirements: ItemRequirement[] // 装备需求
+    }
+
+    enum ItemRarity {
+      COMMON = "普通",
+      UNCOMMON = "优秀", 
+      RARE = "稀有",
+      EPIC = "史诗",
+      LEGENDARY = "传奇"
+    }
+
+PVE系统规格
+
+    interface PVESystem {
+      // 副本类型配置
+      dungeonDatabase: Map<string, RaidDungeon>  // 副本数据库
+      
+      raidTypes: {
+        smallDungeon: RaidConfig     // 10-15人副本
+        largeDungeon: RaidConfig     // 25-40人副本
+        eliteSmall: RaidConfig       // 精英10-15人
+        eliteLarge: RaidConfig       // 精英25-40大团
+        epicRaid: RaidConfig         // 史诗团本
+      }
+      
+      worldBosses: WorldBossSystem   // 多公会竞争系统
+      schedulingSystem: ActivityScheduler // 日程管理
+      
+      // 新增系统
+      progressionSystem: RaidProgression // 副本进度系统
+      difficultyScaling: DifficultyManager // 难度缩放管理
+    }
+
+    // 战斗结果计算规格 (增强版)
+    interface CombatSimulation {
+      memberAttributes: MemberStats[]   // 成员属性
+      tacticModifiers: TacticEffect[]   // 战术影响
+      randomFactors: RandomElement[]    // 随机因素
+      aiCoordination: TeamworkBonus     // 团队配合
+      
+      // 新增计算因素
+      dungeonModifiers: DungeonModifier[] // 副本特殊修正
+      bossPhaseLogic: PhaseTransition[]   // Boss阶段转换逻辑
+      raidComposition: RaidComposition    // 团队配置分析
+      
+      calculateResult(): CombatResult
+      simulateEncounter(encounter: Encounter): EncounterResult
+      evaluateWipeRisk(): RiskAssessment
+    }
+
+3.2.3 战术中心模块
+
+3.2.3.1 阵容管理系统详细设计
+
+    // 战术中心核心接口
+    interface TacticalCenter {
+      raidCompositionManager: RaidCompositionManager   // PVE阵容管理器
+      pvpCompositionManager: PVPCompositionManager     // PVP阵容管理器
+      tacticsLibrary: TacticsLibrary                   // 战术库系统
+      aiAutoAssignment: AIAutoAssignmentSystem         // AI自动分配系统
+      memberAvailabilityTracker: MemberAvailabilityTracker // 成员可用性追踪
+    }
+
+    // PVE阵容管理器
+    interface RaidCompositionManager {
+      maxRaidMembers: number                           // 最大阵容人数: 50人
+      
+      // 阵容配置
+      raidCompositions: Map<string, RaidComposition>   // PVE阵容列表
+      
+      /* 创建PVE阵容 */
+      createRaidComposition(name: string, raidType: RaidType): RaidComposition
+      
+      /* AI自动人员调配 */
+      autoAssignMembers(compositionId: string, raidType: RaidType): AssignmentResult
+      
+      /* 手动分配成员到位置 */
+      assignMemberToRole(compositionId: string, memberId: string, role: RaidRole): boolean
+      
+      /* 验证阵容有效性 */
+      validateComposition(compositionId: string, raidType: RaidType): ValidationResult
+    }
+
+    // PVE阵容定义
+    interface RaidComposition {
+      compositionId: string                            // 阵容ID
+      name: string                                     // 阵容名称
+      raidType: RaidType                              // 适用副本类型
+      maxMembers: number                              // 该阵容最大人数
+      
+      // 三个核心位置
+      roles: {
+        tanks: RaidMemberSlot[]                       // 坦克位置
+        dps: RaidMemberSlot[]                        // 输出位置  
+        healers: RaidMemberSlot[]                    // 治疗位置
+      }
+      
+      // 阵容状态
+      currentMemberCount: number                       // 当前成员数量
+      readinessLevel: ReadinessLevel                  // 准备程度
+      lastModified: Date                              // 最后修改时间
+      
+      // AI分配影响因素
+      assignmentFactors: {
+        raidLeaderInfluence: OfficerInfluence         // RL官员影响
+        classLeaderInfluence: Map<CharacterClass, OfficerInfluence> // 职业队长影响
+        raidExperience: RaidExperienceLevel          // 副本熟练度
+      }
+    }
+
+    // 副本类型及人数限制
+    enum RaidType {
+      SMALL_DUNGEON = "小型副本",                      // 5人上限
+      MEDIUM_DUNGEON = "中型副本",                     // 10人上限
+      LARGE_DUNGEON = "大型副本",                      // 25人上限
+      RAID_INSTANCE = "团队副本",                      // 40人上限
+      MEGA_RAID = "超大副本"                          // 50人上限
+    }
+
+    // 成员槽位
+    interface RaidMemberSlot {
+      slotId: string                                  // 槽位ID
+      assignedMember?: string                         // 分配的成员ID
+      requiredRole: RaidRole                          // 需要的角色
+      priority: SlotPriority                          // 槽位优先级
+      
+      // 槽位状态
+      isRequired: boolean                             // 是否必需
+      isLocked: boolean                               // 是否锁定
+      aiRecommendation?: string                       // AI推荐成员
+    }
+
+    enum RaidRole {
+      MAIN_TANK = "主坦克",                           // 主坦克
+      OFF_TANK = "副坦克",                            // 副坦克
+      MELEE_DPS = "近战输出",                         // 近战输出
+      RANGED_DPS = "远程输出",                        // 远程输出
+      MAIN_HEALER = "主治疗",                         // 主治疗
+      BACKUP_HEALER = "副治疗",                       // 副治疗
+      UTILITY = "多用途"                              // 多用途角色
+    }
+
+    // PVP阵容管理器
+    interface PVPCompositionManager {
+      // PVP阵容类型
+      battlegroundCompositions: Map<string, PVPComposition> // 战场阵容
+      arenaCompositions: Map<string, PVPComposition>        // 竞技场阵容
+      
+      /* 创建PVP阵容 */
+      createPVPComposition(name: string, type: PVPType): PVPComposition
+      
+      /* 分配队长 */
+      assignCaptain(compositionId: string, memberId: string): boolean
+      
+      /* 添加成员到PVP阵容 */
+      addMemberToComposition(compositionId: string, memberId: string): boolean
+    }
+
+    // PVP阵容定义
+    interface PVPComposition {
+      compositionId: string                           // 阵容ID
+      name: string                                    // 阵容名称
+      type: PVPType                                   // PVP类型
+      
+      // 成员配置
+      captain: string                                 // 队长ID
+      members: string[]                               // 成员ID列表
+      maxMembers: number                              // 最大成员数
+      
+      // 队长影响
+      captainBonuses: {
+        leadershipBonus: number                       // 领导力加成
+        tacticalBonus: number                         // 战术加成
+        moraleBonus: number                           // 士气加成
+      }
+    }
+
+    enum PVPType {
+      BATTLEGROUND = "战场",                          // 战场PVP
+      ARENA = "竞技场"                                // 竞技场PVP
+    }
+
+    // 成员可用性追踪
+    interface MemberAvailabilityTracker {
+      /* 检查成员阵容冲突 */
+      checkMemberConflicts(memberId: string): ConflictCheck
+      
+      /* 获取成员当前阵容 */
+      getMemberCompositions(memberId: string): MemberCompositionStatus
+      
+      /* 验证成员可加入阵容 */
+      canJoinComposition(memberId: string, compositionId: string, type: CompositionType): boolean
+    }
+
+    // 成员阵容状态
+    interface MemberCompositionStatus {
+      memberId: string                                // 成员ID
+      memberName: string                              // 成员姓名
+      
+      // 当前阵容归属
+      currentCompositions: {
+        pveComposition?: string                       // 当前PVE阵容
+        battlegroundComposition?: string              // 当前战场阵容
+        arenaComposition?: string                     // 当前竞技场阵容
+      }
+      
+      // 冲突检查
+      conflictStatus: {
+        hasPVEConflict: boolean                       // 是否有PVE冲突
+        hasBattlegroundConflict: boolean              // 是否有战场冲突
+        hasArenaConflict: boolean                     // 是否有竞技场冲突
+      }
+    }
+
+    // AI自动分配系统
+    interface AIAutoAssignmentSystem {
+      /* 智能分配PVE阵容 */
+      autoAssignRaidComposition(compositionId: string): AutoAssignmentResult
+      
+      /* 考虑官员影响的分配 */
+      assignWithOfficerInfluence(compositionId: string): AssignmentResult
+      
+      /* 生成最优阵容建议 */
+      generateOptimalComposition(raidType: RaidType): CompositionRecommendation
+    }
+
+    // 官员影响系统
+    interface OfficerInfluence {
+      officerId: string                               // 官员ID
+      officerType: OfficerType                        // 官员类型
+      influenceLevel: number                          // 影响力等级 (1-10)
+      
+      // 具体影响
+      influences: {
+        memberSelectionWeight: number                 // 成员选择权重
+        roleAssignmentBonus: number                   // 角色分配加成
+        compositionEfficiency: number                // 阵容效率提升
+      }
+    }
+
+    enum OfficerType {
+      RAID_LEADER = "团队领袖",                       // RL官员
+      TANK_LEADER = "坦克队长",                       // 坦克职业队长
+      DPS_LEADER = "输出队长",                         // 输出职业队长
+      HEALER_LEADER = "治疗队长",                     // 治疗职业队长
+      TACTICAL_OFFICER = "战术官员"                   // 战术专员
+    }
+
+3.2.3.2 战术库系统设计
+
+    // 战术库系统
+    interface TacticsLibrary {
+      unlockedTactics: Map<string, Tactic>            // 已解锁战术
+      researchQueue: TacticResearchQueue              // 战术研究队列
+      
+      /* 解锁新战术 */
+      unlockTactic(tacticId: string, unlockMethod: UnlockMethod): UnlockResult
+      
+      /* 升级战术 */
+      upgradeTactic(tacticId: string): UpgradeResult
+      
+      /* 获取可用战术 */
+      getAvailableTactics(compositionId: string, activityType: ActivityType): Tactic[]
+    }
+
+    // 战术定义
+    interface Tactic {
+      tacticId: string                                // 战术ID
+      name: string                                    // 战术名称
+      description: string                             // 战术描述
+      category: TacticCategory                        // 战术类别
+      level: number                                   // 战术等级 (1-10)
+      
+      // 使用限制
+      usageRestrictions: {
+        raidTypeRestrictions: RaidType[]              // 副本类型限制
+        minimumGuildLevel: number                     // 最低公会等级要求
+        requiredOfficerLevel: number                  // 所需官员等级
+        cooldownPeriod: number                        // 冷却期 (小时)
+      }
+      
+      // 战术效果
+      effects: TacticEffect[]                         // 战术效果列表
+      
+      // 选择影响因素
+      selectionFactors: {
+        guildLevelBonus: number                       // 公会等级加成
+        raidLeaderBonus: number                       // RL官员属性加成
+        raidFamiliarity: number                       // 副本熟练度加成
+        maxSelectableCount: number                    // 最大可选数量
+      }
+    }
+
+    // 战术类别
+    enum TacticCategory {
+      RESOURCE_CONSUMPTION = "资源消耗型",             // 消耗资源增强战力
+      SKILL_NEGATION = "技能抵消型",                  // 无消耗抵消特定技能
+      FORMATION_ENHANCEMENT = "阵型强化型",            // 强化阵容配置
+      EMERGENCY_RESPONSE = "应急响应型",               // 紧急情况处理
+      BUFF_AMPLIFICATION = "增益放大型",               // 放大团队增益效果
+      DEBUFF_RESISTANCE = "减益抗性型"                // 抵抗负面效果
+    }
+
+    // 战术效果
+    interface TacticEffect {
+      effectId: string                                // 效果ID
+      effectType: EffectType                          // 效果类型
+      magnitude: number                               // 效果强度
+      duration: number                                // 持续时间 (分钟)
+      
+      // 资源消耗
+      resourceCost?: ResourceCost                     // 资源消耗 (如果有)
+      
+      // 目标和条件
+      targets: EffectTarget[]                         // 作用目标
+      conditions: EffectCondition[]                   // 生效条件
+    }
+
+    enum EffectType {
+      DAMAGE_BOOST = "伤害提升",                      // 伤害增强
+      DEFENSE_BOOST = "防御提升",                     // 防御增强
+      HEALING_BOOST = "治疗提升",                     // 治疗增强
+      RESISTANCE_GRANT = "抗性赋予",                  // 给予特定抗性
+      SKILL_IMMUNITY = "技能免疫",                    // 免疫特定技能
+      RESOURCE_EFFICIENCY = "资源效率",                // 提升资源使用效率
+      COORDINATION_ENHANCEMENT = "协调强化"            // 提升团队协调性
+    }
+
+    // 战术解锁方式
+    enum UnlockMethod {
+      BASE_FACILITY_RESEARCH = "基地设施研究",         // 通过基地设施研究解锁
+      EVENT_COMPLETION = "事件完成",                  // 完成特定事件解锁
+      LEGENDARY_MEMBER_JOIN = "传奇成员加入",          // 传奇成员带来的战术
+      BOSS_FIRST_KILL = "Boss首杀",                  // Boss首杀奖励
+      ALLIANCE_EXCHANGE = "联盟交换",                 // 与其他公会交换
+      ACHIEVEMENT_REWARD = "成就奖励",                // 成就系统奖励
+      SPECIAL_EVENT = "特殊事件"                      // 特殊活动解锁
+    }
+
+    // 战术选择系统
+    interface TacticSelectionSystem {
+      /* 计算可选战术数量 */
+      calculateSelectableCount(compositionId: string, activityType: ActivityType): number
+      
+      /* 选择战术组合 */
+      selectTacticCombination(compositionId: string, selectedTactics: string[]): SelectionResult
+      
+      /* 验证战术兼容性 */
+      validateTacticCompatibility(tactics: string[]): CompatibilityCheck
+    }
+
+    // 示例战术配置
+    const ExampleTactics: Record<string, Tactic> = {
+      // 资源消耗型战术示例
+      BLACK_DRAGON_HEAD: {
+        tacticId: "black_dragon_head",
+        name: "黑龙头挂饰",
+        description: "消耗黑龙头道具，为全团提供火抗和伤害加成",
+        category: TacticCategory.RESOURCE_CONSUMPTION,
+        level: 5,
+        effects: [
+          {
+            effectId: "fire_resistance_boost",
+            effectType: EffectType.RESISTANCE_GRANT,
+            magnitude: 50,
+            duration: 60,
+            resourceCost: {
+              itemId: "black_dragon_head",
+              quantity: 1
+            }
+          },
+          {
+            effectId: "damage_boost",
+            effectType: EffectType.DAMAGE_BOOST,
+            magnitude: 15,
+            duration: 60
+          }
+        ]
+      },
+      
+      // 技能抵消型战术示例
+      FULL_FIRE_RESISTANCE: {
+        tacticId: "full_fire_resistance",
+        name: "全团火抗",
+        description: "无消耗抵消Boss燃烧技能效果",
+        category: TacticCategory.SKILL_NEGATION,
+        level: 3,
+        effects: [
+          {
+            effectId: "burn_immunity",
+            effectType: EffectType.SKILL_IMMUNITY,
+            magnitude: 100,
+            duration: 180,
+            conditions: [{
+              conditionType: "boss_skill",
+              targetSkill: "burning_flame"
+            }]
+          }
+        ]
+      }
+    }
+
+阵容管理规则：
+
+1.  成员分配限制
+
+    - 每位成员在同一类型阵容中只能加入一个（PVE、战场、竞技场各自独立）
+    - 最大PVE阵容人数：50人
+    - AI根据副本类型自动限制参战人员（如大型副本25人上限）
+
+2.  AI智能分配
+
+    - 考虑RL官员和职业队长的影响
+    - 基于成员属性、技能、经验进行最优匹配
+    - 自动平衡角色分配（坦克/输出/治疗比例）
+
+3.  战术系统机制
+
+    - 多种解锁途径：研究、事件、传奇成员等
+    - 战术可升级强化，等级影响效果
+    - 每次活动可多选战术，数量受多因素影响
+
+3.2.4 公会会员模块
+
+角色属性字段设计
+
+参考魔兽世界设计理念，定义完整的角色属性系统：
+
+    // 会长角色属性 (玩家扮演)
+    interface GuildLeader extends BaseCharacter {
+      // 基础信息
+      name: string              // 会长名称
+      title: string             // 称号
+      race: string              // 种族
+      class: string             // 职业
+      
+      // 核心属性 (1-100)
+      leadership: number        // 领导力 - 影响公会整体士气和效率
+      charisma: number          // 魅力 - 影响招募成功率和外交
+      strategy: number          // 策略 - 影响战术制定和活动规划
+      management: number        // 管理 - 影响公会运营效率
+      
+      // 经验系统
+      experience: MemberExperienceSystem
+      
+      // 特殊能力
+      leadershipSkills: LeadershipSkill[]  // 会长专用技能
+      reputation: number                   // 个人声望
+      
+      // 社交关系
+      intimacyMap: Map<string, number>     // 与其他角色的亲密度
+      contactList: ContactEntry[]          // 联系人清单
+    }
+
+    // 公会成员属性
+    interface GuildMember extends BaseCharacter {
+      // 基础信息  
+      name: string              // 角色名称
+      race: string              // 种族
+      class: string             // 职业 (战士/法师/牧师/盗贼等)
+      specialization: string    // 专精 (坦克/治疗/输出)
+      guild:string              // 所属公会
+      assess:string             // 公会评价
+      
+      // 传奇成员属性
+      legendary: boolean        // 传奇成员标识
+      legendaryType?: LegendaryType          // 传奇类型 (仅传奇成员有效)
+      legendaryAbilities?: LegendaryAbility[] // 传奇专属能力
+      legendaryBackstory?: string            // 传奇背景故事
+      rarity: MemberRarity      // 成员稀有度等级
+      
+      // 核心属性 (1-100)
+      skill: number             // 技能水平 - 影响活动表现
+      loyalty: number           // 忠诚度 - 影响流失概率
+      teamwork: number          // 团队配合 - 影响团队活动效果
+      ambition: number          // 野心 - 影响成长欲望和内部竞争
+      
+      // 状态属性
+      satisfaction: number      // 满意度 (0-100)
+      fatigue: number          // 疲劳度 (0-100)
+      morale: number           // 士气 (0-100)
+      availability: number      // 可用度 (0-100, 受现实时间影响)
+      
+      // 经验系统
+      experience: MemberExperienceSystem
+      
+      // 社交关系
+      intimacyWithLeader: number           // 与会长的亲密度
+      memberRelationships: Map<string, number> // 与其他成员关系
+      
+      // AI特性 (NPC成员)
+      personality: PersonalityTrait[]      // 性格特质
+      aiGoals: PersonalGoal[]             // 个人目标
+      behaviorPattern: BehaviorPattern     // 行为模式
+      
+      // 游戏机制
+      recruitmentSource: RecruitmentSource // 招募来源
+      joinDate: Date                      // 加入日期
+      currentRole: GuildRole              // 当前公会职位
+    }
+
+    // 基础角色接口
+    interface BaseCharacter {
+      id: string
+      avatar: string            // 头像
+      level: number            // 等级 (1-60)
+      gearScore: number        // 装备评分
+      
+      // 活动统计
+      activityStats: {
+        totalActivities: number
+        successRate: number
+        mvpCount: number
+        lastActivityDate: Date
+      }
+    }
+
+    // 成员稀有度等级
+    enum MemberRarity {
+      COMMON = "普通",          // 常见成员 (85%)
+      UNCOMMON = "稀有",        // 稀有成员 (12%)
+      RARE = "精英",           // 精英成员 (2.5%)
+      LEGENDARY = "传奇"       // 传奇成员 (0.5%)
+    }
+
+    // 传奇成员类型
+    enum LegendaryType {
+      COMBAT_MASTER = "战斗大师",     // 战斗技能卓越，提升团队DPS
+      STRATEGIC_GENIUS = "战术天才",   // 战术策划能力，提升活动成功率
+      SOCIAL_BUTTERFLY = "社交达人",  // 社交能力卓越，提升招募和外交
+      TECHNICAL_EXPERT = "技术专家",  // 专业技能精通，提升专业活动效率
+      LEADERSHIP_ICON = "领导典范",   // 领导魅力出众，提升团队士气
+      LEGENDARY_CRAFTER = "传奇工匠", // 制作技能精湛，提升装备和道具质量
+      MASTER_STRATEGIST = "军事家"   // 军事战略专家，提升PVP和大型战役表现
+    }
+
+    // 传奇能力定义
+    interface LegendaryAbility {
+      id: string                    // 能力ID
+      name: string                  // 能力名称
+      description: string           // 能力描述
+      type: LegendaryAbilityType    // 能力类型
+      
+      // 能力效果
+      effects: AbilityEffect[]      // 具体效果列表
+      cooldown?: number            // 冷却时间 (回合)
+      cost?: ResourceCost          // 使用成本
+      
+      // 触发条件
+      triggerConditions?: TriggerCondition[] // 触发条件
+      passiveBonus?: PassiveBonus   // 被动加成
+    }
+
+    enum LegendaryAbilityType {
+      PASSIVE = "被动技能",         // 持续生效的被动能力
+      ACTIVE = "主动技能",          // 需要主动激活的能力
+      AURA = "光环效果",           // 影响周围成员的光环
+      CONDITIONAL = "条件技能"      // 特定条件下触发的能力
+    }
+
+    // 传奇能力效果
+    interface AbilityEffect {
+      target: TargetType           // 影响目标
+      attribute: string            // 影响属性
+      modifier: number             // 修正值
+      duration?: number            // 持续时间
+      conditions?: string[]        // 生效条件
+    }
+
+    enum TargetType {
+      SELF = "自身",              // 仅影响自己
+      TEAM = "团队",              // 影响整个团队
+      GUILD = "公会",             // 影响整个公会
+      ACTIVITY = "活动",          // 影响特定活动
+      OPPONENTS = "对手"          // 影响对手 (PVP)
+    }
+
+    // 传奇成员展示信息 (用于NPC公会信息显示)
+    interface LegendaryMemberInfo {
+      id: string                  // 成员ID
+      name: string                // 成员名称
+      race: string                // 种族
+      class: string               // 职业
+      legendaryType: LegendaryType // 传奇类型
+      joinDate: Date              // 加入日期
+      achievements: string[]       // 主要成就
+      specialAbility: string      // 特殊能力简述
+    }
+
+    // 性格特质枚举
+    enum PersonalityTrait {
+      COMPETITIVE = "好胜心强",
+      COOPERATIVE = "合作精神",
+      PERFECTIONIST = "完美主义",
+      CASUAL = "休闲随性",
+      SOCIAL = "社交活跃",
+      INTROVERTED = "内向专注",
+      AMBITIOUS = "雄心勃勃",
+      LOYAL = "忠诚可靠"
+    }
+
+    // 公会职位
+    enum GuildRole {
+      LEADER = "会长",
+      OFFICER = "官员", 
+      VETERAN = "资深成员",
+      MEMBER = "普通成员",
+      TRIAL = "见习成员"
+    }
+
+亲密度系统设计
+
+核心社交机制，管理玩家会长与游戏世界中所有角色的关系网络：
+
+    // 亲密度系统核心接口
+    interface IntimacySystem {
+      // 全局亲密度映射 (包括所有NPC公会成员、非会员AI等)
+      globalIntimacyMap: Map<string, IntimacyData>
+      
+      // 联系人清单 (亲密度 >= 1 的角色)
+      contactList: ContactEntry[]
+      
+      // 亲密度事件触发器
+      intimacyTriggers: IntimacyTrigger[]
+      
+      // 核心方法
+      updateIntimacy(characterId: string, change: number): void
+      triggerIntimacyEvent(characterId: string): void
+      addToContactList(characterId: string): void
+      getAvailableActions(characterId: string): ContactAction[]
+    }
+
+    // 亲密度数据结构
+    interface IntimacyData {
+      characterId: string        // 角色ID
+      intimacyLevel: number      // 亲密度等级 (0-10)
+      intimacyValue: number      // 具体亲密度数值 (0-1000)
+      relationshipType: RelationshipType // 关系类型
+      lastInteractionDate: Date  // 最后互动时间
+      interactionHistory: InteractionRecord[] // 互动历史
+      
+      // 角色基本信息
+      characterInfo: {
+        name: string
+        guildId?: string         // 所属公会ID (如果有)
+        class: string           // 职业
+        specialization: string  // 专精
+        reputation: number      // 该角色的声望
+      }
+    }
+
+    // 亲密度等级定义
+    enum IntimacyLevel {
+      UNKNOWN = 0,              // 陌生人，不在联系人清单
+      ACQUAINTANCE = 1,         // 认识，进入联系人清单
+      FRIENDLY = 2,             // 友好
+      CLOSE_FRIEND = 3,         // 亲密朋友
+      TRUSTED_ALLY = 4,         // 可信盟友
+      BEST_FRIEND = 5           // 最好的朋友
+    }
+
+    // 关系类型
+    enum RelationshipType {
+      POTENTIAL_RECRUIT = "潜在招募对象",
+      GUILD_MEMBER = "公会成员",
+      RIVAL_GUILD_MEMBER = "敌对公会成员",
+      NEUTRAL_PLAYER = "中立玩家",
+      MENTOR = "导师",
+      PROTEGE = "门徒",
+      BUSINESS_CONTACT = "商业伙伴"
+    }
+
+    // 联系人清单条目
+    interface ContactEntry {
+      intimacyData: IntimacyData
+      availableActions: ContactAction[]    // 可执行的互动指令
+      lastActionDate?: Date               // 最后行动时间
+      actionCooldowns: Map<string, Date>  // 行动冷却时间
+    }
+
+    // 联系人可执行的行动
+    interface ContactAction {
+      id: string
+      name: string                        // 行动名称 (如"招募"、"送礼"、"邀请聊天")
+      description: string                 // 详细描述
+      intimacyRequirement: number         // 所需最低亲密度
+      cooldown: number                    // 冷却时间 (小时)
+      cost?: ResourceCost                 // 消耗资源
+      successRate: number                 // 成功率 (基于当前亲密度)
+      
+      // 效果预期
+      intimacyChange: IntimacyChange      // 亲密度变化
+      possibleEvents: string[]            // 可能触发的事件ID
+    }
+
+    // 亲密度变化规则
+    interface IntimacyChange {
+      onSuccess: number                   // 成功时亲密度变化
+      onFailure: number                   // 失败时亲密度变化
+      onCriticalSuccess?: number          // 大成功时额外变化
+    }
+
+    // 亲密度触发器
+    interface IntimacyTrigger {
+      intimacyThreshold: number           // 触发阈值
+      eventId: string                     // 触发的事件ID
+      triggerOnce: boolean               // 是否只触发一次
+      additionalConditions?: Condition[]  // 额外触发条件
+    }
+
+    // 互动记录
+    interface InteractionRecord {
+      actionId: string
+      date: Date
+      result: InteractionResult
+      intimacyChange: number
+    }
+
+    enum InteractionResult {
+      CRITICAL_SUCCESS = "大成功",
+      SUCCESS = "成功", 
+      FAILURE = "失败",
+      CRITICAL_FAILURE = "大失败"
+    }
+
+亲密度系统机制说明：
+
+1.  初始状态: 所有角色亲密度为0，玩家不认识他们
+2.  建立联系: 通过事件邮件、推荐、主动招募等方式，亲密度提升至1，角色进入联系人清单
+3.  主动互动: 玩家可在联系人清单中选择行动指令，影响亲密度
+4.  自动触发: 达到特定亲密度阈值时自动触发相关事件
+5.  动态管理: 长期不互动的联系人亲密度会自然下降
+
+社交关系网络
+
+    interface SocialNetwork {
+      memberHierarchy: HierarchyStructure  // 层级管理
+      relationshipGraph: RelationshipMap   // 关系网络图
+      satisfactionSystem: SatisfactionMetrics // 满意度系统
+      friendGroups: FriendGroupAI[]        // AI形成的小团体
+      intimacySystem: IntimacySystem       // 亲密度系统集成
+    }
+
+    // 招募系统规格 (与亲密度系统集成)
+    interface RecruitmentSystem {
+      searchFilters: RecruitmentFilters    // 多维度搜索
+      negotiationSystem: NegotiationFlow   // 合同谈判流程
+      talentRankings: TalentLeaderboard   // 天梯排行榜
+      intimacyBasedRecruitment: boolean   // 基于亲密度的招募加成
+      
+      // 传奇成员专用功能 (新增)
+      legendaryMemberSearch: LegendarySearchSystem // 传奇成员检索系统
+      legendaryRecruitmentEvents: LegendaryRecruitmentEventPool // 传奇成员招募事件池
+    }
+
+    // 招募搜索过滤器 (扩展传奇成员支持)
+    interface RecruitmentFilters {
+      // 基础过滤
+      classFilter: string[]               // 职业过滤
+      levelRange: [number, number]        // 等级区间
+      skillRange: [number, number]        // 技能区间
+      
+      // 传奇成员过滤 (新增)
+      rarityFilter: MemberRarity[]        // 稀有度过滤
+      legendaryOnly: boolean              // 仅显示传奇成员
+      legendaryTypeFilter: LegendaryType[] // 传奇类型过滤
+      availableLegendariesOnly: boolean   // 仅显示可招募的传奇成员
+      
+      // 高级过滤
+      personalityTraits: PersonalityTrait[] // 性格特质过滤
+      experienceRequirement: number       // 经验要求
+      intimacyLevelFilter: number         // 亲密度等级过滤
+    }
+
+    // 传奇成员搜索系统
+    interface LegendarySearchSystem {
+      // 搜索功能
+      searchAvailableLegendaries(): LegendaryMemberCandidate[] // 搜索可招募传奇成员
+      filterByType(type: LegendaryType): LegendaryMemberCandidate[] // 按类型筛选
+      searchByAbility(abilityKeyword: string): LegendaryMemberCandidate[] // 按能力搜索
+      
+      // 展示功能
+      displayLegendaryRoster(guildId: string): LegendaryMemberInfo[] // 显示公会传奇成员
+      compareLegendaryMembers(member1: string, member2: string): ComparisonResult // 传奇成员对比
+      
+      // 统计功能  
+      getLegendaryStatistics(): LegendaryStatistics // 获取传奇成员统计
+    }
+
+    // 传奇成员候选人
+    interface LegendaryMemberCandidate {
+      memberInfo: GuildMember            // 基础成员信息
+      recruitmentCost: ResourceCost      // 招募成本
+      negotiationDifficulty: number     // 谈判难度
+      competingGuilds: string[]          // 竞争公会列表
+      exclusiveRequirements?: string[]   // 特殊招募要求
+      timeLimit?: Date                   // 招募截止时间
+    }
+
+3.2.5 随机化世界生成机制
+
+每次游戏开始时动态生成不同的竞争环境，确保高重玩价值和策略多样性。
+
+    // 世界生成系统
+    interface WorldGenerationSystem {
+      // 公会池配置
+      guildArchetypes: NPCGuildArchetype[]  // 预定义公会原型
+      
+      // 生成逻辑
+      generateCompetitors(): NPCGuild[]
+      initializeWorldState(competitors: NPCGuild[]): WorldState
+    }
+
+    // NPC公会原型定义
+    interface NPCGuildArchetype {
+      id: string
+      name: string
+      tier: number                             // 公会等级(1-10，与游戏阶段绑定)
+      reputation: number                       // 对玩家公会的声望值
+      strategy: GuildStrategy                  // 发展策略
+      initialMembers: MemberTemplate[]         // 初始成员配置
+      initialOfficers: OfficerTemplate[]       //  初始官员配置
+      specialties: string[]                    // 专精领域
+      personality: AIPersonalityTrait[]        // AI性格特质
+      feud: string                             // 死敌公会
+      homebase: string                         // 公会基地
+      
+      // 传奇成员展示 (新增)
+      legendaryMembers: LegendaryMemberInfo[]  // 传奇成员清单 (用于公会信息展示)
+      legendaryMemberCount: number             // 传奇成员总数 (便于排序和比较)
+      
+      // 历史里程碑系统 (新增)
+      historyMilestones: GuildHistoryRecord[]  // 公会历史里程碑记录
+      achievementHistory: GuildAchievement[]   // 成就历史
+      legacyRanking: HistoricalRanking         // 历史最高排名记录
+      
+      // 公会联赛日程系统 (新增)
+      leagueSchedule: GuildLeagueSchedule      // 公会联赛日程表
+      competitionHistory: CompetitionRecord[]  // 比赛历史记录
+      leagueStanding: LeagueStanding           // 联赛排名状态
+      
+      // 外交态度系统 (新增)
+      diplomaticAttitude: DiplomaticAttitude   // 对玩家公会的外交态度 (-100 到 +100)
+      diplomaticModifiers: DiplomaticModifier[] // 外交态度修正因子
+      eventPool: DiplomaticEventPool           // 关联的外交事件池
+      relationshipHistory: DiplomaticHistory[] // 外交关系历史
+    }
+
+    // 历史里程碑系统类型定义
+    interface GuildHistoryRecord {
+      id: string                               // 历史记录ID
+      eventType: HistoryEventType              // 事件类型
+      eventTitle: string                       // 事件标题
+      eventDescription: string                 // 事件描述
+      achievementDate: Date                    // 达成日期
+      significance: SignificanceLevel          // 重要程度
+      
+      // 相关数据
+      relatedData: {
+        [key: string]: any                     // 事件相关数据 (如排名、Boss名称等)
+      }
+      
+      // 影响评估
+      impactAssessment: {
+        reputationGain: number                 // 声望提升
+        rivalryEffect: Map<string, number>     // 对其他公会的关系影响
+        memberMoraleBoost: number              // 成员士气提升
+      }
+    }
+
+    enum HistoryEventType {
+      RAID_FIRST_CLEAR = "副本首通",            // 副本首次通关
+      BOSS_FIRST_KILL = "Boss首杀",            // 世界Boss首杀
+      RANKING_ACHIEVEMENT = "排名成就",         // 排名相关成就
+      PVP_VICTORY = "PVP胜利",                // 重大PVP胜利
+      DIPLOMATIC_BREAKTHROUGH = "外交突破",     // 外交重大进展
+      MEMBER_LEGENDARY = "传奇会员",            // 成员晋升传奇
+      FACILITY_BREAKTHROUGH = "设施突破",       // 基地设施重大升级
+      ECONOMIC_MILESTONE = "经济里程碑",        // 经济发展里程碑
+      CRISIS_RESOLUTION = "危机化解",           // 成功化解重大危机
+      ALLIANCE_FORMATION = "联盟成立"           // 重大联盟成立
+    }
+
+    enum SignificanceLevel {
+      MINOR = "轻微",                          // 一般性成就
+      MODERATE = "适中",                       // 较重要成就
+      MAJOR = "重大",                         // 重大成就
+      LEGENDARY = "传奇",                     // 传奇级成就
+      EPOCH_MAKING = "划时代"                 // 划时代成就
+    }
+
+    interface HistoricalRanking {
+      highestServerRank: number               // 历史最高服务器排名
+      highestBattlezoneRank: number          // 历史最高战区排名
+      highestNationalRank: number            // 历史最高国服排名
+      highestGlobalRank: number              // 历史最高全球排名
+      
+      // 排名历史
+      rankingTimeline: RankingSnapshot[]      // 排名时间线
+      rankingAchievements: RankingAchievement[] // 排名相关成就
+      
+      // 竞争记录
+      rivalryRecords: Map<string, RivalryRecord> // 与其他公会的竞争记录
+    }
+
+    interface RankingSnapshot {
+      timestamp: Date                         // 时间点
+      serverRank: number                      // 服务器排名
+      battlezoneRank?: number                 // 战区排名 (如果适用)
+      nationalRank?: number                   // 国服排名 (如果适用)
+      globalRank?: number                     // 全球排名 (如果适用)
+      gamePhase: GamePhase                    // 游戏阶段
+    }
+
+    // 公会联赛日程系统类型定义
+    interface GuildLeagueSchedule {
+      seasonId: string                        // 赛季ID
+      seasonName: string                      // 赛季名称
+      scheduleType: ScheduleType              // 日程类型
+      
+      // 比赛日程
+      upcomingMatches: ScheduledMatch[]       // 即将进行的比赛
+      completedMatches: CompletedMatch[]      // 已完成的比赛
+      
+      // 赛季信息
+      seasonInfo: {
+        startDate: Date                       // 赛季开始日期
+        endDate: Date                         // 赛季结束日期
+        totalRounds: number                   // 总轮数
+        currentRound: number                  // 当前轮数
+        participatingGuilds: string[]         // 参赛公会列表
+      }
+      
+      // 表现统计
+      seasonStats: SeasonPerformanceStats     // 赛季表现统计
+    }
+
+    enum ScheduleType {
+      REGULAR_SEASON = "常规赛",               // 常规赛季日程
+      PLAYOFFS = "季后赛",                    // 季后赛日程
+      CHAMPIONSHIP = "冠军赛",                // 冠军赛日程
+      INVITATIONAL = "邀请赛",                // 邀请赛日程
+      FRIENDLY = "友谊赛"                     // 友谊赛日程
+    }
+
+    interface ScheduledMatch {
+      matchId: string                         // 比赛ID
+      matchType: MatchType                    // 比赛类型
+      opponent: string                        // 对手公会ID
+      scheduledTime: Date                     // 预定时间
+      venue: MatchVenue                       // 比赛场地
+      importance: MatchImportance             // 比赛重要性
+      
+      // 比赛设置
+      matchFormat: MatchFormat                // 比赛形式
+      rules: MatchRules                       // 比赛规则
+      stakes: MatchStakes                     // 比赛赌注/奖励
+    }
+
+    interface CompletedMatch {
+      matchId: string                         // 比赛ID
+      opponent: string                        // 对手公会ID
+      result: MatchResult                     // 比赛结果
+      completedTime: Date                     // 完成时间
+      score: MatchScore                       // 比分
+      
+      // 表现分析
+      performanceAnalysis: MatchPerformance   // 比赛表现分析
+      mvpMembers: string[]                    // MVP成员
+      lessonLearned: string[]                 // 经验教训
+    }
+
+    enum MatchType {
+      RAID_COMPETITION = "副本竞速",           // 副本通关竞速
+      PVP_TOURNAMENT = "PVP锦标赛",           // PVP锦标赛
+      RESOURCE_CONTEST = "资源争夺",           // 资源争夺战
+      DIPLOMATIC_DEBATE = "外交辩论",          // 外交辩论赛
+      STRATEGY_CHALLENGE = "策略挑战",         // 策略挑战赛
+      MIXED_COMPETITION = "综合竞赛"           // 综合性竞赛
+    }
+
+    interface LeagueStanding {
+      currentPosition: number                 // 当前排名
+      totalParticipants: number              // 总参赛者数
+      
+      // 积分情况
+      points: number                          // 总积分
+      wins: number                           // 胜场数
+      losses: number                         // 败场数
+      draws: number                          // 平局数
+      
+      // 趋势分析
+      recentForm: MatchResult[]              // 近期表现
+      trendDirection: TrendDirection         // 排名趋势
+      projectedFinish: number                // 预测最终排名
+    }
+
+    // 外交态度系统类型定义
+    interface DiplomaticAttitude {
+      attitudeValue: number                   // 外交态度数值 (-100 到 +100)
+      attitudeCategory: AttitudeCategory      // 态度分类
+      stabilityFactor: number                 // 态度稳定性因子 (0-1)
+      
+      // 态度构成因素
+      attitudeFactors: {
+        historicalRelations: number           // 历史关系影响 (-20 到 +20)
+        recentInteractions: number            // 近期互动影响 (-30 到 +30)
+        competitiveRivalry: number            // 竞争关系影响 (-25 到 +5)
+        diplomaticEfforts: number             // 外交努力影响 (-5 到 +25)
+        thirdPartyInfluence: number           // 第三方影响 (-10 到 +10)
+        personalityAlignment: number          // 性格匹配度影响 (-10 到 +10)
+      }
+      
+      // 动态调整机制
+      adjustmentTriggers: AttitudeTrigger[]   // 态度调整触发器
+      decayRate: number                       // 态度自然衰减率
+      lastUpdateTime: Date                    // 最后更新时间
+    }
+
+    enum AttitudeCategory {
+      HOSTILE = "敌对",                       // -100 到 -61
+      UNFRIENDLY = "不友好",                  // -60 到 -21
+      NEUTRAL = "中立",                       // -20 到 +20
+      FRIENDLY = "友好",                      // +21 到 +60
+      ALLIED = "盟友"                         // +61 到 +100
+    }
+
+    interface DiplomaticModifier {
+      modifierId: string                      // 修正因子ID
+      modifierName: string                    // 修正因子名称
+      modifierType: ModifierType              // 修正类型
+      effect: number                          // 效果值
+      duration: Duration                      // 持续时间
+      source: ModifierSource                  // 来源
+      
+      // 条件和限制
+      conditions: ModifierCondition[]         // 生效条件
+      stackable: boolean                      // 是否可叠加
+      priority: number                        // 优先级
+    }
+
+    enum ModifierType {
+      PERMANENT = "永久性",                   // 永久性修正
+      TEMPORARY = "临时性",                   // 临时性修正
+      DECAY_OVER_TIME = "逐渐衰减",           // 随时间衰减
+      EVENT_TRIGGERED = "事件触发",            // 事件触发型
+      CONDITIONAL = "条件性"                  // 条件性修正
+    }
+
+    interface DiplomaticEventPool {
+      poolId: string                          // 事件池ID
+      applicableAttitudeRange: AttitudeRange  // 适用的态度范围
+      
+      // 事件分类
+      eventsByType: {
+        diplomaticInvitations: DiplomaticEvent[]  // 外交邀请事件
+        tradeProposals: DiplomaticEvent[]         // 贸易提案事件
+        militaryCooperation: DiplomaticEvent[]    // 军事合作事件
+        informationExchange: DiplomaticEvent[]    // 信息交换事件
+        culturalExchange: DiplomaticEvent[]       // 文化交流事件
+        conflictResolution: DiplomaticEvent[]     // 冲突解决事件
+        hostileActions: DiplomaticEvent[]         // 敌对行动事件
+      }
+      
+      // 事件权重和概率
+      eventWeights: Map<string, number>       // 事件权重映射
+      triggerConditions: EventTriggerCondition[] // 触发条件
+    }
+
+    interface AttitudeRange {
+      minValue: number                        // 最小态度值
+      maxValue: number                        // 最大态度值
+      preferredRange?: {                      // 优选范围 (可选)
+        min: number
+        max: number
+      }
+    }
+
+    interface DiplomaticEvent {
+      eventId: string                         // 事件ID
+      eventName: string                       // 事件名称
+      eventDescription: string                // 事件描述
+      eventType: DiplomaticEventType          // 事件类型
+      
+      // 事件参数
+      attitudeRequirement: AttitudeRange      // 态度要求
+      cooldownPeriod: number                  // 冷却期 (小时)
+      maxOccurrences?: number                 // 最大发生次数
+      
+      // 事件结果
+      possibleOutcomes: DiplomaticOutcome[]   // 可能的结果
+      attitudeImpact: AttitudeImpact          // 态度影响
+      sideEffects: SideEffect[]               // 副作用
+    }
+
+    enum DiplomaticEventType {
+      TRADE_AGREEMENT = "贸易协定",            // 贸易协定
+      MILITARY_ALLIANCE = "军事同盟",          // 军事同盟
+      NON_AGGRESSION_PACT = "互不侵犯",        // 互不侵犯条约
+      INFORMATION_SHARING = "情报共享",         // 情报共享协议
+      RESOURCE_EXCHANGE = "资源交换",          // 资源交换
+      JOINT_OPERATION = "联合行动",            // 联合军事行动
+      DIPLOMATIC_INSULT = "外交侮辱",          // 外交侮辱
+      BORDER_DISPUTE = "边界争端",             // 边界争端
+      SABOTAGE_ATTEMPT = "破坏行动",           // 破坏行动
+      PEACE_NEGOTIATION = "和平谈判"           // 和平谈判
+    }
+
+    interface DiplomaticHistory {
+      recordId: string                        // 记录ID
+      timestamp: Date                         // 时间戳
+      eventType: DiplomaticEventType          // 事件类型
+      previousAttitude: number                // 事件前态度
+      newAttitude: number                     // 事件后态度
+      attitudeChange: number                  // 态度变化
+      
+      // 事件详情
+      eventDetails: {
+        eventDescription: string              // 事件描述
+        playerGuildAction?: string            // 玩家公会行动 (如果有)
+        npcGuildResponse: string              // NPC公会反应
+        intermediaryFactors?: string[]        // 中介因素
+      }
+      
+      // 后续影响
+      longTermImpact: {
+        durationInDays: number                // 影响持续天数
+        secondaryEffects: string[]            // 次级效应
+        relatedEventTriggers: string[]        // 触发的相关事件
+      }
+    }
+
+    **玩家公会系统设计**
+
+    基于NPC公会原型扩展，融合魔兽世界公会管理理念：
+
+    ```typescript
+    // 玩家公会完整定义 (扩展自NPC公会基础)
+    interface PlayerGuild extends BaseGuild {
+      // 基础信息 (继承自NPC公会)
+      id: string
+      name: string                         // 公会名称
+      tag: string                         // 公会标签 ([TAG])
+      realm: string                       // 服务器名称
+      faction: Faction                    // 阵营 (联盟/部落/中立)
+      
+      // 公会等级和声望
+      guildLevel: number                  // 公会等级 (1-25，参考魔兽世界)
+      reputation: number                  // 总声望值
+      reputationLevel: number             // 声望等级
+      experience: number                  // 公会经验
+      
+      // 核心管理信息
+      leader: GuildLeader                 // 会长信息
+      foundedDate: Date                   // 创建日期
+      motto: string                       // 公会格言
+      description: string                 // 公会描述
+      
+      // 成员管理 (扩展魔兽世界设计)
+      members: Map<string, GuildMember>   // 公会成员列表
+      memberRoster: GuildRoster           // 成员花名册
+      memberLimit: number                 // 成员上限 (基于公会等级)
+      
+      // 公会设施和资源
+      guildHall: GuildHall               // 公会大厅系统
+      guildBank: GuildBank               // 公会银行
+      facilities: Map<string, GuildFacility> // 各种设施
+      resources: GuildResources          // 公会资源
+      
+      // 活动和进度
+      raidProgress: Map<string, RaidProgress> // 副本进度
+      pvpRating: PVPRating              // PVP评级
+      achievements: AchievementProgress[] // 成就进度
+      
+      // 公会管理
+      officerSystem: OfficerSystem       // 官员体系
+      guildPolicies: GuildPolicy[]       // 公会政策
+      recruitmentSettings: RecruitmentConfig // 招募设置
+      
+      // 社交和外交
+      alliances: GuildAlliance[]         // 公会联盟
+      rivalries: GuildRivalry[]          // 敌对关系
+      reputation_external: Map<string, number> // 对外声望
+      
+      // 经济系统
+      treasury: GuildTreasury            // 公会财政
+      taxSettings: TaxConfiguration      // 税收设置
+      budgetAllocation: BudgetPlan       // 预算分配
+    }
+
+    // 魔兽世界风格的公会花名册 (扩展传奇成员支持)
+    interface GuildRoster {
+      totalMembers: number               // 总成员数
+      onlineMembers: number             // 在线成员数
+      membersByRank: Map<GuildRank, GuildMember[]> // 按职位分组
+      membersByClass: Map<string, GuildMember[]>   // 按职业分组
+      membersByLevel: Map<number, GuildMember[]>   // 按等级分组
+      
+      // 传奇成员专用分组 (新增)
+      membersByRarity: Map<MemberRarity, GuildMember[]> // 按稀有度分组
+      legendaryMembers: GuildMember[]    // 传奇成员清单 (快速访问)
+      legendaryMemberCount: number       // 传奇成员总数
+      membersByLegendaryType: Map<LegendaryType, GuildMember[]> // 按传奇类型分组
+      
+      // 花名册功能
+      sortOptions: RosterSortOption[]    // 排序选项
+      filterOptions: RosterFilter[]      // 过滤选项
+      memberNotes: Map<string, string>   // 成员备注
+      officerNotes: Map<string, string>  // 官员备注
+      
+      // 传奇成员专用功能 (新增)
+      legendaryShowcase: boolean         // 是否启用传奇成员展示模式
+      legendaryMemberHighlights: Map<string, LegendaryHighlight> // 传奇成员高亮设置
+    }
+
+    // 传奇成员高亮设置
+    interface LegendaryHighlight {
+      memberId: string                   // 成员ID
+      highlightType: HighlightType       // 高亮类型
+      specialBadge?: string             // 特殊徽章
+      glowEffect?: string               // 发光效果
+      customNote?: string               // 自定义备注
+    }
+
+    enum HighlightType {
+      GOLDEN_BORDER = "金色边框",        // 金色边框高亮
+      RAINBOW_GLOW = "彩虹光效",         // 彩虹发光效果
+      CROWN_ICON = "皇冠图标",           // 皇冠图标标识
+      SPECIAL_ANIMATION = "特殊动画",    // 特殊动画效果
+      CUSTOM_BADGE = "自定义徽章"        // 自定义徽章显示
+    }
+
+    // 公会等级系统 (参考魔兽世界)
+    enum GuildRank {
+      GUILD_MASTER = 0,     // 会长
+      OFFICER = 1,          // 官员
+      VETERAN = 2,          // 老兵
+      MEMBER = 3,           // 成员
+      INITIATE = 4,         // 新人
+      TRIAL = 5             // 试用期
+    }
+
+    **公会基地设施系统**
+
+    与游戏6大模块深度绑定的建筑和升级系统：
+
+    ```typescript
+    // 公会基地完整系统
+    interface GuildBase {
+      // 基地核心
+      guildHall: GuildHall               // 公会大厅
+      baseLevel: number                  // 基地总等级 (1-25)
+      
+      // 功能设施 (对应6大游戏模块)
+      facilities: Map<FacilityType, GuildFacility>
+      facilityModifiers: FacilityModifier[] // 设施提供的属性加成
+      
+      // 升级管理
+      upgradeQueue: FacilityUpgrade[]    // 升级队列
+      constructionQueue: FacilityConstruction[] // 建设队列
+      
+      // 资源管理
+      maintenanceCost: MaintenanceCost   // 维护费用
+      powerConsumption: number           // 能量消耗
+    }
+
+    // 公会设施详细定义
+    interface GuildFacility {
+      id: string                         // 设施ID
+      name: string                       // 设施名称
+      type: FacilityType                 // 设施类型
+      level: number                      // 当前等级 (0-10)
+      maxLevel: number                   // 最大等级 (受公会等级限制)
+      
+      // 建设信息
+      isBuilt: boolean                   // 是否已建设
+      constructionTime: number           // 建设时间(小时)
+      constructionCost: ResourceCost     // 建设费用
+      
+      // 升级信息
+      upgradeRequirements: UpgradeRequirement[] // 升级需求
+      nextUpgradeCost: ResourceCost      // 下次升级费用
+      upgradeTime: number                // 升级时间
+      
+      // 功能效果
+      moduleBinding: GameModule          // 绑定的游戏模块
+      attributeBonus: AttributeBonus[]   // 属性加成
+      unlockFeatures: string[]           // 解锁功能
+      
+      // 运营数据
+      dailyMaintenance: ResourceCost     // 日常维护
+      efficiencyRating: number           // 运行效率
+      lastUpgradeDate: Date             // 最后升级时间
+    }
+
+    // 设施类型枚举 (对应6大模块)
+    enum FacilityType {
+      // 公会管理模块设施
+      COMMAND_CENTER = "指挥中心",       // 提升公会管理效率
+      MEETING_HALL = "会议大厅",         // 提升决策制定效果
+      COMMUNICATION_HUB = "通讯中心",    // 提升邮件处理速度
+      
+      // 作战大厅模块设施  
+      TRAINING_GROUNDS = "训练场",       // 提升成员战斗属性
+      STRATEGY_ROOM = "战术室",          // 提升战术制定效果
+      EQUIPMENT_FORGE = "装备锻造厂",    // 提升装备制作和修理
+      
+      // 战术中心模块设施
+      SIMULATION_CHAMBER = "模拟战斗室", // 提升阵容配置效果
+      RESEARCH_LAB = "研究实验室",       // 加速战术研究
+      INTELLIGENCE_CENTER = "情报中心",  // 提升对手分析能力
+      
+      // 会员管理模块设施
+      RECRUITMENT_OFFICE = "招募办公室", // 提升招募成功率
+      MEMBER_LOUNGE = "成员休息室",      // 提升成员满意度
+      TRAINING_ACADEMY = "培训学院",     // 加速成员成长
+      
+      // 论坛模块设施
+      MEDIA_CENTER = "媒体中心",         // 提升公关和声誉管理
+      SOCIAL_HUB = "社交中心",          // 提升社区互动效果
+      BROADCAST_STUDIO = "直播工作室",   // 提升直播和宣传效果
+      
+      // 后勤模块设施
+      TREASURY = "金库",                // 增加资源存储上限
+      SUPPLY_DEPOT = "补给仓库",        // 提升资源产出
+      MARKETPLACE = "交易市场"          // 提升经济效率
+    }
+
+    // 设施升级需求
+    interface UpgradeRequirement {
+      type: RequirementType
+      condition: RequirementCondition
+      value: number | string
+    }
+
+    enum RequirementType {
+      GUILD_LEVEL = "公会等级",          // 公会等级需求
+      GUILD_EXPERIENCE = "公会经验",     // 公会经验需求
+      FACILITY_DEPENDENCY = "前置设施",  // 其他设施等级需求
+      ACHIEVEMENT = "成就解锁",          // 特定成就需求
+      REPUTATION = "声望需求",           // 声望等级需求
+      SPECIAL_EVENT = "特殊事件"         // 特殊事件解锁
+    }
+
+    // 设施属性加成
+    interface AttributeBonus {
+      targetModule: GameModule           // 目标模块
+      bonusType: BonusType              // 加成类型
+      bonusValue: number                // 加成数值
+      bonusDescription: string          // 加成描述
+    }
+
+    enum BonusType {
+      // 效率类加成
+      MANAGEMENT_EFFICIENCY = "管理效率", // 提升管理类操作效果
+      TRAINING_SPEED = "训练速度",        // 加速成员训练
+      RESEARCH_SPEED = "研究速度",        // 加速战术研究
+      RECRUITMENT_SUCCESS = "招募成功率", // 提升招募成功率
+      
+      // 属性类加成
+      MEMBER_SATISFACTION = "成员满意度", // 提升成员满意度上限
+      GUILD_REPUTATION = "公会声誉",      // 提升声誉获得
+      RESOURCE_GENERATION = "资源产出",   // 提升资源生产
+      STORAGE_CAPACITY = "存储容量",      // 增加资源存储上限
+      
+      // 解锁类加成
+      FEATURE_UNLOCK = "功能解锁",        // 解锁新功能
+      CAPACITY_INCREASE = "容量提升",     // 增加各种上限
+      QUALITY_IMPROVEMENT = "质量提升"    // 提升活动质量等级
+    }
+
+    // 游戏模块枚举
+    enum GameModule {
+      GUILD_MANAGEMENT = "公会管理",
+      COMBAT_HALL = "作战大厅", 
+      TACTICAL_CENTER = "战术中心",
+      MEMBER_MANAGEMENT = "会员管理",
+      GUILD_FORUM = "公会论坛",
+      LOGISTICS = "公会后勤"
+    }
+
+    // 设施管理器
+    class FacilityManager {
+      // 设施操作
+      buildFacility(facilityType: FacilityType): BuildResult
+      upgradeFacility(facilityId: string): UpgradeResult
+      demolishFacility(facilityId: string): DemolishResult
+      
+      // 效果计算
+      calculateTotalBonus(module: GameModule): ModuleBonus
+      getAvailableUpgrades(guildLevel: number): AvailableUpgrade[]
+      checkUpgradeRequirements(facilityId: string): RequirementCheck
+      
+      // 资源管理
+      calculateMaintenanceCost(): ResourceCost
+      processQueuedUpgrades(): UpgradeResult[]
+      optimizeFacilityLayout(): OptimizationSuggestion[]
+    }
+
+    // 设施升级队列
+    interface FacilityUpgrade {
+      facilityId: string
+      targetLevel: number
+      estimatedTime: number              // 剩余时间(小时)
+      requiredResources: ResourceCost
+      canSpeedUp: boolean               // 是否可加速
+      speedUpCost: ResourceCost         // 加速费用
+    }
+
+设施系统核心机制：
+
+1.  模块绑定: 每个设施直接对应游戏6大模块的功能提升
+
+2.  等级限制: 公会等级决定所有设施的最大等级上限
+
+3.  三种解锁方式:
+
+    - 经验解锁：达到指定公会经验
+    - 资源建设：消耗金币/材料/时间
+    - 事件解锁：通过特殊成就或事件获得
+
+4.  动态加成: 设施等级直接影响对应模块的效率和上限
+
+5.  维护成本: 高级设施需要持续资源维护
+
+设施效果示例：
+
+- 指挥中心5级：公会管理效率+25%，邮件处理速度+50%
+- 训练场10级：成员训练速度+100%，解锁专精训练
+- 招募办公室7级：招募成功率+35%，同时招募人数+2
+
+// 公会大厅系统 (简化版，集成到基地系统) interface GuildHall { level: number // 大厅等级 facilities: GuildFacility[] // 已建设施 upgradeQueue: FacilityUpgrade[] // 升级队列
+
+// 核心区域 (特殊设施) commandCenter: CommandCenter // 指挥中心 mainHall: MainHall // 主大厅 (社交和仪式) vaultEntrance: VaultEntrance // 金库入口 }
+
+// 官员系统 (扩展版) interface OfficerSystem { positions: Map<string, OfficerPosition> // 职位定义 appointments: Map<string, string> // 职位任命 (职位ID -> 成员ID) permissions: Map<string, Permission[]> // 权限设置
+
+// 核心职位 raidLeader: OfficerPosition // 团队领袖 classLeaders: Map<string, OfficerPosition> // 职业队长 recruitmentOfficer: OfficerPosition // 招募官 treasuryOfficer: OfficerPosition // 财务官 diplomaticOfficer: OfficerPosition // 外交官 trainingOfficer: OfficerPosition // 训练官 }
+
+// 职位定义 interface OfficerPosition { id: string name: string // 职位名称 description: string // 职位描述 requirements: Requirement[] // 任职要求 responsibilities: string[] // 职责列表 permissions: Permission[] // 拥有权限
+
+// 职位设置 appointedMember?: string // 当前任职成员ID deputyMembers: string[] // 副手成员 isActive: boolean // 是否激活
+
+// 影响系统 effectModifiers: EffectModifier[] // 职位效果修正 managementScope: ManagementScope // 管理范围 }
+
+// 公会资源系统 interface GuildResources { // 基础资源 gold: number // 金币 supplies: number // 补给品 materials: number // 建筑材料 influence: number // 影响力
+
+// 特殊资源 guildTokens: number // 公会代币 researchPoints: number // 研究点数 diplomaticFavor: number // 外交好感
+
+// 资源产出 dailyIncome: ResourceIncome // 每日收入 weeklyProduction: ResourceIncome // 每周产出 resourceCapacity: ResourceLimit // 资源上限 }
+
+// 阵营系统 (继承魔兽世界设计) enum Faction { ALLIANCE = "联盟", HORDE = "部落", NEUTRAL = "中立" }
+
+
+    // 世界初始化服务 (更新版)
+    class WorldInitializationService {
+      private guildPool: NPCGuildArchetype[]
+      
+      // 核心生成逻辑
+      loadGuildArchetypes(): NPCGuildArchetype[]
+      selectRandomCompetitors(count: number = 9): NPCGuildArchetype[]
+      instantiateNPCGuilds(archetypes: NPCGuildArchetype[]): NPCGuild[]
+      
+      // 玩家公会初始化
+      createPlayerGuild(config: PlayerGuildConfig): PlayerGuild
+      initializeGuildHall(guild: PlayerGuild): void
+      setupStartingOfficers(guild: PlayerGuild): void
+      
+      // 随机化策略
+      applyRandomVariations(guild: NPCGuild): void
+      ensureDiversity(guilds: NPCGuild[]): void
+    }
+
+NPC会员贡献度系统设计
+
+    // NPC会员贡献度系统核心接口
+    interface NPCMemberContributionSystem {
+      contributionTracker: ContributionTracker         // 贡献度追踪器
+      rewardExchangeManager: RewardExchangeManager     // 奖励兑换管理器
+      activityParticipation: ActivityParticipation    // 活动参与管理
+      contributionAnalytics: ContributionAnalytics    // 贡献度分析系统
+      auditSystem: ContributionAuditSystem            // 贡献度审计系统
+    }
+
+    // 贡献度追踪器
+    interface ContributionTracker {
+      /* 追踪NPC会员活动贡献 */
+      trackActivityContribution(memberId: string, activity: GuildActivity, performance: ActivityPerformance): void
+      
+      /* 追踪训练贡献 */
+      trackTrainingContribution(memberId: string, training: TrainingSession, results: TrainingResults): void
+      
+      /* 计算总贡献度 */
+      calculateTotalContribution(memberId: string): ContributionSummary
+      
+      /* 获取贡献度历史 */
+      getContributionHistory(memberId: string, timeRange?: TimeRange): ContributionRecord[]
+      
+      /* 贡献度排行榜 */
+      getContributionLeaderboard(period: TimePeriod, category?: ContributionCategory): ContributionRanking[]
+    }
+
+    // NPC会员贡献度配置
+    interface NPCMemberContribution {
+      memberId: string                                 // NPC会员ID
+      memberName: string                               // 会员姓名
+      currentContribution: number                      // 当前总贡献度
+      lifetimeContribution: number                     // 终身贡献度
+      
+      // 分类贡献度
+      contributionBreakdown: {
+        raidContribution: number                       // 副本贡献度
+        pvpContribution: number                        // PVP贡献度
+        trainingContribution: number                   // 训练贡献度
+        socialContribution: number                     // 社交贡献度
+        economicContribution: number                   // 经济贡献度
+        leadershipContribution: number                 // 领导力贡献度
+        supportContribution: number                    // 支援贡献度
+      }
+      
+      // 贡献等级系统
+      contributionTier: ContributionTier               // 贡献等级
+      tierProgress: number                             // 当前等级进度 (0-100%)
+      nextTierRequirement: number                      // 下一等级所需贡献度
+      
+      // 奖励兑换记录
+      exchangeHistory: ExchangeRecord[]                // 兑换历史记录
+      availableExchangePoints: number                  // 可用兑换点数
+      
+      // 贡献效率分析
+      contributionEfficiency: {
+        averageContributionPerActivity: number         // 平均每次活动贡献度
+        contributionGrowthRate: number                 // 贡献度增长率
+        specialtyContributionArea: ContributionCategory // 专长贡献领域
+        recentPerformanceTrend: PerformanceTrend       // 近期表现趋势
+      }
+    }
+
+    // 贡献等级枚举
+    enum ContributionTier {
+      NOVICE = "新手",                                 // 0-999 贡献度
+      APPRENTICE = "学徒",                             // 1000-2999 贡献度
+      JOURNEYMAN = "熟练者",                           // 3000-5999 贡献度
+      EXPERT = "专家",                                 // 6000-9999 贡献度
+      MASTER = "大师",                                 // 10000-14999 贡献度
+      GRANDMASTER = "宗师",                            // 15000-24999 贡献度
+      LEGEND = "传奇",                                 // 25000+ 贡献度
+    }
+
+    // 贡献分类
+    enum ContributionCategory {
+      RAID_COMBAT = "副本战斗",                        // 副本中的战斗表现
+      RAID_SUPPORT = "副本支援",                       // 副本中的支援作用
+      PVP_VICTORY = "PVP胜利",                        // PVP比赛胜利
+      PVP_TACTICS = "PVP战术",                        // PVP战术贡献
+      TRAINING_ATTENDANCE = "训练出席",                // 训练课程出席
+      TRAINING_PERFORMANCE = "训练表现",               // 训练中的表现
+      SOCIAL_HARMONY = "社交和谐",                     // 维护公会和谐
+      MENTORSHIP = "新人指导",                         // 指导新成员
+      RESOURCE_CONTRIBUTION = "资源贡献",              // 资源捐献
+      EVENT_ORGANIZATION = "活动组织",                 // 协助组织活动
+      DIPLOMATIC_RELATIONS = "外交关系",               // 外交活动参与
+      BASE_MAINTENANCE = "基地维护"                    // 公会基地维护
+    }
+
+    // 活动参与贡献计算
+    interface ActivityParticipation {
+      /* 计算副本活动贡献 */
+      calculateRaidContribution(participation: RaidParticipation): number
+      
+      /* 计算PVP活动贡献 */
+      calculatePVPContribution(participation: PVPParticipation): number
+      
+      /* 计算训练活动贡献 */
+      calculateTrainingContribution(participation: TrainingParticipation): number
+      
+      /* 计算社交活动贡献 */
+      calculateSocialContribution(participation: SocialParticipation): number
+    }
+
+    // 副本参与贡献计算
+    interface RaidParticipation {
+      raidId: string                                   // 副本ID
+      raidDifficulty: RaidDifficulty                  // 副本难度
+      memberRole: RaidRole                            // 成员在副本中的角色
+      performanceMetrics: {
+        damageDealt: number                           // 造成伤害
+        damageReceived: number                        // 承受伤害
+        healingProvided: number                       // 提供治疗
+        tacticalContribution: number                  // 战术贡献度
+        teamworkScore: number                         // 团队配合评分
+        survivalRate: number                          // 生存率
+      }
+      raidResult: RaidResult                          // 副本结果
+      contributionMultiplier: number                   // 贡献度倍数
+    }
+
+    // 贡献度奖励兑换系统
+    interface RewardExchangeManager {
+      /* 获取可兑换奖励列表 */
+      getAvailableRewards(memberId: string): ExchangeableReward[]
+      
+      /* 执行奖励兑换 */
+      executeExchange(memberId: string, rewardId: string, quantity: number): ExchangeResult
+      
+      /* 模拟竞拍系统 */
+      simulateAuction(item: AuctionItem, participants: string[]): AuctionResult
+      
+      /* 检查兑换资格 */
+      checkExchangeEligibility(memberId: string, rewardId: string): EligibilityCheck
+    }
+
+    // 可兑换奖励接口
+    interface ExchangeableReward {
+      rewardId: string                                 // 奖励ID
+      rewardType: RewardType                          // 奖励类型
+      rewardName: string                              // 奖励名称
+      description: string                             // 奖励描述
+      contributionCost: number                        // 贡献度花费
+      
+      // 奖励限制
+      tierRequirement: ContributionTier               // 等级要求
+      maxExchangePerPeriod: number                    // 每期最大兑换次数
+      availableQuantity: number                       // 可用数量
+      
+      // 奖励内容
+      rewardContent: RewardContent                    // 具体奖励内容
+      
+      // 竞拍属性 (如果是竞拍物品)
+      isAuctionItem: boolean                          // 是否竞拍物品
+      auctionSettings?: AuctionSettings               // 竞拍设置
+    }
+
+    // 奖励类型枚举
+    enum RewardType {
+      // Boss掉落物品
+      RAID_EQUIPMENT = "副本装备",                     // 副本Boss掉落装备
+      RARE_WEAPONS = "稀有武器",                      // 稀有武器
+      LEGENDARY_ITEMS = "传奇物品",                   // 传奇级物品
+      
+      // 公会基地设施福利
+      FACILITY_ACCESS = "设施使用权",                  // 高级设施使用权限
+      VIP_TRAINING = "VIP训练",                       // VIP训练课程
+      PRIVATE_ROOM = "专属房间",                      // 个人专属空间
+      
+      // 公会银行道具
+      CONSUMABLES = "消耗品",                         // 各类消耗品
+      CRAFTING_MATERIALS = "制作材料",                // 制作材料
+      ENHANCEMENT_STONES = "强化石",                  // 装备强化材料
+      
+      // 特殊权限和荣誉
+      TITLE_REWARDS = "称号奖励",                     // 特殊称号
+      APPEARANCE_ITEMS = "外观物品",                  // 外观装饰
+      PRIVILEGE_TOKENS = "特权令牌",                  // 各种特权令牌
+      
+      // 竞拍专属
+      AUCTION_EXCLUSIVE = "竞拍专属"                  // 仅限竞拍的高级物品
+    }
+
+    // 模拟竞拍系统
+    interface AuctionSystem {
+      /* 创建竞拍活动 */
+      createAuction(item: AuctionItem, settings: AuctionSettings): AuctionSession
+      
+      /* NPC会员参与竞拍 */
+      participateInAuction(auctionId: string, memberId: string, bidAmount: number): BidResult
+      
+      /* AI驱动的智能竞拍策略 */
+      generateAIBidStrategy(memberId: string, item: AuctionItem): BidStrategy
+      
+      /* 结算竞拍结果 */
+      settleAuction(auctionId: string): AuctionSettlement
+    }
+
+    // 竞拍物品接口
+    interface AuctionItem {
+      itemId: string                                  // 物品ID
+      itemName: string                                // 物品名称
+      itemQuality: ItemQuality                        // 物品品质
+      itemLevel: number                               // 物品等级
+      
+      // 物品属性
+      attributes: ItemAttributes                      // 物品属性
+      powerLevel: number                              // 物品强度等级
+      memberTypeRestriction?: MemberClass[]           // 职业限制
+      
+      // 竞拍设置
+      startingBid: number                             // 起拍价 (贡献度)
+      minimumIncrement: number                        // 最小加价幅度
+      reservePrice?: number                           // 保留价
+      auctionDuration: number                         // 竞拍持续时间 (分钟)
+      
+      // 来源信息
+      sourceActivity: string                          // 来源活动
+      dropRate: number                                // 掉落率
+      acquisitionDifficulty: AcquisitionDifficulty   // 获取难度
+    }
+
+    // 智能竞拍策略
+    interface BidStrategy {
+      memberId: string                                // 参与会员ID
+      maxBidAmount: number                            // 最高出价
+      biddingPattern: BiddingPattern                  // 出价模式
+      priorityLevel: BidPriority                      // 优先级
+      
+      // AI决策因素
+      decisionFactors: {
+        itemDesirability: number                      // 物品渴望程度 (0-100)
+        contributionCapacity: number                  // 贡献度承受能力
+        competitionAnalysis: CompetitionAnalysis     // 竞争分析
+        strategicValue: number                        // 战略价值评估
+      }
+      
+      // 出价时机
+      biddingTiming: {
+        earlyBidProbability: number                   // 早期出价概率
+        lastMinuteBidding: boolean                    // 是否最后时刻出价
+        counterBidAggression: number                  // 反击出价激进程度
+      }
+    }
+
+    // 贡献度分析系统
+    interface ContributionAnalytics {
+      /* 生成个人贡献度报告 */
+      generatePersonalReport(memberId: string): PersonalContributionReport
+      
+      /* 生成公会贡献度概览 */
+      generateGuildOverview(): GuildContributionOverview
+      
+      /* 贡献度趋势分析 */
+      analyzeTrends(timeRange: TimeRange): ContributionTrendAnalysis
+      
+      /* 预测贡献度发展 */
+      predictContributionGrowth(memberId: string): ContributionForecast
+    }
+
+    // 个人贡献度报告
+    interface PersonalContributionReport {
+      memberId: string                                // 会员ID
+      reportPeriod: TimeRange                         // 报告时间段
+      
+      // 贡献度总结
+      totalContribution: number                       // 总贡献度
+      periodContribution: number                      // 本期贡献度
+      contributionGrowth: number                      // 贡献度增长
+      
+      // 排名信息
+      guildRanking: number                            // 公会内排名
+      categoryRankings: Map<ContributionCategory, number> // 各分类排名
+      
+      // 表现亮点
+      achievements: ContributionAchievement[]         // 贡献成就
+      milestones: ContributionMilestone[]             // 里程碑
+      standoutPerformances: StandoutPerformance[]     // 突出表现
+      
+      // 改进建议
+      improvementSuggestions: ImprovementSuggestion[] // 改进建议
+      recommendedActivities: RecommendedActivity[]    // 推荐活动
+      
+      // 奖励预览
+      upcomingRewards: UpcomingReward[]               // 即将解锁的奖励
+      exchangeRecommendations: ExchangeRecommendation[] // 兑换推荐
+    }
+
+实现要求:
+
+- 公会池JSON文件包含200多个不同的公会原型
+- 每次新游戏随机选择9个最低层级的公会AI作为竞争对手
+- 确保选中的公会具有不同的战略重点和发展方向
+- 支持后续扩展更多公会原型和选择算法
+
+3.2.6 公会论坛模块（AI生态核心）
+
+论坛生态系统
+
+    interface ForumEcosystem {
+      officialNews: NewsSystem        // 官方新闻和版本预告
+      officialForum: ForumSystem      // 全服论坛讨论
+      guildForum: GuildInternalForum  // 公会内部论坛
+      liveStreaming: StreamingSystem  // 直播反馈系统
+      
+      // AI内容生成
+      npcComments: AICommentGenerator  // NPC评论生成
+      mediaReports: MediaAI           // 媒体报道AI
+      fanInteractions: FanSystemAI    // 粉丝互动AI
+    }
+
+3.2.7 公会后勤模块
+
+3.2.7.1 拍卖行系统设计
+
+    // 拍卖行系统核心接口
+    interface AuctionHouseSystem {
+      playerAuctions: PlayerAuctionManager              // 玩家拍卖管理
+      systemMarketplace: SystemMarketplace              // 系统市场
+      aiPurchaseEngine: AIPurchaseEngine                // AI购买引擎
+      transactionHistory: TransactionHistory            // 交易历史
+      priceOracle: PriceOracle                         // 价格预言机
+    }
+
+    // 玩家拍卖管理器
+    interface PlayerAuctionManager {
+      /* 创建拍卖 */
+      createAuction(item: BankItem, startingPrice: number, buyoutPrice?: number): AuctionListing
+      
+      /* 取消拍卖 */
+      cancelAuction(auctionId: string): CancelResult
+      
+      /* 竞标 */
+      placeBid(auctionId: string, bidAmount: number): BidResult
+      
+      /* 一口价购买 */
+      buyoutAuction(auctionId: string): PurchaseResult
+    }
+
+    // 拍卖物品定义
+    interface AuctionListing {
+      auctionId: string                               // 拍卖ID
+      sellerId: string                                // 卖家ID (玩家)
+      item: BankItem                                  // 拍卖物品
+      
+      // 价格设置
+      startingPrice: number                           // 起拍价
+      currentBid: number                              // 当前出价
+      buyoutPrice?: number                            // 一口价 (可选)
+      
+      // 时间设置
+      listingTime: Date                               // 上架时间
+      duration: AuctionDuration                       // 拍卖时长
+      expirationTime: Date                            // 到期时间
+      
+      // 竞拍信息
+      bidHistory: BidRecord[]                         // 竞拍历史
+      currentBidder?: string                          // 当前最高出价者
+      bidCount: number                                // 竞拍次数
+    }
+
+    enum AuctionDuration {
+      SHORT = "短期",                                 // 2小时
+      MEDIUM = "中期",                                // 8小时
+      LONG = "长期",                                  // 24小时
+      VERY_LONG = "超长期"                            // 48小时
+    }
+
+    // 系统市场
+    interface SystemMarketplace {
+      /* 获取系统刷新物品 */
+      getSystemListings(gamePhase: GamePhase): SystemItem[]
+      
+      /* 刷新市场物品 */
+      refreshMarketplace(): RefreshResult
+      
+      /* 根据游戏阶段调整物品品质 */
+      adjustItemQuality(gamePhase: GamePhase): void
+    }
+
+    // 系统刷新物品
+    interface SystemItem {
+      itemId: string                                  // 物品ID
+      itemName: string                                // 物品名称
+      itemQuality: ItemQuality                        // 物品品质
+      itemLevel: number                               // 物品等级
+      
+      // 价格设置
+      basePrice: number                               // 基础价格
+      currentPrice: number                            // 当前价格
+      priceFluctuation: number                        // 价格波动范围
+      
+      // 可用性
+      stockQuantity: number                           // 库存数量
+      refreshTimer: number                            // 刷新时间
+      purchaseLimit?: number                          // 购买限制
+      
+      // 阶段限制
+      requiredGamePhase: GamePhase                    // 需要的游戏阶段
+      phaseModifiers: PhaseModifier[]                 // 阶段修正
+    }
+
+    // AI购买引擎
+    interface AIPurchaseEngine {
+      /* AI随机购买玩家物品 */
+      simulateAIPurchase(): AIPurchaseResult
+      
+      /* 计算AI购买概率 */
+      calculatePurchaseProbability(listing: AuctionListing): number
+      
+      /* AI价格评估 */
+      evaluateItemValue(item: BankItem): PriceEvaluation
+      
+      /* 系统回收机制 */
+      systemRecycle(listing: AuctionListing): RecycleResult
+    }
+
+    // AI购买行为配置
+    interface AIPurchaseBehavior {
+      purchaseFrequency: number                       // 购买频率 (次/小时)
+      priceToleranceRange: PriceRange                // 价格容忍范围
+      
+      // 物品偏好
+      itemPreferences: {
+        qualityPreference: Map<ItemQuality, number>   // 品质偏好权重
+        typePreference: Map<ItemType, number>          // 类型偏好权重
+        levelRangePreference: LevelRange              // 等级范围偏好
+      }
+      
+      // 市场影响因素
+      marketFactors: {
+        supplyDemandRatio: number                     // 供需比影响
+        priceHistoryInfluence: number                 // 历史价格影响
+        competitionFactor: number                     // 竞争因素
+      }
+    }
+
+    // 价格预言机系统
+    interface PriceOracle {
+      /* 获取物品建议价格 */
+      getSuggestedPrice(item: BankItem): PriceSuggestion
+      
+      /* 分析市场趋势 */
+      analyzeMarketTrends(itemType: ItemType): MarketTrend
+      
+      /* 预测价格走势 */
+      predictPriceMovement(itemId: string, timeframe: TimeFrame): PricePrediction
+    }
+
+3.2.7.2 训练系统设计
+
+    // 训练系统核心接口
+    interface TrainingSystem {
+      trainingScheduler: TrainingScheduler            // 训练计划调度器
+      trainingPrograms: Map<string, TrainingProgram>  // 训练项目
+      trainingResults: TrainingResultManager          // 训练结果管理
+      influenceCalculator: TrainingInfluenceCalculator // 影响因素计算器
+    }
+
+    // 训练项目定义
+    interface TrainingProgram {
+      programId: string                               // 项目ID
+      programName: string                             // 项目名称
+      programType: TrainingType                       // 训练类型
+      
+      // 训练目标
+      targetAttributes: AttributeTarget[]             // 目标属性
+      targetSkills: SkillTarget[]                     // 目标技能
+      activityExperience: ActivityExpTarget[]         // 活动经验目标
+      
+      // 训练设置
+      duration: number                                // 训练时长 (小时)
+      intensity: TrainingIntensity                    // 训练强度
+      maxParticipants: number                         // 最大参与人数
+      
+      // 效果和成本
+      baseEffectiveness: number                       // 基础效果值
+      fatigueGeneration: number                       // 疲劳产生量
+      resourceCost: ResourceCost[]                    // 资源消耗
+    }
+
+    enum TrainingType {
+      ATTRIBUTE_TRAINING = "属性训练",                // 提升基础属性
+      SKILL_TRAINING = "技能训练",                    // 提升专业技能
+      TACTICAL_TRAINING = "战术训练",                 // 提升战术理解
+      TEAM_TRAINING = "团队训练",                     // 提升团队配合
+      SPECIALIZED_TRAINING = "专项训练"               // 特定活动训练
+    }
+
+    enum TrainingIntensity {
+      LIGHT = "轻度",                                 // 低疲劳，低收益
+      MODERATE = "中度",                              // 中等疲劳，中等收益
+      INTENSIVE = "高强度",                           // 高疲劳，高收益
+      EXTREME = "极限"                                // 极高疲劳，极高收益
+    }
+
+    // 训练结果管理器
+    interface TrainingResultManager {
+      /* 提交训练计划 */
+      submitTrainingPlan(plan: TrainingPlan): SubmissionResult
+      
+      /* 计算训练结果 (下周公布) */
+      calculateWeeklyResults(): WeeklyTrainingResults
+      
+      /* 应用训练效果 */
+      applyTrainingEffects(results: TrainingResult[]): void
+      
+      /* 获取历史训练记录 */
+      getTrainingHistory(memberId: string): TrainingHistory
+    }
+
+    // 训练计划
+    interface TrainingPlan {
+      planId: string                                  // 计划ID
+      weekNumber: number                              // 周数
+      
+      // 参与成员
+      participants: TrainingParticipant[]             // 参与者列表
+      
+      // 训练安排
+      trainingSchedule: {
+        programId: string                             // 训练项目
+        assignedMembers: string[]                     // 分配的成员
+        scheduledHours: number                        // 计划训练时数
+      }[]
+      
+      // 教练配置
+      coachAssignments: {
+        headCoach?: string                            // 主教练 (官员)
+        assistantCoaches: string[]                    // 助理教练
+      }
+    }
+
+    // 训练影响因素计算器
+    interface TrainingInfluenceCalculator {
+      /* 计算基地设施加成 */
+      calculateFacilityBonus(facilityLevel: number): number
+      
+      /* 计算训练官员加成 */
+      calculateOfficerBonus(officerId: string): number
+      
+      /* 计算会长属性影响 */
+      calculateLeaderInfluence(leaderAttributes: LeaderAttributes): number
+      
+      /* 综合计算训练效果 */
+      calculateFinalEffectiveness(base: number, modifiers: TrainingModifier[]): number
+    }
+
+    // 训练结果
+    interface TrainingResult {
+      memberId: string                                // 成员ID
+      weekNumber: number                              // 训练周数
+      
+      // 获得提升
+      attributeGains: AttributeGain[]                 // 属性提升
+      skillGains: SkillGain[]                         // 技能提升
+      experienceGains: ExperienceGain[]               // 经验获得
+      
+      // 副作用
+      fatigueAccumulated: number                      // 累积疲劳
+      injuryRisk: number                             // 受伤风险
+      
+      // 训练质量
+      trainingQuality: TrainingQuality                // 训练质量评价
+      specialEvents: TrainingEvent[]                  // 特殊事件
+    }
+
+    enum TrainingQuality {
+      EXCEPTIONAL = "卓越",                           // 超出预期
+      EXCELLENT = "优秀",                             // 表现优秀
+      GOOD = "良好",                                  // 正常表现
+      FAIR = "一般",                                  // 低于预期
+      POOR = "糟糕"                                   // 训练失败
+    }
+
+3.2.7.3 疲劳管理系统设计
+
+    // 疲劳管理系统
+    interface FatigueManagementSystem {
+      fatigueTracker: FatigueTracker                  // 疲劳追踪器
+      recoveryPlans: Map<string, RecoveryPlan>        // 恢复方案
+      recoveryExecutor: RecoveryExecutor              // 恢复执行器
+      facilityInfluence: FacilityInfluenceCalculator // 设施影响计算
+    }
+
+    // 恢复方案定义
+    interface RecoveryPlan {
+      planId: string                                  // 方案ID
+      planName: string                                // 方案名称
+      planType: RecoveryType                          // 恢复类型
+      
+      // 效果配置
+      effects: {
+        fatigueReduction: number                      // 疲劳减少量
+        debuffRemoval: DebuffRemovalEffect[]          // 移除的debuff
+        recoverySpeed: number                         // 恢复速度倍率
+        maxTargets: number                            // 最大影响人数
+      }
+      
+      // 资源消耗
+      resourceCosts: {
+        basicResources: ResourceCost[]                // 基础资源消耗
+        specialItems?: SpecialItemCost[]              // 特殊道具消耗
+        facilityRequirements?: FacilityRequirement[]  // 设施要求
+      }
+      
+      // 使用限制
+      usageRestrictions: {
+        cooldownPeriod: number                        // 冷却时间 (小时)
+        maxUsesPerWeek: number                        // 每周最大使用次数
+        minimumFacilityLevel?: number                 // 最低设施等级
+      }
+    }
+
+    enum RecoveryType {
+      BASIC_REST = "基础休息",                        // 基础恢复
+      MEDICAL_TREATMENT = "医疗治疗",                 // 医疗恢复
+      SPA_THERAPY = "水疗养护",                       // 高级水疗
+      SPECIAL_ITEMS = "特殊道具",                     // 使用特殊物品
+      FACILITY_RECOVERY = "设施恢复",                  // 设施辅助恢复
+      EMERGENCY_RECOVERY = "紧急恢复"                 // 应急恢复
+    }
+
+    // 疲劳相关的临时debuff
+    interface FatigueDebuff {
+      debuffId: string                                // Debuff ID
+      name: string                                    // Debuff名称
+      severity: DebuffSeverity                        // 严重程度
+      
+      // 触发条件
+      triggerConditions: {
+        minimumFatigue: number                        // 最低疲劳值
+        duration: number                              // 持续时间要求
+        activityType?: ActivityType                   // 特定活动类型
+      }
+      
+      // 效果
+      effects: {
+        attributePenalty: Map<string, number>         // 属性惩罚
+        performanceReduction: number                  // 表现降低百分比
+        injuryRiskIncrease: number                   // 受伤风险增加
+      }
+    }
+
+    enum DebuffSeverity {
+      MINOR = "轻微",                                 // 轻微影响
+      MODERATE = "中等",                              // 中等影响
+      SEVERE = "严重",                                // 严重影响
+      CRITICAL = "危急"                               // 危急状态
+    }
+
+    // 特殊恢复道具
+    interface SpecialRecoveryItem {
+      itemId: string                                  // 道具ID
+      itemName: string                                // 道具名称
+      itemType: RecoveryItemType                      // 道具类型
+      
+      // 恢复效果
+      recoveryEffects: {
+        instantFatigueReduction: number               // 即时疲劳减少
+        fatigueRegenBonus: number                     // 疲劳恢复加成
+        debuffCleanse: DebuffType[]                   // 清除的debuff类型
+        duration: number                              // 持续时间
+      }
+      
+      // 获取途径
+      acquisitionMethods: AcquisitionMethod[]         // 获取方式
+      rarity: ItemRarity                              // 稀有度
+    }
+
+    enum RecoveryItemType {
+      CONSUMABLE = "消耗品",                          // 一次性消耗
+      EQUIPMENT = "装备",                             // 可装备物品
+      FACILITY_UPGRADE = "设施升级",                   // 设施强化
+      TEMPORARY_BUFF = "临时增益"                     // 临时效果
+    }
+
+    // 恢复执行器
+    interface RecoveryExecutor {
+      /* 执行恢复方案 */
+      executeRecoveryPlan(planId: string, targets: string[]): RecoveryResult
+      
+      /* 使用特殊道具 */
+      useSpecialItem(itemId: string, targets: string[]): ItemUseResult
+      
+      /* 计算综合恢复效果 */
+      calculateTotalRecovery(base: number, modifiers: RecoveryModifier[]): number
+    }
+
+    // 设施影响计算器
+    interface FacilityInfluenceCalculator {
+      /* 计算医疗设施加成 */
+      calculateMedicalFacilityBonus(level: number): number
+      
+      /* 计算休息设施加成 */
+      calculateRestFacilityBonus(level: number): number
+      
+      /* 计算官员管理加成 */
+      calculateOfficerManagementBonus(officerId: string): number
+      
+      /* 计算会长属性影响 */
+      calculateLeadershipInfluence(attributes: LeaderAttributes): number
+    }
+
+    // 综合恢复方案示例
+    const RecoveryPlanExamples: Record<string, RecoveryPlan> = {
+      BASIC_REST_PLAN: {
+        planId: "basic_rest",
+        planName: "基础休息计划",
+        planType: RecoveryType.BASIC_REST,
+        effects: {
+          fatigueReduction: 20,
+          debuffRemoval: [],
+          recoverySpeed: 1.0,
+          maxTargets: 10
+        },
+        resourceCosts: {
+          basicResources: [{
+            resourceType: "gold",
+            amount: 100
+          }]
+        }
+      },
+      
+      LUXURY_SPA_PLAN: {
+        planId: "luxury_spa",
+        planName: "豪华水疗套餐",
+        planType: RecoveryType.SPA_THERAPY,
+        effects: {
+          fatigueReduction: 50,
+          debuffRemoval: [DebuffSeverity.MINOR, DebuffSeverity.MODERATE],
+          recoverySpeed: 2.5,
+          maxTargets: 5
+        },
+        resourceCosts: {
+          basicResources: [{
+            resourceType: "gold",
+            amount: 1000
+          }],
+          specialItems: [{
+            itemId: "spa_voucher",
+            quantity: 1
+          }],
+          facilityRequirements: [{
+            facilityType: "spa_facility",
+            minimumLevel: 3
+          }]
+        }
+      }
+    }
+
+公会后勤模块功能总结：
+
+1.  拍卖行系统
+
+    - 玩家可拍卖银行道具，设置起拍价和一口价
+    - 系统定期刷新物品，品质随游戏阶段提升
+    - AI智能购买机制进行系统回收
+    - 价格预言机提供市场分析和建议
+
+2.  训练系统
+
+    - 非即时结果，下周公布上周训练成果
+    - 获得属性、技能和活动经验，产生少量疲劳
+    - 受基地设施、训练官员、会长属性影响
+    - 多种训练强度和类型可选
+
+3.  疲劳管理系统
+
+    - 多种恢复方案，消耗不同资源
+    - 特殊道具可作为恢复消耗品
+    - 高疲劳产生临时debuff
+    - 受设施等级、官员和会长属性影响
+
+3.2.8 邮件通信模块（智能分类与快捷操作）
+
+3.2.8.1 智能邮件分类系统
+
+    // 邮件分类系统核心接口
+    interface IntelligentMailSystem {
+      categoryEngine: MailCategoryEngine           // 邮件分类引擎
+      quickActionManager: QuickActionManager       // 快捷操作管理器
+      eventMailGenerator: EventMailGenerator       // 事件邮件生成器
+      filterSystem: AdvancedFilterSystem           // 高级筛选系统
+      notificationCenter: NotificationCenter       // 通知中心
+    }
+
+    // 邮件分类引擎
+    interface MailCategoryEngine {
+      /* 自动分类邮件 */
+      categorizeEmail(email: GameEmail): MailCategory
+      
+      /* 基于事件类型自动归类 */
+      categorizeByEvent(eventType: GameEventType): MailCategory
+      
+      /* 动态创建新分类 */
+      createDynamicCategory(criteria: CategoryCriteria): MailCategory
+      
+      /* 学习用户分类偏好 */
+      learnUserPreferences(userActions: UserActionHistory[]): void
+    }
+
+    // 邮件类别枚举
+    enum MailCategory {
+      // 核心游戏事件
+      GUILD_MANAGEMENT = "公会管理",               // 公会管理相关邮件
+      MEMBER_ACTIVITIES = "成员活动",              // 成员活动通知
+      RAID_OPERATIONS = "团队副本",               // 副本作战相关
+      PVP_COMPETITIONS = "PVP竞技",              // PVP比赛通知
+      WORLD_BOSS_EVENTS = "世界Boss",            // 世界Boss事件
+      
+      // 社交互动
+      DIPLOMACY = "外交事务",                     // 外交邀请、联盟
+      NPC_INTERACTIONS = "NPC互动",              // NPC成员沟通
+      RECRUITMENT = "人员招募",                   // 招募相关邮件
+      MEDIA_INTERVIEWS = "媒体采访",              // 媒体相关
+      
+      // 系统通知
+      ACHIEVEMENTS = "成就奖励",                  // 成就解锁通知
+      RANKING_UPDATES = "排名变动",              // 排名系统更新
+      TECHNICAL_ALERTS = "技术提醒",             // 系统维护等
+      FINANCIAL_REPORTS = "财务报告",            // 资源变动报告
+      
+      // 紧急事件
+      URGENT_DECISIONS = "紧急决策",             // 需要立即决策的事件
+      CRISIS_MANAGEMENT = "危机处理",            // 危机事件处理
+      TIME_SENSITIVE = "时限任务",               // 有时间限制的任务
+      
+      // 自定义分类
+      CUSTOM_CATEGORIES = "自定义分类"           // 用户自定义分类
+    }
+
+    // 游戏邮件接口
+    interface GameEmail {
+      id: string                                  // 邮件ID
+      subject: string                             // 邮件主题
+      content: string                             // 邮件内容
+      sender: MailSender                          // 发送者信息
+      timestamp: Date                             // 发送时间
+      category: MailCategory                      // 邮件分类
+      priority: MailPriority                      // 优先级
+      eventContext: GameEventContext              // 关联游戏事件
+      quickActions: QuickAction[]                 // 快捷操作列表
+      attachments?: MailAttachment[]              // 附件（奖励、资源等）
+      
+      // 智能分类标签
+      tags: MailTag[]                            // 智能标签
+      relatedEvents: string[]                     // 相关事件ID
+      actionRequired: boolean                     // 是否需要用户操作
+      deadline?: Date                            // 截止时间
+    }
+
+    // 邮件发送者类型
+    interface MailSender {
+      type: SenderType                           // 发送者类型
+      id: string                                 // 发送者ID
+      name: string                               // 发送者名称
+      avatar?: string                            // 头像
+      relationship?: RelationshipType            // 与玩家的关系
+    }
+
+    enum SenderType {
+      SYSTEM = "系统",                           // 系统邮件
+      NPC_MEMBER = "NPC成员",                    // NPC公会成员
+      NPC_GUILD = "NPC公会",                     // NPC公会官方
+      GAME_MASTER = "游戏管理员",                // GM邮件
+      EVENT_GENERATOR = "事件生成器",            // 事件触发邮件
+      AI_ASSISTANT = "AI助手",                   // AI助手邮件
+      EXTERNAL_CONTACT = "外部联系人"            // 外部人员（媒体等）
+    }
+
+3.2.8.2 快捷操作系统设计
+
+    // 快捷操作管理器
+    interface QuickActionManager {
+      /* 根据邮件内容生成快捷操作 */
+      generateQuickActions(email: GameEmail): QuickAction[]
+      
+      /* 执行快捷操作 */
+      executeQuickAction(actionId: string, parameters?: ActionParameters): ActionResult
+      
+      /* 批量操作支持 */
+      executeBatchActions(emails: GameEmail[], action: BatchAction): BatchResult
+      
+      /* 创建自定义快捷操作 */
+      createCustomAction(template: ActionTemplate): QuickAction
+    }
+
+    // 快捷操作接口
+    interface QuickAction {
+      id: string                                 // 操作ID
+      label: string                              // 操作标签
+      icon: string                               // 操作图标
+      actionType: ActionType                     // 操作类型
+      targetFunction: string                     // 目标功能模块
+      parameters: ActionParameters               // 操作参数
+      confirmation?: ConfirmationConfig          // 确认配置
+      availability: ActionAvailability           // 可用性条件
+    }
+
+    // 操作类型枚举
+    enum ActionType {
+      // 导航类操作
+      NAVIGATE_TO_MODULE = "跳转功能模块",       // 跳转到指定功能界面
+      OPEN_DETAIL_VIEW = "打开详情页",           // 打开详细信息页面
+      SWITCH_TO_TAB = "切换标签页",             // 切换到相关标签页
+      
+      // 数据处理操作
+      AUTO_APPROVE = "自动批准",                // 自动批准申请
+      AUTO_REJECT = "自动拒绝",                 // 自动拒绝申请
+      MARK_AS_READ = "标记已读",               // 标记为已读
+      ARCHIVE_EMAIL = "归档邮件",              // 归档邮件
+      
+      // 业务功能操作
+      START_ACTIVITY = "启动活动",              // 启动相关活动
+      JOIN_RAID = "加入副本",                  // 加入副本队列
+      ACCEPT_INVITATION = "接受邀请",           // 接受邀请
+      SCHEDULE_MEETING = "安排会议",            // 安排公会会议
+      
+      // 资源管理操作
+      CLAIM_REWARDS = "领取奖励",              // 领取邮件附件奖励
+      TRANSFER_RESOURCES = "转移资源",          // 资源转移操作
+      UPDATE_BUDGET = "更新预算",              // 更新预算分配
+      
+      // 沟通交流操作
+      REPLY_IMMEDIATELY = "立即回复",           // 快速回复邮件
+      FORWARD_TO_OFFICER = "转发官员",          // 转发给相关官员
+      ADD_TO_CALENDAR = "添加日程",            // 添加到日程表
+      
+      // 批量处理操作
+      BULK_PROCESS = "批量处理",               // 批量处理同类邮件
+      APPLY_TEMPLATE = "应用模板",             // 应用预设处理模板
+      CUSTOM_ACTION = "自定义操作"             // 用户自定义操作
+    }
+
+    // 具体操作实现示例
+    interface MailActionImplementations {
+      /* 公会管理相关快捷操作 */
+      guildManagementActions: {
+        viewGuildStatus: () => void              // 查看公会状态
+        openMemberManagement: () => void         // 打开成员管理
+        reviewApplications: () => void           // 审核入会申请
+        scheduleGuildMeeting: (time: Date) => void // 安排公会会议
+      }
+      
+      /* 成员活动相关快捷操作 */
+      memberActivityActions: {
+        joinUpcomingRaid: (raidId: string) => void // 加入即将开始的副本
+        reviewActivityReport: (activityId: string) => void // 查看活动报告
+        adjustMemberSchedule: (memberId: string) => void // 调整成员时间表
+        approveMemberRequest: (requestId: string) => void // 批准成员请求
+      }
+      
+      /* 外交事务相关快捷操作 */
+      diplomacyActions: {
+        reviewDiplomaticProposal: (proposalId: string) => void // 审核外交提案
+        acceptAllianceInvite: (guildId: string) => void // 接受联盟邀请
+        scheduleDiplomaticMeeting: (guildId: string) => void // 安排外交会议
+        updateDiplomaticStance: (guildId: string, stance: DiplomaticAttitude) => void // 更新外交态度
+      }
+      
+      /* 紧急事件相关快捷操作 */
+      emergencyActions: {
+        activateCrisisProtocol: (eventId: string) => void // 激活危机预案
+        callEmergencyMeeting: () => void         // 召集紧急会议
+        redistributeResources: (plan: ResourcePlan) => void // 重新分配资源
+        sendUrgentNotification: (message: string) => void // 发送紧急通知
+      }
+    }
+
+3.2.8.3 事件驱动邮件生成系统
+
+    // 事件邮件生成器
+    interface EventMailGenerator {
+      /* 基于游戏事件自动生成邮件 */
+      generateEventMail(event: GameEvent): GameEmail
+      
+      /* 批量生成事件相关邮件 */
+      generateBatchMails(events: GameEvent[]): GameEmail[]
+      
+      /* 根据用户偏好定制邮件内容 */
+      customizeMailContent(template: MailTemplate, userPrefs: UserPreferences): string
+      
+      /* 智能推荐快捷操作 */
+      recommendQuickActions(event: GameEvent, userHistory: ActionHistory): QuickAction[]
+    }
+
+    // 邮件模板系统
+    interface MailTemplate {
+      templateId: string                         // 模板ID
+      eventType: GameEventType                   // 关联事件类型
+      subjectTemplate: string                    // 主题模板
+      contentTemplate: string                    // 内容模板
+      defaultActions: QuickAction[]              // 默认快捷操作
+      priorityLevel: MailPriority               // 默认优先级
+      categoryMapping: MailCategory             // 分类映射
+      
+      // 模板变量
+      variables: {
+        [key: string]: TemplateVariable         // 模板变量定义
+      }
+      
+      // 条件渲染规则
+      conditionalRules: ConditionalRule[]       // 条件渲染规则
+    }
+
+    // 具体邮件模板示例
+    const MailTemplates: Record<GameEventType, MailTemplate> = {
+      RAID_COMPLETION: {
+        templateId: "raid_completion_mail",
+        eventType: GameEventType.RAID_COMPLETION,
+        subjectTemplate: "副本 {raidName} 已完成 - {result}",
+        contentTemplate: `
+          尊敬的会长，
+          
+          我们的团队刚刚完成了 {raidName} 副本挑战。
+          
+          📊 战果总结:
+          - 完成时间: {completionTime}
+          - 团队表现: {teamPerformance}
+          - 获得奖励: {rewards}
+          - MVP成员: {mvpMember}
+          
+          {conditionalContent}
+          
+          请及时查看详细报告并安排奖励分配。
+        `,
+        defaultActions: [
+          {
+            id: "view_raid_report",
+            label: "查看详细报告",
+            actionType: ActionType.NAVIGATE_TO_MODULE,
+            targetFunction: "RaidReportModule"
+          },
+          {
+            id: "distribute_rewards",
+            label: "分配奖励",
+            actionType: ActionType.NAVIGATE_TO_MODULE,
+            targetFunction: "RewardDistributionModule"
+          },
+          {
+            id: "praise_mvp",
+            label: "表彰MVP",
+            actionType: ActionType.CUSTOM_ACTION,
+            targetFunction: "MemberRecognitionModule"
+          }
+        ],
+        priorityLevel: MailPriority.HIGH,
+        categoryMapping: MailCategory.RAID_OPERATIONS
+      },
+      
+      DIPLOMATIC_INVITATION: {
+        templateId: "diplomatic_invitation_mail",
+        eventType: GameEventType.DIPLOMATIC_INVITATION,
+        subjectTemplate: "外交邀请 - {senderGuildName} 希望建立 {relationType}",
+        contentTemplate: `
+          会长您好，
+          
+          {senderGuildName} 公会通过外交渠道向我们发出了 {relationType} 邀请。
+          
+          🏛️ 对方公会信息:
+          - 公会名称: {senderGuildName}
+          - 当前排名: {senderRanking}
+          - 实力评估: {strengthAssessment}
+          - 外交历史: {diplomaticHistory}
+          
+          📋 邀请详情:
+          {invitationDetails}
+          
+          请您考虑并做出决策。建议在 {deadline} 前给出回复。
+        `,
+        defaultActions: [
+          {
+            id: "view_guild_profile",
+            label: "查看对方公会详情",
+            actionType: ActionType.NAVIGATE_TO_MODULE,
+            targetFunction: "GuildProfileModule"
+          },
+          {
+            id: "accept_invitation",
+            label: "接受邀请",
+            actionType: ActionType.AUTO_APPROVE,
+            targetFunction: "DiplomacyModule",
+            confirmation: {
+              required: true,
+              message: "确定要接受来自 {senderGuildName} 的外交邀请吗？"
+            }
+          },
+          {
+            id: "decline_invitation",
+            label: "礼貌拒绝",
+            actionType: ActionType.AUTO_REJECT,
+            targetFunction: "DiplomacyModule"
+          },
+          {
+            id: "schedule_negotiation",
+            label: "安排谈判",
+            actionType: ActionType.SCHEDULE_MEETING,
+            targetFunction: "DiplomacyModule"
+          }
+        ],
+        priorityLevel: MailPriority.HIGH,
+        categoryMapping: MailCategory.DIPLOMACY
+      }
+    }
+
+3.2.8.4 高级筛选与搜索系统
+
+    // 高级筛选系统
+    interface AdvancedFilterSystem {
+      /* 多维度筛选邮件 */
+      filterMails(criteria: FilterCriteria): GameEmail[]
+      
+      /* 智能搜索邮件内容 */
+      searchMails(query: SearchQuery): SearchResult[]
+      
+      /* 保存常用筛选条件 */
+      saveFilterPreset(name: string, criteria: FilterCriteria): void
+      
+      /* 基于AI的智能推荐筛选 */
+      suggestFilters(userContext: UserContext): FilterSuggestion[]
+    }
+
+    // 筛选条件接口
+    interface FilterCriteria {
+      categories?: MailCategory[]                // 邮件分类筛选
+      senders?: SenderType[]                     // 发送者类型筛选
+      priority?: MailPriority[]                  // 优先级筛选
+      dateRange?: DateRange                      // 日期范围筛选
+      tags?: MailTag[]                          // 标签筛选
+      actionRequired?: boolean                   // 是否需要操作
+      hasAttachments?: boolean                   // 是否有附件
+      readStatus?: ReadStatus                    // 阅读状态
+      customFilters?: CustomFilter[]             // 自定义筛选条件
+    }
+
+    // 智能搜索配置
+    interface SearchQuery {
+      keyword: string                            // 搜索关键词
+      searchScope: SearchScope                   // 搜索范围
+      fuzzyMatch: boolean                        // 模糊匹配
+      contextualSearch: boolean                  // 上下文搜索
+      resultLimit?: number                       // 结果数量限制
+      sortBy?: SortCriteria                     // 排序方式
+    }
+
+    enum SearchScope {
+      SUBJECT_ONLY = "仅主题",                   // 仅搜索邮件主题
+      CONTENT_ONLY = "仅内容",                   // 仅搜索邮件内容
+      FULL_EMAIL = "完整邮件",                   // 搜索完整邮件
+      TAGS_ONLY = "仅标签",                     // 仅搜索标签
+      SENDER_INFO = "发送者信息",                // 搜索发送者信息
+      ALL_FIELDS = "所有字段"                    // 搜索所有字段
+    }
+
+3.2.8.5 通知中心与优先级管理
+
+    // 通知中心
+    interface NotificationCenter {
+      /* 实时通知推送 */
+      pushNotification(notification: GameNotification): void
+      
+      /* 邮件优先级自动调整 */
+      adjustMailPriority(email: GameEmail, context: GameContext): MailPriority
+      
+      /* 批量通知管理 */
+      manageBatchNotifications(notifications: GameNotification[]): void
+      
+      /* 用户通知偏好学习 */
+      learnNotificationPreferences(userInteractions: NotificationInteraction[]): void
+    }
+
+    // 邮件优先级
+    enum MailPriority {
+      CRITICAL = "紧急",                         // 需要立即处理
+      HIGH = "高",                              // 24小时内处理
+      NORMAL = "普通",                          // 3天内处理
+      LOW = "低",                               // 一周内处理
+      ARCHIVE = "存档"                          // 仅供参考
+    }
+
+    // 优先级自动调整规则
+    interface PriorityAdjustmentRules {
+      /* 基于事件紧急程度调整 */
+      eventBasedAdjustment: (event: GameEvent) => MailPriority
+      
+      /* 基于发送者重要性调整 */
+      senderBasedAdjustment: (sender: MailSender) => MailPriority
+      
+      /* 基于截止时间调整 */
+      deadlineBasedAdjustment: (deadline: Date) => MailPriority
+      
+      /* 基于用户历史行为调整 */
+      behaviorBasedAdjustment: (userHistory: ActionHistory) => MailPriority
+    }
+
+3.3 用户界面规格
+
+3.3.1 界面设计原则
+
+- 信息层次: 清晰的信息架构，支持快速定位
+- 响应式设计: 适配不同屏幕尺寸
+- 可访问性: 支持键盘导航和屏幕阅读器
+- 性能优化: 大量数据的流畅展示
+
+3.3.2 核心界面规格
+
+    interface UISpecifications {
+      layout: {
+        mainNavigation: NavigationBar    // 主导航栏
+        sidePanel: InformationPanel     // 侧边信息面板
+        mainContent: ContentArea        // 主内容区域
+        modalSystem: ModalManager       // 弹窗管理系统
+      }
+      
+      interactionPatterns: {
+        dragAndDrop: DragDropSystem     // 拖拽操作
+        rightClickMenus: ContextMenu[]  // 右键菜单
+        keyboardShortcuts: ShortcutMap  // 快捷键系统
+        tooltipSystem: TooltipManager   // 提示信息系统
+      }
+    }
+
+3.4 成就系统详细扩展
+
+成就系统基于现有的公会目标和粉丝期望系统，提供多维度的成就追踪和奖励机制，是用户长期留存的核心驱动力。
+
+3.4.1 功能要求
+
+- 多维度成就分类: 公会排名、首杀数量、声望里程碑、发展成就等
+- 事件驱动触发: 所有成就基于游戏事件自动触发，无需手动检查
+- 进度可视化: 玩家可查看所有成就的完成进度和剩余条件
+- 奖励机制: 成就完成后提供资源、声望或特殊权益奖励
+- 粉丝期望集成: 成就完成直接影响粉丝满意度和期望值
+
+3.4.2 技术规格
+
+    // 成就系统核心接口
+    interface AchievementDefinition {
+      id: string                    // 唯一标识
+      name: string                  // 成就名称
+      description: string           // 详细描述
+      category: 'ranking' | 'firstkill' | 'reputation' | 'milestone'
+      
+      // 触发条件 (基于事件系统)
+      trigger: {
+        eventName: string           // 监听的事件名称
+        condition: string           // 条件表达式
+        threshold?: number          // 累积阈值 (可选)
+      }
+      
+      // 奖励配置
+      rewards: {
+        resources?: ResourceReward[]  // 资源奖励
+        reputation?: number          // 声望奖励
+        unlocks?: string[]          // 解锁内容
+        fanImpact?: number          // 粉丝期望影响
+      }
+      
+      // 显示状态
+      hidden?: boolean              // 是否隐藏成就
+      repeatable?: boolean          // 是否可重复完成
+    }
+
+    // 成就管理器服务
+    class AchievementManager {
+      private achievements: Map<string, AchievementDefinition>
+      private playerProgress: Map<string, AchievementProgress>
+      
+      // 核心功能
+      loadAchievements(): void
+      subscribeToEvents(): void
+      checkAchievementTrigger(event: GameEvent): void
+      unlockAchievement(achievementId: string): void
+      getPlayerProgress(): AchievementProgress[]
+    }
+
+3.4.3 验收标准
+
+-  成就系统能监听所有游戏事件并正确触发
+-  玩家界面显示成就进度和完成状态
+-  成就奖励正确发放并影响相关系统
+-  粉丝期望值随成就完成动态调整
+
+3.5 经验系统架构
+
+简化的经验系统专注于成员个体成长和多样化活动参与，删除复杂的熟练度机制。
+
+3.5.1 功能要求
+
+- 成员主体经验: 所有成员（玩家公会和NPC公会）拥有主体等级和经验
+- 活动专精经验: 针对不同位置、副本、PVP等活动的专门经验
+- 公会声望系统: 公会整体通过成就和活动获得声望，而非直接经验
+- 直观成长机制: 经验直接影响成员在对应活动中的表现
+
+3.5.2 技术规格
+
+    // 简化的经验系统接口
+    interface MemberExperienceSystem {
+      // 主体经验
+      level: number              // 成员总等级 (1-60)
+      experience: number         // 当前总经验
+      experienceToNext: number   // 升级所需经验
+      
+      // 活动专精经验 (参考魔兽世界设计)
+      activityExperience: {
+        // 位置经验
+        tank: number             // 坦克位置经验
+        healer: number           // 治疗位置经验
+        dps: number              // 输出位置经验
+        
+        // 副本经验
+        dungeonExperience: Map<string, number>  // 各副本专精经验
+        raidExperience: Map<string, number>     // 团本专精经验
+        
+        // PVP经验  
+        arenaExperience: number          // 竞技场经验
+        battlegroundExperience: number   // 战场经验
+        
+        // 其他活动经验
+        trainingExperience: number       // 训练经验
+        diplomacyExperience: number      // 外交经验
+      }
+    }
+
+    // 公会声望系统 (替代公会经验)
+    interface GuildReputationSystem {
+      reputation: number         // 总声望值
+      reputationLevel: number    // 声望等级 (1-10)
+      
+      // 声望来源追踪
+      reputationSources: {
+        firstKills: number       // 首杀声望
+        championships: number    // 比赛冠军声望
+        memberAchievements: number // 成员成就声望
+        communityContribution: number // 社区贡献声望
+      }
+      
+      // 声望效果
+      getReputationBonus(): ReputationBonus
+      canUnlockFeature(feature: string): boolean
+    }
+
+    // 扩展成员接口
+    interface GuildMember extends BaseEntity {
+      experience: MemberExperienceSystem
+      
+      // 经验增长方法
+      gainExperience(amount: number): void
+      gainActivityExperience(activity: ActivityType, amount: number): void
+      getActivityEfficiency(activity: ActivityType): number
+      
+      // 等级影响计算
+      calculatePerformanceBonus(activity: ActivityType): number
+    }
+
+    // 经验管理服务
+    class ExperienceManager {
+      // 主体经验计算
+      calculateLevelUp(currentExp: number): LevelUpResult
+      getExperienceForLevel(level: number): number
+      
+      // 活动经验计算
+      calculateActivityExperience(activity: Activity, performance: number): number
+      getActivityLevelBonus(activityExp: number): number
+      
+      // 公会声望计算
+      calculateReputationGain(achievement: Achievement): number
+      updateGuildReputation(guild: Guild, change: number): void
+    }
+
+3.5.3 验收标准
+
+-  成员主体经验正确计算和等级提升
+-  活动专精经验影响对应活动的表现
+-  公会声望系统与成员成就正确关联
+-  经验数据持久化和界面显示正常
+-  不同活动的经验获取平衡合理
+
+3.6 活动结算AI评价反馈系统
+
+3.6.1 功能要求
+
+系统概述： 每次PVE和PVP活动结束后，在结算界面提供多维度的AI评价反馈，包括参与成员、未参与成员、粉丝、官员等角色的个性化评价。
+
+    /* 活动结算AI评价反馈系统 */
+    interface ActivityFeedbackSystem {
+      // 反馈生成器
+      feedbackGenerator: FeedbackGenerator
+      
+      // 评价者配置
+      evaluators: Map<EvaluatorType, AIEvaluator[]>  // 不同类型的评价者
+      commentPool: CommentPool                       // 静态评价池
+      dynamicContext: ActivityContext               // 动态上下文分析
+      
+      // 反馈展示
+      feedbackRenderer: FeedbackRenderer           // 反馈渲染器
+      reactionSystem: ReactionSystem               // 反应和互动系统
+    }
+
+    // 评价者类型
+    enum EvaluatorType {
+      PARTICIPATING_MEMBERS = "参与成员",     // 参与该活动的公会成员
+      NON_PARTICIPATING = "未参与成员",       // 未参与该活动的公会成员  
+      GUILD_FANS = "公会粉丝",              // 公会外部粉丝和关注者
+      GUILD_OFFICERS = "公会官员",          // 各级官员和管理层
+      CLASS_LEADERS = "职业队长",           // 专业队长和导师
+      RIVAL_GUILDS = "敌对公会",            // 竞争对手公会成员
+      NEUTRAL_OBSERVERS = "中立观察者"       // 游戏世界中的中立NPC
+    }
+
+    // AI评价者实体
+    interface AIEvaluator {
+      id: string                               // 评价者ID
+      name: string                            // 评价者名称
+      type: EvaluatorType                     // 评价者类型
+      personality: PersonalityProfile         // 个性特征
+      relationshipLevel: number               // 与公会的关系等级
+      
+      // 评价倾向
+      evaluationStyle: EvaluationStyle        // 评价风格
+      focusAspects: ActivityAspect[]          // 关注重点
+      biasFactors: BiasConfiguration          // 偏见和倾向配置
+      
+      // 历史记录
+      pastComments: CommentHistory[]          // 历史评价记录
+      reputationImpact: number               // 声誉影响权重
+    }
+
+    // 评价风格配置
+    interface EvaluationStyle {
+      tone: CommentTone                       // 评价语调
+      detailLevel: DetailLevel                // 详细程度
+      constructiveness: number                // 建设性程度 (0-1)
+      emotionalIntensity: number              // 情感强度 (0-1)
+      professionalLevel: number               // 专业程度 (0-1)
+    }
+
+    enum CommentTone {
+      ENCOURAGING = "鼓励型",                 // 积极鼓励的语调
+      CRITICAL = "批评型",                    // 批评和指正的语调
+      ANALYTICAL = "分析型",                  // 客观分析的语调
+      EMOTIONAL = "情感型",                   // 感性和情绪化的语调
+      PROFESSIONAL = "专业型",                // 专业和技术性的语调
+      HUMOROUS = "幽默型",                    // 轻松幽默的语调
+      SARCASTIC = "讽刺型"                   // 讽刺和挖苦的语调
+    }
+
+    // 活动评价维度
+    enum ActivityAspect {
+      STRATEGY_EXECUTION = "战术执行",         // 战术执行质量
+      TEAM_COORDINATION = "团队协作",          // 团队配合程度
+      INDIVIDUAL_PERFORMANCE = "个人表现",      // 个人技能表现
+      RESOURCE_MANAGEMENT = "资源管理",        // 资源分配和使用
+      LEADERSHIP_QUALITY = "领导力",           // 指挥和决策质量
+      ADAPTABILITY = "应变能力",              // 突发情况应对
+      PREPARATION_LEVEL = "准备充分度",        // 活动前准备工作
+      COMMUNICATION = "沟通效果",             // 沟通和信息传递
+      LEARNING_IMPROVEMENT = "学习改进",       // 从失败中学习的能力
+      ENTERTAINMENT_VALUE = "娱乐价值"         // 活动的观赏性和趣味性
+    }
+
+    // 评价内容池
+    interface CommentPool {
+      // 按评价维度分类的评价模板
+      templatesByAspect: Map<ActivityAspect, CommentTemplate[]>
+      
+      // 按结果类型分类的评价模板
+      templatesByResult: Map<ActivityResultType, CommentTemplate[]>
+      
+      // 按评价者类型分类的评价模板
+      templatesByEvaluator: Map<EvaluatorType, CommentTemplate[]>
+      
+      // 动态评价生成规则
+      dynamicGenerationRules: GenerationRule[]
+    }
+
+    // 评价模板
+    interface CommentTemplate {
+      id: string                              // 模板ID
+      template: string                        // 评价模板文本 (支持变量替换)
+      applicableContexts: ContextCondition[]  // 适用场景条件
+      emotionalWeight: number                 // 情感权重
+      impactLevel: FeedbackImpact            // 反馈影响等级
+      
+      // 模板变量
+      variables: TemplateVariable[]           // 可替换变量定义
+      
+      // 使用限制
+      cooldownPeriod: number                  // 冷却期 (防止重复)
+      maxUsagePerSession: number             // 单次活动最大使用次数
+    }
+
+    enum FeedbackImpact {
+      NEUTRAL = "中性",                       // 无明显情感倾向
+      POSITIVE_MILD = "轻度正面",             // 轻微的正面情感
+      POSITIVE_STRONG = "强烈正面",           // 强烈的正面情感
+      NEGATIVE_MILD = "轻度负面",             // 轻微的负面情感  
+      NEGATIVE_STRONG = "强烈负面",           // 强烈的负面情感
+      MOTIVATIONAL = "激励性",                // 激励和鼓舞性质
+      EDUCATIONAL = "教育性"                  // 教育和指导性质
+    }
+
+    // 反馈生成器
+    class FeedbackGenerator {
+      /* 为指定活动生成AI评价反馈 */
+      generateFeedback(activity: Activity, context: ActivityContext): ActivityFeedback
+      
+      /* 选择合适的评价者 */
+      selectEvaluators(activity: Activity, maxCount: number): AIEvaluator[]
+      
+      /* 基于上下文生成个性化评价 */
+      generatePersonalizedComment(evaluator: AIEvaluator, context: ActivityContext): string
+      
+      /* 应用评价者的个性特征 */
+      applyPersonalityBias(comment: string, personality: PersonalityProfile): string
+    }
+
+3.6.2 技术规格
+
+评价生成算法：
+
+    // 评价生成核心算法
+    class CommentGenerationEngine {
+      /* 智能评价生成 */
+      generateIntelligentComment(params: CommentGenerationParams): GeneratedComment {
+        // 1. 分析活动上下文
+        const context = this.analyzeActivityContext(params.activity)
+        
+        // 2. 评估评价者关系和倾向
+        const evaluatorContext = this.buildEvaluatorContext(params.evaluator, context)
+        
+        // 3. 选择合适的评价模板
+        const templates = this.selectApplicableTemplates(evaluatorContext)
+        
+        // 4. 生成动态内容
+        const dynamicContent = this.generateDynamicContent(evaluatorContext)
+        
+        // 5. 组合和个性化处理
+        return this.combineAndPersonalize(templates, dynamicContent, evaluatorContext)
+      }
+      
+      /* 上下文敏感的模板选择 */
+      private selectApplicableTemplates(context: EvaluatorContext): CommentTemplate[] {
+        return this.commentPool.templates
+          .filter(template => this.matchesContext(template, context))
+          .sort((a, b) => this.calculateRelevanceScore(b, context) - this.calculateRelevanceScore(a, context))
+          .slice(0, 3) // 选择最相关的3个模板
+      }
+    }
+
+    // 活动结果分析器
+    interface ActivityAnalyzer {
+      /* 分析活动表现 */
+      analyzePerformance(activity: Activity): PerformanceAnalysis
+      
+      /* 识别关键时刻 */
+      identifyKeyMoments(activity: Activity): KeyMoment[]
+      
+      /* 计算影响因素 */
+      calculateImpactFactors(activity: Activity): ImpactFactor[]
+    }
+
+    interface PerformanceAnalysis {
+      overallRating: number                   // 总体评分 (0-10)
+      aspectRatings: Map<ActivityAspect, number> // 各维度评分
+      strengths: string[]                     // 表现亮点
+      weaknesses: string[]                    // 改进空间
+      surprisingMoments: KeyMoment[]          // 意外时刻
+      
+      // 对比分析
+      historicalComparison: ComparisonResult  // 与历史表现对比
+      peerComparison: ComparisonResult       // 与同级别公会对比
+    }
+
+3.6.3 验收标准
+
+功能验收：
+
+-  活动结束后自动触发评价生成
+-  支持7种不同类型的评价者
+-  评价内容与活动表现高度相关
+-  评价者个性特征明显体现
+-  避免重复和机械化的评价内容
+
+质量验收：
+
+-  评价内容的娱乐性和可读性
+-  评价对玩家决策的指导价值
+-  系统性能影响控制在可接受范围
+-  多样化的评价风格和语调
+
+3.7 官员系统详细设计
+
+3.7.1 功能要求
+
+系统概述： 建立完整的公会官员体系，包括团队领袖(RL)、职业队长、专业官员等多层级管理结构，提供明确的权限分工和责任体系。
+
+    /* 完整官员系统设计 */
+    interface ComprehensiveOfficerSystem {
+      // 核心职位体系
+      positions: Map<OfficerRank, OfficerPosition>  // 职位等级体系
+      appointments: Map<string, OfficerAppointment> // 职位任命记录
+      
+      // 权限管理
+      permissionMatrix: PermissionMatrix            // 权限矩阵
+      roleBasedAccess: RoleAccessControl           // 基于角色的访问控制
+      
+      // 专业职位
+      specializedRoles: SpecializedOfficerRoles    // 专业化职位
+      
+      // 管理功能
+      managementTools: OfficerManagementTools      // 管理工具集
+      performanceTracking: OfficerPerformanceSystem // 官员绩效系统
+    }
+
+    // 官员等级体系
+    enum OfficerRank {
+      GUILD_MASTER = 0,        // 会长 - 最高权限
+      DEPUTY_MASTER = 1,       // 副会长 - 协助会长管理
+      SENIOR_OFFICER = 2,      // 高级官员 - 部门负责人
+      OFFICER = 3,             // 普通官员 - 专业职能
+      JUNIOR_OFFICER = 4,      // 初级官员 - 助理职位
+      SPECIALIST = 5           // 专业人员 - 特定技能
+    }
+
+    // 专业化官员职位详细定义
+    interface SpecializedOfficerRoles {
+      // 战斗指挥体系
+      raidLeader: RaidLeaderPosition            // 团队领袖 (RL)
+      assistantRaidLeader: AssistantRLPosition  // 副RL
+      classLeaders: Map<CharacterClass, ClassLeaderPosition> // 职业队长
+      
+      // 管理职能体系  
+      recruitmentOfficer: RecruitmentOfficerPosition  // 招募官
+      treasuryOfficer: TreasuryOfficerPosition        // 财务官
+      disciplinaryOfficer: DisciplinaryPosition       // 纪律官
+      publicRelationsOfficer: PRPosition               // 公关官
+      
+      // 专业支持体系
+      strategyAnalyst: StrategyAnalystPosition         // 战术分析师
+      diplomaticAttache: DiplomaticPosition            // 外交官
+      logisticsManager: LogisticsManagerPosition       // 后勤经理
+      eventCoordinator: EventCoordinatorPosition       // 活动协调员
+      
+      // 培训指导体系
+      mentorshipCoordinator: MentorshipPosition       // 导师协调员
+      newbieOfficer: NewbieOfficerPosition            // 新人指导官
+      skillInstructor: SkillInstructorPosition        // 技能教练
+    }
+
+    // 团队领袖 (RL) 职位详细定义
+    interface RaidLeaderPosition extends OfficerPosition {
+      // RL核心职责
+      raidPlanningAuthority: boolean           // 团队规划权限
+      memberSelectionRight: boolean            // 成员选择权限
+      tacticalCommandAuthority: boolean        // 战术指挥权限
+      lootDistributionRight: boolean           // 战利品分配权限
+      
+      // RL专业技能要求
+      requiredSkills: RaidLeaderSkill[]        // 必需技能
+      preferredExperience: ExperienceRequirement[] // 经验偏好
+      leadershipStyle: LeadershipStyle         // 领导风格
+      
+      // RL绩效指标
+      performanceMetrics: RLPerformanceMetrics // 绩效评估标准
+      
+      // 团队管理工具
+      teamManagementTools: RLManagementToolset // RL专用管理工具
+    }
+
+    enum RaidLeaderSkill {
+      TACTICAL_PLANNING = "战术规划",           // 战术规划能力
+      TEAM_COORDINATION = "团队协调",           // 团队协调能力
+      PRESSURE_MANAGEMENT = "压力管理",         // 压力处理能力
+      COMMUNICATION = "沟通技巧",               // 沟通交流技巧
+      ADAPTABILITY = "应变能力",                // 临场应变能力
+      ANALYTICAL_THINKING = "分析思维",         // 分析思考能力
+      CONFLICT_RESOLUTION = "冲突解决"          // 冲突处理能力
+    }
+
+    // 职业队长详细定义
+    interface ClassLeaderPosition extends OfficerPosition {
+      managedClass: CharacterClass             // 负责的职业
+      
+      // 职业队长职责
+      classOptimizationRight: boolean          // 职业优化权限
+      buildRecommendationAuthority: boolean    // 构建推荐权限
+      trainingProgramManagement: boolean       // 培训项目管理
+      performanceEvaluationRight: boolean      // 成员表现评估
+      
+      // 专业知识要求
+      classExpertiseLevel: ExpertiseLevel      // 职业专精等级
+      theoreticalKnowledge: KnowledgeArea[]    // 理论知识要求
+      practicalExperience: PracticalSkill[]    // 实践经验要求
+      
+      // 队长特有工具
+      classManagementTools: ClassManagementToolset // 职业管理工具集
+    }
+
+    // 权限矩阵系统
+    interface PermissionMatrix {
+      // 模块访问权限
+      moduleAccess: Map<GameModule, AccessLevel>    // 各模块访问级别
+      
+      // 功能操作权限
+      functionalPermissions: Map<GameFunction, PermissionLevel> // 功能权限
+      
+      // 数据访问权限
+      dataAccess: Map<DataCategory, DataAccessLevel> // 数据访问权限
+      
+      // 人员管理权限
+      memberManagement: MemberManagementPermissions // 成员管理权限
+      
+      // 财务权限
+      financialAuthority: FinancialPermissions      // 财务操作权限
+    }
+
+    enum PermissionLevel {
+      NO_ACCESS = 0,      // 无权限
+      VIEW_ONLY = 1,      // 仅查看
+      LIMITED_EDIT = 2,   // 有限编辑
+      FULL_EDIT = 3,      // 完全编辑
+      ADMINISTRATIVE = 4  // 管理权限
+    }
+
+    // 官员绩效系统
+    interface OfficerPerformanceSystem {
+      // 绩效指标定义
+      performanceIndicators: Map<OfficerRank, PerformanceIndicator[]>
+      
+      // 评估周期管理
+      evaluationCycles: EvaluationCycle[]     // 评估周期
+      
+      // 绩效记录
+      performanceRecords: Map<string, PerformanceRecord[]> // 绩效记录
+      
+      // 奖惩机制
+      rewardSystem: OfficerRewardSystem       // 奖励系统
+      disciplinarySystem: DisciplinarySystem  // 纪律处分系统
+    }
+
+    // 官员管理工具集
+    class OfficerManagementTools {
+      /* 任命和罢免 */
+      appointOfficer(memberId: string, position: OfficerPosition): AppointmentResult
+      dismissOfficer(officerId: string, reason: string): DismissalResult
+      
+      /* 权限管理 */
+      grantPermission(officerId: string, permission: Permission): PermissionResult
+      revokePermission(officerId: string, permission: Permission): PermissionResult
+      
+      /* 绩效评估 */
+      evaluateOfficerPerformance(officerId: string, period: EvaluationPeriod): PerformanceEvaluation
+      
+      /* 培训和发展 */
+      createTrainingPlan(officerId: string, developmentGoals: DevelopmentGoal[]): TrainingPlan
+    }
+
+3.7.2 技术规格
+
+官员管理算法：
+
+    // 智能官员推荐系统
+    class OfficerRecommendationEngine {
+      /* 基于能力匹配推荐合适的官员候选人 */
+      recommendCandidates(position: OfficerPosition, guild: Guild): CandidateRecommendation[] {
+        const members = guild.members
+        const requirements = position.requirements
+        
+        return members
+          .map(member => this.evaluateCandidateSuitability(member, requirements))
+          .filter(evaluation => evaluation.suitabilityScore > 0.6)
+          .sort((a, b) => b.suitabilityScore - a.suitabilityScore)
+      }
+      
+      /* 评估候选人适合度 */
+      private evaluateCandidateSuitability(member: GuildMember, requirements: PositionRequirements): CandidateEvaluation {
+        const skillMatch = this.calculateSkillMatch(member.skills, requirements.requiredSkills)
+        const experienceMatch = this.calculateExperienceMatch(member.experience, requirements.minimumExperience)
+        const personalityMatch = this.calculatePersonalityMatch(member.personality, requirements.preferredPersonality)
+        const availabilityMatch = this.calculateAvailabilityMatch(member.availability, requirements.timeCommitment)
+        
+        const suitabilityScore = (skillMatch * 0.4) + (experienceMatch * 0.3) + (personalityMatch * 0.2) + (availabilityMatch * 0.1)
+        
+        return {
+          member,
+          suitabilityScore,
+          skillMatch,
+          experienceMatch,
+          personalityMatch,
+          availabilityMatch,
+          recommendations: this.generateDevelopmentRecommendations(member, requirements)
+        }
+      }
+    }
+
+    // 权限验证系统
+    class PermissionValidator {
+      /* 验证官员是否有权限执行特定操作 */
+      validatePermission(officerId: string, action: GameAction, context: ActionContext): PermissionValidationResult {
+        const officer = this.getOfficer(officerId)
+        const requiredPermissions = this.getRequiredPermissions(action)
+        const officerPermissions = this.getOfficerPermissions(officer)
+        
+        const hasPermission = requiredPermissions.every(permission => 
+          this.checkPermission(officerPermissions, permission, context))
+        
+        return {
+          hasPermission,
+          officer,
+          requiredPermissions,
+          officerPermissions,
+          validationDetails: this.generateValidationDetails(requiredPermissions, officerPermissions)
+        }
+      }
+    }
+
+3.7.3 验收标准
+
+功能验收：
+
+-  支持12种不同的专业官员职位
+-  完整的权限矩阵和访问控制
+-  智能官员推荐和适配系统
+-  官员绩效评估和管理工具
+-  职位继承和临时代理机制
+
+质量验收：
+
+-  权限验证的准确性和安全性
+-  官员管理的便利性和直观性
+-  绩效评估的公平性和有效性
+-  系统的可扩展性和维护性
+
+3.7.4 简化玩家界面设计（AI后端驱动）
+
+设计理念： 基于单机游戏特性和玩家作为会长的角色定位，将复杂的官员管理逻辑转移到AI后端处理，为玩家提供简洁直观的管理界面，专注于重要决策而非繁琐操作。
+
+    // 简化版官员系统玩家界面
+    interface SimplifiedOfficerInterface {
+      // 核心管理视图
+      executiveDashboard: ExecutiveDashboard       // 高管仪表板
+      quickDecisionPanel: QuickDecisionPanel       // 快速决策面板
+      officerOverview: OfficerOverview             // 官员概览
+      
+      // AI驱动的后端系统
+      aiOfficerManager: AIOfficerManager           // AI官员管理器
+      intelligentRecommendations: AIRecommendationEngine // 智能推荐引擎
+      autoManagementSystem: AutoManagementSystem   // 自动管理系统
+    }
+
+    // 高管仪表板 - 玩家主要交互界面
+    interface ExecutiveDashboard {
+      // 关键信息概览
+      keyMetrics: {
+        totalOfficers: number                      // 官员总数
+        activeOfficers: number                     // 活跃官员数
+        performanceRating: number                  // 整体表现评分 (0-100)
+        managementEfficiency: number              // 管理效率 (0-100)
+      }
+      
+      // 需要关注的事项
+      attentionItems: {
+        urgentDecisions: UrgentDecision[]          // 紧急决策事项
+        performanceAlerts: PerformanceAlert[]     // 表现警报
+        vacantPositions: VacantPosition[]         // 空缺职位
+        promotionOpportunities: PromotionOpportunity[] // 晋升机会
+      }
+      
+      // 简化的状态指示
+      systemHealth: {
+        leadershipCoverage: HealthStatus          // 领导力覆盖状况
+        specialistAvailability: HealthStatus     // 专业人员可用性
+        permissionConsistency: HealthStatus      // 权限一致性
+        workloadBalance: HealthStatus            // 工作负载平衡
+      }
+    }
+
+    enum HealthStatus {
+      EXCELLENT = "优秀",                         // 90-100%
+      GOOD = "良好",                             // 70-89%
+      FAIR = "一般",                             // 50-69%
+      POOR = "较差",                             // 30-49%
+      CRITICAL = "危急"                          // 0-29%
+    }
+
+    // 快速决策面板 - 简化的决策界面
+    interface QuickDecisionPanel {
+      // 推荐决策选项
+      recommendedActions: RecommendedAction[]     // AI推荐的行动
+      
+      // 一键操作
+      quickActions: {
+        autoFillVacancies: () => void             // 自动填补空缺
+        rebalanceWorkload: () => void             // 重新平衡工作负载
+        optimizePermissions: () => void           // 优化权限分配
+        promoteDeserving: () => void              // 晋升优秀成员
+      }
+      
+      // 批量决策
+      batchDecisions: {
+        pendingAppointments: BatchAppointment[]   // 待批准任命
+        performanceReviews: BatchPerformanceReview[] // 批量绩效评估
+        permissionUpdates: BatchPermissionUpdate[] // 权限更新
+      }
+    }
+
+    // AI推荐的行动
+    interface RecommendedAction {
+      actionId: string                           // 行动ID
+      actionType: ActionType                     // 行动类型
+      priority: ActionPriority                   // 优先级
+      title: string                              // 行动标题
+      description: string                        // 详细描述
+      
+      // AI分析结果
+      aiAnalysis: {
+        currentSituation: string                 // 当前情况分析
+        expectedOutcome: string                  // 预期结果
+        riskAssessment: RiskLevel               // 风险评估
+        confidenceLevel: number                  // AI建议置信度 (0-100)
+      }
+      
+      // 简化的选择选项
+      actionOptions: ActionOption[]              // 行动选项
+      estimatedImpact: ImpactEstimation         // 影响预估
+    }
+
+    enum ActionType {
+      APPOINTMENT = "任命决策",                   // 官员任命
+      RESTRUCTURING = "组织重构",                // 组织结构调整
+      PERFORMANCE_MANAGEMENT = "绩效管理",        // 绩效相关决策
+      PERMISSION_ADJUSTMENT = "权限调整",         // 权限修改
+      CRISIS_RESPONSE = "危机应对",               // 危机处理
+      OPTIMIZATION = "系统优化"                   // 系统优化
+    }
+
+    enum ActionPriority {
+      IMMEDIATE = "立即处理",                     // 需要立即处理
+      HIGH = "高优先级",                         // 高优先级
+      MEDIUM = "中等优先级",                     // 中等优先级
+      LOW = "低优先级"                          // 低优先级
+    }
+
+    // AI官员管理器 - 后端智能管理
+    interface AIOfficerManager {
+      /* 自动管理日常运营 */
+      autoManageDailyOperations(): void
+      
+      /* 智能匹配官员和职位 */
+      intelligentStaffMatching(): StaffingRecommendation[]
+      
+      /* 自动处理常规权限管理 */
+      autoManagePermissions(): PermissionAdjustment[]
+      
+      /* 预测官员发展趋势 */
+      predictOfficerTrends(): OfficerTrendAnalysis
+      
+      /* 自动生成管理建议 */
+      generateManagementAdvice(): ManagementAdvice[]
+    }
+
+    // 智能推荐引擎
+    interface AIRecommendationEngine {
+      /* 分析组织结构并提供优化建议 */
+      analyzeOrganizationalStructure(): StructuralAnalysis
+      
+      /* 识别潜在的管理问题 */
+      identifyManagementIssues(): ManagementIssue[]
+      
+      /* 推荐人才发展计划 */
+      recommendTalentDevelopment(): TalentDevelopmentPlan[]
+      
+      /* 预测官员系统表现 */
+      predictSystemPerformance(): PerformanceForecast
+    }
+
+    // 官员概览 - 简化的信息展示
+    interface OfficerOverview {
+      // 关键职位状态
+      keyPositions: {
+        guildMaster: OfficerSummary               // 会长 (玩家)
+        deputyMasters: OfficerSummary[]           // 副会长们
+        seniorOfficers: OfficerSummary[]          // 高级官员们
+        specialists: OfficerSummary[]             // 专业人员们
+      }
+      
+      // 简化的表现指标
+      performanceOverview: {
+        topPerformers: OfficerSummary[]           // 表现最佳
+        needsAttention: OfficerSummary[]          // 需要关注
+        recentPromotions: OfficerSummary[]        // 最近晋升
+        potentialCandidates: OfficerSummary[]     // 潜在候选人
+      }
+      
+      // 工作负载分布
+      workloadDistribution: WorkloadVisualization // 工作负载可视化
+    }
+
+    // 简化的官员摘要
+    interface OfficerSummary {
+      officerId: string                          // 官员ID
+      name: string                               // 姓名
+      currentPosition: string                    // 当前职位
+      performanceScore: number                   // 表现评分 (0-100)
+      workloadLevel: WorkloadLevel              // 工作负载等级
+      
+      // 简化状态指示
+      status: {
+        availability: AvailabilityStatus         // 可用性状态
+        satisfaction: SatisfactionLevel         // 满意度等级
+        growthPotential: GrowthPotential        // 成长潜力
+      }
+      
+      // AI生成的关键洞察
+      aiInsights: {
+        keyStrengths: string[]                   // 关键优势
+        improvementAreas: string[]               // 改进领域
+        recommendedActions: string[]             // 推荐行动
+      }
+    }
+
+    enum WorkloadLevel {
+      UNDERUTILIZED = "使用不足",                // 工作负载过轻
+      OPTIMAL = "最佳状态",                      // 工作负载适中
+      OVERLOADED = "负载过重",                   // 工作负载过重
+      CRITICAL = "严重超载"                      // 严重超载
+    }
+
+    enum AvailabilityStatus {
+      FULLY_AVAILABLE = "完全可用",              // 完全可用
+      LIMITED_AVAILABILITY = "有限可用",          // 有限可用
+      TEMPORARILY_UNAVAILABLE = "暂时不可用",     // 暂时不可用
+      EXTENDED_ABSENCE = "长期缺席"              // 长期缺席
+    }
+
+    // 自动管理系统
+    interface AutoManagementSystem {
+      // 自动化规则设置
+      automationRules: {
+        autoFillVacancies: boolean               // 自动填补空缺
+        autoPromoteBasedOnPerformance: boolean   // 基于表现自动晋升
+        autoAdjustPermissions: boolean           // 自动调整权限
+        autoRebalanceWorkload: boolean           // 自动重新平衡工作负载
+      }
+      
+      // 自动化阈值设置
+      automationThresholds: {
+        minPerformanceForPromotion: number       // 晋升最低表现要求
+        maxWorkloadBeforeRebalance: number       // 重新平衡前的最大工作负载
+        minSatisfactionLevel: number             // 最低满意度水平
+      }
+      
+      // 自动化报告
+      automationReports: {
+        dailyActions: AutomationAction[]         // 每日自动化行动
+        weeklyPerformance: AutomationPerformance // 每周自动化表现
+        systemRecommendations: SystemRecommendation[] // 系统推荐
+      }
+    }
+
+    // 简化的玩家交互流程
+    interface SimplifiedPlayerWorkflow {
+      /* 每日简报查看 */
+      viewDailySummary(): DailySummary
+      
+      /* 快速决策处理 */
+      processQuickDecisions(decisions: Decision[]): DecisionResult[]
+      
+      /* 设置自动化偏好 */
+      configureAutomation(preferences: AutomationPreferences): void
+      
+      /* 查看详细报告 (可选) */
+      viewDetailedReports(reportType: ReportType): DetailedReport
+      
+      /* 手动干预 (紧急情况) */
+      manualIntervention(situation: CriticalSituation): InterventionResult
+    }
+
+    // 每日简报
+    interface DailySummary {
+      date: Date                                 // 日期
+      
+      // 关键指标
+      keyMetrics: {
+        systemHealth: OverallHealth              // 系统整体健康度
+        completedTasks: number                   // 完成任务数
+        pendingDecisions: number                 // 待决策事项数
+        memberSatisfaction: number               // 成员满意度
+      }
+      
+      // 重要事件
+      significantEvents: SignificantEvent[]     // 重要事件
+      
+      // AI建议摘要
+      aiRecommendationSummary: string           // AI建议摘要
+      
+      // 明日预览
+      tomorrowPreview: {
+        scheduledActivities: ScheduledActivity[] // 计划活动
+        anticipatedDecisions: AnticipatedDecision[] // 预期决策
+        potentialIssues: PotentialIssue[]        // 潜在问题
+      }
+    }
+
+    // 用户体验优化
+    interface UXOptimizations {
+      // 个性化设置
+      personalization: {
+        preferredNotificationLevel: NotificationLevel // 偏好通知级别
+        dashboardLayout: DashboardLayout         // 仪表板布局偏好
+        decisionStyle: DecisionStyle             // 决策风格偏好
+      }
+      
+      // 学习适应
+      adaptiveLearning: {
+        userBehaviorPatterns: BehaviorPattern[]  // 用户行为模式
+        preferenceAdjustments: PreferenceAdjustment[] // 偏好调整
+        uiCustomizations: UICustomization[]      // 界面定制
+      }
+      
+      // 智能提醒
+      intelligentReminders: {
+        contextualAlerts: ContextualAlert[]      // 上下文相关警报
+        proactiveNotifications: ProactiveNotification[] // 主动通知
+        learningBasedSuggestions: LearningSuggestion[] // 基于学习的建议
+      }
+    }
+
+    // 后端AI系统架构
+    interface BackendAIArchitecture {
+      // 决策支持系统
+      decisionSupportSystem: DecisionSupportAI   // 决策支持AI
+      
+      // 预测分析系统
+      predictiveAnalytics: PredictiveAnalyticsAI // 预测分析AI
+      
+      // 自然语言处理
+      naturalLanguageProcessor: NLPProcessor     // 自然语言处理器
+      
+      // 机器学习模型
+      machineLearningModels: MLModelManager      // 机器学习模型管理器
+      
+      // 知识图谱
+      knowledgeGraph: KnowledgeGraphSystem       // 知识图谱系统
+    }
+
+实现策略：
+
+1.  界面简化原则
+
+    - 将12种专业官员职位合并为4个主要类别显示
+    - 复杂的权限矩阵通过AI自动管理，玩家只需确认关键决策
+    - 绩效评估自动化，玩家仅需关注异常情况
+
+2.  AI后端接管功能
+
+    - 日常权限分配和调整
+    - 官员绩效监控和评估
+    - 工作负载自动平衡
+    - 职位匹配和推荐
+    - 常规管理任务自动化
+
+3.  玩家保留控制权
+
+    - 重要官员任免决策
+    - 组织结构重大调整
+    - 危机处理关键决策
+    - 自动化规则设置和调整
+
+3.8 世界Boss系统设计
+
+3.8.1 功能要求
+
+系统概述： 设计跨公会竞争的世界Boss系统，提供大型共享PVE内容，促进公会间的合作与竞争，增加游戏的社交层面和长期挑战性。
+
+    /* 世界Boss系统完整设计 */
+    interface WorldBossSystem {
+      // Boss管理
+      activeBosses: Map<string, WorldBoss>          // 当前活跃的世界Boss
+      bossSchedule: BossSpawnSchedule               // Boss刷新计划
+      bossTemplates: Map<string, WorldBossTemplate> // Boss模板库
+      
+      // 跨公会机制
+      guildParticipation: Map<string, GuildParticipation> // 公会参与状态
+      allianceSystem: AllianceManagement            // 临时联盟系统
+      competitionRanking: CompetitionRanking        // 竞争排行榜
+      
+      // 奖励系统
+      rewardDistribution: RewardDistributionSystem  // 奖励分配系统
+      achievementSystem: WorldBossAchievements      // 世界Boss专属成就
+      
+      // 动态难度
+      difficultyScaling: DynamicDifficultySystem    // 动态难度调整
+      adaptiveChallenge: AdaptiveChallengeSystem    // 自适应挑战机制
+    }
+
+    // 世界Boss实体定义
+    interface WorldBoss {
+      id: string                                    // Boss唯一ID
+      name: string                                  // Boss名称
+      title: string                                 // Boss称号
+      lore: string                                  // 背景故事
+      
+      // Boss状态
+      currentHealth: number                         // 当前生命值
+      maxHealth: number                            // 最大生命值
+      phase: BossPhase                             // 当前阶段
+      enrageTimer: number                          // 狂暴计时器
+      
+      // Boss能力
+      abilities: Map<string, BossAbility>           // Boss技能集
+      phases: BossPhase[]                          // 阶段机制
+      mechanics: BossMechanic[]                    // 特殊机制
+      
+      // 参与统计
+      participatingGuilds: Map<string, GuildContribution> // 参与公会贡献
+      damageLeaderboard: DamageRecord[]            // 伤害排行榜
+      
+      // 时间管理
+      spawnTime: Date                              // 出现时间
+      duration: number                             // 持续时间
+      nextSpawnPrediction: Date                    // 下次出现预测
+      
+      // 奖励池
+      rewardPool: WorldBossRewardPool              // 奖励池
+      guaranteedDrops: GuaranteedDrop[]            // 保底奖励
+      rareDrops: RareDrop[]                        // 稀有掉落
+    }
+
+    // Boss阶段机制
+    interface BossPhase {
+      phaseNumber: number                          // 阶段编号
+      healthThreshold: number                      // 触发生命值阈值
+      phaseName: string                           // 阶段名称
+      
+      // 阶段特征
+      newAbilities: string[]                       // 新增技能
+      disabledAbilities: string[]                  // 禁用技能
+      mechanicChanges: MechanicChange[]            // 机制变化
+      
+      // 视觉效果
+      visualEffects: PhaseVisualEffect[]           // 视觉特效
+      audioCues: AudioCue[]                       // 音频提示
+      environmentChanges: EnvironmentChange[]      // 环境变化
+      
+      // 时间限制
+      phaseTimeLimit: number                       // 阶段时间限制
+      enrageCondition: EnrageCondition            // 狂暴条件
+    }
+
+    // 公会参与系统
+    interface GuildParticipation {
+      guildId: string                             // 公会ID
+      participationStatus: ParticipationStatus    // 参与状态
+      
+      // 贡献统计
+      totalDamageContribution: number              // 总伤害贡献
+      healingContribution: number                  // 治疗贡献
+      supportContribution: number                  // 支援贡献
+      tacticalContribution: number                 // 战术贡献
+      
+      // 参与成员
+      activeMembers: Map<string, MemberContribution> // 活跃成员贡献
+      reserves: string[]                           // 预备成员
+      
+      // 联盟关系
+      allies: string[]                            // 盟友公会
+      rivals: string[]                            // 竞争对手
+      
+      // 策略规划
+      strategy: GuildBossStrategy                  // 公会策略
+      coordination: CoordinationPlan               // 协调计划
+    }
+
+    enum ParticipationStatus {
+      PREPARING = "准备中",                        // 正在准备参与
+      ACTIVE = "积极参与",                         // 正在积极战斗
+      SUPPORTING = "支援模式",                     // 提供支援和治疗
+      COMPETING = "竞争模式",                      // 与其他公会竞争
+      WITHDRAWING = "撤退中",                      // 正在撤退
+      OBSERVING = "观战模式"                       // 观察其他公会表现
+    }
+
+    // 临时联盟系统
+    interface AllianceManagement {
+      // 联盟形成
+      proposedAlliances: AllianceProposal[]        // 联盟提案
+      activeAlliances: TempAlliance[]              // 活跃联盟
+      allianceHistory: AllianceRecord[]            // 联盟历史
+      
+      // 联盟协调
+      sharedStrategy: SharedStrategy               // 共享策略
+      resourceSharing: ResourceSharingAgreement    // 资源共享协议
+      communicationChannels: AllianceCommunication // 联盟通讯渠道
+      
+      // 利益分配
+      contributionTracking: ContributionTracker    // 贡献追踪
+      rewardSharingRules: RewardSharingProtocol    // 奖励分享协议
+    }
+
+    // 临时联盟定义
+    interface TempAlliance {
+      allianceId: string                          // 联盟ID
+      allianceName: string                        // 联盟名称
+      leaderGuild: string                         // 领导公会
+      memberGuilds: string[]                      // 成员公会
+      
+      // 联盟协议
+      formationTime: Date                         // 成立时间
+      duration: number                            // 联盟持续时间
+      objectives: AllianceObjective[]             // 联盟目标
+      rules: AllianceRule[]                       // 联盟规则
+      
+      // 协调机制
+      commandStructure: AllianceCommandStructure  // 指挥结构
+      decisionMaking: DecisionMakingProcess       // 决策流程
+      conflictResolution: ConflictResolutionMechanism // 冲突解决机制
+      
+      // 绩效追踪
+      alliancePerformance: AlliancePerformanceMetrics // 联盟表现指标
+      memberContributions: Map<string, AllianceContribution> // 成员贡献
+    }
+
+    // 奖励分配系统
+    interface RewardDistributionSystem {
+      // 分配规则
+      distributionAlgorithm: RewardAlgorithm       // 奖励算法
+      contributionWeights: ContributionWeight[]    // 贡献权重
+      
+      // 奖励类型
+      guilds: GuildReward[]                       // 公会奖励
+      individuals: IndividualReward[]             // 个人奖励
+      achievements: AchievementReward[]           // 成就奖励
+      
+      // 特殊奖励
+      firstKillBonus: FirstKillReward             // 首杀奖励
+      speedKillBonus: SpeedKillReward             // 快速击杀奖励
+      mvpRewards: MVPReward[]                     // MVP奖励
+      
+      // 历史记录
+      distributionHistory: RewardDistributionRecord[] // 分配历史
+    }
+
+    // 动态难度系统
+    interface DynamicDifficultySystem {
+      // 难度评估
+      participationAnalyzer: ParticipationAnalyzer // 参与度分析器
+      skillLevelAssessment: SkillAssessment        // 技能水平评估
+      
+      // 难度调整
+      difficultyModifiers: DifficultyModifier[]    // 难度修正器
+      scalingAlgorithms: ScalingAlgorithm[]        // 缩放算法
+      
+      // 平衡机制
+      balanceTargets: BalanceTarget[]             // 平衡目标
+      adaptiveAdjustments: AdaptiveAdjustment[]    // 自适应调整
+    }
+
+    // 世界Boss管理器
+    class WorldBossManager {
+      /* 生成世界Boss */
+      spawnWorldBoss(template: WorldBossTemplate, location: WorldLocation): WorldBoss
+      
+      /* 管理Boss战斗逻辑 */
+      manageBossFight(bossId: string): BossFightState
+      
+      /* 处理公会参与 */
+      handleGuildParticipation(guildId: string, bossId: string): ParticipationResult
+      
+      /* 分配奖励 */
+      distributeRewards(bossId: string): RewardDistributionResult
+      
+      /* 记录战斗数据 */
+      recordBattleData(bossId: string, battleData: BattleData): void
+    }
+
+3.8.2 技术规格
+
+跨公会协调算法：
+
+    // 智能联盟匹配系统
+    class AllianceMatchingEngine {
+      /* 推荐潜在联盟伙伴 */
+      recommendAlliancePartners(guild: Guild, boss: WorldBoss): AllianceRecommendation[] {
+        const compatibleGuilds = this.findCompatibleGuilds(guild, boss)
+        const complementarySkills = this.analyzeComplementarySkills(guild, compatibleGuilds)
+        const relationshipHistory = this.evaluateRelationshipHistory(guild, compatibleGuilds)
+        
+        return this.generateRecommendations(compatibleGuilds, complementarySkills, relationshipHistory)
+      }
+      
+      /* 评估联盟成功概率 */
+      evaluateAllianceSuccess(proposedAlliance: AllianceProposal): SuccessProbability {
+        const skillComplementarity = this.calculateSkillComplementarity(proposedAlliance.memberGuilds)
+        const trustLevel = this.calculateTrustLevel(proposedAlliance.memberGuilds)
+        const resourceBalance = this.evaluateResourceBalance(proposedAlliance.memberGuilds)
+        const leadershipQuality = this.assessLeadershipQuality(proposedAlliance.leaderGuild)
+        
+        return {
+          overallProbability: (skillComplementarity + trustLevel + resourceBalance + leadershipQuality) / 4,
+          strengthFactors: this.identifyStrengthFactors(proposedAlliance),
+          riskFactors: this.identifyRiskFactors(proposedAlliance),
+          recommendations: this.generateImprovementRecommendations(proposedAlliance)
+        }
+      }
+    }
+
+    // 动态难度调整引擎
+    class DifficultyAdjustmentEngine {
+      /* 实时分析参与情况并调整难度 */
+      adjustDifficultyRealtime(boss: WorldBoss): DifficultyAdjustment {
+        const currentParticipation = this.analyzeCurrentParticipation(boss)
+        const performanceMetrics = this.calculatePerformanceMetrics(boss)
+        const progressRate = this.evaluateProgressRate(boss)
+        
+        if (progressRate < this.targetProgressRate) {
+          return this.generateDifficultyReduction(boss, performanceMetrics)
+        } else if (progressRate > this.maxProgressRate) {
+          return this.generateDifficultyIncrease(boss, performanceMetrics)
+        }
+        
+        return { adjustmentType: 'NONE', reason: 'Balanced progression rate' }
+      }
+    }
+
+3.8.3 验收标准
+
+功能验收：
+
+-  支持多公会同时参与世界Boss战斗
+-  临时联盟系统运作流畅
+-  公平的奖励分配机制
+-  动态难度调整有效性
+-  跨公会通讯和协调功能
+
+质量验收：
+
+-  世界Boss战斗的挑战性和趣味性
+-  公会间互动的深度和多样性
+-  系统性能在大量公会参与时的稳定性
+-  反作弊和公平竞争机制的有效性
+
+3.9 PVP系统设计
+
+3.9.1 功能要求
+
+系统概述： 设计单机环境下的模拟PVP系统，通过AI驱动的虚拟对手公会提供真实的PVP体验，包括公会战、竞技场、排位赛等多种PVP模式。
+
+    /* 单机模拟PVP系统设计 */
+    interface SimulatedPVPSystem {
+      // AI对手系统
+      virtualOpponents: Map<string, VirtualGuild>    // 虚拟对手公会
+      opponentGenerator: OpponentGenerator           // 对手生成器
+      aiPersonalities: Map<string, PVPPersonality>   // AI个性档案
+      
+      // PVP模式
+      pvpModes: Map<PVPMode, PVPModeConfiguration>   // PVP模式配置
+      matchmaking: MatchmakingSystem                 // 匹配系统
+      
+      // 战斗系统
+      battleSimulator: PVPBattleSimulator            // PVP战斗模拟器
+      tacticsEngine: PVPTacticsEngine               // 战术引擎
+      
+      // 排名和奖励
+      rankingSystem: PVPRankingSystem               // 排名系统
+      seasonSystem: PVPSeasonSystem                 // 赛季系统
+      rewardSystem: PVPRewardSystem                 // 奖励系统
+      
+      // 历史记录
+      battleHistory: PVPBattleHistory               // 战斗历史
+      performanceAnalytics: PVPAnalyticsSystem      // 表现分析
+    }
+
+    // 虚拟对手公会
+    interface VirtualGuild {
+      id: string                                    // 虚拟公会ID
+      name: string                                  // 公会名称
+      reputation: number                            // 声誉等级
+      
+      // AI特征
+      aiPersonality: PVPPersonality                 // AI个性特征
+      playstyle: PVPPlaystyle                      // 游戏风格
+      adaptability: AdaptabilityLevel              // 适应性等级
+      
+      // 公会实力
+      overallRating: number                        // 综合评分
+      memberComposition: VirtualMemberComposition  // 成员构成
+      strengths: GuildStrength[]                   // 公会优势
+      weaknesses: GuildWeakness[]                  // 公会弱点
+      
+      // 战术偏好
+      preferredTactics: TacticalPreference[]       // 偏好战术
+      adaptiveBehavior: AdaptiveBehaviorPattern[]  // 适应性行为模式
+      learningCapability: LearningCapability       // 学习能力
+      
+      // 历史表现
+      winRate: number                              // 胜率
+      battleHistory: VirtualBattleRecord[]         // 战斗记录
+      evolutionHistory: GuildEvolutionRecord[]     // 进化历史
+    }
+
+    // AI个性特征定义
+    interface PVPPersonality {
+      aggressiveness: number                       // 侵略性 (0-1)
+      defensiveness: number                        // 防守性 (0-1)
+      risktaking: number                          // 冒险倾向 (0-1)
+      adaptability: number                        // 适应能力 (0-1)
+      
+      // 战术偏好
+      tacticalFocus: TacticalFocus                // 战术重点
+      decisionMaking: DecisionMakingStyle         // 决策风格
+      resourceManagement: ResourceManagementStyle // 资源管理风格
+      
+      // 心理特征
+      pressureResistance: number                  // 抗压能力
+      teamworkOrientation: number                 // 团队合作倾向
+      innovativeness: number                      // 创新能力
+      stubbornness: number                        // 固执程度
+    }
+
+    enum PVPMode {
+      GUILD_WAR = "公会战争",                      // 大规模公会对战
+      ARENA_COMBAT = "竞技场对战",                 // 小队竞技场
+      RANKED_BATTLE = "排位战",                    // 排位系统对战
+      TOURNAMENT = "锦标赛",                      // 淘汰赛制锦标赛
+      SIEGE_WARFARE = "攻城战",                   // 攻防战模式
+      SKIRMISH = "遭遇战",                        // 快速小规模战斗
+      CHAMPIONSHIP = "冠军赛"                     // 赛季总决赛
+    }
+
+    // PVP战斗模拟器
+    interface PVPBattleSimulator {
+      // 战斗引擎
+      combatEngine: CombatEngine                  // 战斗计算引擎
+      tacticProcessor: TacticProcessor            // 战术处理器
+      
+      // 模拟算法
+      battleSimulation: BattleSimulationAlgorithm // 战斗模拟算法
+      outcomePredictor: OutcomePredictor          // 结果预测器
+      
+      // 动态要素
+      battleEvents: BattleEvent[]                 // 战斗事件
+      criticalMoments: CriticalMoment[]           // 关键时刻
+      turnOfEvents: TurnOfEvents[]                // 战局转折
+      
+      // 平衡机制
+      balanceAdjustment: BalanceAdjustment        // 平衡调整
+      rubberbandMechanic: RubberbandMechanic     // 橡皮筋机制
+    }
+
+    // 匹配系统
+    interface MatchmakingSystem {
+      // 匹配算法
+      matchingAlgorithm: MatchingAlgorithm        // 匹配算法
+      ratingSystem: EloRatingSystem              // ELO评分系统
+      
+      // 匹配条件
+      matchCriteria: MatchCriteria               // 匹配条件
+      balanceFactors: BalanceFactor[]            // 平衡因素
+      
+      // 对手生成
+      opponentPool: OpponentPool                 // 对手池
+      dynamicAdjustment: DynamicOpponentAdjustment // 动态对手调整
+      
+      // 匹配历史
+      matchHistory: MatchRecord[]                // 匹配历史
+      performance_tracking: PerformanceTracking  // 表现追踪
+    }
+
+    // PVP战术引擎
+    class PVPTacticsEngine {
+      /* 分析战术有效性 */
+      analyzeTacticalEffectiveness(playerTactics: Tactics, opponentTactics: Tactics): TacticalAnalysis
+      
+      /* 生成对手应对策略 */
+      generateCounterStrategy(playerStrategy: Strategy, opponentPersonality: PVPPersonality): CounterStrategy
+      
+      /* 实时战术调整 */
+      adjustTacticsRealtime(battleState: BattleState, aiPersonality: PVPPersonality): TacticalAdjustment
+      
+      /* 学习玩家行为模式 */
+      learnPlayerPatterns(playerHistory: PlayerBattleHistory): BehaviorPattern[]
+    }
+
+    // 排名系统
+    interface PVPRankingSystem {
+      // 排名等级
+      rankTiers: RankTier[]                      // 段位等级
+      currentSeason: PVPSeason                   // 当前赛季
+      
+      // 评分机制
+      ratingCalculation: RatingCalculation       // 评分计算
+      pointSystem: PointSystem                   // 积分系统
+      
+      // 晋升机制
+      promotionRules: PromotionRule[]            // 晋升规则
+      relegationRules: RelegationRule[]          // 降级规则
+      
+      // 奖励分配
+      rankRewards: Map<RankTier, RankReward[]>   // 段位奖励
+      seasonRewards: SeasonReward[]              // 赛季奖励
+    }
+
+    enum RankTier {
+      BRONZE = "青铜",                           // 青铜段位
+      SILVER = "白银",                           // 白银段位
+      GOLD = "黄金",                            // 黄金段位
+      PLATINUM = "铂金",                        // 铂金段位
+      DIAMOND = "钻石",                         // 钻石段位
+      MASTER = "大师",                          // 大师段位
+      GRANDMASTER = "宗师",                     // 宗师段位
+      CHALLENGER = "王者"                       // 王者段位
+    }
+
+    // 虚拟对手生成器
+    class OpponentGenerator {
+      /* 生成匹配的虚拟对手 */
+      generateMatchedOpponent(playerGuild: Guild, difficulty: DifficultyLevel): VirtualGuild {
+        const baseTemplate = this.selectBaseTemplate(playerGuild.overallRating)
+        const personalityProfile = this.generatePersonality(difficulty)
+        const memberComposition = this.generateMemberComposition(playerGuild, difficulty)
+        const tacticalPreferences = this.generateTacticalPreferences(personalityProfile)
+        
+        return this.assembleVirtualGuild(baseTemplate, personalityProfile, memberComposition, tacticalPreferences)
+      }
+      
+      /* 基于历史表现调整对手 */
+      adaptOpponentBasedOnHistory(opponent: VirtualGuild, playerHistory: PlayerBattleHistory): VirtualGuild {
+        const playerWeaknesses = this.identifyPlayerWeaknesses(playerHistory)
+        const playerPatterns = this.analyzePlayerPatterns(playerHistory)
+        
+        // 让AI学习和适应玩家的策略
+        opponent.adaptiveBehavior = this.generateCounterPatterns(playerPatterns)
+        opponent.tacticalFocus = this.focusOnPlayerWeaknesses(playerWeaknesses)
+        
+        return opponent
+      }
+    }
+
+3.9.2 技术规格
+
+AI智能对手算法：
+
+    // 自适应AI对手系统
+    class AdaptiveAIOpponent {
+      /* 基于玩家表现动态调整AI行为 */
+      adaptBehavior(playerPerformance: PlayerPerformance, battleContext: BattleContext): AIBehaviorAdjustment {
+        const playerStrengths = this.analyzePlayerStrengths(playerPerformance)
+        const playerWeaknesses = this.analyzePlayerWeaknesses(playerPerformance)
+        const playerTendencies = this.identifyPlayerTendencies(playerPerformance)
+        
+        // 生成有针对性的AI策略
+        const counterStrengths = this.generateCounterStrategies(playerStrengths)
+        const exploitWeaknesses = this.generateExploitationTactics(playerWeaknesses)
+        const patternBreaking = this.generatePatternBreakingBehavior(playerTendencies)
+        
+        return {
+          strategicFocus: this.combineTacticalElements(counterStrengths, exploitWeaknesses, patternBreaking),
+          difficultyAdjustment: this.calculateDifficultyAdjustment(playerPerformance),
+          personalityShift: this.calculatePersonalityAdjustment(battleContext)
+        }
+      }
+      
+      /* 实时学习玩家战术 */
+      learnPlayerTactics(currentBattle: OngoingBattle): LearningResult {
+        const tacticPatterns = this.identifyTacticPatterns(currentBattle.playerActions)
+        const decisionPatterns = this.analyzeDecisionPatterns(currentBattle.playerDecisions)
+        const timingPatterns = this.extractTimingPatterns(currentBattle.actionTimeline)
+        
+        return {
+          learnedPatterns: [...tacticPatterns, ...decisionPatterns, ...timingPatterns],
+          confidenceLevel: this.calculateLearningConfidence(currentBattle),
+          adaptationStrategies: this.generateAdaptationStrategies(tacticPatterns)
+        }
+      }
+    }
+
+    // 战斗结果生成器
+    class BattleOutcomeGenerator {
+      /* 生成逼真的战斗结果 */
+      generateRealisticOutcome(playerGuild: Guild, opponentGuild: VirtualGuild, tactics: BattleTactics): BattleResult {
+        // 基础胜率计算
+        const baseWinRate = this.calculateBaseWinRate(playerGuild, opponentGuild)
+        const tacticalModifier = this.calculateTacticalModifier(tactics, opponentGuild.preferredTactics)
+        const randomFactor = this.generateRandomFactor()
+        
+        // 生成关键战斗时刻
+        const keyMoments = this.generateKeyBattleMoments(playerGuild, opponentGuild, tactics)
+        const battleProgression = this.simulateBattleProgression(keyMoments)
+        
+        // 确定最终结果
+        const finalWinRate = Math.min(0.95, Math.max(0.05, baseWinRate + tacticalModifier + randomFactor))
+        const outcome = this.determineOutcome(finalWinRate, battleProgression)
+        
+        return {
+          winner: outcome.winner,
+          winMargin: outcome.margin,
+          battleProgression: battleProgression,
+          keyMoments: keyMoments,
+          playerPerformance: this.evaluatePlayerPerformance(outcome, tactics),
+          lessonsLearned: this.extractLessonsLearned(outcome, tactics)
+        }
+      }
+    }
+
+3.9.3 验收标准
+
+功能验收：
+
+-  支持7种不同的PVP模式
+-  智能AI对手系统运作良好
+-  排名系统公平性和准确性
+-  战斗结果的合理性和多样性
+-  虚拟对手的个性化和适应性
+
+质量验收：
+
+-  PVP战斗的挑战性和娱乐性
+-  AI对手行为的真实感和不可预测性
+-  排名系统的激励效果
+-  长期游戏体验的可持续性
+
+3.10 分阶段公会排名系统
+
+3.10.1 功能要求
+
+系统概述： 设计与游戏进程紧密关联的分阶段公会排名系统，从服务器内竞争逐步扩展到全球排名，提供递进式的挑战目标和成就感。
+
+    /* 分阶段公会排名系统完整设计 */
+    interface PhaseBasedRankingSystem {
+      // 排名阶段管理
+      currentPhase: GamePhase              // 当前游戏阶段
+      phaseConfiguration: Map<GamePhase, PhaseConfig> // 各阶段配置
+      
+      // 排名数据
+      rankings: Map<GamePhase, GuildRanking> // 各阶段排名数据
+      rankingHistory: RankingHistoryRecord[] // 历史排名记录
+      
+      // 公会分类
+      aiDrivenGuilds: Set<string>          // AI驱动的活跃公会 (10-20个)
+      displayGuilds: Set<string>           // 展示型公会 (填充排名用)
+      playerGuild: string                  // 玩家公会ID
+      
+      // 排名计算
+      rankingAlgorithm: RankingAlgorithm   // 排名算法引擎
+      scoreCalculator: ScoreCalculator     // 评分计算器
+      
+      // 奖励系统
+      phaseRewards: Map<GamePhase, PhaseReward[]> // 阶段奖励
+      rankingRewards: RankingRewardSystem  // 排名奖励分配
+    }
+
+    // 游戏阶段定义
+    enum GamePhase {
+      SERVER_PHASE = 1,      // 服务器阶段 - 初始竞争范围
+      BATTLEZONE_PHASE = 2,  // 战区阶段 - 区域性扩展
+      NATIONAL_PHASE = 3,    // 国服阶段 - 全国性竞争
+      GLOBAL_PHASE = 4       // 全球阶段 - 最高级竞争
+    }
+
+    // 阶段配置
+    interface PhaseConfig {
+      phaseName: string                    // 阶段名称
+      totalGuilds: number                  // 参与排名的公会总数
+      aiActiveGuilds: number               // AI驱动的活跃公会数量
+      displayOnlyGuilds: number            // 仅展示用的公会数量
+      
+      // 阶段特性
+      competitionIntensity: CompetitionLevel // 竞争激烈程度
+      rankingUpdateFrequency: UpdateFrequency // 排名更新频率
+      phaseUnlockRequirements: UnlockRequirement[] // 阶段解锁要求
+      
+      // 阶段独有功能
+      specialFeatures: PhaseSpecialFeature[] // 阶段特殊功能
+      crossPhaseInteraction: boolean       // 是否允许跨阶段互动
+    }
+
+    // 阶段配置映射
+    const PHASE_CONFIGURATIONS: Map<GamePhase, PhaseConfig> = new Map([
+      [GamePhase.SERVER_PHASE, {
+        phaseName: "服务器排名",
+        totalGuilds: 20,
+        aiActiveGuilds: 10,                // 10个AI驱动公会
+        displayOnlyGuilds: 9,              // 9个展示公会 + 1个玩家公会
+        competitionIntensity: CompetitionLevel.MODERATE,
+        rankingUpdateFrequency: UpdateFrequency.WEEKLY,
+        phaseUnlockRequirements: [],       // 初始阶段，无解锁要求
+        specialFeatures: [PhaseSpecialFeature.LOCAL_EVENTS],
+        crossPhaseInteraction: false
+      }],
+      
+      [GamePhase.BATTLEZONE_PHASE, {
+        phaseName: "战区排名", 
+        totalGuilds: 50,
+        aiActiveGuilds: 15,                // 15个AI驱动公会
+        displayOnlyGuilds: 34,             // 34个展示公会 + 1个玩家公会
+        competitionIntensity: CompetitionLevel.HIGH,
+        rankingUpdateFrequency: UpdateFrequency.BI_WEEKLY,
+        phaseUnlockRequirements: [
+          { type: "guildLevel", value: 15 },
+          { type: "serverRanking", value: 5 }  // 服务器排名前5
+        ],
+        specialFeatures: [PhaseSpecialFeature.CROSS_SERVER_BATTLES],
+        crossPhaseInteraction: true
+      }],
+      
+      [GamePhase.NATIONAL_PHASE, {
+        phaseName: "国服排名",
+        totalGuilds: 100, 
+        aiActiveGuilds: 20,                // 20个AI驱动公会
+        displayOnlyGuilds: 79,             // 79个展示公会 + 1个玩家公会
+        competitionIntensity: CompetitionLevel.VERY_HIGH,
+        rankingUpdateFrequency: UpdateFrequency.DAILY,
+        phaseUnlockRequirements: [
+          { type: "guildLevel", value: 25 },
+          { type: "battlezoneRanking", value: 3 } // 战区排名前3
+        ],  
+        specialFeatures: [PhaseSpecialFeature.NATIONAL_TOURNAMENTS],
+        crossPhaseInteraction: true
+      }],
+      
+      [GamePhase.GLOBAL_PHASE, {
+        phaseName: "全球排名",
+        totalGuilds: 500,
+        aiActiveGuilds: 25,                // 25个AI驱动公会  
+        displayOnlyGuilds: 474,            // 474个展示公会 + 1个玩家公会
+        competitionIntensity: CompetitionLevel.EXTREME,
+        rankingUpdateFrequency: UpdateFrequency.REAL_TIME,
+        phaseUnlockRequirements: [
+          { type: "guildLevel", value: 30 },
+          { type: "nationalRanking", value: 1 }   // 国服排名第1
+        ],
+        specialFeatures: [PhaseSpecialFeature.WORLD_CHAMPIONSHIPS],
+        crossPhaseInteraction: true
+      }]
+    ]);
+
+    // 公会排名数据结构
+    interface GuildRanking {
+      phase: GamePhase                     // 所属阶段
+      rankings: RankingEntry[]             // 排名条目
+      lastUpdateTime: Date                 // 最后更新时间
+      
+      // 排名统计
+      totalParticipants: number            // 参与公会总数
+      averageScore: number                 // 平均分数
+      competitionTrend: TrendAnalysis      // 竞争趋势分析
+      
+      // 玩家相关
+      playerGuildRank: number              // 玩家公会排名
+      playerGuildScore: number             // 玩家公会得分
+      rankingChange: RankingChange         // 排名变化情况
+    }
+
+    // 排名条目
+    interface RankingEntry {
+      rank: number                         // 当前排名
+      guildId: string                      // 公会ID
+      guildName: string                    // 公会名称
+      guildTag: string                     // 公会标签
+      
+      // 排名数据
+      totalScore: number                   // 总分
+      scoreBreakdown: ScoreBreakdown       // 分数详细构成
+      
+      // 公会状态
+      guildType: GuildType                 // 公会类型 (AI驱动/展示型/玩家)
+      isActive: boolean                    // 是否活跃
+      lastActivityTime: Date               // 最后活跃时间
+      
+      // 排名变化
+      previousRank?: number                // 上次排名
+      rankChange: number                   // 排名变化 (+上升/-下降)
+      trendDirection: TrendDirection       // 趋势方向
+      
+      // 展示信息
+      guildLevel: number                   // 公会等级
+      memberCount: number                  // 成员数量
+      legendaryMemberCount: number         // 传奇成员数量
+      guildReputation: number              // 公会声望
+      specialAchievements: string[]        // 特色成就
+    }
+
+    enum GuildType {
+      PLAYER_GUILD = "玩家公会",           // 玩家控制的公会
+      AI_DRIVEN = "AI驱动",               // AI控制的活跃公会
+      DISPLAY_ONLY = "展示公会"           // 仅用于展示的静态公会
+    }
+
+    enum CompetitionLevel {
+      MODERATE = "适中",                  // 适中的竞争强度
+      HIGH = "激烈",                      // 激烈的竞争
+      VERY_HIGH = "极为激烈",             // 极为激烈的竞争
+      EXTREME = "终极竞争"                // 最高级别的竞争
+    }
+
+    enum UpdateFrequency {
+      WEEKLY = "每周更新",                // 每周更新排名
+      BI_WEEKLY = "半周更新",             // 每3-4天更新
+      DAILY = "每日更新",                 // 每天更新排名
+      REAL_TIME = "实时更新"              // 实时更新排名
+    }
+
+    // 阶段特殊功能
+    enum PhaseSpecialFeature {
+      LOCAL_EVENTS = "本地事件",          // 服务器内特殊事件
+      CROSS_SERVER_BATTLES = "跨服战斗",  // 跨服务器对战
+      NATIONAL_TOURNAMENTS = "全国锦标赛", // 国家级锦标赛
+      WORLD_CHAMPIONSHIPS = "世界冠军赛"  // 世界冠军赛
+    }
+
+    // 排名算法引擎
+    class RankingAlgorithm {
+      /* 计算公会综合得分 */
+      calculateGuildScore(guild: Guild, phase: GamePhase): number {
+        const baseScore = this.calculateBaseScore(guild)
+        const phaseModifier = this.getPhaseModifier(phase)
+        const activityBonus = this.calculateActivityBonus(guild, phase)
+        const achievementBonus = this.calculateAchievementBonus(guild)
+        
+        return (baseScore + activityBonus + achievementBonus) * phaseModifier
+      }
+      
+      /* 更新排名 */
+      updateRankings(phase: GamePhase): GuildRanking {
+        const guilds = this.getGuildsForPhase(phase)
+        const scoredGuilds = guilds.map(guild => ({
+          guild,
+          score: this.calculateGuildScore(guild, phase)
+        }))
+        
+        // 按分数排序
+        scoredGuilds.sort((a, b) => b.score - a.score)
+        
+        return this.generateRankingData(scoredGuilds, phase)
+      }
+      
+      /* 处理阶段升级 */
+      handlePhaseUpgrade(guild: Guild, newPhase: GamePhase): PhaseUpgradeResult {
+        const requirements = PHASE_CONFIGURATIONS.get(newPhase)?.phaseUnlockRequirements
+        const meetsRequirements = this.checkRequirements(guild, requirements)
+        
+        if (meetsRequirements) {
+          return this.promoteToPhase(guild, newPhase)
+        } else {
+          return { success: false, missingRequirements: this.getMissingRequirements(guild, requirements) }
+        }
+      }
+    }
+
+3.10.2 技术规格
+
+阶段管理算法：
+
+    // 阶段升级管理器
+    class PhaseUpgradeManager {
+      /* 检查阶段升级资格 */
+      checkUpgradeEligibility(guildId: string): PhaseUpgradeEligibility {
+        const guild = this.getGuild(guildId)
+        const currentPhase = guild.currentPhase
+        const nextPhase = this.getNextPhase(currentPhase)
+        
+        if (!nextPhase) {
+          return { eligible: false, reason: "已达到最高阶段" }
+        }
+        
+        const requirements = PHASE_CONFIGURATIONS.get(nextPhase)?.phaseUnlockRequirements
+        const eligibilityCheck = this.evaluateRequirements(guild, requirements)
+        
+        return {
+          eligible: eligibilityCheck.allMet,
+          nextPhase,
+          progress: eligibilityCheck.progress,
+          missingRequirements: eligibilityCheck.missing
+        }
+      }
+      
+      /* 自动处理阶段升级 */
+      processAutomaticUpgrade(guildId: string): UpgradeResult {
+        const eligibility = this.checkUpgradeEligibility(guildId)
+        
+        if (eligibility.eligible) {
+          return this.executePhaseUpgrade(guildId, eligibility.nextPhase)
+        }
+        
+        return { success: false, reason: "不满足升级条件" }
+      }
+    }
+
+    // 展示型公会生成器
+    class DisplayGuildGenerator {
+      /* 生成展示型公会 */
+      generateDisplayGuilds(phase: GamePhase, count: number): DisplayGuild[] {
+        const phaseConfig = PHASE_CONFIGURATIONS.get(phase)
+        const guilds: DisplayGuild[] = []
+        
+        for (let i = 0; i < count; i++) {
+          const guild = this.createDisplayGuild(phase, i)
+          guild.staticData = this.generateStaticGuildData(phase)
+          guild.rankingPosition = this.calculateDisplayRankPosition(phase, i)
+          guilds.push(guild)
+        }
+        
+        return guilds
+      }
+      
+      /* 确保展示型公会数据一致性 */
+      private createDisplayGuild(phase: GamePhase, index: number): DisplayGuild {
+        const nameGenerator = this.getNameGenerator(phase)
+        const strengthTier = this.calculateStrengthTier(phase, index)
+        
+        return {
+          id: `display_${phase}_${index}`,
+          name: nameGenerator.generateName(),
+          guildType: GuildType.DISPLAY_ONLY,
+          staticScore: this.generateStaticScore(strengthTier),
+          memberData: this.generateStaticMemberData(strengthTier),
+          achievements: this.generateStaticAchievements(strengthTier),
+          lastUpdateTime: new Date(), // 初始化时间，之后不再更新
+          isStatic: true // 标记为静态数据
+        }
+      }
+    }
+
+    // 跨阶段交互管理器
+    class CrossPhaseInteractionManager {
+      /* 处理跨阶段挑战 */
+      handleCrossPhaseChallenge(challengerGuild: string, targetGuild: string): ChallengeResult {
+        const challenger = this.getGuild(challengerGuild)
+        const target = this.getGuild(targetGuild)
+        
+        // 检查跨阶段交互规则
+        const interactionAllowed = this.checkCrossPhaseRules(challenger.currentPhase, target.currentPhase)
+        
+        if (!interactionAllowed) {
+          return { allowed: false, reason: "不允许跨阶段交互" }
+        }
+        
+        // 应用阶段差异调整
+        const challengeModifier = this.calculatePhaseModifier(challenger.currentPhase, target.currentPhase)
+        
+        return this.executeCrossPhaseChallenge(challenger, target, challengeModifier)
+      }
+    }
+
+3.10.3 验收标准
+
+功能验收：
+
+-  支持4个不同的游戏阶段和排名规模
+-  AI驱动公会和展示型公会正确分类和管理
+-  阶段升级条件检查和自动升级功能
+-  排名算法的公平性和准确性
+-  展示型公会数据的一致性和静态特性
+
+质量验收：
+
+-  排名系统的激励效果和进程感
+-  不同阶段间的竞争强度递增
+-  系统性能在大量公会参与时的稳定性
+-  跨阶段交互的平衡性和公平性
+
+3.11 数据管理规格
+
+3.11.1 数据架构
+
+    /gamedata (本地JSON存储)
+    ├── /events_ecosystem          # 事件系统数据
+    │   ├── event_templates.json   # 事件模板库（200+）
+    │   ├── event_chains.json      # 事件链和任务系统
+    │   ├── trigger_conditions.json # 触发条件库
+    │   └── effect_mechanisms.json # 效果机制库
+    ├── /ai_personalities          # AI生态数据
+    │   ├── guild_ai_config.json   # NPC公会配置（10-20个）
+    │   ├── guild_archetypes.json  # 公会原型池（25-30个）
+    │   ├── member_ai_traits.json  # 成员AI特质库
+    │   └── interaction_matrix.json # AI互动规则矩阵
+    ├── /progression_systems       # 进度系统数据
+    │   ├── achievements.json      # 成就定义和配置
+    │   ├── experience_config.json # 经验系统参数
+    │   └── proficiency_rules.json # 熟练度计算规则
+    ├── /dynamic_world            # 动态世界状态
+    │   ├── world_state.json      # 实时世界状态
+    │   ├── active_effects.json   # 当前生效效果
+    │   ├── achievement_progress.json # 玩家成就进度
+    │   └── relationship_graph.json # 关系网络数据
+    ├── /extension_interfaces     # 扩展接口预留
+    │   ├── card_system_schema.json # 卡牌系统接口定义
+    │   ├── skill_tree_schema.json  # 技能树接口定义
+    │   └── reputation_schema.json  # 声望系统接口定义
+    └── /game_content            # 游戏内容数据
+        ├── guilds.json          # 公会信息
+        ├── members.json         # 成员档案
+        └── activities.json      # 活动配置
+
+3.11.2 数据完整性要求
+
+- 备份机制: 自动备份和恢复功能
+- 数据验证: JSON结构和内容的完整性检查
+- 版本控制: 支持数据格式的版本迁移
+- 并发安全: 防止数据损坏的锁定机制
+
+3.11.3 数据统计模块勾稽关系设计
+
+3.11.3.1 统计模块核心架构
+
+    // 数据统计模块核心接口
+    interface DataStatisticsModule {
+      playerGuildAnalytics: PlayerGuildAnalytics       // 玩家公会分析
+      npcGuildAnalytics: NPCGuildAnalytics             // NPC公会分析
+      memberAnalytics: MemberAnalytics                 // 会员数据分析
+      crossReferenceEngine: CrossReferenceEngine       // 勾稽关系引擎
+      reportGenerator: StatisticsReportGenerator       // 报告生成器
+      realTimeTracker: RealTimeDataTracker             // 实时数据追踪
+    }
+
+    // 勾稽关系引擎
+    interface CrossReferenceEngine {
+      /* 建立数据实体间的交叉引用关系 */
+      establishReferences(): Promise<ReferenceMap>
+      
+      /* 验证数据一致性 */
+      validateDataConsistency(): ConsistencyReport
+      
+      /* 追踪数据变更影响 */
+      trackDataImpact(changeEvent: DataChangeEvent): ImpactAnalysis
+      
+      /* 生成关联度报告 */
+      generateCorrelationReport(): CorrelationMatrix
+    }
+
+3.11.3.2 玩家公会统计勾稽设计
+
+    // 玩家公会数据分析
+    interface PlayerGuildAnalytics {
+      guildId: string                                  // 公会ID
+      memberCount: number                              // 成员数量
+      legendaryMemberCount: number                     // 传奇成员数量
+      
+      // 勾稽关系映射
+      crossReferences: {
+        // 与NPC公会的关系
+        rivalNPCGuilds: NPCGuildReference[]           // 竞争对手NPC公会
+        allyNPCGuilds: NPCGuildReference[]            // 盟友NPC公会
+        diplomaticRelations: DiplomaticRelationStats  // 外交关系统计
+        
+        // 与NPC会员的关系
+        recruitedFromNPCGuilds: RecruitmentTracker[]  // 从NPC公会招募记录
+        interactionHistory: NPCInteractionLog[]       // NPC交互历史
+        contributionComparisons: ContributionMatrix   // 贡献度对比
+      }
+      
+      // 统计指标
+      performanceMetrics: {
+        rankingHistory: RankingProgressTracker        // 排名变化历史
+        activityParticipation: ActivityStats          // 活动参与统计
+        memberDevelopment: MemberProgressStats        // 成员发展统计
+        resourceManagement: ResourceUtilizationStats  // 资源管理统计
+      }
+      
+      // 预测分析
+      predictiveAnalytics: {
+        growthProjection: GrowthForecast              // 成长预测
+        competitionAnalysis: CompetitionInsights      // 竞争分析
+        optimizationSuggestions: OptimizationAdvice[] // 优化建议
+      }
+    }
+
+    // NPC公会引用映射
+    interface NPCGuildReference {
+      npcGuildId: string                              // NPC公会ID
+      relationshipType: DiplomaticAttitude            // 关系类型
+      interactionFrequency: number                    // 交互频率
+      competitionLevel: CompetitionIntensity          // 竞争程度
+      influenceScore: number                          // 影响力评分 (0-100)
+    }
+
+3.11.3.3 NPC公会统计勾稽设计
+
+    // NPC公会数据分析
+    interface NPCGuildAnalytics {
+      npcGuildId: string                              // NPC公会ID
+      archetypeId: string                             // 原型ID
+      isAIDriven: boolean                             // 是否AI驱动
+      
+      // 勾稽关系映射
+      crossReferences: {
+        // 与玩家公会的关系
+        playerGuildRelations: PlayerGuildInteraction[] // 玩家公会关系
+        competitiveMetrics: CompetitiveAnalysis        // 竞争指标
+        diplomaticHistory: DiplomaticEventLog[]        // 外交事件历史
+        
+        // 与其他NPC公会的关系
+        npcGuildNetwork: NPCGuildNetworkMap           // NPC公会网络
+        allianceParticipation: AllianceStats          // 联盟参与情况
+        conflictHistory: ConflictRecord[]             // 冲突记录
+        
+        // 成员相关统计
+        memberFlowAnalysis: MemberTransferAnalysis    // 成员流动分析
+        recruitmentPattern: RecruitmentPatternStats   // 招募模式统计
+        memberContributions: NPCMemberContributions   // 成员贡献统计
+      }
+      
+      // AI行为统计（仅限AI驱动公会）
+      aiBehaviorMetrics?: {
+        decisionPatterns: AIDecisionAnalysis           // AI决策模式
+        adaptationRate: AdaptationMetrics             // 适应性指标
+        learningProgress: LearningCurveData           // 学习曲线
+        performanceEvolution: PerformanceTimeline     // 表现演变
+      }
+      
+      // 影响力分析
+      influenceMetrics: {
+        serverImpact: ServerInfluenceScore            // 服务器影响力
+        economicContribution: EconomicImpactStats     // 经济贡献
+        socialNetworkCentrality: NetworkCentrality   // 社交网络中心度
+        eventTriggerFrequency: EventTriggerStats      // 事件触发频率
+      }
+    }
+
+3.11.3.4 NPC会员统计勾稽设计
+
+    // NPC会员综合数据分析
+    interface MemberAnalytics {
+      totalMemberCount: number                        // 总会员数量
+      activeNPCMembers: number                        // 活跃NPC会员数
+      legendaryNPCMembers: number                     // 传奇NPC会员数
+      
+      // 勾稽关系映射
+      crossReferences: {
+        // 公会归属分析
+        guildDistribution: {
+          playerGuildMembers: MemberDistribution      // 玩家公会成员分布
+          aiDrivenGuildMembers: MemberDistribution    // AI公会成员分布
+          displayOnlyGuildMembers: MemberDistribution // 展示用公会成员分布
+        }
+        
+        // 交互关系网络
+        interactionNetwork: {
+          playerInteractions: PlayerNPCInteractionMap // 玩家-NPC交互
+          npcInterInternalNetworks: NPCInternalNetwork // NPC内部关系网络
+          crossGuildConnections: CrossGuildNetwork     // 跨公会连接
+        }
+        
+        // 贡献度关联分析
+        contributionAnalysis: {
+          individualContributions: NPCContributionProfile[] // 个体贡献概况
+          guildContributionImpact: GuildImpactMatrix        // 公会贡献影响
+          activityParticipationPatterns: ActivityPatternAnalysis // 活动参与模式
+        }
+      }
+      
+      // 会员行为统计
+      behaviorMetrics: {
+        loyaltyAnalysis: LoyaltyMeasurement            // 忠诚度分析
+        skillDevelopmentTrends: SkillProgressAnalysis  // 技能发展趋势
+        socialInfluenceMapping: SocialInfluenceGraph   // 社交影响力映射
+        performanceCorrelations: PerformanceMatrix     // 表现相关性
+      }
+      
+      // 人才流动分析
+      talentFlowAnalysis: {
+        recruitmentSources: RecruitmentSourceAnalysis  // 招募来源分析
+        retentionRates: RetentionAnalytics             // 留存率分析
+        transferPatterns: TransferPatternInsights      // 转会模式洞察
+        talentPoolOptimization: TalentOptimizationAdvice // 人才库优化建议
+      }
+    }
+
+    // 贡献度交叉分析
+    interface NPCContributionProfile {
+      npcMemberId: string                             // NPC会员ID
+      parentGuildId: string                           // 所属公会ID
+      contributionScore: number                       // 贡献分数
+      
+      // 跨实体贡献影响
+      contributionImpact: {
+        toPlayerGuild: ContributionInfluence          // 对玩家公会的贡献影响
+        toAINPCGuilds: ContributionInfluence[]        // 对AI NPC公会的贡献影响
+        toGameEcosystem: EcosystemContribution        // 对游戏生态的整体贡献
+      }
+      
+      // 互动质量评估
+      interactionQuality: {
+        playerSatisfactionScore: number               // 玩家满意度评分
+        aiCooperationEfficiency: number              // AI合作效率
+        conflictResolutionAbility: number            // 冲突解决能力
+      }
+    }
+
+3.11.3.5 实时数据同步与一致性保障
+
+    // 实时数据追踪器
+    interface RealTimeDataTracker {
+      /* 监控数据变更 */
+      monitorDataChanges(): void
+      
+      /* 同步统计数据 */
+      synchronizeStatistics(entity: EntityType): Promise<SyncResult>
+      
+      /* 触发勾稽关系更新 */
+      triggerReferenceUpdate(changeSet: DataChangeSet): void
+      
+      /* 生成实时报告 */
+      generateRealTimeReport(): LiveStatisticsReport
+    }
+
+    // 数据一致性验证
+    interface ConsistencyReport {
+      overallHealth: DataHealthStatus                 // 整体数据健康状态
+      referenceIntegrity: ReferenceIntegrityCheck     // 引用完整性检查
+      crossValidationResults: CrossValidationResult[] // 交叉验证结果
+      anomalyDetection: AnomalyReport[]               // 异常检测报告
+      
+      // 修复建议
+      repairRecommendations: {
+        criticalIssues: RepairAction[]                // 关键问题修复
+        optimizationSuggestions: OptimizationAction[] // 优化建议
+        preventiveMeasures: PreventiveAction[]        // 预防措施
+      }
+    }
+
+    // 统计报告生成器
+    interface StatisticsReportGenerator {
+      /* 生成综合分析报告 */
+      generateComprehensiveReport(): ComprehensiveAnalyticsReport
+      
+      /* 生成勾稽关系图表 */
+      generateReferenceChart(): CrossReferenceVisualization
+      
+      /* 生成趋势分析报告 */
+      generateTrendAnalysis(timeRange: TimeRange): TrendAnalysisReport
+      
+      /* 生成预测报告 */
+      generatePredictiveReport(): PredictiveAnalyticsReport
+    }
+
+3.11.3.6 数据存储架构扩展
+
+    // 扩展数据存储结构以支持统计模块
+    const StatisticsDataSchema = {
+      // 统计数据存储
+      "/statistics_data": {
+        "cross_references.json": "CrossReferenceMap",      // 勾稽关系映射
+        "analytics_cache.json": "AnalyticsCacheData",      // 分析缓存数据
+        "real_time_metrics.json": "RealTimeMetrics",       // 实时指标
+        "historical_trends.json": "HistoricalTrendData"    // 历史趋势数据
+      },
+      
+      // 报告生成缓存
+      "/reports_cache": {
+        "daily_reports/": "DailyAnalyticsReports",         // 日报缓存
+        "weekly_reports/": "WeeklyAnalyticsReports",       // 周报缓存
+        "custom_reports/": "CustomReportTemplates"         // 自定义报告模板
+      },
+      
+      // 数据一致性日志
+      "/consistency_logs": {
+        "validation_history.json": "ValidationHistory",    // 验证历史
+        "sync_operations.json": "SyncOperationLog",        // 同步操作日志
+        "anomaly_alerts.json": "AnomalyAlertLog"          // 异常警报日志
+      }
+    }
+
+------------------------------------------------------------------------
+
+4. 技术架构规范
+4.1 技术栈选择
+4.1.1 核心技术栈
+// 核心技术栈选择 (跨平台版本)
+var TechStack = new {
+    engine = "Godot 4.5",              // 跨平台游戏引擎
+    uiFramework = "Godot Control",     // UI 系统 (控件节点)
+    styling = "Godot Theme/Skin",      // 样式和主题
+    language = "C#",                   // 主开发语言
+    buildTool = "Godot Export Templates", // 打包与发布工具
+    dataStorage = "godot-sqlite",      // 本地数据库 (SQLite 插件)
+    aiComputing = "ThreadPool",        // AI 计算的多线程处理
+    configStorage = "ConfigFile (user://)", // 本地配置和存档
+    communication = "Signals + Autoload"    // 模块间通信机制
+};
+
+// 性能优化架构
+var PerformanceStack = new {
+    aiWorkerThreads = "Dedicated ThreadPool",  // 专用 AI 计算线程池
+    databaseMode = "SQLite WAL mode",          // 高并发数据库模式
+    caching = "LRU Memory Cache",              // 智能内存缓存
+    eventQueue = "Priority Queue System"       // 事件优先级队列
+};
+
+
+此外，开发流程中将集成 SonarQube 进行静态代码分析，并使用 Sentry 进行运行期错误监控和发布健康跟踪，以提升代码质量和产品稳定性。
+
+4.1.2 架构设计原则
+
+事件驱动: 所有系统基于事件通信（Godot 信号机制）
+
+模块化: 清晰的模块边界，支持并行开发
+
+可扩展: 插件化架构支持 DLC 和功能扩展
+
+离线优先: 本地数据存储，无网络依赖
+
+4.2 系统架构设计
+4.2.1 整体架构图
+┌─────────────────────────────────────────────────────────────┐
+│                    Godot 4.5 Engine (C#)                    │
+├─────────────────────────────────────────────────────────────┤
+│  Godot UI Layer                 │  Game Logic Layer         │
+│  ├── Dashboard Components       │  ├── Game State Mgr       │
+│  ├── Form Interactions          │  ├── Event Engine         │
+│  ├── Data Visualization         │  ├── AI Coordinator       │
+│  └── Modal Systems              │  └── Time Manager         │
+├─────────────────────────────────────────────────────────────┤
+│               Signals & Autoload Communication              │
+├─────────────────────────────────────────────────────────────┤
+│  Core Game Logic (C#)                                       │
+│  ├── Event System Engine        │  ├── AI Behavior Mgr      │
+│  ├── State Management           │  ├── Data Validation      │
+│  └── Business Logic             │  └── Save/Load System     │
+├─────────────────────────────────────────────────────────────┤
+│  Local Data Storage (SQLite)                                │
+│  ├── Events Data                │  ├── AI Personalities     │
+│  └── Game State                 │  └── User Preferences     │
+└─────────────────────────────────────────────────────────────┘
+
+4.2.2 核心组件规格
+
+事件引擎核心
+
+class EventEngine {
+  private eventPool: Map<string, EventTemplate>;
+  private activeEvents: Map<string, ActiveEvent>;
+  private eventQueue: PriorityQueue<PendingEvent>;
+
+  // 核心功能
+  processGameCycle(gameWeek: number): void;
+  evaluateEventConditions(context: GameContext): EventTrigger[];
+  executeEventEffects(event: ActiveEvent): EventResult;
+  resolveEventConflicts(conflicts: EventConflict[]): Resolution[];
+
+  // 扩展接口
+  registerPlugin(plugin: EventPlugin): void;
+  validateEventDefinition(event: EventTemplate): ValidationResult;
+}
+
+
+AI 协调系统
+
+class AICoordinator {
+  private guildAIs: Map<string, NPCGuildAI>;
+  private memberAIs: Map<string, GuildMemberAI>;
+  private environmentAI: EnvironmentAI;
+
+  // 协调功能
+  processAICycle(): AIAction[];
+  resolveAIConflicts(conflicts: AIConflict[]): Resolution[];
+  updateRelationshipNetwork(): void;
+  generateAIEvents(): AITriggeredEvent[];
+}
+
+
+(以上代码段的语法改为 C# 伪代码表示，但逻辑与原始文档相同。所有核心模块（事件引擎、AI 协调等）保持原有设计，只是实现语言和技术栈转换为 C# / Godot。)
+
+4.3 性能要求
+4.3.1 性能指标
+指标类型	目标值	测量方法
+启动时间	<10 秒	应用启动到主界面可用
+内存使用	<2 GB	运行时峰值内存消耗
+响应时间	<500 ms	UI 交互响应时间
+事件处理	<200 ms	单个事件的处理时间
+数据加载	<3 秒	游戏存档加载时间
+4.3.2 扩展性要求
+
+事件池: 支持扩展至 1000+ 事件而不影响性能
+
+AI 数量: 支持 200+ AI 实体同时运行
+
+数据规模: 支持 10 MB+ 的游戏存档文件
+
+并发处理: 支持多个系统的并发操作
+
+4.4 安全性和数据保护
+4.4.1 数据安全
+interface DataSecurity {
+  backup: {
+    autoBackup: boolean;           // 自动备份功能
+    backupFrequency: number;       // 备份频率（分钟）
+    maxBackups: number;            // 最大备份数量
+  };
+
+  validation: {
+    schemaValidation: boolean;     // 结构验证（模式校验）
+    dataIntegrity: boolean;        // 数据完整性检查
+    checksumVerification: boolean; // 校验和验证
+  };
+
+  recovery: {
+    corruptionDetection: boolean;  // 损坏检测
+    autoRecovery: boolean;         // 自动恢复
+    manualRestore: boolean;        // 手动恢复选项
+  };
+}
+
+4.4.2 用户隐私
+
+本地存储: 所有数据存储在用户本地，无云端收集
+
+无网络通信: 游戏运行无需网络连接
+
+可选遥测: 性能数据收集需用户明确同意
+
+4.5 扩展性架构与接口预留
+
+为确保未来功能扩展的无缝集成，架构设计预留了关键接口和扩展点。
+
+4.5.1 核心扩展原则
+
+事件驱动: 所有新功能通过 Godot 信号与 Autoload 机制与核心系统交互
+
+数据驱动: 新内容通过配置文件（JSON）定义，无需代码修改
+
+模块化: 新功能作为独立模块，最小化对核心系统的影响
+
+向后兼容: 数据格式设计支持版本迁移和兼容性
+
+4.5.2 预留接口规格
+
+卡牌系统接口预留
+
+// 卡牌系统核心接口 (Phase 4 实现)
+interface CardSystem {
+  // 卡牌定义
+  card: {
+    id: string;
+    name: string;
+    description: string;
+    rarity: 'common' | 'rare' | 'epic' | 'legendary';
+    cost: ResourceCost;
+    effects: CardEffect[]; // 与事件系统集成
+  };
+
+  // 卡牌机制
+  mechanics: {
+    triggerEvents: string[];         // 可直接触发的事件 ID
+    modifyEvents: EventModifier[];   // 修改现有事件的效果
+    resourceEffects: ResourceModifier[];
+    aiInfluence: AIBehaviorModifier[];
+  };
+}
+
+
+公会会长技能树接口预留
+
+// 会长技能系统接口
+interface GuildLeaderSkillTree {
+  skills: {
+    id: string;
+    name: string;
+    description: string;
+    tier: number;                // 技能层级
+    prerequisites: string[];     // 前置技能
+    effects: SkillEffect[];      // 技能效果
+  };
+
+  // 技能点系统
+  skillPoints: {
+    total: number;
+    spent: number;
+    sources: SkillPointSource[]; // 技能点获取途径
+  };
+}
+
+
+声望系统接口预留
+
+// 声望系统核心接口
+interface ReputationSystem {
+  // 声望维度
+  dimensions: {
+    military: number;   // 军事声望
+    diplomatic: number; // 外交声望
+    economic: number;   // 经济声望
+    social: number;     // 社交声望
+  };
+
+  // 声望影响
+  effects: {
+    eventProbabilityModifiers: Map<string, number>;
+    aiReactionModifiers: Map<string, number>;
+    unlockableContent: string[];
+  };
+}
+
+4.5.3 插件系统架构
+interface PluginSystem {
+  eventPlugins: EventPlugin[];    // 事件系统插件
+  uiPlugins: UIPlugin[];          // 界面扩展插件
+  aiPlugins: AIBehaviorPlugin[];  // AI 行为扩展
+  dataPlugins: DataSourcePlugin[]; // 数据源扩展
+}
+
+// 插件接口规范
+interface EventPlugin {
+  name: string;
+  version: string;
+  hooks: {
+    beforeEventTrigger?: (event: EventDefinition) => EventDefinition;
+    afterEventExecute?: (result: EventResult) => void;
+    customCondition?: (condition: CustomCondition) => boolean;
+    customEffectHandler?: (effect: Effect) => void;
+  };
+}
+
+// 扩展事件定义
+interface ExtendableEventDefinition extends EventDefinition {
+  customType?: string;                   // 未来自定义事件类型
+  pluginData?: Record<string, any>;      // 预留插件数据
+  extensionHooks?: string[];            // 预留扩展钩子
+}
+
+4.5.4 DLC 支持架构
+
+内容包管理: 支持 DLC 内容的动态加载和卸载
+
+版本兼容: 向后兼容的数据格式设计和迁移工具
+
+模块化加载: 按需加载 DLC 内容，不影响基础游戏性能
+
+接口标准: 统一的 DLC 开发接口和验证标准
+
+5. 开发计划与里程碑
+5.1 整体开发时间线
+5.1.1 四阶段开发计划 (10 个月)
+Phase 1: 事件引擎核心     │ Month 1-4  │ 基础架构 + 核心系统  
+Phase 2: 游戏系统集成     │ Month 5-7  │ 8 大模块 + UI 集成  
+Phase 3: 生态内容完善     │ Month 8-9  │ AI 优化 + 内容制作  
+Phase 4: 抛光与扩展       │ Month 10   │ 优化 + 发布准备  
+
+5.2 详细开发里程碑
+5.2.1 Phase 1: 事件引擎核心 (Month 1-4)
+
+Month 1-2: 基础架构建设
+
+Week 1-2: 项目搭建与架构设计  
+├── Godot 4.5 (C#) 引擎开发环境搭建  
+├── C# 项目配置和代码规范建立  
+├── 信号与 Autoload 通信机制实现  
+└── 基础项目结构和模块划分  
+
+Week 3-4: 事件系统基础  
+├── EventDefinition 接口设计和实现  
+├── 事件池管理器开发  
+├── 基础触发机制实现  
+└── 简单事件处理流程验证  
+
+Week 5-6: 数据架构与状态管理  
+├── JSON 数据结构设计  
+├── 状态管理系统实现  
+├── 数据统计模块勾稽关系架构  
+└── 基础 AI 状态机实现  
+
+Week 7-8: 多主体事件协调  
+├── 事件冲突检测和解决机制  
+├── 多主体事件处理逻辑  
+├── AI 协调器基础架构  
+└── Phase 1 原型完成和测试  
+
+
+Month 3-4: 核心系统完善
+
+Week 9-12: 高级事件系统  
+├── 传奇成员系统框架  
+├── 分阶段排名系统架构  
+├── 外交态度系统基础  
+└── NPC 历史里程碑记录器  
+
+Week 13-16: AI 智能化提升  
+├── AI 官员管理后端系统  
+├── 智能邮件分类引擎  
+├── NPC 贡献度计算系统  
+└── 自动化决策支持系统  
+
+
+Phase 1 交付物:
+
+可运行的技术原型
+
+事件系统核心引擎
+
+高级 AI 行为框架
+
+数据存储和统计系统
+
+传奇成员和排名系统基础
+
+验收标准:
+
+能够触发和处理 200+ 复杂事件
+
+AI 实体能够自主做出智能决策
+
+数据勾稽关系完整且一致
+
+系统架构支持所有新增功能模块
+
+5.2.2 Phase 2: 游戏系统集成 (Month 5-7)
+
+Month 5: 核心功能模块
+
+Week 17-18: 公会管理系统  
+├── 工作面板 UI 和数据展示  
+├── 智能邮件系统与快捷操作  
+├── 公会信息管理功能  
+└── 基础设施升级系统  
+
+Week 19-20: 会员管理系统  
+├── 传奇成员展示与检索  
+├── 招募系统和谈判机制  
+├── NPC 贡献度追踪系统  
+└── 满意度和亲友团系统  
+
+
+Month 6: 战斗与战术系统
+
+Week 21-22: 作战大厅实现  
+├── PVE 50 人阵容管理系统  
+├── PVP 战场/竞技场阵容  
+├── 世界 Boss 多公会竞争  
+└── 活动日程管理系统  
+
+Week 23-24: 战术中心开发  
+├── 阵容角色分配系统（坦克/输出/治疗）  
+├── 战术库解锁与升级系统  
+├── AI 自动调配功能  
+└── 战术选择影响因素计算  
+
+
+Month 7: 社交与后勤系统
+
+Week 25-26: 论坛生态系统  
+├── 官方新闻和论坛系统  
+├── AI 评论和互动机制  
+├── 公会联赛日程显示  
+└── 外交事件触发系统  
+
+Week 27-28: 后勤管理完善  
+├── 拍卖行系统（含 AI 购买）  
+├── 非即时训练结果系统  
+├── 疲劳管理与恢复方案  
+└── 简化官员管理界面  
+
+
+Phase 2 交付物:
+
+完整的 8 大功能模块
+
+智能化 AI 管理系统
+
+完善的阵容管理机制
+
+深度的经济循环系统
+
+验收标准:
+
+所有核心模块功能完整可用
+
+AI 能够智能管理日常运营
+
+战术系统深度足够支撑长期游戏
+
+玩家界面简洁直观易操作
+
+(以上交付物与验收标准为更新的内容，反映新技术栈对功能的影响，例如界面简洁直观是基于 Godot 原生 UI 的优化设计。)
+
+Phase 2 补充交付物:
+
+Godot 引擎内 UI 和 游戏逻辑集成
+
+基础 AI 生态系统运行
+
+核心游戏循环可完整体验
+
+5.2.3 Phase 3: 生态内容完善 (Month 8-9)
+
+Month 8: AI 智能化和内容扩展
+
+Week 29-30: AI 行为优化  
+├── NPC 公会 AI 个性化  
+├── 成员 AI 关系动态优化  
+├── 环境 AI (媒体/粉丝) 完善  
+└── AI 间复杂互动实现  
+
+Week 31-32: 事件池内容制作  
+├── 200+ 事件内容创作  
+├── 事件链和任务系统完善  
+├── 随机事件平衡调整  
+└── 特殊事件和里程碑设计  
+
+
+Month 9: 游戏平衡和优化
+
+Week 33-34: 平衡性调整  
+├── 经济系统参数调优  
+├── AI 难度梯度调整  
+├── 关键数值回归测试  
+└── 玩家反馈快速响应调整  
+
+Week 35-36: 内容完善和测试  
+├── 新手引导系统完善  
+├── 教程和帮助系统  
+├── 全功能集成测试  
+└── Beta 版本准备  
+
+
+Phase 3 交付物:
+
+海量的事件和内容扩充
+
+AI 个性化互动系统
+
+完整的游戏平衡调优方案
+
+Beta 测试版本发布
+
+验收标准:
+
+200+ 事件内容和复杂事件链全部实装
+
+AI 生态系统稳定运行，无明显漏洞
+
+性能优化达标：内存 < 500 MB，响应 < 200 ms
+
+数据完整性和错误恢复机制健全
+
+全功能压力测试通过
+
+5.2.4 Phase 4: 抛光与扩展 (Month 10)
+
+Month 10: 最终完善
+
+Week 37-38: UI/UX 优化  
+├── 界面美化和交互优化  
+├── 用户体验流程改进  
+├── 可访问性功能完善  
+└── 多语言支持准备  
+
+Week 39-40: 扩展功能实现  
+├── 卡牌系统基础实现  
+├── 移动端适配准备工作  
+├── DLC 架构验证  
+└── 发布版本准备  
+
+
+Phase 4 交付物:
+
+全面优化的 UI/UX 体验
+
+新增的扩展功能原型（卡牌系统等）
+
+PC 端发布版本
+
+验收标准:
+
+所有性能指标达标
+
+安全性和数据保护测试通过
+
+发布版本稳定性验证通过
+
+数据统计勾稽关系验证通过
+
+全系统 AI 智能化测试通过
+
+5.3 质量保证计划
+5.3.1 测试策略
+interface QAStrategy {
+  unitTesting: {
+    coverage: "90%+",             // 代码覆盖率目标
+    framework: "xUnit + FluentAssertions + NSubstitute", // 测试框架
+    focus: ["事件系统", "AI 逻辑", "数据管理"]
+  },
+
+  integrationTesting: {
+    coverage: "核心流程100%",      // 集成测试覆盖
+    framework: "GdUnit4",          // 集成测试框架
+    automation: "CI/CD 集成",      // 自动化测试
+    focus: ["模块间通信", "Godot Signals/Autoload", "数据一致性"]
+  },
+
+  userTesting: {
+    alphaTest: "内部团队测试",      // Alpha 测试
+    betaTest: "目标用户测试",       // Beta 测试
+    focus: ["用户体验", "学习成本", "bug 发现"]
+  }
+}
+
+5.3.2 性能测试计划
+
+压力测试: 大量事件和 AI 并发处理
+
+内存测试: 长时间运行的内存泄漏检测
+
+兼容性测试: 不同操作系统和硬件配置下的兼容性验证
+
+数据完整性测试: 异常情况下的数据保护与恢复验证
+
+5.4 风险管理时间线
+5.4.1 关键风险点和时间
+时间节点	风险类型	缓解措施	负责人
+Month 2	事件系统复杂度	分阶段实现，早期验证	技术负责人
+Month 4	AI 协调性能	性能测试，优化算法	AI 工程师
+Month 6	UI/游戏逻辑集成	信号机制稳定性测试	全栈工程师
+Month 8	用户接受度	Beta 测试，用户反馈	产品经理
+Month 9	性能优化	压力测试，代码优化	技术团队
+
+(上述风险点中，Month 6 强调了 Godot 信号与 Autoload 机制在 UI 与游戏逻辑通信中的稳定性，替代原有 EventBus 方案。)
+
+6. 成功指标与验收标准
+6.1 关键成功指标 (KPI)
+
+用户留存: D1 留存 > 40%，D7 留存 > 20%
+
+玩家口碑: 社区评价正向，占比 > 80%
+
+销售目标: 首月销量 > 50,000，首年销量 > 100,000
+
+DLC 转化: 核心玩家 DLC 购买率 > 30%
+
+BUG 率: 上线前关键 BUG 收敛至 ≤5 个，Crash Free 用户 > 99%
+
+6.2 验收标准
+6.2.1 Phase 1 验收 (Month 4)
+
+技术验收标准:
+
+事件系统核心功能实现
+
+基础 AI 生态运行（多主体 AI 互动）
+
+数据结构稳定，无严重内存泄漏
+
+核心架构支持后续模块扩展
+
+功能验收标准:
+
+创建公会和会长角色流程可用
+
+基础成员管理和属性系统就绪
+
+简单事件可以被触发和处理
+
+AI 成员具备基础行为和反应
+
+时间推进与游戏循环正常运行
+
+6.2.2 Phase 2 验收 (Month 7)
+
+技术验收标准:
+
+8 大模块完整集成和交互
+
+Godot 引擎内 UI 和 游戏逻辑协同工作
+
+复杂事件处理和 AI 协调正常
+
+数据完整性和并发安全通过测试
+
+性能达标：内存 < 400 MB，响应 < 250 ms
+
+50 人 PVE 阵容管理数据结构完成
+
+智能邮件分类系统实现
+
+拍卖行 AI 购买引擎基础完成
+
+功能验收标准:
+
+完整的公会管理工作流程
+
+PVE/PVP 战斗模拟及结果计算
+
+会员招募和社交关系管理
+
+基础论坛和 AI 评论系统
+
+后勤管理和数据分析功能
+
+传奇成员展示系统完成
+
+战术库基础功能实现
+
+官员管理界面与 AI 后端集成完成
+
+6.2.3 Phase 3 验收 (Month 9)
+
+技术验收标准:
+
+200+ 事件内容和复杂事件链实装
+
+AI 生态系统稳定运行
+
+性能优化：内存 < 500 MB，响应 < 200 ms
+
+数据完整性和错误恢复机制通过验证
+
+全功能压力测试通过
+
+分阶段排名系统完整实现
+
+疲劳度管理系统优化完成
+
+培训系统延迟发布机制验证
+
+功能验收标准:
+
+完整的游戏体验流程 (游戏 0-36 周完整模拟)
+
+AI 个性化和复杂互动行为呈现
+
+新手引导和教程系统完善
+
+游戏平衡和数值调优完成
+
+Beta 用户测试反馈问题解决
+
+NPC 公会历史里程碑系统就绪
+
+联赛日程和外交态度系统运行正常
+
+拍卖行经济系统平衡性验证
+
+6.2.4 Phase 4 验收 (Month 10)
+
+技术验收标准:
+
+所有性能指标达标（启动、内存、响应等）
+
+跨平台兼容性验证（Windows/macOS）
+
+安全性和数据保护测试通过
+
+发布版本稳定，无严重崩溃
+
+移动端适配基础完成（界面缩放、触控支持）
+
+数据统计勾稽关系验证通过
+
+全系统 AI 智能化测试通过
+
+战术库完整性验证通过
+
+商业验收标准:
+
+Beta 用户 NPS > 7
+
+核心功能使用率 > 80%
+
+用户留存率 D7 > 60%
+
+发布准备和营销材料到位
+
+DLC 和扩展计划确认
+
+传奇成员系统对玩家具有吸引力验证
+
+拍卖行经济模型平衡性验证
+
+6.2.5 模块功能详细验收
+
+1. 成员管理模块
+
+成员招募：多渠道申请、审核流程、自动化筛选
+
+传奇成员：特殊标识显示、检索筛选功能、历史记录
+
+NPC 贡献度：计算准确性、排名实时更新、奖励发放
+
+疲劳管理：状态监控、恢复计划执行、提醒机制
+
+权限系统：细粒度控制、继承关系、审计日志
+
+2. 活动管理模块
+
+活动创建：模板系统、自定义参数、时间调度
+
+报名机制：条件检查、自动分组、候补系统
+
+奖励分配：DKP/EPGP 计算、自动分配、申诉处理
+
+NPC 联赛：日程生成、结果模拟、排名更新
+
+历史统计：完整记录、数据分析、趋势图表
+
+3. 战术中心模块
+
+PVE 阵容：50 人团队配置、角色定位分配、阵容保存
+
+AI 自动分配：根据副本类型、考虑成员属性、优化建议
+
+PVP 阵容：战场/竞技场模式、队长指定、战术配置
+
+战术库：多种解锁方式、等级升级、分享机制
+
+模拟验证：阵容有效性检查、成功率预测、改进建议
+
+4. 资源管理模块
+
+库存管理：实时统计、分类存储、权限控制
+
+分配系统：申请流程、审批机制、历史追踪
+
+预算规划：资源预测、消耗分析、预警提醒
+
+数据同步：多端一致性、冲突解决、备份恢复
+
+审计功能：操作日志、异常检测、报表生成
+
+5. 社交互动模块
+
+聊天系统：多频道支持、历史记录、敏感词过滤
+
+智能邮件：自动分类、快捷回复、批量操作
+
+公告系统：分级推送、定时发布、已读统计
+
+投票机制：多种类型、防作弊、结果公示
+
+NPC 外交：态度系统、关系变化、事件触发
+
+6. 官员管理模块
+
+简化界面：一键操作、AI 推荐、批量处理
+
+AI 后端：智能决策、属性影响计算、行为预测
+
+权限委派：清晰层级、自动继承、冲突检测
+
+绩效评估：多维度指标、自动评分、改进建议
+
+任期管理：自动轮换、历史记录、交接流程
+
+7. 公会后勤模块
+
+拍卖行：物品上架、定价机制、AI 购买行为
+
+市场调节：供需平衡、价格预言机、通胀控制
+
+培训系统：课程安排、延迟发布、效果追踪
+
+疲劳管理：状态监控、恢复计划、效率优化
+
+物资调配：智能分配、紧急调度、损耗统计
+
+8. 数据统计模块
+
+数据准确性：实时更新、勾稽关系验证、异常检测
+
+分阶段排名：服务器→战区→国服→全球梯度排名
+
+报表系统：每日/每周报告自动生成、趋势可视化
+
+监控预警：关键指标阈值监控、异常波动提醒
+
+日志分析：行为日志收集、漏斗分析、决策支持
+
+文档状态: 完成
+审核状态: 待审核

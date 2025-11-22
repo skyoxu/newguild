@@ -1,0 +1,11 @@
+# Task ID: 11
+# Title: Setup Core Game Loop
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Implement the core game loop for Guild Manager using a turn-based system.
+# Details:
+Implement the GameTurnSystem interface with methods for executing the resolution, player, and AI phases. Ensure each phase updates the game state appropriately.
+
+# Test Strategy:
+Unit test each phase to ensure correct state transitions and data updates.

@@ -1,0 +1,14 @@
+# Task ID: 76
+# Title: Integrate Core Game Modules
+# Status: pending
+# Dependencies: 75
+# Priority: medium
+# Description: Integrate core game modules including guild and member management systems.
+# Details:
+1. Develop the guild management system with UI and data display.
+2. Implement the smart email system and quick actions.
+3. Create guild information management features.
+4. Develop the infrastructure upgrade system.
+
+# Test Strategy:
+Conduct integration testing to ensure seamless module communication and data consistency.

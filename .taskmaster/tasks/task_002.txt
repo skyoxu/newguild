@@ -1,0 +1,37 @@
+# Task ID: 2
+# Title: Implement Event Engine Core
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Develop the core functionalities of the Event Engine.
+# Details:
+Create the EventEngine class in C#. Implement methods for processing game cycles, evaluating event conditions, executing event effects, and resolving conflicts. Use Godot signals for event-driven communication.
+
+# Test Strategy:
+Unit test each method to ensure correct event processing and conflict resolution. Use mock events to simulate game cycles.
+
+# Subtasks:
+## 1. Create EventEngine Class in C# [pending]
+### Dependencies: None
+### Description: Develop the foundational EventEngine class in C# for the event engine core.
+### Details:
+Define the EventEngine class structure, including necessary properties and fields. Ensure compatibility with Godot signals for event-driven communication.
+
+## 2. Implement Game Cycle Processing Method [pending]
+### Dependencies: 2.1
+### Description: Develop the method to process game cycles within the EventEngine class.
+### Details:
+Create a method to handle game cycle updates, integrating with Godot signals to trigger events. Ensure efficient cycle management.
+
+## 3. Develop Event Condition Evaluation Method [pending]
+### Dependencies: 2.1
+### Description: Implement the method to evaluate event conditions in the EventEngine class.
+### Details:
+Design a method to assess event conditions, using logical checks and state evaluations. Integrate with existing game state data.
+
+## 4. Set Up Unit Tests for Event Engine Core [pending]
+### Dependencies: 2.1, 2.2, 2.3
+### Description: Establish unit tests for the EventEngine class and its methods.
+### Details:
+Create unit tests for each method in the EventEngine class, focusing on game cycle processing, event condition evaluation, and event execution.
+

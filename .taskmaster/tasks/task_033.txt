@@ -1,0 +1,11 @@
+# Task ID: 33
+# Title: Create Player Guild System
+# Status: pending
+# Dependencies: 27
+# Priority: medium
+# Description: Extend the BaseGuild interface to define the PlayerGuild structure.
+# Details:
+Implement properties for id, name, tag, realm, faction, guildLevel, reputation, experience, leader, foundedDate, motto, description, members, guildHall, guildBank, facilities, resources, raidProgress, pvpRating, achievements, officerSystem, guildPolicies, recruitmentSettings, alliances, rivalries, reputation_external, treasury, taxSettings, and budgetAllocation.
+
+# Test Strategy:
+Test the integration of player-specific features and ensure compatibility with NPC guild systems.

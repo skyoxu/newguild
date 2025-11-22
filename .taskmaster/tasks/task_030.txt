@@ -1,0 +1,11 @@
+# Task ID: 30
+# Title: Design Guild League Schedule System
+# Status: pending
+# Dependencies: 27
+# Priority: medium
+# Description: Develop the GuildLeagueSchedule interface to manage guild competition schedules.
+# Details:
+Implement properties for seasonId, seasonName, scheduleType, upcomingMatches, completedMatches, seasonInfo, and seasonStats.
+
+# Test Strategy:
+Test schedule creation and updates, ensuring matches are correctly categorized and season stats are accurate.

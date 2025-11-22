@@ -1,0 +1,11 @@
+# Task ID: 28
+# Title: Develop History Milestone System
+# Status: pending
+# Dependencies: 27
+# Priority: medium
+# Description: Create the GuildHistoryRecord interface to track historical milestones of guilds.
+# Details:
+Define properties like id, eventType, eventTitle, eventDescription, achievementDate, significance, relatedData, and impactAssessment.
+
+# Test Strategy:
+Test the creation and retrieval of history records, ensuring data integrity and correct impact calculations.

@@ -1,0 +1,11 @@
+# Task ID: 35
+# Title: Implement Legendary Highlight System
+# Status: pending
+# Dependencies: 34
+# Priority: medium
+# Description: Create the LegendaryHighlight interface to manage special member highlights.
+# Details:
+Define properties for memberId, highlightType, specialBadge, glowEffect, and customNote.
+
+# Test Strategy:
+Test the application of highlights to members and ensure visual effects are correctly displayed.

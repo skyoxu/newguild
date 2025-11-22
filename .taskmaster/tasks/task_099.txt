@@ -1,0 +1,37 @@
+# Task ID: 99
+# Title: Implement PlayerGuild Class
+# Status: pending
+# Dependencies: 95, 96
+# Priority: medium
+# Description: Develop the PlayerGuild class to manage guild data and operations.
+# Details:
+Create PlayerGuild class extending BaseGuild. Include properties like id, name, tag, realm, faction, guildLevel, reputation, experience, leader, foundedDate, motto, description, members, memberRoster, memberLimit, guildHall, facilities, guildBank, resources, raidProgress, pvpRating, achievements, officerSystem, guildPolicies, recruitmentSettings, alliances, rivalries, reputation_external, treasury, taxSettings, budgetAllocation.
+
+# Test Strategy:
+Test guild creation and member management. Validate facility upgrades and resource management. Simulate guild operations to ensure data consistency.
+
+# Subtasks:
+## 1. Create PlayerGuild Class Structure [pending]
+### Dependencies: None
+### Description: Develop the basic structure of the PlayerGuild class extending BaseGuild.
+### Details:
+Define the PlayerGuild class with properties such as id, name, tag, realm, and faction. Ensure it extends BaseGuild.
+
+## 2. Implement Member Management System [pending]
+### Dependencies: 99.1
+### Description: Develop the system to manage guild members within the PlayerGuild class.
+### Details:
+Add properties and methods for managing members, memberRoster, and memberLimit. Include functionality for adding and removing members.
+
+## 3. Integrate Resource Management [pending]
+### Dependencies: 99.1
+### Description: Incorporate resource management features into the PlayerGuild class.
+### Details:
+Implement properties and methods for managing guildBank, resources, and treasury. Ensure proper handling of resource transactions.
+
+## 4. Develop Guild Operations and Policies [pending]
+### Dependencies: 99.1, 99.2, 99.3
+### Description: Implement guild operations and policy management within the PlayerGuild class.
+### Details:
+Add properties and methods for handling guild policies, recruitmentSettings, and alliances. Ensure integration with existing systems.
+

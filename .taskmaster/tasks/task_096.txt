@@ -1,0 +1,11 @@
+# Task ID: 96
+# Title: Create GuildMember Class
+# Status: pending
+# Dependencies: 94
+# Priority: medium
+# Description: Extend BaseCharacter to create the GuildMember class with specific attributes.
+# Details:
+Develop a C# class GuildMember that extends BaseCharacter. Include properties such as name, race, class, specialization, guild, assess, legendary, legendaryType, legendaryAbilities, legendaryBackstory, rarity, skill, loyalty, teamwork, ambition, satisfaction, fatigue, morale, availability, experience, intimacyWithLeader, memberRelationships, personality, aiGoals, behaviorPattern, recruitmentSource, joinDate, currentRole.
+
+# Test Strategy:
+Ensure all properties are correctly initialized and can be modified. Test legendary member attributes and ensure they trigger appropriate events.

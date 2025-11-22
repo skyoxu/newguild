@@ -1,0 +1,11 @@
+# Task ID: 97
+# Title: Implement LeadershipSkill and GuildLeaderSkillTree
+# Status: pending
+# Dependencies: 95
+# Priority: medium
+# Description: Develop the LeadershipSkill class and GuildLeaderSkillTree structure for managing skills.
+# Details:
+Create LeadershipSkill class with properties like id, name, description, tier, prerequisites, and effects. Implement GuildLeaderSkillTree to organize skills in a tree structure, managing skill points and dependencies.
+
+# Test Strategy:
+Test skill unlocking logic and prerequisites. Validate skill effects on game mechanics by simulating skill application in various scenarios.

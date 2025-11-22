@@ -661,3 +661,7 @@ godot --headless --path . --gdunit-run         # CI/CD 模式
 - CI/CD 质量门禁配置
 - 确定性测试最佳实践
 - 常见问题和工具推荐
+
+## Task Master AI Instructions
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md

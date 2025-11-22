@@ -1,0 +1,13 @@
+# Task ID: 88
+# Title: Develop Game Logic Layer
+# Status: pending
+# Dependencies: 86, 87
+# Priority: high
+# Description: Create the game logic layer using C# scripts to handle core game mechanics.
+# Details:
+1. Implement core game mechanics using C#.
+2. Ensure logic layer can communicate with the UI layer via events and signals.
+3. Structure the logic to handle player decisions and AI simulations.
+
+# Test Strategy:
+Unit test core mechanics and verify communication with the UI layer.

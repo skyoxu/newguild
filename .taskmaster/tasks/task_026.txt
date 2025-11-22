@@ -1,0 +1,11 @@
+# Task ID: 26
+# Title: Define World Generation System Interface
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create the interface for the world generation system to dynamically generate different competitive environments.
+# Details:
+Define the WorldGenerationSystem interface with methods for generating competitors and initializing world state. Implement the guildArchetypes property to hold predefined NPC guild archetypes.
+
+# Test Strategy:
+Unit test the interface methods to ensure they return expected types and handle edge cases.

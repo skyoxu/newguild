@@ -2,7 +2,7 @@
 PRD-ID: PRD-Guild-Manager
 Title: 安全事件与策略契约更新（Security Contracts）
 ADR-Refs:
-  - ADR-0002
+  - ADR-0019
   - ADR-0004
   - ADR-0005
 Test-Refs:
@@ -17,8 +17,8 @@ Status: Proposed
 
 变更意图（引用）
 
-- Electron 安全基线：见 ADR‑0002（CSP、contextIsolation 等）。
-- 契约与事件统一：见 ADR‑0004。
+- Godot 安全基线：见 ADR‑0019（资源与文件访问、外链与权限约束）；
+- 契约与事件统一：见 ADR‑0004；
 - 质量门禁与发布健康：见 ADR‑0005。
 
 影响范围

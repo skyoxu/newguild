@@ -1,0 +1,423 @@
+[
+  {
+    "id": "NG-0001",
+    "story_id": "PRD-NEWGUILD-VS-0001",
+    "title": "整理 newguild 首个垂直切片 PRD 与 Overlay 映射",
+    "description": "基于现有 ADR 与 Phase 文档，为 newguild 定义首个可玩的垂直切片（例如基础公会管理循环），并将 Story 对齐到 PRD-<PRODUCT> / overlays/08 中的功能纵切文档。产出：一份最小 PRD 片段、对应 overlays 目录与 Test-Refs 协议。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "docs",
+    "depends_on": [],
+    "adr_refs": ["ADR-0018", "ADR-0004", "ADR-0005", "ADR-0023", "ADR-0011"],
+    "chapter_refs": ["CH01", "CH04", "CH05", "CH06", "CH07"],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": ["prd", "vertical-slice", "docs", "architecture"],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [
+      "存在一份针对 newguild 的最小 PRD 片段（含输入/输出/状态/存储与非功能约束），并显式引用 ADR-0018/0004/0005/0023/0011。",
+      "在 overlays/PRD-*/08 下新增或调整功能纵切文档，严格遵守 08 章只引用 01/02/03 口径的规则（不复制阈值）。",
+      "每个 Story 至少关联一条 Test-Ref（xUnit 或 GdUnit4），并在文档脚注中列出。"
+    ],
+    "test_strategy": [
+      "文档审阅：由架构负责人确认 PRD 与 ADR/Phase 一致性。",
+      "链接校验：任务/回链校验脚本通过（task-links-validate）。"
+    ]
+  },
+  {
+    "id": "NG-0012",
+    "story_id": "PH12-BACKLOG-B1-B2",
+    "title": "Python 版 headless smoke 封装与 strict 模式开关",
+    "description": "根据 Phase-12-Headless-Smoke-Backlog.md B1/B2，在当前 Godot + C# 模板中实现 Python 版 headless smoke 封装脚本（替代/补充 PowerShell 版本），并增加 strict 模式：严格依赖 [TEMPLATE_SMOKE_READY]/[DB] opened marker 决定通过与否。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "ci",
+    "depends_on": ["NG-0001"],
+    "adr_refs": ["ADR-0005", "ADR-0011", "ADR-0018", "ADR-0020"],
+    "chapter_refs": ["CH06", "CH07"],
+    "overlay_refs": [],
+    "labels": ["ci", "smoke", "godot", "python", "headless"],
+    "owner": "architecture",
+    "test_refs": [
+      "logs/ci/<date>/smoke/headless.log",
+      "logs/ci/<date>/smoke/selfcheck-summary.json"
+    ],
+    "acceptance": [
+      "新增 scripts/python/smoke_headless.py（或等价脚本），支持 --godot-bin/--scene/--timeout-sec/--project-path 参数，并在 Windows 上可直接运行。",
+      "非 strict 模式下，脚本行为与现有 PowerShell 版本等价，输出写入 logs/ci/<date>/smoke/**，并保留宽松判定。",
+      "strict 模式下，仅当日志包含 [TEMPLATE_SMOKE_READY] 或 [DB] opened 时返回 0，否则返回非零并在日志中标记为 strict-failed。",
+      "ci-windows.yml 或 windows-quality-gate.yml 至少提供一条注释示例，展示如何在受保护分支启用 strict 模式。"
+    ],
+    "test_strategy": [
+      "本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。",
+      "CI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。"
+    ]
+  },
+  {
+    "id": "NG-0013",
+    "story_id": "PH13-BACKLOG-B1-B2-B5",
+    "title": "扩展 quality_gates.py 覆盖率阈值与 GdUnit4 集成",
+    "description": "承接 Phase-13-Quality-Gates-Script.md 与 Backlog：将 xUnit 覆盖率门禁提升到蓝图标准（行≥90%、分支≥85%，可由环境变量覆盖），并把关键 GdUnit4 集合（Adapters+Security 小集）通过 quality_gates.py 聚合输出到统一 summary，以便在 CI 中统一判定。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "ci",
+    "depends_on": ["NG-0012"],
+    "adr_refs": ["ADR-0005", "ADR-0015", "ADR-0018", "ADR-0020"],
+    "chapter_refs": ["CH07", "CH09"],
+    "overlay_refs": [],
+    "labels": ["ci", "quality-gates", "coverage", "gdunit"],
+    "owner": "architecture",
+    "test_refs": [
+      "logs/ci/<date>/unit/coverage.json",
+      "logs/e2e/<date>/gdunit-hard/run-summary.json",
+      "logs/ci/<date>/quality-gates-summary.json"
+    ],
+    "acceptance": [
+      "scripts/python/run_dotnet.py 读取覆盖率结果并在 summary.json 中写入 lines/branches 与阈值配置（默认 90/85，可由环境变量覆盖）。",
+      "当覆盖率低于阈值时，quality_gates.py 在 summary 中标记为 failed，并可配置为软/硬门禁（至少支持硬门禁）。",
+      "quality_gates.py 能调用 run_gdunit.py 或等价封装，执行 Adapters+Security 硬门禁集合，并在 quality-gates-summary.json 中汇总结果。",
+      "Windows Quality Gate 工作流调用 quality_gates.py all 时，能在 Step Summary 中清晰展示 dotnet 覆盖率与 GdUnit4 集合结果。"
+    ],
+    "test_strategy": [
+      "本地模拟：手工降低测试覆盖率，验证 quality_gates.py 将其标记为 failed，并按配置返回非零 exit code。",
+      "CI 验证：在 PR 上运行 windows-quality-gate 工作流，观察 coverage 与 GdUnit4 结果是否在 Step Summary 与 artifacts 中正确展示。"
+    ]
+  },
+  {
+    "id": "NG-0014",
+    "story_id": "PH14-BACKLOG-B1-B2-B3-B4",
+    "title": "Godot 安全适配层增强：外链白名单、文件访问与 OS.execute 守卫",
+    "description": "按照 Phase-14-Godot-Security-Baseline.md 与 Backlog，对当前 Godot+C# 模板补齐安全适配层：统一外链白名单配置（ALLOWED_EXTERNAL_HOSTS）、文件访问适配（仅 res:// 与 user://，拒绝 .. 和绝对路径）、显式封装 OS.execute，并为安全审计 JSONL 增加格式校验与最小测试集。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "adapter",
+    "depends_on": ["NG-0001"],
+      "adr_refs": ["ADR-0019", "ADR-0006", "ADR-0005", "ADR-0011"],
+      "chapter_refs": ["CH02", "CH05", "CH06"],
+    "overlay_refs": [],
+    "labels": ["security", "godot", "adapter", "filesystem", "process"],
+    "owner": "architecture",
+    "test_refs": [
+      "Tests.Godot/tests/Security/Hard/test_db_path_rejection.gd",
+      "Tests.Godot/tests/Security/Hard/test_settings_config_security.gd",
+      "logs/ci/<date>/security-audit.jsonl"
+    ],
+    "acceptance": [
+      "外链访问统一通过 SecurityUrlAdapter（或等价组件）完成，强制 https scheme + ALLOWED_EXTERNAL_HOSTS 白名单，禁止 file://、javascript: 等高危 scheme。",
+      "文件访问统一通过 SecurityFileAdapter（或等价组件）封装 FileAccess/DirAccess：仅允许 res:// 读取与 user:// 读写，拒绝绝对路径与 .. 越权访问，并将拒绝写入 security-audit.jsonl。",
+      "OS.execute 默认在运行时禁用，或仅在开发/CI 模式通过 SecurityProcessAdapter 白名单执行，并记录审计日志。",
+      "安全审计 JSONL（logs/ci/<date>/security-audit.jsonl 与 user://logs/security/**）均通过验证脚本检查：每行合法 JSON，至少包含 {ts, action, reason, target, caller} 字段。",
+      "相关 GdUnit4 Hard 测试覆盖允许/拒绝/非法三态场景，并在 CI 中作为硬门禁的一部分。"
+    ],
+    "test_strategy": [
+      "GdUnit4 安全用例：编写/扩展 Hard 集测试外链、文件、进程三类接口的 allow/deny/invalid 行为。",
+      "脚本校验：新增或扩展 scripts/python/validate_audit_logs.py，针对 security-audit.jsonl 做格式与字段校验，在 CI 中运行。"
+    ]
+  },
+  {
+    "id": "NG-0015",
+    "story_id": "PH15-BACKLOG-B1-B2",
+    "title": "在 Game.Core 落地性能追踪库并接入 CI 性能门禁",
+    "description": "根据 Phase-15-Performance-Budgets-and-Gates.md 与 ADR-0015，在 Game.Core 中实现纯 C# 性能追踪库（PerformanceTracker/PerformanceMetrics/QueryPerformanceTracker），计算 P50/P95 等指标并生成 JSON 报告；在脚本层新增性能门禁聚合脚本，将 PerfTracker 输出与预算阈值（环境变量可配置）联动，写入 logs/perf 与 logs/ci。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": ["NG-0013"],
+    "adr_refs": ["ADR-0015", "ADR-0005", "ADR-0018"],
+    "chapter_refs": ["CH06", "CH09"],
+    "overlay_refs": [],
+    "labels": ["performance", "core", "metrics", "ci"],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core.Tests/Performance/PerformanceTrackerTests.cs",
+      "logs/perf/<date>/summary.json",
+      "logs/ci/<date>/perf/performance-gates-summary.json"
+    ],
+    "acceptance": [
+      "Game.Core/Performance/** 下存在 PerformanceTracker/PerformanceMetrics/QueryPerformanceTracker 等类型，API 与 Phase-15 文档保持一致且不依赖 Godot API。",
+      "xUnit 测试覆盖性能库的关键统计逻辑（P50/P95/平均值/最大值），并生成覆盖率报告。",
+      "Godot 侧 PerfTracker 使用或适配 Game.Core 性能库的输出，将帧时间/关键路径指标写入 user://logs/perf/perf.json。",
+      "新增 scripts/python/performance_gates.py（或等价脚本），读取 PerfTracker JSON 与预算阈值（环境变量），在 logs/perf/<date>/summary.json 与 logs/ci/<date>/perf/** 中生成结果，并通过 exit code 暴露软/硬门禁。"
+    ],
+    "test_strategy": [
+      "单元测试：为性能库编写 xUnit 基准级测试，验证统计函数在不同样本上的正确性。",
+      "本地演练：运行 Godot 场景 + PerfTracker，生成 perf.json，再用 performance_gates.py 校验阈值与报告。",
+      "CI 集成：在 windows-quality-gate 工作流中增加可选性能门禁 step，观察超阈值时的报告与退出码。"
+    ]
+  },
+  {
+    "id": "NG-0016",
+    "story_id": "PH16-BACKLOG-B1-B3",
+    "title": "Observability Autoload 与 Sentry Release Health Gate",
+    "description": "按照 Phase-16-Observability-Sentry-Integration.md 与 Backlog，在 Game.Godot 中引入 Observability Autoload（初始化 Sentry Godot SDK、统一日志接口），并实现 Python 版 release_health_gate 脚本：从 Sentry API 读取 Crash-Free Sessions/Users 指标，与 ADR-0003/0015 定义的阈值对齐，在 CI 中生成 release-health.json 并支持作为发布门禁。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "depends_on": ["NG-0015"],
+    "adr_refs": ["ADR-0003", "ADR-0005", "ADR-0015", "ADR-0018"],
+    "chapter_refs": ["CH03", "CH09"],
+    "overlay_refs": [],
+    "labels": ["observability", "sentry", "release-health", "godot"],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core.Tests/Observability/ObservabilityClientTests.cs",
+      "logs/ci/<date>/release-health.json"
+    ],
+    "acceptance": [
+      "Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期初始化 Sentry Godot SDK，并设置 Release/Environment。",
+      "Game.Core 中存在 ObservabilityClient/StructuredLogger（或等价实现），通过接口注入到核心服务，避免直接依赖 Godot 或 Sentry。",
+      "新增 scripts/python/release_health_gate.py，支持配置 SENTRY_* 环境变量与阈值 JSON，生成 logs/ci/<date>/release-health.json 并根据阈值返回 exit code。",
+      "CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），在配置正确的情况下能拉取 Sentry 数据并给出清晰的通过/失败原因。"
+    ],
+    "test_strategy": [
+      "核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。",
+      "脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。"
+    ]
+  },
+  {
+    "id": "NG-0017",
+    "story_id": "PH17-BACKLOG-B1-B2-B3",
+    "title": "Python 构建驱动脚本与 Windows Release Workflow 整合",
+    "description": "依据 Phase-17-Build-System-and-Godot-Export.md 与 Backlog，在 scripts 下实现跨平台 Python 构建驱动脚本（build_windows.py），统一调用 Godot headless 导出、生成版本元数据（build-info.json/release-profile.json）与 SHA256 校验；并将现有 Windows Release (Tag/Manual) 工作流调整为调用该脚本，简化导出与发布流程。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "ci",
+    "depends_on": ["NG-0001", "NG-0015"],
+    "adr_refs": ["ADR-0008", "ADR-0011", "ADR-0003", "ADR-0015"],
+    "chapter_refs": ["CH07", "CH10"],
+    "overlay_refs": [],
+    "labels": ["build", "export", "windows", "ci", "release"],
+    "owner": "architecture",
+    "test_refs": [
+      "logs/ci/<date>/export/summary.json",
+      "build/build-info.json",
+      "build/release-profile.json"
+    ],
+    "acceptance": [
+      "存在 scripts/python/build_windows.py（或等价脚本），在本地 Windows 环境下可通过 Godot headless 导出 Release/Debug EXE，并生成 build-info.json 与 SHA256 校验文件。",
+      ".github/workflows/windows-release.yml 与 windows-release-tag.yml 中的导出步骤统一改为调用 build_windows.py，而非直接内联 Godot 导出命令。",
+      "Release Notes 或相关文档中引用 build-info.json/release-profile.json，记录版本号、渠道、构建时间与 Commit SHA。",
+      "导出的 Game.exe 能在未安装 Godot 的 Windows 环境中直接运行，并通过 smoke_exe.ps1 的冒烟验证。"
+    ],
+    "test_strategy": [
+      "本地构建：在开发机运行 build_windows.py release/debug，验证输出文件与日志。",
+      "CI 集成：触发 Windows Release (Manual/Tag) 工作流，确认 Artifact 中包含 EXE、PCK、build-info.json 与 SHA256 校验文件。"
+    ]
+  },
+  {
+    "id": "NG-0018",
+    "story_id": "PH18-19-BACKLOG-CANARY-ROLLBACK",
+    "title": "分阶段发布（Canary/Stable）与回滚脚本骨架",
+    "description": "基于 Phase-18-Staged-Release-and-Canary-Strategy.md 与 Phase-19-Emergency-Rollback-and-Monitoring.md，为 newguild 提供最小的分阶段发布与回滚脚本骨架：引入 RELEASE_CHANNEL 概念（qa/internal/beta/stable），在构建时生成 release-profile.json，预留 Sentry Release Health 驱动的发布/回滚决策接口。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "ci",
+    "depends_on": ["NG-0016", "NG-0017"],
+    "adr_refs": ["ADR-0003", "ADR-0005", "ADR-0015"],
+    "chapter_refs": ["CH03", "CH10"],
+    "overlay_refs": [],
+    "labels": ["release", "canary", "rollback", "sentry"],
+    "owner": "architecture",
+    "test_refs": [
+      "build/release-profile.json",
+      "logs/ci/<date>/release-health.json"
+    ],
+    "acceptance": [
+      "构建脚本或 CI 能根据环境变量 RELEASE_CHANNEL（qa/internal/beta/stable）生成包含渠道信息与启用 FeatureFlags 列表的 release-profile.json。",
+      "Release 工作流在 Step Summary 或 Artifact 中附带 release-profile.json，便于追踪。",
+      "存在回滚脚本或工作流骨架（例如 windows-rollback.yml 或 PowerShell/Python 脚本），至少能根据指定 tag/版本重新触发构建或下载历史 Artifact。",
+      "文档中说明 Canary/Stable 渠道的基本策略与 Release Health 驱动的 go/no-go 决策接口（即使实际接入 Sentry 仍在 Backlog）。"
+    ],
+    "test_strategy": [
+      "本地验证：手工设置不同 RELEASE_CHANNEL，运行构建脚本并检查 release-profile.json 差异。",
+      "CI 验证：在测试分支上运行带渠道参数的 Release 工作流，确认生成的 profile 与工件符合预期。"
+    ]
+  },
+  {
+    "id": "NG-0019",
+    "story_id": "PH20-22-BACKLOG-DOCS-ACCEPTANCE",
+    "title": "项目级功能验收与文档整合骨架",
+    "description": "参考 Phase-20-Functional-Acceptance-Testing.md、Phase-21-Performance-Optimization.md 与 Phase-22-Documentation-and-Release-Notes.md，为基于 newguild 的具体游戏项目提供功能验收清单、性能基线与发布说明模板骨架，但不在模板仓库内虚构具体玩法。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "docs",
+    "depends_on": ["NG-0001"],
+    "adr_refs": ["ADR-0005", "ADR-0015", "ADR-0003"],
+    "chapter_refs": ["CH04", "CH09", "CH10"],
+    "overlay_refs": [],
+    "labels": ["acceptance", "docs", "perf", "release-notes"],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [
+      "在 docs 下增加项目级功能验收/迁移报告/发布说明的模板文件（例如 docs/acceptance/functional_checklist.template.md、docs/release/EXECUTIVE_SUMMARY.template.md），明确字段与引用 ADR/Phase 的方式。",
+      "在 README 或 docs/PROJECT_DOCUMENTATION_INDEX.md 中增加一小节，指引项目团队如何基于模板补齐 Phase-20/21/22 所需的项目级文档。",
+      "不在模板仓库内引入具体玩法/关卡/敌人等业务细节，保持模板对多个项目的复用性。"
+    ],
+    "test_strategy": [
+      "文档审阅：由架构/产品共同确认模板文档结构对真实项目足够且不过度约束。",
+      "链接检查：task-links-validate 或等价脚本对新模板文档进行路径与引用校验。"
+    ]
+  },
+  {
+    "id": "NG-0020",
+    "story_id": "PRD-GUILD-MANAGER-VS-CORE-LOOP",
+    "title": "公会管理器首个垂直切片的三层架构与核心类型落地",
+    "description": "依据 PRD-Guild-Manager 与 08-功能纵切-公会管理器.md，在 Game.Core / Game.Godot / Tests.Godot 三层落地首个可玩的公会管理垂直切片：实现基础 Guild/GuildMember/Raid/Event 域模型与服务，提供对应的 Godot 场景与 UI Glue，并为该循环建立最小 xUnit 与 GdUnit4 测试集。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": ["NG-0001"],
+    "adr_refs": [
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0006",
+      "ADR-0007",
+      "ADR-0005",
+      "ADR-0020"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [
+      "core",
+      "guild",
+      "vertical-slice",
+      "architecture"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core.Tests/Domain/GuildCoreTests.cs",
+      "Game.Core.Tests/Domain/EventEngineTests.cs",
+      "Tests.Godot/tests/Scenes/test_guild_main_scene.gd",
+      "Tests.Godot/tests/Integration/test_guild_workflow.gd"
+    ],
+    "acceptance": [
+      "Game.Core 中存在 Guild、GuildMember、Raid、Event 等核心域模型与服务，且不依赖 Godot API。",
+      "Game.Godot 中存在与 08-功能纵切-公会管理器.md 一致的主场景与公会管理 UI 节点结构，并通过 Adapters 调用 Game.Core 服务。",
+      "Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。",
+      "Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。",
+      "上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。"
+    ],
+    "test_strategy": [
+      "单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。",
+      "场景测试：在 Tests.Godot 中编写主场景与公会管理 UI 的 GdUnit4 用例，验证节点结构与关键 Signals。",
+      "集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。"
+    ]
+  },
+  {
+    "id": "NG-0021",
+    "story_id": "PRD-GUILD-MANAGER-VS-TEST-CI",
+    "title": "首个垂直切片的最小 xUnit/GdUnit4/Smoke 流程打通",
+    "description": "在 newguild 模板下，为 PRD-Guild-Manager 的首个公会管理垂直切片建立最小可用的测试与 CI 流程：xUnit 覆盖核心域逻辑，GdUnit4 覆盖主场景与基本交互，headless smoke 验证游戏能从命令行启动到主场景并正常退出，所有步骤在 dev_cli.py 与 Windows CI 工作流中可自动执行。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "ci",
+    "depends_on": [
+      "NG-0001",
+      "NG-0012",
+      "NG-0020"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0011",
+      "ADR-0018",
+      "ADR-0020"
+    ],
+    "chapter_refs": [
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [
+      "ci",
+      "testing",
+      "smoke",
+      "xunit",
+      "gdunit"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core.Tests/Domain/GuildCoreTests.cs",
+      "Tests.Godot/tests/Scenes/test_guild_main_scene.gd",
+      "logs/ci/<date>/ci-pipeline-summary.json",
+      "logs/e2e/<date>/smoke/selfcheck-summary.json"
+    ],
+    "acceptance": [
+      "dev_cli.py run-ci-basic 在本地 Windows 环境下能成功运行，并至少执行一次 dotnet test 与一次 headless smoke。",
+      "Windows CI 工作流（ci-windows.yml 或 windows-quality-gate.yml）中包含对 Game.Core.Tests 与 Tests.Godot 的执行步骤，且在首个垂直切片落地后仍然全部通过。",
+      "headless smoke 用例能够在不依赖交互的情况下启动游戏主场景，并输出 [TEMPLATE_SMOKE_READY] 或 [DB] opened 标记。",
+      "失败的测试或 smoke 能在 logs/ci 与 logs/e2e 目录下生成可用于排查的 JSON/文本日志，与 AGENTS.md 中的日志规范一致。"
+    ],
+    "test_strategy": [
+      "本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。",
+      "CI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。"
+    ]
+  },
+  {
+    "id": "NG-0022",
+    "story_id": "PRD-GUILD-Manager-DOCS-LINKS",
+    "title": "公会管理器文档与回链对齐（PRD/Base/ADR/Overlay/Tasks）",
+    "description": "围绕 PRD-Guild-Manager 与 newguild 模板，梳理公会管理器相关文档与任务回链：确保 PRD、Base 文档（CH01–CH07）、相关 ADR、Overlay/08 与 Taskmaster 任务（NG-00xx 与玩法任务）之间存在清晰的一致性链接，避免出现重复口径或断链。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "docs",
+    "depends_on": ["NG-0001"],
+    "adr_refs": [
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0003"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH03",
+      "CH04",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [
+      "docs",
+      "links",
+      "acceptance",
+      "task-links"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "docs/prd.txt",
+      "docs/architecture/base/01-introduction-and-goals-v2.md",
+      "docs/adr/ADR-0018-godot-csharp-tech-stack.md",
+      "docs/adr/ADR-0019-godot-security-baseline.md"
+    ],
+    "acceptance": [
+      "docs/prd.txt 中与公会管理器相关的章节在 Overlay/08 中都有对应条目或引用。",
+      "与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-功能纵切-公会管理器.md 与本验收清单的 Front-Matter 中有一致引用。",
+      "Taskmaster 任务（NG-0001/NG-0020/NG-0021 以及后续玩法任务）在 story_id/adr_refs/chapter_refs/overlay_refs 上与 PRD/Base/ADR/Overlay 建立清晰回链。",
+      "task-links-validate（或等价脚本）能够在 CI 中验证上述回链关系并生成报告。"
+    ],
+    "test_strategy": [
+      "文档审阅：由架构/产品共同检查 PRD/Base/ADR/Overlay 是否互相引用、无矛盾口径。",
+      "自动化：扩展或实现 task-links-validate 脚本，针对 NG-00xx 与玩法任务校验 story_id/adr_refs/chapter_refs/overlay_refs 与文档实际存在性和一致性。"
+    ]
+  }
+]

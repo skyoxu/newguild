@@ -1,0 +1,11 @@
+# Task ID: 81
+# Title: Create Guild and Leader Role Creation Process
+# Status: pending
+# Dependencies: 78, 79
+# Priority: medium
+# Description: Implement the process for creating guilds and assigning leader roles.
+# Details:
+Develop a user interface for guild creation. Implement backend logic to handle guild data and leader role assignments. Ensure data consistency and security.
+
+# Test Strategy:
+Perform integration tests to verify the guild creation process. Use UI tests to ensure the interface functions correctly.

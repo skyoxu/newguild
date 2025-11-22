@@ -1,0 +1,11 @@
+# Task ID: 64
+# Title: Create Reward Distribution System
+# Status: pending
+# Dependencies: 61, 62
+# Priority: medium
+# Description: Develop the system for distributing rewards based on guild and individual contributions during World Boss events.
+# Details:
+Implement the RewardDistributionSystem with algorithms for calculating rewards based on contribution weights and event outcomes.
+
+# Test Strategy:
+Validate reward calculations with various contribution scenarios to ensure fairness and accuracy.

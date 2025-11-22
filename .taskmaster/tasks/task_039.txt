@@ -1,0 +1,11 @@
+# Task ID: 39
+# Title: Develop Facility Management System
+# Status: pending
+# Dependencies: 38
+# Priority: medium
+# Description: Create a system to manage guild facilities, including construction, upgrades, and demolitions.
+# Details:
+Implement the FacilityManager class with methods for building, upgrading, and demolishing facilities. Include logic for calculating bonuses and managing upgrade queues.
+
+# Test Strategy:
+Test facility operations with various scenarios to ensure correct behavior and resource calculations.

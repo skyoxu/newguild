@@ -1,0 +1,11 @@
+# Task ID: 38
+# Title: Implement Guild Base Core System
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Develop the core system for managing the guild base, including guild hall, base level, and facilities.
+# Details:
+Create the GuildBase interface and implement methods to manage guild hall, base level, and facilities. Ensure the system can handle upgrades and constructions with proper resource management.
+
+# Test Strategy:
+Unit tests for each method to ensure correct handling of guild base operations and resource management.

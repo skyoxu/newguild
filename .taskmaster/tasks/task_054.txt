@@ -1,0 +1,11 @@
+# Task ID: 54
+# Title: Develop Guild Reputation System
+# Status: pending
+# Dependencies: 53
+# Priority: medium
+# Description: Replace guild experience with a reputation system linked to achievements and activities.
+# Details:
+Implement the GuildReputationSystem interface. Track reputation sources and calculate bonuses based on achievements and activities.
+
+# Test Strategy:
+Test reputation changes with various activities and achievements. Ensure bonuses are correctly applied.

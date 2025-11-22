@@ -1,0 +1,11 @@
+# Task ID: 101
+# Title: Implement GuildBank and Inventory Management
+# Status: pending
+# Dependencies: 99
+# Priority: medium
+# Description: Develop the GuildBank class and manage inventory operations.
+# Details:
+Create GuildBank class with properties like slots, capacity. Implement inventory operations for adding, removing, and managing items. Ensure integration with PlayerGuild resources.
+
+# Test Strategy:
+Test inventory operations for concurrency and data integrity. Validate item transactions and ensure correct updates to guild resources.

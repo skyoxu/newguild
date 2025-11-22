@@ -1,0 +1,11 @@
+# Task ID: 94
+# Title: Implement BaseCharacter Class
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create the BaseCharacter class to serve as the foundation for character attributes.
+# Details:
+Implement a C# class named BaseCharacter in Godot. Include properties such as id, avatar, level, gearScore, and activityStats. Ensure the class is extendable for future character types.
+
+# Test Strategy:
+Write unit tests to verify that all properties are correctly initialized and accessible. Use mock data to simulate character creation and ensure data integrity.

@@ -1,0 +1,3906 @@
+[
+  {
+    "id": 1,
+    "title": "Setup Godot Project Environment",
+    "description": "Initialize the Godot project with the specified tech stack.",
+    "details": "Create a new Godot project using Godot 4.5. Set up the project to use C# as the scripting language. Integrate the Godot Control UI framework and configure the Godot Theme/Skin for styling. Ensure the Godot Export Templates are ready for build and deployment.",
+    "testStrategy": "Verify the project builds successfully and the UI framework is correctly integrated by creating a simple UI component.",
+    "priority": "high",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Verify the project builds successfully and the UI framework is correctly integrated by creating a simple UI component."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 2,
+    "title": "Implement Event Engine Core",
+    "description": "Develop the core functionalities of the Event Engine.",
+    "details": "Create the EventEngine class in C#. Implement methods for processing game cycles, evaluating event conditions, executing event effects, and resolving conflicts. Use Godot signals for event-driven communication.",
+    "testStrategy": "Unit test each method to ensure correct event processing and conflict resolution. Use mock events to simulate game cycles.",
+    "priority": "high",
+    "dependencies": [
+      1
+    ],
+    "status": "pending",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Create EventEngine Class in C#",
+        "description": "Develop the foundational EventEngine class in C# for the event engine core.",
+        "dependencies": [],
+        "details": "Define the EventEngine class structure, including necessary properties and fields. Ensure compatibility with Godot signals for event-driven communication.",
+        "status": "pending",
+        "testStrategy": "Verify class instantiation and signal connections."
+      },
+      {
+        "id": 2,
+        "title": "Implement Game Cycle Processing Method",
+        "description": "Develop the method to process game cycles within the EventEngine class.",
+        "dependencies": [
+          1
+        ],
+        "details": "Create a method to handle game cycle updates, integrating with Godot signals to trigger events. Ensure efficient cycle management.",
+        "status": "pending",
+        "testStrategy": "Unit test with mock game cycles to ensure correct processing."
+      },
+      {
+        "id": 3,
+        "title": "Develop Event Condition Evaluation Method",
+        "description": "Implement the method to evaluate event conditions in the EventEngine class.",
+        "dependencies": [
+          1
+        ],
+        "details": "Design a method to assess event conditions, using logical checks and state evaluations. Integrate with existing game state data.",
+        "status": "pending",
+        "testStrategy": "Test with various event conditions to ensure accurate evaluations."
+      },
+      {
+        "id": 4,
+        "title": "Set Up Unit Tests for Event Engine Core",
+        "description": "Establish unit tests for the EventEngine class and its methods.",
+        "dependencies": [
+          1,
+          2,
+          3
+        ],
+        "details": "Create unit tests for each method in the EventEngine class, focusing on game cycle processing, event condition evaluation, and event execution.",
+        "status": "pending",
+        "testStrategy": "Use a testing framework to automate and validate test cases, ensuring comprehensive coverage."
+      }
+    ],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      1
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Unit test each method to ensure correct event processing and conflict resolution. Use mock events to simulate game cycles."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 3,
+    "title": "Develop AI Coordinator System",
+    "description": "Build the AI Coordinator to manage AI behaviors and interactions.",
+    "details": "Create the AICoordinator class in C#. Implement AI cycle processing, conflict resolution, relationship network updates, and AI event generation. Utilize a dedicated ThreadPool for AI computations.",
+    "testStrategy": "Simulate AI interactions and verify correct behavior and conflict resolution. Measure performance to ensure efficient processing.",
+    "priority": "high",
+    "dependencies": [
+      1
+    ],
+    "status": "pending",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Implement AI Cycle Processing",
+        "description": "Develop the AI cycle processing logic within the AICoordinator class.",
+        "dependencies": [],
+        "details": "Create methods to handle AI decision-making and state updates. Ensure efficient processing using C# and optimize for performance.",
+        "status": "pending",
+        "testStrategy": "Simulate AI cycles and verify correct state transitions."
+      },
+      {
+        "id": 2,
+        "title": "Develop Conflict Resolution Mechanism",
+        "description": "Create a system to resolve conflicts between AI entities.",
+        "dependencies": [
+          1
+        ],
+        "details": "Implement algorithms to detect and resolve conflicts. Use priority rules and negotiation strategies to manage AI interactions.",
+        "status": "pending",
+        "testStrategy": "Test conflict scenarios and ensure resolution logic is applied correctly."
+      },
+      {
+        "id": 3,
+        "title": "Optimize AI Performance with ThreadPool",
+        "description": "Utilize ThreadPool to enhance AI computation efficiency.",
+        "dependencies": [
+          1
+        ],
+        "details": "Integrate a dedicated ThreadPool for parallel processing of AI tasks. Ensure thread safety and manage resource allocation.",
+        "status": "pending",
+        "testStrategy": "Measure performance improvements and verify thread safety."
+      },
+      {
+        "id": 4,
+        "title": "Integrate Relationship Network Updates",
+        "description": "Update AI relationship networks based on interactions.",
+        "dependencies": [
+          1,
+          2
+        ],
+        "details": "Develop methods to adjust relationship parameters dynamically. Ensure updates are consistent with AI interactions.",
+        "status": "pending",
+        "testStrategy": "Simulate interactions and verify relationship network updates."
+      },
+      {
+        "id": 5,
+        "title": "Generate AI Events",
+        "description": "Implement AI event generation within the AICoordinator.",
+        "dependencies": [
+          1,
+          2,
+          4
+        ],
+        "details": "Create a system to generate events based on AI actions and interactions. Ensure events are logged and processed correctly.",
+        "status": "pending",
+        "testStrategy": "Test event generation and logging under various AI scenarios."
+      }
+    ],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0008",
+      "ADR-0011",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      1
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate AI interactions and verify correct behavior and conflict resolution. Measure performance to ensure efficient processing."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 4,
+    "title": "Integrate Local Data Storage with SQLite",
+    "description": "Set up local data storage using godot-sqlite for game data.",
+    "details": "Integrate the godot-sqlite plugin into the project. Configure the database in WAL mode for high concurrency. Implement data models for events, game state, AI personalities, and user preferences.",
+    "testStrategy": "Perform CRUD operations on the database and verify data integrity and performance under load.",
+    "priority": "medium",
+    "dependencies": [
+      1
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      1
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Perform CRUD operations on the database and verify data integrity and performance under load."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 5,
+    "title": "Implement Config and Save/Load System",
+    "description": "Develop the system for configuration and game state management.",
+    "details": "Use Godot's ConfigFile to manage user configurations and save game states. Implement save/load functionality ensuring data integrity and recovery options.",
+    "testStrategy": "Test saving and loading game states under various scenarios. Verify data consistency and recovery from simulated corruption.",
+    "priority": "medium",
+    "dependencies": [
+      4
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      4
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test saving and loading game states under various scenarios. Verify data consistency and recovery from simulated corruption."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 6,
+    "title": "Setup Performance Optimization Features",
+    "description": "Implement performance optimization mechanisms as specified.",
+    "details": "Implement a dedicated ThreadPool for AI, configure SQLite in WAL mode, and set up an LRU Memory Cache. Develop a Priority Queue System for event handling.",
+    "testStrategy": "Benchmark performance metrics such as startup time, memory usage, and response times. Optimize based on results.",
+    "priority": "medium",
+    "dependencies": [
+      2,
+      3,
+      4
+    ],
+    "status": "pending",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Implement Dedicated ThreadPool for AI",
+        "description": "Develop a dedicated ThreadPool to optimize AI processing.",
+        "dependencies": [],
+        "details": "Create a ThreadPool class in C# to manage AI tasks efficiently. Ensure thread safety and optimal resource allocation.",
+        "status": "pending",
+        "testStrategy": "Benchmark AI task processing times and resource usage."
+      },
+      {
+        "id": 2,
+        "title": "Configure SQLite in WAL Mode",
+        "description": "Set up SQLite to use Write-Ahead Logging (WAL) mode for improved performance.",
+        "dependencies": [],
+        "details": "Modify SQLite configuration to enable WAL mode. Ensure compatibility with existing database operations.",
+        "status": "pending",
+        "testStrategy": "Measure database read/write speeds before and after enabling WAL mode."
+      },
+      {
+        "id": 3,
+        "title": "Develop Priority Queue System for Event Handling",
+        "description": "Create a Priority Queue System to manage event handling efficiently.",
+        "dependencies": [],
+        "details": "Implement a priority queue using C# to handle events based on priority levels. Integrate with the existing event engine.",
+        "status": "pending",
+        "testStrategy": "Test event processing order and efficiency under various load conditions."
+      },
+      {
+        "id": 4,
+        "title": "Set Up LRU Memory Cache",
+        "description": "Implement an LRU (Least Recently Used) Memory Cache to optimize memory usage.",
+        "dependencies": [],
+        "details": "Develop an LRU cache system in C# to store frequently accessed data. Ensure it integrates seamlessly with existing systems.",
+        "status": "pending",
+        "testStrategy": "Evaluate cache hit/miss ratios and memory usage efficiency."
+      }
+    ],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      2,
+      3,
+      4
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Benchmark performance metrics such as startup time, memory usage, and response times. Optimize based on results."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 7,
+    "title": "Integrate Static Code Analysis and Error Monitoring",
+    "description": "Set up SonarQube for code analysis and Sentry for error monitoring.",
+    "details": "Integrate SonarQube into the development workflow for continuous code quality checks. Set up Sentry for runtime error monitoring and release health tracking.",
+    "testStrategy": "Run static analysis on the codebase and verify error monitoring by simulating runtime errors.",
+    "priority": "medium",
+    "dependencies": [
+      1
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH03",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      1
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Run static analysis on the codebase and verify error monitoring by simulating runtime errors."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 8,
+    "title": "Design and Implement Modular Plugin System",
+    "description": "Create a plugin system to support modular extensions.",
+    "details": "Develop interfaces for event, UI, AI behavior, and data source plugins. Implement hooks for event triggers, execution, and custom conditions.",
+    "testStrategy": "Develop sample plugins and test their integration and functionality within the system.",
+    "priority": "low",
+    "dependencies": [
+      2,
+      3
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0007",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      2,
+      3
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Develop sample plugins and test their integration and functionality within the system."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 9,
+    "title": "Develop User Privacy and Data Security Features",
+    "description": "Implement features to ensure data security and user privacy.",
+    "details": "Implement auto-backup, schema validation, data integrity checks, and recovery options. Ensure all data is stored locally with optional telemetry requiring user consent.",
+    "testStrategy": "Test backup and recovery processes. Verify data integrity and privacy compliance through audits.",
+    "priority": "medium",
+    "dependencies": [
+      5
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0018",
+      "ADR-0019"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md"
+    ],
+    "depends_on": [
+      5
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test backup and recovery processes. Verify data integrity and privacy compliance through audits."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 10,
+    "title": "Prepare for Future DLC and Expansion Support",
+    "description": "Design the system to support future DLCs and expansions.",
+    "details": "Reserve interfaces and extension points for future DLCs. Ensure modular loading and backward compatibility in data formats.",
+    "testStrategy": "Simulate DLC loading and unloading. Verify system stability and compatibility with existing data.",
+    "priority": "low",
+    "dependencies": [
+      8
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0007",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      8
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate DLC loading and unloading. Verify system stability and compatibility with existing data."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 11,
+    "title": "Setup Core Game Loop",
+    "description": "Implement the core game loop for Guild Manager using a turn-based system.",
+    "details": "Implement the GameTurnSystem interface with methods for executing the resolution, player, and AI phases. Ensure each phase updates the game state appropriately.",
+    "testStrategy": "Unit test each phase to ensure correct state transitions and data updates.",
+    "priority": "high",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Unit test each phase to ensure correct state transitions and data updates."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 12,
+    "title": "Develop Event System",
+    "description": "Create a scalable event system to handle game events.",
+    "details": "Implement the EventDefinition interface to manage event categories, triggers, and outcomes. Ensure the system can handle at least 1000 events initially.",
+    "testStrategy": "Test event triggering and resolution under various conditions to ensure robustness.",
+    "priority": "high",
+    "dependencies": [
+      11
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      11
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test event triggering and resolution under various conditions to ensure robustness."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 13,
+    "title": "Implement AI Ecosystem",
+    "description": "Develop a multi-layered AI system for NPC guilds and members.",
+    "details": "Create the AIEcosystem class with member, NPC guild, and environment AI layers. Implement autonomous decision-making and relationship dynamics.",
+    "testStrategy": "Simulate AI behavior in different scenarios to validate decision-making and interactions.",
+    "priority": "high",
+    "dependencies": [
+      11
+    ],
+    "status": "pending",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Develop Member AI Layer",
+        "description": "Create the AI layer for individual guild members.",
+        "dependencies": [],
+        "details": "Implement the MemberAI class to handle individual decision-making and actions within the guild.",
+        "status": "pending",
+        "testStrategy": "Simulate member actions in various scenarios to ensure correct behavior."
+      },
+      {
+        "id": 2,
+        "title": "Develop NPC Guild AI Layer",
+        "description": "Create the AI layer for NPC guilds.",
+        "dependencies": [],
+        "details": "Implement the NPCGuildAI class to manage guild-level strategies and interactions.",
+        "status": "pending",
+        "testStrategy": "Test guild strategies in simulated environments to validate decision-making."
+      },
+      {
+        "id": 3,
+        "title": "Develop Environment AI Layer",
+        "description": "Create the AI layer for the environment.",
+        "dependencies": [],
+        "details": "Implement the EnvironmentAI class to simulate environmental interactions and influences on guilds and members.",
+        "status": "pending",
+        "testStrategy": "Simulate environmental changes and observe AI responses to ensure realistic interactions."
+      },
+      {
+        "id": 4,
+        "title": "Implement Autonomous Decision-Making Logic",
+        "description": "Develop the logic for autonomous decision-making across AI layers.",
+        "dependencies": [
+          1,
+          2,
+          3
+        ],
+        "details": "Create algorithms that enable AI entities to make independent decisions based on their objectives and environment.",
+        "status": "pending",
+        "testStrategy": "Run decision-making scenarios to ensure AI entities make optimal choices."
+      },
+      {
+        "id": 5,
+        "title": "Implement Relationship Dynamics",
+        "description": "Develop the system for managing relationship dynamics between AI entities.",
+        "dependencies": [
+          1,
+          2
+        ],
+        "details": "Create a relationship management system to handle interactions and dynamics between members and guilds.",
+        "status": "pending",
+        "testStrategy": "Test relationship changes and dynamics in various scenarios to ensure realistic interactions."
+      }
+    ],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      11
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate AI behavior in different scenarios to validate decision-making and interactions."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 14,
+    "title": "Design Guild Management Module",
+    "description": "Build the guild management interface and functionalities.",
+    "details": "Implement the WorkPanel interface to provide real-time updates on guild status, finances, and member activities. Integrate with the event system for notifications.",
+    "testStrategy": "Conduct UI/UX testing to ensure information is displayed accurately and intuitively.",
+    "priority": "medium",
+    "dependencies": [
+      11,
+      12
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0008",
+      "ADR-0011",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      11,
+      12
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Conduct UI/UX testing to ensure information is displayed accurately and intuitively."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 15,
+    "title": "Create Tactical Center Module",
+    "description": "Develop the tactical center for managing raid and PVP compositions.",
+    "details": "Implement the TacticalCenter interface with systems for managing raid and PVP compositions, including AI auto-assignment and validation.",
+    "testStrategy": "Test composition creation and validation processes to ensure correct role assignments and balance.",
+    "priority": "medium",
+    "dependencies": [
+      11,
+      13
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      11,
+      13
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test composition creation and validation processes to ensure correct role assignments and balance."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 16,
+    "title": "Develop PVE System",
+    "description": "Implement the PVE system with raid dungeons and boss encounters.",
+    "details": "Create the RaidDungeon and Encounter interfaces to define raid structures and boss mechanics. Implement combat simulation for encounter results.",
+    "testStrategy": "Simulate raid encounters to test mechanics, difficulty scaling, and reward distribution.",
+    "priority": "medium",
+    "dependencies": [
+      12,
+      13
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      12,
+      13
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate raid encounters to test mechanics, difficulty scaling, and reward distribution."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 17,
+    "title": "Implement PVP System",
+    "description": "Develop the PVP system for battlegrounds and arenas.",
+    "details": "Create the PVPCompositionManager to handle PVP team compositions and manage battles. Integrate with the tactical center for strategy management.",
+    "testStrategy": "Conduct PVP simulations to ensure team dynamics and strategy effectiveness.",
+    "priority": "medium",
+    "dependencies": [
+      15
+    ],
+    "status": "pending",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Develop PVPCompositionManager",
+        "description": "Create the PVPCompositionManager to handle team compositions.",
+        "dependencies": [],
+        "details": "Implement a class to manage PVP team compositions, including methods for adding, removing, and updating team members.",
+        "status": "pending",
+        "testStrategy": "Write unit tests to verify team composition changes."
+      },
+      {
+        "id": 2,
+        "title": "Implement Battle Simulation System",
+        "description": "Develop a system to simulate PVP battles.",
+        "dependencies": [
+          1
+        ],
+        "details": "Create a simulation engine to model PVP battles, including combat mechanics and outcome prediction.",
+        "status": "pending",
+        "testStrategy": "Conduct simulations to validate battle outcomes and mechanics."
+      },
+      {
+        "id": 3,
+        "title": "Integrate Strategy Management with Tactical Center",
+        "description": "Integrate PVP strategies with the tactical center.",
+        "dependencies": [
+          1,
+          2
+        ],
+        "details": "Develop interfaces to connect PVP strategies with the tactical center for dynamic strategy adjustments.",
+        "status": "pending",
+        "testStrategy": "Test integration with tactical center to ensure strategy updates are applied correctly."
+      }
+    ],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      15
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Conduct PVP simulations to ensure team dynamics and strategy effectiveness."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 18,
+    "title": "Build Member Management Module",
+    "description": "Create a system for managing guild members and their attributes.",
+    "details": "Implement the GuildMember interface to manage member attributes, roles, and relationships. Integrate with the AI system for dynamic behavior.",
+    "testStrategy": "Test member recruitment, role assignment, and relationship dynamics under various scenarios.",
+    "priority": "medium",
+    "dependencies": [
+      14
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0008",
+      "ADR-0011",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      14
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test member recruitment, role assignment, and relationship dynamics under various scenarios."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 19,
+    "title": "Develop Social Interaction System",
+    "description": "Implement a system for managing social interactions and relationships.",
+    "details": "Create the IntimacySystem interface to manage relationships and social actions. Implement triggers for relationship events.",
+    "testStrategy": "Simulate social interactions to test relationship dynamics and event triggering.",
+    "priority": "medium",
+    "dependencies": [
+      18
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      18
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate social interactions to test relationship dynamics and event triggering."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 20,
+    "title": "Design Recruitment System",
+    "description": "Develop a recruitment system for guild members, including legendary members.",
+    "details": "Implement the RecruitmentSystem interface with filters for member search and negotiation processes. Integrate legendary member recruitment features.",
+    "testStrategy": "Test recruitment processes for different member types, ensuring correct filtering and negotiation outcomes.",
+    "priority": "medium",
+    "dependencies": [
+      18,
+      19
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      18,
+      19
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test recruitment processes for different member types, ensuring correct filtering and negotiation outcomes."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 21,
+    "title": "Create Combat Simulation System",
+    "description": "Develop a system for simulating combat outcomes in PVE and PVP.",
+    "details": "Implement the CombatSimulation interface to calculate combat results based on member attributes, tactics, and random factors.",
+    "testStrategy": "Run combat simulations to validate result accuracy and balance.",
+    "priority": "medium",
+    "dependencies": [
+      16,
+      17
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      16,
+      17
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Run combat simulations to validate result accuracy and balance."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 22,
+    "title": "Implement DLC and Plugin Support",
+    "description": "Add support for DLC and plugins to extend game content.",
+    "details": "Design a modular system to load and manage additional content through DLCs and plugins. Ensure compatibility with core systems.",
+    "testStrategy": "Test DLC and plugin integration to ensure seamless content addition and removal.",
+    "priority": "low",
+    "dependencies": [
+      11,
+      12,
+      13
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0007",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      11,
+      12,
+      13
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test DLC and plugin integration to ensure seamless content addition and removal."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 23,
+    "title": "Develop User Experience Enhancements",
+    "description": "Improve user experience with tutorials and data visualization.",
+    "details": "Implement tutorials for new players and enhance data visualization for better decision-making. Focus on reducing learning curve.",
+    "testStrategy": "Conduct user testing to evaluate tutorial effectiveness and data visualization clarity.",
+    "priority": "low",
+    "dependencies": [
+      14,
+      15
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      14,
+      15
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Conduct user testing to evaluate tutorial effectiveness and data visualization clarity."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 24,
+    "title": "Create Media and Community Interaction System",
+    "description": "Develop systems for media and community interactions.",
+    "details": "Implement systems for media feedback and community discussions. Integrate with the event system for dynamic interactions.",
+    "testStrategy": "Simulate media and community events to test interaction dynamics and impact on guild reputation.",
+    "priority": "low",
+    "dependencies": [
+      19
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      19
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate media and community events to test interaction dynamics and impact on guild reputation."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 25,
+    "title": "Design Achievement and Reward System",
+    "description": "Implement a system for achievements and rewards to enhance player engagement.",
+    "details": "Create a system to track player achievements and distribute rewards. Integrate with core gameplay systems for seamless operation.",
+    "testStrategy": "Test achievement tracking and reward distribution to ensure accurate recognition and incentive delivery.",
+    "priority": "low",
+    "dependencies": [
+      11,
+      12,
+      13
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      11,
+      12,
+      13
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test achievement tracking and reward distribution to ensure accurate recognition and incentive delivery."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 26,
+    "title": "Define World Generation System Interface",
+    "description": "Create the interface for the world generation system to dynamically generate different competitive environments.",
+    "details": "Define the WorldGenerationSystem interface with methods for generating competitors and initializing world state. Implement the guildArchetypes property to hold predefined NPC guild archetypes.",
+    "testStrategy": "Unit test the interface methods to ensure they return expected types and handle edge cases.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Unit test the interface methods to ensure they return expected types and handle edge cases."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 27,
+    "title": "Implement NPC Guild Archetype Interface",
+    "description": "Develop the NPCGuildArchetype interface to define the structure of NPC guilds.",
+    "details": "Implement properties such as id, name, tier, reputation, strategy, initialMembers, initialOfficers, specialties, personality, feud, homebase, legendaryMembers, historyMilestones, leagueSchedule, and diplomaticAttitude.",
+    "testStrategy": "Create mock data and validate that all properties are correctly initialized and accessible.",
+    "priority": "medium",
+    "dependencies": [
+      26
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      26
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Create mock data and validate that all properties are correctly initialized and accessible."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 28,
+    "title": "Develop History Milestone System",
+    "description": "Create the GuildHistoryRecord interface to track historical milestones of guilds.",
+    "details": "Define properties like id, eventType, eventTitle, eventDescription, achievementDate, significance, relatedData, and impactAssessment.",
+    "testStrategy": "Test the creation and retrieval of history records, ensuring data integrity and correct impact calculations.",
+    "priority": "medium",
+    "dependencies": [
+      27
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      27
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test the creation and retrieval of history records, ensuring data integrity and correct impact calculations."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 29,
+    "title": "Create Historical Ranking System",
+    "description": "Implement the HistoricalRanking interface to manage guild ranking history.",
+    "details": "Include properties for highestServerRank, highestBattlezoneRank, highestNationalRank, highestGlobalRank, rankingTimeline, rankingAchievements, and rivalryRecords.",
+    "testStrategy": "Simulate ranking changes and verify that the timeline and achievements are updated correctly.",
+    "priority": "medium",
+    "dependencies": [
+      27
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      27
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate ranking changes and verify that the timeline and achievements are updated correctly."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 30,
+    "title": "Design Guild League Schedule System",
+    "description": "Develop the GuildLeagueSchedule interface to manage guild competition schedules.",
+    "details": "Implement properties for seasonId, seasonName, scheduleType, upcomingMatches, completedMatches, seasonInfo, and seasonStats.",
+    "testStrategy": "Test schedule creation and updates, ensuring matches are correctly categorized and season stats are accurate.",
+    "priority": "medium",
+    "dependencies": [
+      27
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      27
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test schedule creation and updates, ensuring matches are correctly categorized and season stats are accurate."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 31,
+    "title": "Implement Diplomatic Attitude System",
+    "description": "Create the DiplomaticAttitude interface to handle guild diplomatic relations.",
+    "details": "Define properties such as attitudeValue, attitudeCategory, stabilityFactor, attitudeFactors, adjustmentTriggers, decayRate, and lastUpdateTime.",
+    "testStrategy": "Validate attitude changes over time and in response to triggers, ensuring stability and decay rates are applied correctly.",
+    "priority": "medium",
+    "dependencies": [
+      27
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      27
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Validate attitude changes over time and in response to triggers, ensuring stability and decay rates are applied correctly."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 32,
+    "title": "Develop Diplomatic Event Pool",
+    "description": "Implement the DiplomaticEventPool interface to manage diplomatic events.",
+    "details": "Include properties for poolId, applicableAttitudeRange, eventsByType, eventWeights, and triggerConditions.",
+    "testStrategy": "Test event triggering based on attitude range and weights, ensuring correct event selection and execution.",
+    "priority": "medium",
+    "dependencies": [
+      31
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      31
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test event triggering based on attitude range and weights, ensuring correct event selection and execution."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 33,
+    "title": "Create Player Guild System",
+    "description": "Extend the BaseGuild interface to define the PlayerGuild structure.",
+    "details": "Implement properties for id, name, tag, realm, faction, guildLevel, reputation, experience, leader, foundedDate, motto, description, members, guildHall, guildBank, facilities, resources, raidProgress, pvpRating, achievements, officerSystem, guildPolicies, recruitmentSettings, alliances, rivalries, reputation_external, treasury, taxSettings, and budgetAllocation.",
+    "testStrategy": "Test the integration of player-specific features and ensure compatibility with NPC guild systems.",
+    "priority": "medium",
+    "dependencies": [
+      27
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      27
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test the integration of player-specific features and ensure compatibility with NPC guild systems."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 34,
+    "title": "Develop Guild Roster System",
+    "description": "Implement the GuildRoster interface to manage guild members.",
+    "details": "Define properties for totalMembers, onlineMembers, membersByRank, membersByClass, membersByLevel, membersByRarity, legendaryMembers, legendaryMemberCount, membersByLegendaryType, sortOptions, filterOptions, memberNotes, officerNotes, legendaryShowcase, and legendaryMemberHighlights.",
+    "testStrategy": "Test member management functions, including sorting, filtering, and legendary member features.",
+    "priority": "medium",
+    "dependencies": [
+      33
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      33
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test member management functions, including sorting, filtering, and legendary member features."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 35,
+    "title": "Implement Legendary Highlight System",
+    "description": "Create the LegendaryHighlight interface to manage special member highlights.",
+    "details": "Define properties for memberId, highlightType, specialBadge, glowEffect, and customNote.",
+    "testStrategy": "Test the application of highlights to members and ensure visual effects are correctly displayed.",
+    "priority": "medium",
+    "dependencies": [
+      34
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      34
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test the application of highlights to members and ensure visual effects are correctly displayed."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 36,
+    "title": "Develop Guild Rank System",
+    "description": "Implement the GuildRank enum to define guild ranks.",
+    "details": "Define ranks such as GUILD_MASTER, OFFICER, VETERAN, MEMBER, INITIATE, and TRIAL.",
+    "testStrategy": "Ensure ranks are correctly assigned and managed within the guild system.",
+    "priority": "medium",
+    "dependencies": [
+      33
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      33
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Ensure ranks are correctly assigned and managed within the guild system."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 37,
+    "title": "Integrate World Generation with Player Guilds",
+    "description": "Connect the world generation system with player guild functionalities.",
+    "details": "Ensure that player guilds are correctly integrated into the dynamic world generation process, allowing for interaction with NPC guilds.",
+    "testStrategy": "Test world generation scenarios to ensure player guilds are correctly initialized and interact with NPC guilds as expected.",
+    "priority": "medium",
+    "dependencies": [
+      26,
+      33
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      26,
+      33
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test world generation scenarios to ensure player guilds are correctly initialized and interact with NPC guilds as expected."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 38,
+    "title": "Implement Guild Base Core System",
+    "description": "Develop the core system for managing the guild base, including guild hall, base level, and facilities.",
+    "details": "Create the GuildBase interface and implement methods to manage guild hall, base level, and facilities. Ensure the system can handle upgrades and constructions with proper resource management.",
+    "testStrategy": "Unit tests for each method to ensure correct handling of guild base operations and resource management.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Unit tests for each method to ensure correct handling of guild base operations and resource management."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 39,
+    "title": "Develop Facility Management System",
+    "description": "Create a system to manage guild facilities, including construction, upgrades, and demolitions.",
+    "details": "Implement the FacilityManager class with methods for building, upgrading, and demolishing facilities. Include logic for calculating bonuses and managing upgrade queues.",
+    "testStrategy": "Test facility operations with various scenarios to ensure correct behavior and resource calculations.",
+    "priority": "medium",
+    "dependencies": [
+      38
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      38
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test facility operations with various scenarios to ensure correct behavior and resource calculations."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 40,
+    "title": "Implement Facility Upgrade Requirements",
+    "description": "Develop the logic to handle facility upgrade requirements based on guild level, experience, and dependencies.",
+    "details": "Create the UpgradeRequirement interface and implement methods to check and validate upgrade conditions. Ensure dependencies are correctly handled.",
+    "testStrategy": "Test upgrade scenarios with different requirement types to ensure correct validation and error handling.",
+    "priority": "medium",
+    "dependencies": [
+      39
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      39
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test upgrade scenarios with different requirement types to ensure correct validation and error handling."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 41,
+    "title": "Design NPC Member Contribution System",
+    "description": "Develop a system to track and manage NPC member contributions within the guild.",
+    "details": "Implement the NPCMemberContributionSystem interface with methods for tracking activities, calculating contributions, and managing rewards. Include analytics for contribution efficiency.",
+    "testStrategy": "Validate contribution tracking and reward management through integration tests with simulated NPC activities.",
+    "priority": "medium",
+    "dependencies": [
+      38
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      38
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Validate contribution tracking and reward management through integration tests with simulated NPC activities."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 42,
+    "title": "Create Auction House System",
+    "description": "Develop the auction house system for player and AI interactions, including bidding and item management.",
+    "details": "Implement the AuctionHouseSystem interface with methods for creating, managing, and concluding auctions. Include AI purchase logic and price evaluation.",
+    "testStrategy": "Test auction scenarios with player and AI interactions to ensure correct bidding and item management.",
+    "priority": "medium",
+    "dependencies": [
+      38
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      38
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test auction scenarios with player and AI interactions to ensure correct bidding and item management."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 43,
+    "title": "Develop Training System",
+    "description": "Implement the training system to manage training programs, schedules, and results for guild members.",
+    "details": "Create the TrainingSystem interface with methods for scheduling, executing, and evaluating training programs. Include logic for calculating training effects and managing fatigue.",
+    "testStrategy": "Test training program execution and result calculation with various configurations to ensure correct outcomes.",
+    "priority": "medium",
+    "dependencies": [
+      38
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      38
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test training program execution and result calculation with various configurations to ensure correct outcomes."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 44,
+    "title": "Implement Fatigue Management System",
+    "description": "Develop a system to manage member fatigue and recovery plans within the guild.",
+    "details": "Implement the FatigueManagementSystem interface with methods for tracking fatigue, executing recovery plans, and calculating facility influences.",
+    "testStrategy": "Test fatigue tracking and recovery scenarios to ensure correct fatigue reduction and resource management.",
+    "priority": "medium",
+    "dependencies": [
+      43
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      43
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test fatigue tracking and recovery scenarios to ensure correct fatigue reduction and resource management."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 45,
+    "title": "Develop Intelligent Mail System",
+    "description": "Create a system for intelligent mail categorization and quick actions based on game events.",
+    "details": "Implement the IntelligentMailSystem interface with methods for categorizing emails, generating quick actions, and managing notifications.",
+    "testStrategy": "Test mail categorization and quick action generation with various event scenarios to ensure correct classification and action availability.",
+    "priority": "medium",
+    "dependencies": [
+      38
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      38
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test mail categorization and quick action generation with various event scenarios to ensure correct classification and action availability."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 46,
+    "title": "Design Event-Driven Mail Generation System",
+    "description": "Implement a system to automatically generate emails based on game events and user preferences.",
+    "details": "Create the EventMailGenerator interface with methods for generating event-based emails and customizing content based on user preferences.",
+    "testStrategy": "Test email generation with different event types to ensure correct content and quick action recommendations.",
+    "priority": "medium",
+    "dependencies": [
+      45
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      45
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test email generation with different event types to ensure correct content and quick action recommendations."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 47,
+    "title": "Implement Advanced Filter and Search System",
+    "description": "Develop a system for advanced filtering and searching of emails within the guild communication module.",
+    "details": "Implement the AdvancedFilterSystem interface with methods for filtering emails by various criteria and performing intelligent searches.",
+    "testStrategy": "Test filtering and search functionalities with different criteria to ensure accurate results and performance.",
+    "priority": "medium",
+    "dependencies": [
+      45
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      45
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test filtering and search functionalities with different criteria to ensure accurate results and performance."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 48,
+    "title": "Design Responsive User Interface",
+    "description": "Create a responsive UI that adapts to different screen sizes, supports keyboard navigation, and is optimized for performance.",
+    "details": "Implement a responsive layout using CSS Flexbox or Grid. Ensure all interactive elements are accessible via keyboard and screen readers. Optimize rendering for large datasets using virtual scrolling.",
+    "testStrategy": "Test on various devices and screen sizes. Use accessibility tools to verify keyboard navigation and screen reader support. Measure performance with large datasets.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0007",
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test on various devices and screen sizes. Use accessibility tools to verify keyboard navigation and screen reader support. Measure performance with large datasets."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 49,
+    "title": "Implement Core UI Components",
+    "description": "Develop the main navigation, side panel, content area, and modal system as per the UI specifications.",
+    "details": "Create reusable components for NavigationBar, InformationPanel, ContentArea, and ModalManager. Use a component-based framework like React or Vue.js.",
+    "testStrategy": "Unit test each component for functionality. Conduct integration tests to ensure components work together seamlessly.",
+    "priority": "medium",
+    "dependencies": [
+      48
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      48
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Unit test each component for functionality. Conduct integration tests to ensure components work together seamlessly."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 50,
+    "title": "Develop Interaction Patterns",
+    "description": "Implement drag-and-drop, right-click menus, keyboard shortcuts, and tooltip systems.",
+    "details": "Use libraries like React DnD for drag-and-drop, and implement context menus using custom event handlers. Define keyboard shortcuts and tooltips using a centralized configuration.",
+    "testStrategy": "Test each interaction pattern individually. Use user testing to ensure intuitive interactions.",
+    "priority": "medium",
+    "dependencies": [
+      49
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      49
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test each interaction pattern individually. Use user testing to ensure intuitive interactions."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 51,
+    "title": "Design Achievement System",
+    "description": "Create a multi-dimensional achievement system with event-driven triggers and a reward mechanism.",
+    "details": "Define the AchievementDefinition interface and implement the AchievementManager class. Use an event listener to trigger achievements based on game events.",
+    "testStrategy": "Simulate game events to verify achievement triggers. Ensure rewards are correctly allocated and displayed.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate game events to verify achievement triggers. Ensure rewards are correctly allocated and displayed."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 52,
+    "title": "Integrate Fan Expectations with Achievements",
+    "description": "Link achievement completion to fan satisfaction and expectations.",
+    "details": "Modify the AchievementDefinition to include fanImpact. Update the fan system to adjust satisfaction based on achievements.",
+    "testStrategy": "Test fan satisfaction changes upon achievement completion. Validate the impact on fan metrics.",
+    "priority": "medium",
+    "dependencies": [
+      51
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      51
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test fan satisfaction changes upon achievement completion. Validate the impact on fan metrics."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 53,
+    "title": "Implement Experience System",
+    "description": "Develop a simplified experience system focusing on member growth and activity specialization.",
+    "details": "Create the MemberExperienceSystem interface and implement experience calculations in the ExperienceManager class. Focus on level progression and activity-specific experience.",
+    "testStrategy": "Verify experience calculations and level-ups. Test activity-specific experience impacts on performance.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Verify experience calculations and level-ups. Test activity-specific experience impacts on performance."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 54,
+    "title": "Develop Guild Reputation System",
+    "description": "Replace guild experience with a reputation system linked to achievements and activities.",
+    "details": "Implement the GuildReputationSystem interface. Track reputation sources and calculate bonuses based on achievements and activities.",
+    "testStrategy": "Test reputation changes with various activities and achievements. Ensure bonuses are correctly applied.",
+    "priority": "medium",
+    "dependencies": [
+      53
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      53
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test reputation changes with various activities and achievements. Ensure bonuses are correctly applied."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 55,
+    "title": "Create Activity Feedback System",
+    "description": "Provide AI-driven feedback after PVE and PVP activities, with personalized evaluations.",
+    "details": "Implement the ActivityFeedbackSystem interface. Use AI to generate feedback based on activity performance and evaluator profiles.",
+    "testStrategy": "Simulate activities to test feedback generation. Ensure feedback is relevant and personalized.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate activities to test feedback generation. Ensure feedback is relevant and personalized."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 56,
+    "title": "Design Officer System",
+    "description": "Establish a comprehensive officer system with roles, permissions, and performance tracking.",
+    "details": "Define the ComprehensiveOfficerSystem interface. Implement role-based access control and performance tracking using the OfficerPerformanceSystem.",
+    "testStrategy": "Test role assignments and permission validations. Evaluate performance tracking accuracy.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test role assignments and permission validations. Evaluate performance tracking accuracy."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 57,
+    "title": "Implement Simplified Officer Interface",
+    "description": "Create a player interface for managing officers, driven by AI backend systems.",
+    "details": "Develop the SimplifiedOfficerInterface with dashboards and quick decision panels. Integrate AI systems for automated management.",
+    "testStrategy": "Test interface usability and AI-driven recommendations. Ensure critical decisions are highlighted for player intervention.",
+    "priority": "medium",
+    "dependencies": [
+      56
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      56
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test interface usability and AI-driven recommendations. Ensure critical decisions are highlighted for player intervention."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 58,
+    "title": "Optimize Backend AI Systems",
+    "description": "Enhance backend AI systems for decision support, predictive analytics, and natural language processing.",
+    "details": "Implement the BackendAIArchitecture with decision support and predictive analytics. Use NLP for processing player inputs and generating insights.",
+    "testStrategy": "Test AI system performance and accuracy in decision-making. Validate NLP processing with varied inputs.",
+    "priority": "medium",
+    "dependencies": [
+      55,
+      57
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0007",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      55,
+      57
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test AI system performance and accuracy in decision-making. Validate NLP processing with varied inputs."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 59,
+    "title": "Conduct System Integration Testing",
+    "description": "Perform comprehensive testing of all integrated systems to ensure seamless functionality.",
+    "details": "Conduct end-to-end testing of all systems, including UI, achievement, experience, reputation, feedback, and officer systems.",
+    "testStrategy": "Use automated and manual testing to verify system integration. Focus on user experience and system performance.",
+    "priority": "medium",
+    "dependencies": [
+      58
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      58
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Use automated and manual testing to verify system integration. Focus on user experience and system performance."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 60,
+    "title": "Design World Boss System Interface",
+    "description": "Create the interface for the World Boss System, including boss management, guild participation, and reward systems.",
+    "details": "Implement the WorldBossSystem interface with properties for active bosses, boss schedule, guild participation, and reward distribution. Use TypeScript for type safety and clarity.",
+    "testStrategy": "Unit test each interface property to ensure correct data types and initial values.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Unit test each interface property to ensure correct data types and initial values."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 61,
+    "title": "Implement World Boss Entity",
+    "description": "Develop the World Boss entity with attributes for health, abilities, and participation statistics.",
+    "details": "Create the WorldBoss interface with properties like id, name, currentHealth, abilities, and rewardPool. Implement methods for managing boss phases and mechanics.",
+    "testStrategy": "Write tests to validate boss health management, ability activation, and reward distribution logic.",
+    "priority": "medium",
+    "dependencies": [
+      60
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      60
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Write tests to validate boss health management, ability activation, and reward distribution logic."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 62,
+    "title": "Develop Guild Participation System",
+    "description": "Create the system to manage guild participation in World Boss events, including contribution tracking and strategy planning.",
+    "details": "Implement the GuildParticipation interface with properties for participation status, contribution metrics, and strategy coordination. Ensure integration with the WorldBossSystem.",
+    "testStrategy": "Test guild participation tracking and strategy updates through simulated boss events.",
+    "priority": "medium",
+    "dependencies": [
+      60
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md"
+    ],
+    "depends_on": [
+      60
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test guild participation tracking and strategy updates through simulated boss events."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 63,
+    "title": "Design Alliance Management System",
+    "description": "Implement the temporary alliance system for guilds to collaborate during World Boss events.",
+    "details": "Develop the AllianceManagement interface with methods for proposing alliances, tracking active alliances, and managing shared strategies.",
+    "testStrategy": "Simulate alliance formation and dissolution to test system stability and data integrity.",
+    "priority": "medium",
+    "dependencies": [
+      62
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md"
+    ],
+    "depends_on": [
+      62
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate alliance formation and dissolution to test system stability and data integrity."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 64,
+    "title": "Create Reward Distribution System",
+    "description": "Develop the system for distributing rewards based on guild and individual contributions during World Boss events.",
+    "details": "Implement the RewardDistributionSystem with algorithms for calculating rewards based on contribution weights and event outcomes.",
+    "testStrategy": "Validate reward calculations with various contribution scenarios to ensure fairness and accuracy.",
+    "priority": "medium",
+    "dependencies": [
+      61,
+      62
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md"
+    ],
+    "depends_on": [
+      61,
+      62
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Validate reward calculations with various contribution scenarios to ensure fairness and accuracy."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 65,
+    "title": "Implement Dynamic Difficulty System",
+    "description": "Create a system to adjust World Boss difficulty based on player participation and performance metrics.",
+    "details": "Develop the DynamicDifficultySystem with methods for analyzing participation and adjusting difficulty modifiers in real-time.",
+    "testStrategy": "Test difficulty scaling with different player participation levels to ensure balanced gameplay.",
+    "priority": "medium",
+    "dependencies": [
+      61
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      61
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test difficulty scaling with different player participation levels to ensure balanced gameplay."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 66,
+    "title": "Develop World Boss Manager Class",
+    "description": "Implement the WorldBossManager class to handle boss spawning, fight management, and reward distribution.",
+    "details": "Create methods in WorldBossManager for spawning bosses, managing fights, handling guild participation, and distributing rewards.",
+    "testStrategy": "Conduct integration tests to ensure the manager correctly handles boss lifecycle and event outcomes.",
+    "priority": "medium",
+    "dependencies": [
+      61,
+      64
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      61,
+      64
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Conduct integration tests to ensure the manager correctly handles boss lifecycle and event outcomes."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 67,
+    "title": "Build Alliance Matching Engine",
+    "description": "Develop the engine to recommend potential alliance partners based on guild compatibility and historical data.",
+    "details": "Implement the AllianceMatchingEngine class with methods for recommending partners and evaluating alliance success probabilities.",
+    "testStrategy": "Test alliance recommendations with various guild profiles to ensure accurate and beneficial matches.",
+    "priority": "medium",
+    "dependencies": [
+      63
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0008",
+      "ADR-0011",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      63
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test alliance recommendations with various guild profiles to ensure accurate and beneficial matches."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 68,
+    "title": "Create Difficulty Adjustment Engine",
+    "description": "Implement the engine to adjust World Boss difficulty in real-time based on player performance and progress rates.",
+    "details": "Develop the DifficultyAdjustmentEngine with methods for analyzing participation and adjusting difficulty in response to player performance metrics.",
+    "testStrategy": "Simulate boss fights with varying player performance to test real-time difficulty adjustments.",
+    "priority": "medium",
+    "dependencies": [
+      65
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      65
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate boss fights with varying player performance to test real-time difficulty adjustments."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 69,
+    "title": "Validate System Integration and Performance",
+    "description": "Conduct comprehensive testing to ensure all components of the World Boss System work together seamlessly and perform well under load.",
+    "details": "Perform load testing and integration testing across all system components to ensure stability and performance during high player participation.",
+    "testStrategy": "Use stress testing tools to simulate large-scale events and monitor system performance and resource usage.",
+    "priority": "medium",
+    "dependencies": [
+      66,
+      67,
+      68
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      66,
+      67,
+      68
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Use stress testing tools to simulate large-scale events and monitor system performance and resource usage."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 70,
+    "title": "Setup Godot Engine and Project Configuration",
+    "description": "Initialize the development environment using Godot 4.5 and establish project configurations.",
+    "details": "1. Install Godot 4.5 and set up the development environment.\n2. Configure C# project settings and establish coding standards.\n3. Implement signal and Autoload communication mechanisms.\n4. Define the basic project structure and module division.",
+    "testStrategy": "Verify environment setup by running a sample Godot project. Ensure signals and Autoload mechanisms work as expected.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Verify environment setup by running a sample Godot project. Ensure signals and Autoload mechanisms work as expected."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 71,
+    "title": "Design and Implement Event System Core",
+    "description": "Develop the core components of the event system including interfaces and management.",
+    "details": "1. Design and implement the EventDefinition interface.\n2. Develop the event pool manager to handle event storage and retrieval.\n3. Implement basic trigger mechanisms for events.\n4. Validate the simple event processing workflow.",
+    "testStrategy": "Conduct unit tests on event triggering and processing using xUnit. Ensure 90%+ code coverage.",
+    "priority": "medium",
+    "dependencies": [
+      70
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      70
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Conduct unit tests on event triggering and processing using xUnit. Ensure 90%+ code coverage."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 72,
+    "title": "Develop Data Architecture and State Management",
+    "description": "Create the data structures and state management systems needed for the game.",
+    "details": "1. Design JSON data structures for game data.\n2. Implement a state management system to track game states.\n3. Develop the data statistics module to ensure data consistency.\n4. Implement a basic AI state machine.",
+    "testStrategy": "Perform integration testing with GdUnit4 to ensure data consistency and state transitions.",
+    "priority": "medium",
+    "dependencies": [
+      71
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      71
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Perform integration testing with GdUnit4 to ensure data consistency and state transitions."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 73,
+    "title": "Implement Multi-Agent Event Coordination",
+    "description": "Develop mechanisms for handling events involving multiple agents.",
+    "details": "1. Implement conflict detection and resolution mechanisms for events.\n2. Develop logic for handling multi-agent events.\n3. Set up the basic architecture for AI coordinators.\n4. Complete and test the Phase 1 prototype.",
+    "testStrategy": "Conduct stress tests with concurrent events to ensure stability and performance.",
+    "priority": "medium",
+    "dependencies": [
+      72
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      72
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Conduct stress tests with concurrent events to ensure stability and performance."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 74,
+    "title": "Enhance Advanced Event System",
+    "description": "Build advanced features for the event system including ranking and diplomacy.",
+    "details": "1. Develop the framework for the legendary member system.\n2. Architect the phased ranking system.\n3. Implement the basic diplomatic attitude system.\n4. Create the NPC history milestone recorder.",
+    "testStrategy": "Use unit tests to validate each advanced feature. Ensure integration with existing systems.",
+    "priority": "medium",
+    "dependencies": [
+      73
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0008",
+      "ADR-0011",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      73
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Use unit tests to validate each advanced feature. Ensure integration with existing systems."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 75,
+    "title": "Improve AI Intelligence and Backend Systems",
+    "description": "Enhance AI capabilities and develop backend systems for AI management.",
+    "details": "1. Develop the backend system for AI official management.\n2. Implement an intelligent email classification engine.\n3. Create the NPC contribution calculation system.\n4. Develop an automated decision support system.",
+    "testStrategy": "Perform unit and integration tests focusing on AI logic and backend functionality.",
+    "priority": "medium",
+    "dependencies": [
+      74
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      74
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Perform unit and integration tests focusing on AI logic and backend functionality."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 76,
+    "title": "Integrate Core Game Modules",
+    "description": "Integrate core game modules including guild and member management systems.",
+    "details": "1. Develop the guild management system with UI and data display.\n2. Implement the smart email system and quick actions.\n3. Create guild information management features.\n4. Develop the infrastructure upgrade system.",
+    "testStrategy": "Conduct integration testing to ensure seamless module communication and data consistency.",
+    "priority": "medium",
+    "dependencies": [
+      75
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      75
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Conduct integration testing to ensure seamless module communication and data consistency."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 77,
+    "title": "Develop Combat and Tactical Systems",
+    "description": "Implement systems for managing combat and tactical operations.",
+    "details": "1. Implement the PVE and PVP lineup management systems.\n2. Develop the world boss competition system.\n3. Create the tactical center with role allocation and tactical library.\n4. Implement AI auto-deployment and tactical influence calculations.",
+    "testStrategy": "Perform user testing to ensure tactical systems are intuitive and responsive. Conduct performance tests for combat scenarios.",
+    "priority": "medium",
+    "dependencies": [
+      76
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      76
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Perform user testing to ensure tactical systems are intuitive and responsive. Conduct performance tests for combat scenarios."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 78,
+    "title": "Implement Core Event System",
+    "description": "Develop the core functionality of the event system to handle simple events.",
+    "details": "Design and implement the core event system using Godot's signal mechanism. Ensure that events can be triggered and processed efficiently. Use a state machine to manage event states and transitions.",
+    "testStrategy": "Create unit tests to trigger events and verify correct processing. Use mock objects to simulate event sources and handlers.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Create unit tests to trigger events and verify correct processing. Use mock objects to simulate event sources and handlers."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 79,
+    "title": "Develop Basic AI Ecosystem",
+    "description": "Create a basic AI ecosystem with multi-agent interactions.",
+    "details": "Implement AI agents using behavior trees in Godot. Set up interactions between AI agents to simulate a basic ecosystem. Ensure agents can react to events and other agents.",
+    "testStrategy": "Simulate scenarios with multiple AI agents and verify interactions. Use logging to trace AI decision-making processes.",
+    "priority": "medium",
+    "dependencies": [
+      78
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      78
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate scenarios with multiple AI agents and verify interactions. Use logging to trace AI decision-making processes."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 80,
+    "title": "Establish Data Structures and Memory Management",
+    "description": "Ensure stable data structures and manage memory effectively.",
+    "details": "Design data structures for efficient memory usage. Implement memory management techniques to prevent leaks. Use profiling tools to monitor memory usage.",
+    "testStrategy": "Conduct memory profiling and stress tests to identify leaks. Use automated tests to verify data integrity.",
+    "priority": "medium",
+    "dependencies": [
+      78,
+      79
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      78,
+      79
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Conduct memory profiling and stress tests to identify leaks. Use automated tests to verify data integrity."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 81,
+    "title": "Create Guild and Leader Role Creation Process",
+    "description": "Implement the process for creating guilds and assigning leader roles.",
+    "details": "Develop a user interface for guild creation. Implement backend logic to handle guild data and leader role assignments. Ensure data consistency and security.",
+    "testStrategy": "Perform integration tests to verify the guild creation process. Use UI tests to ensure the interface functions correctly.",
+    "priority": "medium",
+    "dependencies": [
+      78,
+      79
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      78,
+      79
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Perform integration tests to verify the guild creation process. Use UI tests to ensure the interface functions correctly."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 82,
+    "title": "Implement Member Management and Attribute System",
+    "description": "Develop the system for managing guild members and their attributes.",
+    "details": "Create a database schema for member data. Implement CRUD operations for member management. Develop an attribute system to track member stats and roles.",
+    "testStrategy": "Use unit tests to verify CRUD operations. Conduct integration tests to ensure attribute updates reflect correctly in the system.",
+    "priority": "medium",
+    "dependencies": [
+      81
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      81
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Use unit tests to verify CRUD operations. Conduct integration tests to ensure attribute updates reflect correctly in the system."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 83,
+    "title": "Develop Time Progression and Game Loop",
+    "description": "Implement the core game loop and time progression mechanics.",
+    "details": "Design a game loop that advances time and triggers events. Implement a scheduler to manage time-based events and actions.",
+    "testStrategy": "Simulate game scenarios to test time progression. Use automated tests to verify event scheduling and execution.",
+    "priority": "medium",
+    "dependencies": [
+      78,
+      79,
+      81
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      78,
+      79,
+      81
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate game scenarios to test time progression. Use automated tests to verify event scheduling and execution."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 84,
+    "title": "Integrate UI with Game Logic in Godot",
+    "description": "Ensure UI elements are fully integrated with game logic using Godot engine.",
+    "details": "Develop UI components using Godot's UI system. Bind UI elements to game logic to reflect real-time data and interactions.",
+    "testStrategy": "Perform UI tests to ensure elements update correctly. Conduct user testing to verify usability and responsiveness.",
+    "priority": "medium",
+    "dependencies": [
+      78,
+      81
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      78,
+      81
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Perform UI tests to ensure elements update correctly. Conduct user testing to verify usability and responsiveness."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 85,
+    "title": "Implement Auction House AI Purchasing Engine",
+    "description": "Develop the AI engine for purchasing in the auction house.",
+    "details": "Create algorithms for AI to evaluate and purchase items in the auction house. Implement decision-making logic based on market conditions and AI goals.",
+    "testStrategy": "Simulate auction scenarios to test AI purchasing decisions. Use logging to analyze AI behavior and adjust algorithms as needed.",
+    "priority": "medium",
+    "dependencies": [
+      79,
+      82
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      79,
+      82
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate auction scenarios to test AI purchasing decisions. Use logging to analyze AI behavior and adjust algorithms as needed."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 86,
+    "title": "Set Up Godot Project with C#",
+    "description": "Initialize the Godot 4.5 project and configure C# scripting environment.",
+    "details": "1. Install Godot 4.5 and set up a new project.\n2. Configure the project to use C# scripting.\n3. Ensure all necessary plugins and extensions for C# are installed.\n4. Create a basic scene to test the setup.",
+    "testStrategy": "Verify that a simple C# script can be executed within the Godot environment without errors.",
+    "priority": "high",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Verify that a simple C# script can be executed within the Godot environment without errors."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 87,
+    "title": "Implement Game Client UI Layer",
+    "description": "Develop the user interface layer using Godot's scene tree and UI nodes.",
+    "details": "1. Design UI components for displaying guild information, mail, and forum interactions.\n2. Use Godot's scene tree to organize UI nodes.\n3. Implement signal communication between UI components and logic layer.",
+    "testStrategy": "Test UI responsiveness and ensure signals are correctly emitted and received.",
+    "priority": "medium",
+    "dependencies": [
+      86
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      86
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test UI responsiveness and ensure signals are correctly emitted and received."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 88,
+    "title": "Develop Game Logic Layer",
+    "description": "Create the game logic layer using C# scripts to handle core game mechanics.",
+    "details": "1. Implement core game mechanics using C#.\n2. Ensure logic layer can communicate with the UI layer via events and signals.\n3. Structure the logic to handle player decisions and AI simulations.",
+    "testStrategy": "Unit test core mechanics and verify communication with the UI layer.",
+    "priority": "high",
+    "dependencies": [
+      86,
+      87
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      86,
+      87
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Unit test core mechanics and verify communication with the UI layer."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 89,
+    "title": "Integrate JSON Data Management",
+    "description": "Set up JSON data handling for configuration and save files.",
+    "details": "1. Implement JSON serialization and deserialization for game state and configuration.\n2. Ensure data integrity and consistency during read/write operations.\n3. Create methods to load initial configuration and save game progress.",
+    "testStrategy": "Test JSON read/write operations and validate data integrity.",
+    "priority": "medium",
+    "dependencies": [
+      88
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0018",
+      "ADR-0019"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      88
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test JSON read/write operations and validate data integrity."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 90,
+    "title": "Develop Event Engine Module",
+    "description": "Create the event engine to manage game events and interactions.",
+    "details": "1. Implement an event queue to handle game events.\n2. Develop logic to trigger and process events across modules.\n3. Ensure the event engine can interact with AI, guild, and forum modules.",
+    "testStrategy": "Simulate events and verify correct processing and module interaction.",
+    "priority": "medium",
+    "dependencies": [
+      88
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      88
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Simulate events and verify correct processing and module interaction."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 91,
+    "title": "Implement AI Simulation Module",
+    "description": "Develop the AI simulation module to drive NPC behavior and interactions.",
+    "details": "1. Create AI logic for NPC behavior in guilds and forums.\n2. Implement decision-making algorithms for NPC actions.\n3. Ensure AI can generate dynamic content and interact with other modules.",
+    "testStrategy": "Test AI behavior in various scenarios and validate decision-making processes.",
+    "priority": "medium",
+    "dependencies": [
+      90
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      90
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test AI behavior in various scenarios and validate decision-making processes."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 92,
+    "title": "Create Guild Management Module",
+    "description": "Develop the guild management module to handle guild operations and data.",
+    "details": "1. Implement data structures for guild information (level, reputation, resources).\n2. Develop functionality for guild operations like member management and event scheduling.\n3. Ensure integration with the event engine and AI simulation.",
+    "testStrategy": "Test guild operations and verify data consistency and event handling.",
+    "priority": "medium",
+    "dependencies": [
+      90
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      90
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test guild operations and verify data consistency and event handling."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 93,
+    "title": "Implement Save and Load Functionality",
+    "description": "Develop the save manager to handle game state persistence.",
+    "details": "1. Implement methods to serialize and save game state to JSON files.\n2. Develop loading functionality to restore game state from saved files.\n3. Ensure data consistency and integrity during save/load operations.",
+    "testStrategy": "Perform save and load operations and verify game state accuracy and consistency.",
+    "priority": "high",
+    "dependencies": [
+      89,
+      92
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      89,
+      92
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Perform save and load operations and verify game state accuracy and consistency."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 94,
+    "title": "Implement BaseCharacter Class",
+    "description": "Create the BaseCharacter class to serve as the foundation for character attributes.",
+    "details": "Implement a C# class named BaseCharacter in Godot. Include properties such as id, avatar, level, gearScore, and activityStats. Ensure the class is extendable for future character types.",
+    "testStrategy": "Write unit tests to verify that all properties are correctly initialized and accessible. Use mock data to simulate character creation and ensure data integrity.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Write unit tests to verify that all properties are correctly initialized and accessible. Use mock data to simulate character creation and ensure data integrity."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 95,
+    "title": "Develop GuildLeader Class",
+    "description": "Extend BaseCharacter to create the GuildLeader class with specific attributes.",
+    "details": "Create a C# class GuildLeader that extends BaseCharacter. Add properties like name, title, race, class, leadership, charisma, strategy, management, experience, leadershipSkills, reputation, intimacyMap, and contactList.",
+    "testStrategy": "Test inheritance by creating instances of GuildLeader and checking for correct property inheritance and initialization. Validate skill tree integration and reputation calculations.",
+    "priority": "medium",
+    "dependencies": [
+      94
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      94
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test inheritance by creating instances of GuildLeader and checking for correct property inheritance and initialization. Validate skill tree integration and reputation calculations."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 96,
+    "title": "Create GuildMember Class",
+    "description": "Extend BaseCharacter to create the GuildMember class with specific attributes.",
+    "details": "Develop a C# class GuildMember that extends BaseCharacter. Include properties such as name, race, class, specialization, guild, assess, legendary, legendaryType, legendaryAbilities, legendaryBackstory, rarity, skill, loyalty, teamwork, ambition, satisfaction, fatigue, morale, availability, experience, intimacyWithLeader, memberRelationships, personality, aiGoals, behaviorPattern, recruitmentSource, joinDate, currentRole.",
+    "testStrategy": "Ensure all properties are correctly initialized and can be modified. Test legendary member attributes and ensure they trigger appropriate events.",
+    "priority": "medium",
+    "dependencies": [
+      94
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      94
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Ensure all properties are correctly initialized and can be modified. Test legendary member attributes and ensure they trigger appropriate events."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 97,
+    "title": "Implement LeadershipSkill and GuildLeaderSkillTree",
+    "description": "Develop the LeadershipSkill class and GuildLeaderSkillTree structure for managing skills.",
+    "details": "Create LeadershipSkill class with properties like id, name, description, tier, prerequisites, and effects. Implement GuildLeaderSkillTree to organize skills in a tree structure, managing skill points and dependencies.",
+    "testStrategy": "Test skill unlocking logic and prerequisites. Validate skill effects on game mechanics by simulating skill application in various scenarios.",
+    "priority": "medium",
+    "dependencies": [
+      95
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      95
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test skill unlocking logic and prerequisites. Validate skill effects on game mechanics by simulating skill application in various scenarios."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 98,
+    "title": "Develop LegendaryAbility Class",
+    "description": "Create the LegendaryAbility class for legendary members.",
+    "details": "Implement LegendaryAbility with properties such as id, name, description, type, effects, cooldown, cost, triggerConditions, and passiveBonus. Ensure compatibility with GuildMember attributes.",
+    "testStrategy": "Test ability activation and cooldown management. Validate effects on target attributes and ensure conditions trigger correctly.",
+    "priority": "medium",
+    "dependencies": [
+      96
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      96
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test ability activation and cooldown management. Validate effects on target attributes and ensure conditions trigger correctly."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 99,
+    "title": "Implement PlayerGuild Class",
+    "description": "Develop the PlayerGuild class to manage guild data and operations.",
+    "details": "Create PlayerGuild class extending BaseGuild. Include properties like id, name, tag, realm, faction, guildLevel, reputation, experience, leader, foundedDate, motto, description, members, memberRoster, memberLimit, guildHall, facilities, guildBank, resources, raidProgress, pvpRating, achievements, officerSystem, guildPolicies, recruitmentSettings, alliances, rivalries, reputation_external, treasury, taxSettings, budgetAllocation.",
+    "testStrategy": "Test guild creation and member management. Validate facility upgrades and resource management. Simulate guild operations to ensure data consistency.",
+    "priority": "medium",
+    "dependencies": [
+      95,
+      96
+    ],
+    "status": "pending",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Create PlayerGuild Class Structure",
+        "description": "Develop the basic structure of the PlayerGuild class extending BaseGuild.",
+        "dependencies": [],
+        "details": "Define the PlayerGuild class with properties such as id, name, tag, realm, and faction. Ensure it extends BaseGuild.",
+        "status": "pending",
+        "testStrategy": "Write unit tests to verify class instantiation and property accessibility."
+      },
+      {
+        "id": 2,
+        "title": "Implement Member Management System",
+        "description": "Develop the system to manage guild members within the PlayerGuild class.",
+        "dependencies": [
+          1
+        ],
+        "details": "Add properties and methods for managing members, memberRoster, and memberLimit. Include functionality for adding and removing members.",
+        "status": "pending",
+        "testStrategy": "Test member addition and removal operations to ensure data consistency."
+      },
+      {
+        "id": 3,
+        "title": "Integrate Resource Management",
+        "description": "Incorporate resource management features into the PlayerGuild class.",
+        "dependencies": [
+          1
+        ],
+        "details": "Implement properties and methods for managing guildBank, resources, and treasury. Ensure proper handling of resource transactions.",
+        "status": "pending",
+        "testStrategy": "Simulate resource transactions and validate updates to ensure accuracy."
+      },
+      {
+        "id": 4,
+        "title": "Develop Guild Operations and Policies",
+        "description": "Implement guild operations and policy management within the PlayerGuild class.",
+        "dependencies": [
+          1,
+          2,
+          3
+        ],
+        "details": "Add properties and methods for handling guild policies, recruitmentSettings, and alliances. Ensure integration with existing systems.",
+        "status": "pending",
+        "testStrategy": "Test policy changes and recruitment settings to ensure correct application and integration."
+      }
+    ],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      95,
+      96
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test guild creation and member management. Validate facility upgrades and resource management. Simulate guild operations to ensure data consistency."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 100,
+    "title": "Design EventDefinition and EventChain",
+    "description": "Create structures for managing game events and event chains.",
+    "details": "Develop EventDefinition class with properties like id, category, subjects, triggers, mechanisms, outcomes. Implement EventChain to link multiple events into a storyline.",
+    "testStrategy": "Test event triggering and outcome resolution. Validate event chains by simulating a sequence of events and ensuring correct progression.",
+    "priority": "medium",
+    "dependencies": [],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "tbd",
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test event triggering and outcome resolution. Validate event chains by simulating a sequence of events and ensuring correct progression."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 101,
+    "title": "Implement GuildBank and Inventory Management",
+    "description": "Develop the GuildBank class and manage inventory operations.",
+    "details": "Create GuildBank class with properties like slots, capacity. Implement inventory operations for adding, removing, and managing items. Ensure integration with PlayerGuild resources.",
+    "testStrategy": "Test inventory operations for concurrency and data integrity. Validate item transactions and ensure correct updates to guild resources.",
+    "priority": "medium",
+    "dependencies": [
+      99
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      99
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test inventory operations for concurrency and data integrity. Validate item transactions and ensure correct updates to guild resources."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 102,
+    "title": "Develop AuctionHouseSystem",
+    "description": "Create the AuctionHouseSystem for managing item auctions.",
+    "details": "Implement AuctionListing and PlayerAuctionManager classes. Develop methods for creating auctions, bidding, and managing auction lifecycle. Integrate with GuildBank for item transactions.",
+    "testStrategy": "Test auction creation and bidding processes. Validate auction lifecycle management and ensure correct handling of bid history and item transfers.",
+    "priority": "medium",
+    "dependencies": [
+      101
+    ],
+    "status": "pending",
+    "subtasks": [],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "core",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      101
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test auction creation and bidding processes. Validate auction lifecycle management and ensure correct handling of bid history and item transfers."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  },
+  {
+    "id": 103,
+    "title": "Implement NPCGuild and AI Systems",
+    "description": "Develop NPCGuild class and AI systems for NPC behavior.",
+    "details": "Create NPCGuild class extending BaseGuild. Implement AI systems for NPC decision-making, including NPCGuildAI and GuildMemberAI. Ensure AI systems can autonomously manage guild operations and interactions.",
+    "testStrategy": "Test AI decision-making processes and validate NPC interactions with player guilds. Simulate various scenarios to ensure AI behaves as expected and adapts to game events.",
+    "priority": "medium",
+    "dependencies": [
+      99
+    ],
+    "status": "pending",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Create NPCGuild Class",
+        "description": "Develop the NPCGuild class by extending the BaseGuild class.",
+        "dependencies": [],
+        "details": "Implement the NPCGuild class with properties and methods specific to NPC guilds. Ensure it inherits from BaseGuild and integrates with existing guild systems.",
+        "status": "pending",
+        "testStrategy": "Write unit tests to verify class properties and inheritance."
+      },
+      {
+        "id": 2,
+        "title": "Develop NPCGuildAI System",
+        "description": "Implement the AI system for NPCGuild decision-making.",
+        "dependencies": [
+          1
+        ],
+        "details": "Create the NPCGuildAI class to handle autonomous decision-making for guild operations. Include methods for managing resources, member tasks, and interactions with player guilds.",
+        "status": "pending",
+        "testStrategy": "Simulate guild operations and validate AI decisions under various scenarios."
+      },
+      {
+        "id": 3,
+        "title": "Implement GuildMemberAI System",
+        "description": "Create AI for individual NPC guild members.",
+        "dependencies": [
+          1
+        ],
+        "details": "Develop the GuildMemberAI class to manage individual NPC behaviors and interactions within the guild. Ensure it can handle tasks, communication, and role assignments.",
+        "status": "pending",
+        "testStrategy": "Test member interactions and task management through scenario simulations."
+      },
+      {
+        "id": 4,
+        "title": "Conduct Scenario Testing for AI Systems",
+        "description": "Test AI systems in simulated game scenarios to ensure proper behavior.",
+        "dependencies": [
+          2,
+          3
+        ],
+        "details": "Design and execute test scenarios to evaluate the performance and adaptability of NPCGuildAI and GuildMemberAI. Focus on decision-making, interaction with player guilds, and response to game events.",
+        "status": "pending",
+        "testStrategy": "Use automated testing tools to simulate scenarios and log AI responses for analysis."
+      }
+    ],
+    "story_id": "PRD-GUILD-MANAGER",
+    "layer": "adapter",
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "depends_on": [
+      99
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_strategy": [
+      "Test AI decision-making processes and validate NPC interactions with player guilds. Simulate various scenarios to ensure AI behaves as expected and adapts to game events."
+    ],
+    "test_refs": [],
+    "acceptance": []
+  }
+]

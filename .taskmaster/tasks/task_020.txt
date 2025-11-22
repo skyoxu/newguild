@@ -1,0 +1,11 @@
+# Task ID: 20
+# Title: Design Recruitment System
+# Status: pending
+# Dependencies: 18, 19
+# Priority: medium
+# Description: Develop a recruitment system for guild members, including legendary members.
+# Details:
+Implement the RecruitmentSystem interface with filters for member search and negotiation processes. Integrate legendary member recruitment features.
+
+# Test Strategy:
+Test recruitment processes for different member types, ensuring correct filtering and negotiation outcomes.

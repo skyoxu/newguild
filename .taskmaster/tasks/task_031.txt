@@ -1,0 +1,11 @@
+# Task ID: 31
+# Title: Implement Diplomatic Attitude System
+# Status: pending
+# Dependencies: 27
+# Priority: medium
+# Description: Create the DiplomaticAttitude interface to handle guild diplomatic relations.
+# Details:
+Define properties such as attitudeValue, attitudeCategory, stabilityFactor, attitudeFactors, adjustmentTriggers, decayRate, and lastUpdateTime.
+
+# Test Strategy:
+Validate attitude changes over time and in response to triggers, ensuring stability and decay rates are applied correctly.

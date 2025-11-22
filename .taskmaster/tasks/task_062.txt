@@ -1,0 +1,11 @@
+# Task ID: 62
+# Title: Develop Guild Participation System
+# Status: pending
+# Dependencies: 60
+# Priority: medium
+# Description: Create the system to manage guild participation in World Boss events, including contribution tracking and strategy planning.
+# Details:
+Implement the GuildParticipation interface with properties for participation status, contribution metrics, and strategy coordination. Ensure integration with the WorldBossSystem.
+
+# Test Strategy:
+Test guild participation tracking and strategy updates through simulated boss events.

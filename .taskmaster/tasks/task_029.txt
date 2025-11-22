@@ -1,0 +1,11 @@
+# Task ID: 29
+# Title: Create Historical Ranking System
+# Status: pending
+# Dependencies: 27
+# Priority: medium
+# Description: Implement the HistoricalRanking interface to manage guild ranking history.
+# Details:
+Include properties for highestServerRank, highestBattlezoneRank, highestNationalRank, highestGlobalRank, rankingTimeline, rankingAchievements, and rivalryRecords.
+
+# Test Strategy:
+Simulate ranking changes and verify that the timeline and achievements are updated correctly.

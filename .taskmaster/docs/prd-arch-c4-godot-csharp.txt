@@ -1,0 +1,74 @@
+# NOTE
+# 本文件是基于《PRD-Guild-Manager》和后续架构讨论整理的
+# 「技术架构图标 / 数据模型规范」补充，不是原始 PRD 正文。
+# Task Master 在拆任务时，请将其视为技术设计约束。
+
+
+系统架构图
+系统上下文图 (Context)
+@startuml
+actor 玩家 as Player
+node "公会管理器游戏\n(Godot 4.5 + C#)" as GameClient
+file "本地存档文件 (JSON)" as SaveFile
+database "配置数据文件 (JSON)" as ConfigFiles
+
+Player --> GameClient : 输入操作与决策
+GameClient --> Player : 用户界面反馈 (UI)
+GameClient --> SaveFile : 存档读写 (序列化JSON)
+GameClient --> ConfigFiles : 加载初始配置 (静态JSON数据)
+@enduml
+
+
+图1: 游戏与外部交互的上下文示意。 玩家通过用户界面与公会管理器单机游戏互动，所有数据保存在本地，无需服务器支持。游戏启动时会加载静态配置（如NPC公会原型、道具配置等JSON文件），在运行中根据玩家决策和AI模拟更新状态，并定期将游戏进度序列化为本地存档文件。整个系统在Godot 4.5引擎中运行，利用C#脚本实现游戏逻辑。
+
+容器部署图 (Container)
+@startuml
+node "Godot 4.5 引擎" as Engine {
+  component "用户界面层\n(场景树与UI节点)" as UI
+  component "游戏逻辑层\n(C#脚本模块)" as Logic
+}
+UI <-d-> Logic : 事件与信号通信
+database "本地JSON数据" as DataStore
+Logic -down-> DataStore : 读取配置/存档
+UI -down-> DataStore : （间接）通过逻辑层存取数据
+@enduml
+
+
+图2: 客户端应用的容器与模块边界。 用户界面层包含Godot场景和控件，用于显示公会信息、邮件、论坛等交互界面；游戏逻辑层由C#编写的各系统模块组成，封装具体规则和数据操作。UI通过Godot的信号机制或事件回调与逻辑层通信，实现指令下达和界面更新（例如玩家在UI上发布招募命令，逻辑层处理后更新成员列表UI）。逻辑层负责与本地数据存储交互，包括加载游戏配置和保存游戏进度。所有模块均运行于同一进程，不同子系统之间通过事件总线或观察者模式解耦通信，必要的耗时计算可使用异步线程处理以避免阻塞UI（例如大型战斗模拟或批量AI决策）。这种分层架构利用Godot引擎提供的渲染/UI支持，结合C#强类型逻辑，实现清晰的模块边界和良好的扩展性。
+
+组件模块图 (Component)
+@startuml
+node "公会管理器游戏 (客户端)" {
+  [事件引擎\nEvent Engine] as EventEngine
+  [AI生态系统\nAI Simulation] as AIEngine
+  [公会管理模块\nGuild Management] as GuildModule
+  [成员/招募模块\nMembership] as MemberModule
+  [战斗模块 (PVE/PVP)\nCombat System] as CombatModule
+  [战术策略模块\nTactics System] as TacticsModule
+  [社交论坛模块\nForum System] as ForumModule
+  [经济与道具模块\nEconomy System] as EconomyModule
+  [存档/配置管理\nSaveManager] as SaveManager
+}
+EventEngine --> AIEngine : 驱动AI事件
+EventEngine --> GuildModule : 触发公会事件
+EventEngine --> MemberModule : 触发成员事件
+EventEngine --> ForumModule : 发布新闻/帖子
+AIEngine --> MemberModule : 模拟NPC成员行为
+AIEngine --> GuildModule : 驱动NPC公会动态
+AIEngine --> ForumModule : 生成AI评论/媒体内容
+AIEngine --> EconomyModule : NPC交易决策
+GuildModule --> MemberModule : 管理成员名单/职位
+GuildModule --> CombatModule : 安排公会活动 (PVE/PVP)
+TacticsModule --> CombatModule : 提供阵容和战术配置
+MemberModule --> CombatModule : 提供成员数据 (属性/可用性)
+EconomyModule --> GuildModule : 提供经济收益/消耗数据
+SaveManager ..> EventEngine : 保存事件进度
+SaveManager ..> GuildModule : 保存公会状态
+SaveManager ..> MemberModule : 保存成员状态
+SaveManager ..> CombatModule : 保存活动进度
+SaveManager ..> ForumModule : 保存论坛记录
+SaveManager ..> EconomyModule : 保存经济数据
+@enduml
+
+
+图3: 系统内部主要子系统和功能模块划分。 事件引擎是核心驱动，管理游戏中的事件池与触发逻辑。它与各功能模块交互：触发公会管理事件（如会长选举、设施升级）、成员事件（如成员离队、传奇招募）以及论坛动态（如新闻发布、玩家帖子）。AI生态系统分三层模拟（成员AI、公会AI、环境AI），主导NPC公会的自主行动和成员行为，包括在论坛发帖、参与经济活动等。公会管理模块负责公会的核心数据（等级、声望、资源、设施等）以及日常运作（政策制定、联盟外交）。成员/招募模块管理公会成员的属性成长、招募与流失、关系网和亲密度系统。战斗模块涵盖PVE副本挑战和PVP对抗的逻辑，实现团队战斗的规则、结果计算和进度保存。战术策略模块提供阵容配置和战术库功能，支持玩家/AI在战斗前配置50人团队阵容、选择战术加成。社交论坛模块模拟游戏内的论坛和媒体生态，AI会在此生成动态内容，玩家可查看官方新闻、内部公会论坛帖子等，影响公会声誉和成员心态。经济与道具模块包括公会财政系统和拍卖行等，用于管理公会资源、装备道具以及模拟交易市场。所有模块的数据最终由存档管理统一序列化保存，支持游戏进度续存和数据一致性。模块间通过事件和消息松耦合，Godot主线程负责UI和主要逻辑，各模块内部可能使用多线程/协程处理复杂计算（如AI决策、战斗模拟）以保障帧率流畅。整个架构贴合Godot+C#特点，实现模块清晰分工且通过信号/事件通信协调运作。

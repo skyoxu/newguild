@@ -1,0 +1,11 @@
+# Task ID: 95
+# Title: Develop GuildLeader Class
+# Status: pending
+# Dependencies: 94
+# Priority: medium
+# Description: Extend BaseCharacter to create the GuildLeader class with specific attributes.
+# Details:
+Create a C# class GuildLeader that extends BaseCharacter. Add properties like name, title, race, class, leadership, charisma, strategy, management, experience, leadershipSkills, reputation, intimacyMap, and contactList.
+
+# Test Strategy:
+Test inheritance by creating instances of GuildLeader and checking for correct property inheritance and initialization. Validate skill tree integration and reputation calculations.

@@ -1,0 +1,11 @@
+# Task ID: 66
+# Title: Develop World Boss Manager Class
+# Status: pending
+# Dependencies: 61, 64
+# Priority: medium
+# Description: Implement the WorldBossManager class to handle boss spawning, fight management, and reward distribution.
+# Details:
+Create methods in WorldBossManager for spawning bosses, managing fights, handling guild participation, and distributing rewards.
+
+# Test Strategy:
+Conduct integration tests to ensure the manager correctly handles boss lifecycle and event outcomes.

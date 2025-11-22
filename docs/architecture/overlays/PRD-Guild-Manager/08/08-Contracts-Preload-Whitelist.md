@@ -8,7 +8,7 @@ Test-Refs:
   - tests/unit/contracts/contracts-preload-whitelist.spec.ts
   - tests/e2e/contracts/contracts-docs-sync.spec.ts
 Contracts-Refs:
-  - src/shared/contracts/electron/preload-whitelist.ts
+  - src/shared/contracts/godot/preload-whitelist.ts
 Status: Proposed
 ---
 
@@ -17,12 +17,12 @@ Status: Proposed
 变更意图（引用，不复制口径）
 
 - 引用 01/02/03 章的统一口径：事件与契约治理（ADR‑0004）、质量门禁（ADR‑0005）。
-- 主进程与预加载暴露 API 必须遵循白名单策略；任何新增导出需在契约中显式声明并通过此页落档。
+- 在 Godot + C# 模板中，若使用嵌入式 WebView 或外部脚本桥接，必须通过预加载白名单统一管理可暴露的 API；任何新增导出需在契约中显式声明并通过此页落档。
 
 影响范围
 
-- 合同文件：`src/shared/contracts/electron/preload-whitelist.ts`
-- 受影响模块：Electron 预加载桥、渲染进程 API 访问路径
+- 合同文件：`src/shared/contracts/godot/preload-whitelist.ts`
+- 受影响模块：Godot 侧嵌入式 WebView（如有）、脚本桥接与外部 API 访问路径
 
 验收要点（就地）
 
@@ -31,4 +31,4 @@ Status: Proposed
 
 回归与风控
 
-- 仅通过 contextBridge 白名单暴露 API；禁止放宽 Electron 安全基线（详见 ADR‑0002）
+- 仅通过白名单适配层暴露 API；禁止绕过 ADR‑0019 中定义的 Godot 安全基线（外链/文件/权限等约束）。

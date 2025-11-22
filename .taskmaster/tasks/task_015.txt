@@ -1,0 +1,11 @@
+# Task ID: 15
+# Title: Create Tactical Center Module
+# Status: pending
+# Dependencies: 11, 13
+# Priority: medium
+# Description: Develop the tactical center for managing raid and PVP compositions.
+# Details:
+Implement the TacticalCenter interface with systems for managing raid and PVP compositions, including AI auto-assignment and validation.
+
+# Test Strategy:
+Test composition creation and validation processes to ensure correct role assignments and balance.

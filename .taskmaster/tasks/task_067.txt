@@ -1,0 +1,11 @@
+# Task ID: 67
+# Title: Build Alliance Matching Engine
+# Status: pending
+# Dependencies: 63
+# Priority: medium
+# Description: Develop the engine to recommend potential alliance partners based on guild compatibility and historical data.
+# Details:
+Implement the AllianceMatchingEngine class with methods for recommending partners and evaluating alliance success probabilities.
+
+# Test Strategy:
+Test alliance recommendations with various guild profiles to ensure accurate and beneficial matches.

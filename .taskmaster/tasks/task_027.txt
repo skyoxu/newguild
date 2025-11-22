@@ -1,0 +1,11 @@
+# Task ID: 27
+# Title: Implement NPC Guild Archetype Interface
+# Status: pending
+# Dependencies: 26
+# Priority: medium
+# Description: Develop the NPCGuildArchetype interface to define the structure of NPC guilds.
+# Details:
+Implement properties such as id, name, tier, reputation, strategy, initialMembers, initialOfficers, specialties, personality, feud, homebase, legendaryMembers, historyMilestones, leagueSchedule, and diplomaticAttitude.
+
+# Test Strategy:
+Create mock data and validate that all properties are correctly initialized and accessible.

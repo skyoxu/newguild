@@ -1,0 +1,11 @@
+# Task ID: 61
+# Title: Implement World Boss Entity
+# Status: pending
+# Dependencies: 60
+# Priority: medium
+# Description: Develop the World Boss entity with attributes for health, abilities, and participation statistics.
+# Details:
+Create the WorldBoss interface with properties like id, name, currentHealth, abilities, and rewardPool. Implement methods for managing boss phases and mechanics.
+
+# Test Strategy:
+Write tests to validate boss health management, ability activation, and reward distribution logic.
