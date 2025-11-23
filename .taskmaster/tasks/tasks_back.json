@@ -8,14 +8,31 @@
     "priority": "P1",
     "layer": "docs",
     "depends_on": [],
-    "adr_refs": ["ADR-0018", "ADR-0004", "ADR-0005", "ADR-0023", "ADR-0011"],
-    "chapter_refs": ["CH01", "CH04", "CH05", "CH06", "CH07"],
+    "adr_refs": [
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0023",
+      "ADR-0011"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
-    "labels": ["prd", "vertical-slice", "docs", "architecture"],
+    "labels": [
+      "prd",
+      "vertical-slice",
+      "docs",
+      "architecture"
+    ],
     "owner": "architecture",
     "test_refs": [],
     "acceptance": [
@@ -36,11 +53,27 @@
     "status": "pending",
     "priority": "P1",
     "layer": "ci",
-    "depends_on": ["NG-0001"],
-    "adr_refs": ["ADR-0005", "ADR-0011", "ADR-0018", "ADR-0020"],
-    "chapter_refs": ["CH06", "CH07"],
+    "depends_on": [
+      "NG-0001"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0011",
+      "ADR-0018",
+      "ADR-0020"
+    ],
+    "chapter_refs": [
+      "CH06",
+      "CH07"
+    ],
     "overlay_refs": [],
-    "labels": ["ci", "smoke", "godot", "python", "headless"],
+    "labels": [
+      "ci",
+      "smoke",
+      "godot",
+      "python",
+      "headless"
+    ],
     "owner": "architecture",
     "test_refs": [
       "logs/ci/<date>/smoke/headless.log",
@@ -65,11 +98,26 @@
     "status": "pending",
     "priority": "P1",
     "layer": "ci",
-    "depends_on": ["NG-0012"],
-    "adr_refs": ["ADR-0005", "ADR-0015", "ADR-0018", "ADR-0020"],
-    "chapter_refs": ["CH07", "CH09"],
+    "depends_on": [
+      "NG-0012"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0015",
+      "ADR-0018",
+      "ADR-0020"
+    ],
+    "chapter_refs": [
+      "CH07",
+      "CH09"
+    ],
     "overlay_refs": [],
-    "labels": ["ci", "quality-gates", "coverage", "gdunit"],
+    "labels": [
+      "ci",
+      "quality-gates",
+      "coverage",
+      "gdunit"
+    ],
     "owner": "architecture",
     "test_refs": [
       "logs/ci/<date>/unit/coverage.json",
@@ -95,11 +143,28 @@
     "status": "pending",
     "priority": "P1",
     "layer": "adapter",
-    "depends_on": ["NG-0001"],
-      "adr_refs": ["ADR-0019", "ADR-0006", "ADR-0005", "ADR-0011"],
-      "chapter_refs": ["CH02", "CH05", "CH06"],
+    "depends_on": [
+      "NG-0001"
+    ],
+    "adr_refs": [
+      "ADR-0019",
+      "ADR-0006",
+      "ADR-0005",
+      "ADR-0011"
+    ],
+    "chapter_refs": [
+      "CH02",
+      "CH05",
+      "CH06"
+    ],
     "overlay_refs": [],
-    "labels": ["security", "godot", "adapter", "filesystem", "process"],
+    "labels": [
+      "security",
+      "godot",
+      "adapter",
+      "filesystem",
+      "process"
+    ],
     "owner": "architecture",
     "test_refs": [
       "Tests.Godot/tests/Security/Hard/test_db_path_rejection.gd",
@@ -126,11 +191,25 @@
     "status": "pending",
     "priority": "P2",
     "layer": "core",
-    "depends_on": ["NG-0013"],
-    "adr_refs": ["ADR-0015", "ADR-0005", "ADR-0018"],
-    "chapter_refs": ["CH06", "CH09"],
+    "depends_on": [
+      "NG-0013"
+    ],
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH06",
+      "CH09"
+    ],
     "overlay_refs": [],
-    "labels": ["performance", "core", "metrics", "ci"],
+    "labels": [
+      "performance",
+      "core",
+      "metrics",
+      "ci"
+    ],
     "owner": "architecture",
     "test_refs": [
       "Game.Core.Tests/Performance/PerformanceTrackerTests.cs",
@@ -157,11 +236,26 @@
     "status": "pending",
     "priority": "P2",
     "layer": "adapter",
-    "depends_on": ["NG-0015"],
-    "adr_refs": ["ADR-0003", "ADR-0005", "ADR-0015", "ADR-0018"],
-    "chapter_refs": ["CH03", "CH09"],
+    "depends_on": [
+      "NG-0015"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0005",
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH03",
+      "CH09"
+    ],
     "overlay_refs": [],
-    "labels": ["observability", "sentry", "release-health", "godot"],
+    "labels": [
+      "observability",
+      "sentry",
+      "release-health",
+      "godot"
+    ],
     "owner": "architecture",
     "test_refs": [
       "Game.Core.Tests/Observability/ObservabilityClientTests.cs",
@@ -186,11 +280,28 @@
     "status": "pending",
     "priority": "P2",
     "layer": "ci",
-    "depends_on": ["NG-0001", "NG-0015"],
-    "adr_refs": ["ADR-0008", "ADR-0011", "ADR-0003", "ADR-0015"],
-    "chapter_refs": ["CH07", "CH10"],
+    "depends_on": [
+      "NG-0001",
+      "NG-0015"
+    ],
+    "adr_refs": [
+      "ADR-0008",
+      "ADR-0011",
+      "ADR-0003",
+      "ADR-0015"
+    ],
+    "chapter_refs": [
+      "CH07",
+      "CH10"
+    ],
     "overlay_refs": [],
-    "labels": ["build", "export", "windows", "ci", "release"],
+    "labels": [
+      "build",
+      "export",
+      "windows",
+      "ci",
+      "release"
+    ],
     "owner": "architecture",
     "test_refs": [
       "logs/ci/<date>/export/summary.json",
@@ -216,11 +327,26 @@
     "status": "pending",
     "priority": "P3",
     "layer": "ci",
-    "depends_on": ["NG-0016", "NG-0017"],
-    "adr_refs": ["ADR-0003", "ADR-0005", "ADR-0015"],
-    "chapter_refs": ["CH03", "CH10"],
+    "depends_on": [
+      "NG-0016",
+      "NG-0017"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0005",
+      "ADR-0015"
+    ],
+    "chapter_refs": [
+      "CH03",
+      "CH10"
+    ],
     "overlay_refs": [],
-    "labels": ["release", "canary", "rollback", "sentry"],
+    "labels": [
+      "release",
+      "canary",
+      "rollback",
+      "sentry"
+    ],
     "owner": "architecture",
     "test_refs": [
       "build/release-profile.json",
@@ -245,11 +371,26 @@
     "status": "pending",
     "priority": "P3",
     "layer": "docs",
-    "depends_on": ["NG-0001"],
-    "adr_refs": ["ADR-0005", "ADR-0015", "ADR-0003"],
-    "chapter_refs": ["CH04", "CH09", "CH10"],
+    "depends_on": [
+      "NG-0001"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0015",
+      "ADR-0003"
+    ],
+    "chapter_refs": [
+      "CH04",
+      "CH09",
+      "CH10"
+    ],
     "overlay_refs": [],
-    "labels": ["acceptance", "docs", "perf", "release-notes"],
+    "labels": [
+      "acceptance",
+      "docs",
+      "perf",
+      "release-notes"
+    ],
     "owner": "architecture",
     "test_refs": [],
     "acceptance": [
@@ -270,7 +411,9 @@
     "status": "pending",
     "priority": "P1",
     "layer": "core",
-    "depends_on": ["NG-0001"],
+    "depends_on": [
+      "NG-0001"
+    ],
     "adr_refs": [
       "ADR-0018",
       "ADR-0004",
@@ -355,7 +498,9 @@
     "owner": "architecture",
     "test_refs": [
       "Game.Core.Tests/Domain/GuildCoreTests.cs",
+      "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
       "Tests.Godot/tests/Scenes/test_guild_main_scene.gd",
+      "Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
       "logs/ci/<date>/ci-pipeline-summary.json",
       "logs/e2e/<date>/smoke/selfcheck-summary.json"
     ],
@@ -363,6 +508,7 @@
       "dev_cli.py run-ci-basic 在本地 Windows 环境下能成功运行，并至少执行一次 dotnet test 与一次 headless smoke。",
       "Windows CI 工作流（ci-windows.yml 或 windows-quality-gate.yml）中包含对 Game.Core.Tests 与 Tests.Godot 的执行步骤，且在首个垂直切片落地后仍然全部通过。",
       "headless smoke 用例能够在不依赖交互的情况下启动游戏主场景，并输出 [TEMPLATE_SMOKE_READY] 或 [DB] opened 标记。",
+      "至少存在一条覆盖 PRD 3.0.3 T2 可玩性场景流的端到端测试路径：Game.Core.Tests/Domain/GameTurnSystemTests.cs（或等价用例）验证三阶段一周循环的状态推进，Tests.Godot/tests/Scenes/test_main_scene_smoke.gd（或等价用例）验证从启动主场景进入首周公会管理界面并完成一次“推进一周”的 UI 流程。",
       "失败的测试或 smoke 能在 logs/ci 与 logs/e2e 目录下生成可用于排查的 JSON/文本日志，与 AGENTS.md 中的日志规范一致。"
     ],
     "test_strategy": [
@@ -378,7 +524,9 @@
     "status": "pending",
     "priority": "P2",
     "layer": "docs",
-    "depends_on": ["NG-0001"],
+    "depends_on": [
+      "NG-0001"
+    ],
     "adr_refs": [
       "ADR-0018",
       "ADR-0004",
@@ -418,6 +566,652 @@
     "test_strategy": [
       "文档审阅：由架构/产品共同检查 PRD/Base/ADR/Overlay 是否互相引用、无矛盾口径。",
       "自动化：扩展或实现 task-links-validate 脚本，针对 NG-00xx 与玩法任务校验 story_id/adr_refs/chapter_refs/overlay_refs 与文档实际存在性和一致性。"
+    ]
+  },
+  {
+    "id": "NG-0023",
+    "story_id": "PH9-BACKLOG-B1",
+    "title": "事件命名统一迁移（game.* → core.*.*）",
+    "description": "根据 Phase-9-Signal-Backlog.md B1，将仍然存在于测试中的旧事件类型（如 game.started/score.changed/player.health.changed）统一迁移为 core.*.* 命名约定，并更新相关测试与文档，避免旧前缀继续被误用。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": [
+      "NG-0001"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0006",
+      "ADR-0018",
+      "ADR-0023"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [
+      "signal",
+      "events",
+      "naming",
+      "core"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core.Tests/Engine/GameEngineCoreEventTests.cs",
+      "Tests.Godot/tests/Scenes/test_main_scene_signals.gd"
+    ],
+    "acceptance": [
+      "Game.Core 与 Tests 中不再存在 game.started/score.changed/player.health.changed 等旧事件类型，全部迁移为 core.*.* 命名。",
+      "GameEngineCoreEventTests 覆盖新的事件类型常量，并全部通过。",
+      "Overlay 08-Contracts-Guild-Manager-Events.md 与 08-功能纵切-公会管理器.md 中的事件示例与实际事件类型保持一致。",
+      "一次 signal 自检（例如全文搜索）可以证明仓库内仅保留 core.*.* 作为事件命名前缀。"
+    ],
+    "test_strategy": [
+      "本地：运行 GameEngineCoreEventTests，并通过全文搜索核对事件类型常量。",
+      "CI：在质量门禁中增加针对 core.*.* 事件类型前缀的简单字符串检查脚本。"
+    ]
+  },
+  {
+    "id": "NG-0024",
+    "story_id": "PH16-BACKLOG-B2",
+    "title": "Game.Core Observability 客户端与结构化日志",
+    "description": "根据 Phase-16-Observability-Backlog.md B2，在 Game.Core 层实现可复用的 ObservabilityClient/StructuredLogger/PiiDataScrubber，使核心逻辑能够在不直接依赖 Godot 或 Sentry SDK 的前提下输出结构化日志并上报事件。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "NG-0016"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0005",
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH03",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "observability",
+      "logging",
+      "core",
+      "sentry"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core/Observability/ObservabilityClient.cs",
+      "Game.Core.Tests/Observability/ObservabilityClientTests.cs"
+    ],
+    "acceptance": [
+      "Game.Core/Observability 下存在 ObservabilityClient/StructuredLogger/PiiDataScrubber 等类型，且不引用任何 Godot API。",
+      "核心服务通过依赖注入使用 ILogger/ObservabilityClient 接口，而不是直接依赖 Sentry 或具体实现。",
+      "ObservabilityClient 能够生成包含 logger、level、tags、extra、breadcrumbs 的结构化日志对象，并在单元测试中可被验证。",
+      "至少一组 xUnit 测试验证 PII 字段在过滤逻辑中被正确脱敏或丢弃。"
+    ],
+    "test_strategy": [
+      "本地：为 ObservabilityClient 编写 xUnit 测试，使用 fake/spy 对象捕获日志与事件上报行为。",
+      "CI：在 dotnet-unit 任务中确保 Observability 测试纳入覆盖率统计，并在质量门禁报告中展示相关用例。"
+    ]
+  },
+  {
+    "id": "NG-0025",
+    "story_id": "PH16-BACKLOG-B4",
+    "title": "隐私与合规文档（privacy-compliance.md）",
+    "description": "根据 Phase-16-Observability-Backlog.md B4，在 docs 目录下新增privacy-compliance.md，明确日志、审计、Sentry 事件中允许出现的字段、PII 分类与脱敏策略，以及数据保留与删除（Retention）约束。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "docs",
+    "depends_on": [
+      "NG-0016"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0019",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH03",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "docs",
+      "privacy",
+      "compliance",
+      "observability",
+      "security"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "docs/privacy-compliance.md",
+      "logs/ci/<date>/task-links.json"
+    ],
+    "acceptance": [
+      "docs/privacy-compliance.md 存在，并链接自 AGENTS.md 或 testing-framework.md 中的隐私与日志相关章节。",
+      "文档中枚举至少一份字段级别的 PII 分类清单，并描述日志、Sentry 事件中的脱敏策略与禁止上报的字段类型。",
+      "文档引用 ADR-0003 与 ADR-0019，说明与 Release Health、Godot 安全基线之间的关系。",
+      "task-links-validate 或等价脚本能够校验 tasks_back.json 中引用privacy-compliance.md 的任务与文档之间的回链关系。"
+    ],
+    "test_strategy": [
+      "文档审阅：由架构或安全角色人工检查 privacy-compliance.md 是否覆盖日志、Sentry 与审计 JSONL 的隐私约束。",
+      "自动化：在 task-links-validate 中增加针对 privacy-compliance.md 的引用检查，保证后续任务不会绕过该文档。"
+    ]
+  },
+  {
+    "id": "NG-0026",
+    "story_id": "PH16-BACKLOG-B5",
+    "title": "可观测性与日志使用规范（logging-guidelines.md）",
+    "description": "根据 Phase-16-Observability-Backlog.md B5，在 docs 下新增 logging-guidelines.md，对 logger 命名空间、级别使用方式、日志路径结构（logs/ci、logs/e2e、user://logs）以及与 ADR-0003 的结构化日志模型进行统一约定。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "docs",
+    "depends_on": [
+      "NG-0024"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0005",
+      "ADR-0018",
+      "ADR-0023"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH03",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "docs",
+      "logging",
+      "observability",
+      "guidelines"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "docs/logging-guidelines.md",
+      "AGENTS.md"
+    ],
+    "acceptance": [
+      "docs/logging-guidelines.md 存在，并在 AGENTS.md 中被引用为日志使用的唯一规范来源。",
+      "文档对 logger 命名空间（如 game.core、ui.menu、db.access、security）、日志级别（debug/info/warning/error）以及 breadcrumbs 使用方式给出清晰建议。",
+      "文档中的日志路径结构与 6.3 节（logs/** SSoT）保持一致，未引入新的散乱目录。",
+      "后续新增的日志相关任务在 adr_refs 和 acceptance 中明确遵守 logging-guidelines.md。"
+    ],
+    "test_strategy": [
+      "文档审阅：在评审 PR 时检查日志相关变更是否引用 logging-guidelines.md 并符合其约定。",
+      "自动化：在 task-links-validate 或等价脚本中校验日志相关任务是否引用该文档。"
+    ]
+  },
+  {
+    "id": "NG-0027",
+    "story_id": "PH13-BACKLOG-B3",
+    "title": "代码重复率与圈复杂度门禁",
+    "description": "根据 Phase-13-Quality-Gates-Backlog.md B3，为 newguild 模板补齐代码重复率（Duplication%）与圈复杂度（Cyclomatic Complexity）质量门禁，将 jscpd、Roslyn 或 SonarQube 指标纳入 quality_gates.py 的统一判断。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "ci",
+    "depends_on": [
+      "NG-0013"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0018",
+      "ADR-0020"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "ci",
+      "quality-gates",
+      "duplication",
+      "complexity"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "logs/ci/<date>/quality-gates-duplication.json",
+      "logs/ci/<date>/quality-gates-complexity.json"
+    ],
+    "acceptance": [
+      "存在脚本或配置能够生成重复率与圈复杂度的机器可读报告，并写入logs/ci/<date>/quality-gates-duplication.json 与 quality-gates-complexity.json。",
+      "quality_gates.py 能够读取上述报告，根据 Phase-13 设定的阈值（例如 Dup% ≤ 2%，最大圈复杂度 ≤ 10，平均圈复杂度 ≤ 5）给出 PASS/FAIL。",
+      "在 CI 中至少有一条 Job 使用 quality_gates.py 作为门禁，并在失败时提供清晰的重复率与复杂度摘要。"
+    ],
+    "test_strategy": [
+      "本地：构造一个故意高重复率、高复杂度的小示例，验证 quality_gates.py 能将其标记为 failed。",
+      "CI：在 windows-quality-gate 工作流中增加对 duplication 与 complexity 报告的校验，并在 Step Summary 中展示关键指标。"
+    ]
+  },
+  {
+    "id": "NG-0028",
+    "story_id": "PH13-BACKLOG-B4",
+    "title": "性能 P95 与审计 JSONL 校验",
+    "description": "根据 Phase-13-Quality-Gates-Backlog.md B4，将性能 P95 阈值与 security-audit.jsonl 的结构校验纳入 quality_gates.py，实现对 logs/perf/summary.json 与logs/ci/<date>/security-audit.jsonl 的自动化检查。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "ci",
+    "depends_on": [
+      "NG-0013",
+      "NG-0014",
+      "NG-0015"
+    ],
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0005",
+      "ADR-0019",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "ci",
+      "performance",
+      "audit",
+      "quality-gates"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "logs/perf/<date>/summary.json",
+      "logs/ci/<date>/security-audit.jsonl",
+      "logs/ci/<date>/quality-gates-perf.json"
+    ],
+    "acceptance": [
+      "新增 scripts/python/validate_perf.py 与 scripts/python/validate_audit_logs.py，能够检查 P95 是否在预算内，以及 security-audit.jsonl 每行为合法 JSON 且包含必需字段。",
+      "quality_gates.py 支持在 all 模式下调用上述校验脚本，并在失败时返回非零退出码。",
+      "CI 日志中可以看到 P95 与审计 JSONL 校验的摘要输出，并产生对应 JSON 摘要文件。"
+    ],
+    "test_strategy": [
+      "单元：为 validate_perf 与 validate_audit_logs 编写测试，验证边界条件与错误路径。",
+      "集成：在 CI 中对刻意构造的超阈值样例运行 quality_gates.py，验证能够正确失败并输出预期的 JSON 摘要。"
+    ]
+  },
+  {
+    "id": "NG-0029",
+    "story_id": "PH14-BACKLOG-B5",
+    "title": "Signal 健康度验证与安全相关测试门禁",
+    "description": "根据 Phase-14-Godot-Security-Backlog.md B5，在安全相关 Signal 上补齐 XML 注释与规范化命名，并通过 xUnit、GdUnit4 或专用脚本，将这些检查纳入 CI 中的信号健康度门禁。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0014",
+      "NG-0023"
+    ],
+    "adr_refs": [
+      "ADR-0019",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "security",
+      "signal",
+      "gdunit",
+      "adapter",
+      "testing"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Tests.Godot/tests/Security/Hard/test_security_signals_health.gd",
+      "logs/ci/<date>/signal-health-summary.json"
+    ],
+    "acceptance": [
+      "与安全相关的关键 Signal（例如 SecurityHttpClient.RequestBlocked 等）具备完整的XML 注释与稳定的命名约定。",
+      "存在至少一组 GdUnit4 测试或分析脚本，对这些 Signal 的注册与触发进行验证，并在失败时产生可读的 JSON 摘要。",
+      "CI 中新增或扩展一个步骤，用于执行 Signal 健康度检查，并在日志中给出通过与失败的统计。"
+    ],
+    "test_strategy": [
+      "GdUnit4：为安全相关 Signal 编写 Hard 套件，用于验证触发路径与 XML 注释是否齐全。",
+      "CI：在 signal-compliance 相关工作流中集成健康度检查脚本，并观察在故意缺失注释或错误命名时是否会失败。"
+    ]
+  },
+  {
+    "id": "NG-0030",
+    "story_id": "PH15-BACKLOG-B3",
+    "title": "性能报告与历史追踪（reports/performance/**）",
+    "description": "根据 Phase-15-Performance-Budgets-Backlog.md B3，为性能测试结果生成 HTML 或 JSON 报告与历史记录（如 performance-history.csv），支持人工分析与长期趋势跟踪。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "ci",
+    "depends_on": [
+      "NG-0015",
+      "NG-0028"
+    ],
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "performance",
+      "reports",
+      "ci",
+      "observability"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "logs/perf/<date>/summary.json",
+      "reports/performance/current-run-report.json",
+      "reports/performance/performance-history.csv"
+    ],
+    "acceptance": [
+      "存在脚本可以从 logs/perf/<date>/summary.json 等原始数据生成当前运行报告与历史记录文件，写入 reports/performance 目录。",
+      "CI 将 reports/performance 目录中的文件作为 artifact 上传，便于离线分析。",
+      "至少有一个简单的趋势图或统计汇总（可以是 JSON 或 CSV），帮助判断性能回归。"
+    ],
+    "test_strategy": [
+      "本地：构造多次性能采样结果，运行报告生成脚本，检查历史文件是否按预期累积数据。",
+      "CI：在性能相关 Job 中执行报告生成步骤，并检查 artifact 中是否包含预期文件。"
+    ]
+  },
+  {
+    "id": "NG-0031",
+    "story_id": "PH15-BACKLOG-B5",
+    "title": "独立性能门禁 CI 工作流（performance-gates.yml）",
+    "description": "根据 Phase-15-Performance-Budgets-Backlog.md B5，新增专门的性能门禁 CI 工作流（例如 .github/workflows/performance-gates.yml），仅运行性能相关脚本与阈值校验，与常规 build/test 工作流解耦。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "ci",
+    "depends_on": [
+      "NG-0015",
+      "NG-0028",
+      "NG-0030"
+    ],
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0005",
+      "ADR-0011",
+      "ADR-0008",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH09",
+      "CH10"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "ci",
+      "performance",
+      "workflow",
+      "quality-gates"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      ".github/workflows/performance-gates.yml",
+      "logs/ci/<date>/performance-gates-summary.json"
+    ],
+    "acceptance": [
+      "仓库中存在独立的性能门禁工作流文件 performance-gates.yml，并在文档中说明触发条件与使用场景。",
+      "性能工作流只运行性能采集与阈值校验相关脚本，不重复常规 build/test 步骤。",
+      "performance-gates 工作流在阈值未通过时能明确标记失败原因，并输出 JSON 摘要到 logs/ci/<date>/performance-gates-summary.json。"
+    ],
+    "test_strategy": [
+      "CI：针对测试分支手动触发 performance-gates 工作流，观察在性能超阈值和正常情况下的行为差异。",
+      "文档：在 Phase-15 或 README 中记录如何启用或关闭性能门禁工作流。"
+    ]
+  },
+  {
+    "id": "NG-0032",
+    "story_id": "PH17-BACKLOG-B4",
+    "title": "代码签名与安全分发",
+    "description": "根据 Phase-17-Build-Backlog.md B4，在构建链路中引入可配置的代码签名步骤，使用 Windows SignTool 对 Game.exe（及安装包如存在）进行签名，并在构建与发布日志中记录签名状态。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "ci",
+    "depends_on": [
+      "NG-0017"
+    ],
+    "adr_refs": [
+      "ADR-0008",
+      "ADR-0011",
+      "ADR-0019",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "build",
+      "signing",
+      "security",
+      "release",
+      "windows"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "scripts/python/build_windows.py",
+      "logs/ci/<date>/signing-summary.json",
+      "build/Game.exe"
+    ],
+    "acceptance": [
+      "build_windows.py 或等价构建脚本支持可选的代码签名步骤，通过环境变量配置证书路径和密码。",
+      "当签名启用且证书有效时，生成的 Game.exe 已被 SignTool 签名，且 signing-summary.json 中记录成功状态；在未配置证书时构建仍可完成但不会尝试签名。",
+      "README 或 Phase-17 文档中说明如何在本地与 CI 环境中开启代码签名以及注意事项。"
+    ],
+    "test_strategy": [
+      "本地：在具备测试证书的环境下执行构建，验证 EXE 已被签名且系统属性中可见。",
+      "CI：在 Windows 构建 Job 中对 signing-summary.json 做基础格式检查，确保脚本在有与无证书两种场景下都能稳定运行。"
+    ]
+  },
+  {
+    "id": "NG-0033",
+    "story_id": "PH17-BACKLOG-B5",
+    "title": "导出预设与多配置支持",
+    "description": "根据 Phase-17-Build-Backlog.md B5，在 Godot export_presets.cfg 中配置多个导出预设（Debug、Release、Demo 等），并在构建脚本中增加相应的导出参数支持。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0017"
+    ],
+    "adr_refs": [
+      "ADR-0011",
+      "ADR-0018",
+      "ADR-0005"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "godot",
+      "export",
+      "presets",
+      "windows",
+      "release"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "export_presets.cfg",
+      "logs/ci/<date>/export/summary.json"
+    ],
+    "acceptance": [
+      "export_presets.cfg 中至少定义 Debug 与 Release 两类 Windows Desktop 导出预设，并按需扩展 Demo 等配置。",
+      "构建脚本可以根据参数选择不同的导出预设，生成对应的 EXE 与 PCK。",
+      "CI 中至少有一条导出 Job 使用 Release 预设，并在导出 summary 中注明所用配置。"
+    ],
+    "test_strategy": [
+      "本地：在 Godot 编辑器与 headless 模式下分别验证各导出预设可以成功生成可运行的 EXE。",
+      "CI：在 export 相关工作流中记录所用预设名称，并检查导出 summary 中的配置字段。"
+    ]
+  }
+  ,
+  {
+    "id": "NG-0034",
+    "story_id": "ADR-0005-STRUCTURAL-REFACTOR-GUIDELINE",
+    "title": "结构性重构与行级禁用回收",
+    "description": "根据 ADR-0005 新增的“结构性重构优先于行级禁用”口径，在现有 newguild 仓库中系统梳理所有基于 lint/静态分析/复杂度规则的行级禁用（包括 ESLint、TypeScript、.NET/Roslyn 分析器、StyleCop 等），为每一类禁用落盘对应的重构任务（NG/GM），并在重构完成后移除禁用、恢复质量门禁。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0018",
+      "ADR-0011"
+    ],
+    "chapter_refs": [
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "refactor",
+      "quality-gates",
+      "analyzers",
+      "godot",
+      "csharp"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "scripts/python/task_links_validate.py",
+      "logs/ci/<date>/quality-gates-structural-refactor.json"
+    ],
+    "acceptance": [
+      "使用专用脚本或现有工具扫描仓库中所有行级禁用（如 // eslint-disable、#pragma warning disable 等），生成禁用基线清单，并按模块分类输出到 logs/ci/<date>/quality-gates-structural-refactor.json。",
+      "为每类禁用创建或补充对应的 NG/GM 重构任务，任务中显式引用 ADR-0005，并在 acceptance 中写明“移除禁用标记、规则重新生效且门禁保持绿灯”。",
+      "在至少一轮 CI 运行中验证：经过结构性重构处理的模块不再依赖行级禁用，同类质量规则依然开启且通过（Dotnet 分析器/ESLint/GdUnit4/coverage 门禁均为绿）。"
+    ],
+    "test_strategy": [
+      "脚本校验：为禁用扫描脚本编写最小单元测试或集成测试，验证对典型文件（TS/CS/配置文件）能正确识别和统计行级禁用标记。",
+      "基线比较：在两次 CI 运行之间比较禁用基线 JSON，确认整体禁用数量单调下降或保持不变，避免在无计划的情况下新增长期禁用。"
+    ]
+  },
+  {
+    "id": "NG-0035",
+    "story_id": "NG-0034-CODE-ANALYZER-CLEANUP-CSHARP",
+    "title": "将 GdUnit4 C# API pragma 明确归类为第三方特例",
+    "description": "基于 NG-0034 的禁用基线报告，对 Tests.Godot/addons/gdUnit4/src/dotnet/GdUnit4CSharpApi.cs 中的 #pragma warning disable 条目进行专项评估：确认其为上游 GdUnit4 官方插件为兼容 Godot/分析器而设置的特例，在 newguild 仓库中不对其进行源码级重构，而是通过 .editorconfig 降级相应规则，仅将结构性重构原则应用于项目自有代码（Game.Core/Game.Godot 等）。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0034"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0020",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "refactor",
+      "analyzers",
+      "gdunit4",
+      "csharp"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "logs/ci/<date>/quality-gates-structural-refactor.json",
+      "Tests.Godot/addons/gdUnit4/src/dotnet/GdUnit4CSharpApi.cs"
+    ],
+    "acceptance": [
+      "在禁用基线 JSON 中为 Tests.Godot/addons/gdUnit4/src/dotnet/GdUnit4CSharpApi.cs 相关条目明确标记为“第三方插件特例”，并在任务备注或附加文档中说明来源（GdUnit4 官方仓库）与保留理由。",
+      "在 .editorconfig 中为 Tests.Godot/addons/gdUnit4/**/*.cs 配置独立的分析器严重级别（例如将 IDE1006/IDE0028/CA1711/CA2213 设为 silent，将 CA1031 降级为 suggestion），确保这部分代码不会阻塞项目自有代码的质量门禁。",
+      "重新运行 scan_code_disables 脚本后，确认禁用基线中仍然包含这些 GdUnit4 pragma 条目，但在后续 NG/GM 重构任务规划中不再将其视为需要通过结构性重构消解的技术债，而是通过配置层面隔离出项目代码与第三方插件代码的质量责任边界。"
+    ],
+    "test_strategy": [
+      "手动与 xUnit/GdUnit4 回归：在尝试移除或调整 pragma 前后运行 Tests.Godot 相关套件，确保测试仍然稳定。",
+      "基线比较：对比两次 quality-gates-structural-refactor.json，确认 GdUnit4CSharpApi.cs 相关禁用的变化符合预期，并记录在任务备注中。"
+    ]
+  },
+  {
+    "id": "NG-0036",
+    "story_id": "NG-0034-CODE-ANALYZER-CLEANUP-DOCUMENTATION",
+    "title": "调整 ADR 与 Taskmaster 文本中的禁用示例，避免被扫描计入噪音",
+    "description": "当前禁用基线报告中包含 .taskmaster/tasks/tasks_back.json、docs/adr/ADR-0005-quality-gates.md 与 scripts/python/scan_code_disables.py 自身的模式示例（如 // eslint-disable 和 #pragma warning disable）。本任务旨在通过轻量文本调整（例如使用占位符 <ESLINT_DISABLE> 或代码块转义）降低这些示例对禁用基线的干扰，同时保持文档与任务说明的可读性与完整性。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "docs",
+    "depends_on": [
+      "NG-0034"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "docs",
+      "refactor",
+      "quality-gates"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "logs/ci/<date>/quality-gates-structural-refactor.json",
+      ".taskmaster/tasks/tasks_back.json",
+      "docs/adr/ADR-0005-quality-gates.md",
+      "scripts/python/scan_code_disables.py"
+    ],
+    "acceptance": [
+      "通过调整示例文本（如使用占位符或说明性文字）减少或消除 .taskmaster/tasks/tasks_back.json 与 ADR-0005 中因示例而被扫描出来的 eslint_disable 条目，同时保证文档对开发者仍然清晰易懂。",
+      "更新 scan_code_disables.py 中的模式定义说明，使其明确区分“真正的行级禁用代码”和“文档中的示例/说明”，必要时对脚本逻辑做排除处理（例如忽略 docs/ 或 .taskmaster/）。",
+      "重新运行 scan_code_disables 脚本，验证禁用基线 JSON 中的示例性条目数量显著减少，真实代码中的禁用统计保持不变。"
+    ],
+    "test_strategy": [
+      "文档审阅：由架构/维护者确认调整后的示例仍然传达相同含义，且不会误导协作者。",
+      "脚本回归：在调整脚本过滤规则后运行 scan_code_disables.py，确保不会因为新增过滤逻辑而漏报真实代码中的禁用。"
     ]
   }
 ]

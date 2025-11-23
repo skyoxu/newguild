@@ -34,7 +34,16 @@
       "Bash(cat:*)",
       "mcp__task-master-ai__analyze_project_complexity",
       "mcp__task-master-ai__expand_task",
-      "mcp__task-master-ai__generate"
+      "mcp__task-master-ai__generate",
+      "Bash(uvx:*)",
+      "Bash(test:*)",
+      "WebFetch(domain:oraios.github.io)",
+      "Bash(pip install:*)",
+      "Bash(skill-seekers scrape:*)",
+      "Bash(skill-seekers-enhance:*)",
+      "Bash(skill-seekers-enhance-local output/godot-csharp/)",
+      "Bash(skill-seekers-package output/godot-csharp/)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": [],
     "ask": []

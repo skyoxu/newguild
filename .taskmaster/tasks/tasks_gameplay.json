@@ -141,13 +141,16 @@
     "owner": "architecture",
     "test_refs": [
       "Game.Core.Tests/Domain/GameLoopTests.cs",
-      "Tests.Godot/tests/Scenes/test_guild_main_scene.gd"
+      "Tests.Godot/tests/Scenes/test_guild_main_scene.gd",
+      "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
+      "Tests.Godot/tests/Scenes/test_main_scene_smoke.gd"
     ],
     "acceptance": [
       "Game.Core 中存在表示游戏周次/阶段/时间的核心类型与服务（例如 GameTurnSystem 或等价接口），并实现 PRD 中定义的三阶段回合循环。",
       "游戏时间推进逻辑能够驱动 EventEngine 与 AICoordinator，在至少一个简单场景中完成从 Resolution → Player → AI Simulation 的完整一周循环。",
       "Godot 主场景 UI 能够显示当前周次/阶段/时间状态，并在回合推进时实时更新。",
-      "Game.Core.Tests 中存在 GameLoopTests（或等价），覆盖时间推进、阶段切换以及回合边界条件；Tests.Godot 中有用例验证 UI 与 Core 状态同步。"
+      "Game.Core.Tests 中存在 GameLoopTests（或等价），覆盖时间推进、阶段切换以及回合边界条件；Tests.Godot 中有用例验证 UI 与 Core 状态同步。",
+      "Game.Core 与 Godot 场景的组合至少能够完成 PRD 3.0.3 T2 可玩性场景流中描述的一次完整循环：从启动主场景进入首周公会管理界面，执行一次完整的 Resolution→Player→AI Simulation 一周循环，并安全返回主菜单或结束会话；对应的 xUnit 和 GdUnit4/headless 用例挂接在 NG-0021 的 test_refs 中并在 CI 中保持绿灯。"
     ],
     "test_strategy": [
       "在 xUnit 中为 GameLoop 设计一组“单周循环”用例，验证每个阶段的调用顺序与状态变化是否符合 PRD 描述。",
@@ -156,4 +159,3 @@
     ]
   }
 ]
-

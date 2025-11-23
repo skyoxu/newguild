@@ -103,5 +103,32 @@ public class GameTurnSystemTests
         next.Week.Should().Be(2);
         next.Phase.Should().Be(GameTurnPhase.Resolution);
     }
-}
 
+    [Fact]
+    public void Full_week_cycle_from_start_new_week_advances_to_week_two_resolution()
+    {
+        // Arrange
+        var system = CreateSystem();
+        var saveId = "save-t2";
+
+        // Act
+        var startState = system.StartNewWeek(saveId);
+        var afterResolution = system.Advance(startState);
+        var afterPlayer = system.Advance(afterResolution);
+        var afterAi = system.Advance(afterPlayer);
+
+        // Assert
+        startState.Week.Should().Be(1);
+        startState.Phase.Should().Be(GameTurnPhase.Resolution);
+
+        afterResolution.Week.Should().Be(1);
+        afterResolution.Phase.Should().Be(GameTurnPhase.Player);
+
+        afterPlayer.Week.Should().Be(1);
+        afterPlayer.Phase.Should().Be(GameTurnPhase.AiSimulation);
+
+        afterAi.Week.Should().Be(2);
+        afterAi.Phase.Should().Be(GameTurnPhase.Resolution);
+        afterAi.SaveId.Should().Be(saveId);
+    }
+}

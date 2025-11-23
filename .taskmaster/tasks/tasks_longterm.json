@@ -1,0 +1,202 @@
+[
+  {
+    "id": "NG-1001",
+    "story_id": "PH9-BACKLOG-B2",
+    "title": "Signal XML 文档注释补全",
+    "description": "根据 Phase-9-Signal-Backlog.md B2，为对外可见的关键 Signal 补齐 XML 注释（至少包含 summary 与 param 描述），优先覆盖 EventBusAdapter 与核心 UI/Glue 信号。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0023"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0019",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH02",
+      "CH04"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "signal",
+      "xml-doc",
+      "adapter",
+      "docs"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Godot/Adapters/EventBusAdapter.cs",
+      "Tests.Godot/tests/Signals/test_signal_xml_docs.gd"
+    ],
+    "acceptance": [
+      "关键对外 Signal（特别是 EventBusAdapter 与主 UI/Glue 层）具有完整的 XML 注释风格说明。",
+      "存在简单的脚本或测试可以扫描缺失注释的 Signal，并在报告中列出。"
+    ],
+    "test_strategy": [
+      "工具：编写简单的 C# 或 Python 脚本扫描 Godot 适配层中的 Signal XML 注释覆盖率。"
+    ]
+  },
+  {
+    "id": "NG-1002",
+    "story_id": "PH9-BACKLOG-B3",
+    "title": "Signal 性能基准测试（Signal Performance Benchmark）",
+    "description": "根据 Phase-9-Signal-Backlog.md B3，为 Signal 系统提供一组可运行的性能基准测试，用于说明在高负载下的吞吐能力，并输出到 logs/perf。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0023"
+    ],
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0004",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH04",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "signal",
+      "performance",
+      "benchmark"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Tests.Godot/tests/Performance/SignalPerformanceTest.cs",
+      "logs/perf/<date>/signal-benchmark-summary.json"
+    ],
+    "acceptance": [
+      "存在可运行的 Signal 性能基准测试场景，能够在本地或 CI 中执行。",
+      "基准执行结果写入 logs/perf，并至少包含 P50 与 P95 统计。"
+    ],
+    "test_strategy": [
+      "本地：在开发机上运行 Signal 基准测试，观察在不同订阅数与事件量下的性能曲线。"
+    ]
+  },
+  {
+    "id": "NG-1003",
+    "story_id": "PH9-BACKLOG-B4",
+    "title": "CI Signal 合规检查工作流（Signal Compliance Workflow）",
+    "description": "根据 Phase-9-Signal-Backlog.md B4，设计并实现 signal-compliance CI 工作流，对 Signal 命名约定与 XML 注释进行自动化检查。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "ci",
+    "depends_on": [
+      "NG-0023",
+      "NG-1001"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH04",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "ci",
+      "signal",
+      "compliance",
+      "workflow"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      ".github/workflows/signal-compliance.yml",
+      "logs/ci/<date>/signal-compliance-summary.json"
+    ],
+    "acceptance": [
+      "仓库中存在独立的 signal-compliance 工作流，能够在 PR 或定时任务中运行。",
+      "当 Signal 命名或 XML 注释不符合约定时，工作流会给出清晰的失败原因。"
+    ],
+    "test_strategy": [
+      "CI：构造刻意缺失注释或命名错误的分支，验证 signal-compliance 工作流能够失败并输出摘要。"
+    ]
+  },
+  {
+    "id": "NG-1004",
+    "story_id": "PH9-BACKLOG-B5",
+    "title": "GDScript 订阅生命周期管理",
+    "description": "根据 Phase-9-Signal-Backlog.md B5，将 Main.gd 中的订阅与退订模式推广到其它订阅 EventBus 的 GDScript 节点，系统性管理 connect 与 disconnect 生命周期。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0023"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0019",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH02",
+      "CH04"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "signal",
+      "gdscript",
+      "lifecycle"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Godot/Scripts/Main.gd",
+      "Tests.Godot/tests/Signals/test_gdscript_subscription_lifecycle.gd"
+    ],
+    "acceptance": [
+      "关键订阅 EventBus 的 GDScript 节点在 _ready 与 _exit_tree 中成对地 connect 与 disconnect。",
+      "存在至少一组测试或脚本可以检测常见的订阅泄漏问题，并输出结果。"
+    ],
+    "test_strategy": [
+      "GdUnit4：通过加载场景并反复 enter 与 exit tree 的方式检测是否出现重复订阅。"
+    ]
+  },
+  {
+    "id": "NG-1005",
+    "story_id": "PH15-BACKLOG-B4",
+    "title": "更细粒度的性能指标采集（GC/Signal/DB 等）",
+    "description": "根据 Phase-15-Performance-Budgets-Backlog.md B4，在现有性能采集基础上增加 GC 暂停、Signal 延迟、DB 查询延迟等更细粒度指标，并汇总到统一的性能报告中。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "core",
+    "depends_on": [
+      "NG-0015",
+      "NG-0030"
+    ],
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "performance",
+      "metrics",
+      "core"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core/Performance/PerformanceTracker.cs",
+      "reports/performance/performance-history.csv"
+    ],
+    "acceptance": [
+      "性能报告中新增 GC、Signal、DB 等关键指标，并在文档中解释采集方式与含义。",
+      "新增指标不会引入显著的性能开销（可通过简单基准测试验证）。"
+    ],
+    "test_strategy": [
+      "本地：对比开启与关闭细粒度采集时的基准结果，评估额外开销。"
+    ]
+  }
+]

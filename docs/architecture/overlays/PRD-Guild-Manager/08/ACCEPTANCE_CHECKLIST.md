@@ -12,7 +12,9 @@ Test-Refs:
   # 具体项目应将占位路径替换为真实测试文件
   - Game.Core.Tests/Domain/GuildCoreTests.cs
   - Game.Core.Tests/Domain/EventEngineTests.cs
+  - Game.Core.Tests/Domain/GameTurnSystemTests.cs
   - Tests.Godot/tests/Scenes/test_guild_main_scene.gd
+  - Tests.Godot/tests/Scenes/test_main_scene_smoke.gd
   - Tests.Godot/tests/Integration/test_guild_workflow.gd
   - logs/ci/<date>/ci-pipeline-summary.json
   - logs/e2e/<date>/smoke/selfcheck-summary.json
@@ -91,6 +93,7 @@ Test-Refs:
 - [ ] GdUnit4 场景/集成测试：
   - Tests.Godot 中有针对主场景、公会管理 UI、关键 Signals 的测试
   - 至少包含一条完整的“启动 → 主菜单 → 进入公会场景 → 简单操作 → 退出”冒烟用例
+  - 至少包含一条覆盖 PRD 3.0.3 T2 可玩性场景流的端到端用例：从启动主场景进入首周公会管理界面，执行一次完整的 Resolution→Player→AI Simulation 一周循环，并安全返回主菜单或结束会话，对应的 xUnit 与 GdUnit4/headless 测试文件挂接在 NG-0021/GM-0103 的 Test-Refs 中
 - [ ] Smoke/CI 流程：
   - `scripts/python/dev_cli.py run-ci-basic` 在当前仓库可成功运行
   - `ci-windows.yml` 与 `windows-quality-gate.yml` 已集成基础单元测试与 Smoke/GdUnit 流程
@@ -130,4 +133,3 @@ Test-Refs:
   - Windows CI/Release 工作流可用于派生项目
 
 > 注：本清单是模板级 DoD 骨架，不强制具体游戏玩法完全实现，仅要求“当基于 newguild 开发公会管理器游戏时，有一条清晰、可执行的验收路线”，并确保所有跨切面约束来自 Base/ADR，而非散落在实现或文档中。
-
