@@ -32,3 +32,7 @@ Status: Proposed
 回归与风控
 
 - 仅通过白名单适配层暴露 API；禁止绕过 ADR‑0019 中定义的 Godot 安全基线（外链/文件/权限等约束）。
+
+示例：当前 Godot+C# 契约引用
+
+- 公会成员加入事件契约：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`

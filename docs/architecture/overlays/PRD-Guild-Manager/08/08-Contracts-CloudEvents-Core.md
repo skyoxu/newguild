@@ -27,3 +27,7 @@ Status: Proposed
 验收要点
 
 - 单测与 E2E 占位存在（见 Test‑Refs），并覆盖基本字段校验。
+
+示例：当前 Godot+C# 契约引用
+
+- 公会成员加入事件契约：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`

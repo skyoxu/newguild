@@ -1,0 +1,46 @@
+{
+  "generated_at": "2025-11-23T17:59:00.524804Z",
+  "entry_count": 8,
+  "entries": [
+    {
+      "path": "AGENTS.md",
+      "title": "Repository Guidelines",
+      "category": "architecture"
+    },
+    {
+      "path": "CLAUDE.md",
+      "title": "CLAUDE.md",
+      "category": "assistant"
+    },
+    {
+      "path": "mcpuse.md",
+      "title": "🛠️ 工具使用指南",
+      "category": "mcp"
+    },
+    {
+      "path": "docs/workflows/task-master-superclaude-integration.md",
+      "title": "Task Master + SuperClaude 联合使用最佳实践",
+      "category": "workflow"
+    },
+    {
+      "path": "docs/PROJECT_DOCUMENTATION_INDEX.md",
+      "title": "项目完整文档索引",
+      "category": "index"
+    },
+    {
+      "path": ".claude/commands/godot-component.md",
+      "title": "Tests/Scenes/test_{{组件名称}}.gd",
+      "category": "command"
+    },
+    {
+      "path": ".claude/commands/godot-scene.md",
+      "title": "godot-scene.md",
+      "category": "command"
+    },
+    {
+      "path": ".claude/commands/godot-script.md",
+      "title": "godot-script.md",
+      "category": "command"
+    }
+  ]
+}

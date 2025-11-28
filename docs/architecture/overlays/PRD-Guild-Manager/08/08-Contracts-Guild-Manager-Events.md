@@ -5,10 +5,13 @@ ADR-Refs:
   - ADR-0004
   - ADR-0005
 Test-Refs:
-  - tests/unit/contracts/contracts-guild-manager-events.spec.ts
-  - tests/e2e/contracts/contracts-docs-sync.spec.ts
+  - Game.Core.Tests/Domain/GuildContractsTests.cs
 Contracts-Refs:
-  - src/shared/contracts/guild/guild-manager-events.ts
+  - Scripts/Core/Contracts/Guild/GuildCreated.cs
+  - Scripts/Core/Contracts/Guild/GuildMemberJoined.cs
+  - Scripts/Core/Contracts/Guild/GuildMemberLeft.cs
+  - Scripts/Core/Contracts/Guild/GuildDisbanded.cs
+  - Scripts/Core/Contracts/Guild/GuildMemberRoleChanged.cs
 Status: Proposed
 ---
 
@@ -21,9 +24,41 @@ Status: Proposed
 
 影响范围
 
-- 合同文件：`src/shared/contracts/guild/guild-manager-events.ts`
-- 受影响模块：公会管理场景的事件发布/订阅、前端状态同步
+- 契约文件：`Scripts/Core/Contracts/Guild/**`（5 个 C# 事件记录类型）
+- 受影响模块：公会管理场景的事件发布/订阅、UI 状态同步
 
 验收要点（就地）
 
 - 单测覆盖事件构造与必需字段；E2E 占位用例存在（见 Test-Refs）
+
+## 核心公会事件契约（Godot + C#）
+
+- **GuildCreated** (`core.guild.created`)
+  - 触发时机：公会创建成功后
+  - 字段示例：GuildId, CreatorId, GuildName, CreatedAt
+  - 契约位置（规划）：Scripts/Core/Contracts/Guild/GuildCreated.cs
+- **GuildMemberJoined** (`core.guild.member.joined`)
+  - 触发时机：成员成功加入公会后
+  - 字段示例：UserId, GuildId, JoinedAt, Role
+  - 契约位置：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
+  - 说明：当用户成功加入某个公会时触发，用于驱动 Guild Manager 场景内成员列表与日志更新。
+- **GuildMemberLeft** (`core.guild.member.left`)
+  - 触发时机：成员离开或被移出公会后
+  - 字段示例：UserId, GuildId, LeftAt, Reason
+  - 契约位置（规划）：Scripts/Core/Contracts/Guild/GuildMemberLeft.cs
+
+## 扩展公会事件契约（Godot + C#）
+
+- **GuildDisbanded** (`core.guild.disbanded`)
+  - 触发时机：公会被解散时（主动解散或管理策略触发）
+  - 字段示例：GuildId, DisbandedByUserId, DisbandedAt, Reason
+  - 契约位置：Scripts/Core/Contracts/Guild/GuildDisbanded.cs
+- **GuildMemberRoleChanged** (`core.guild.member.role_changed`)
+  - 触发时机：公会成员角色发生变更时（如 member → admin）
+  - 字段示例：UserId, GuildId, OldRole, NewRole, ChangedAt, ChangedByUserId
+  - 契约位置：Scripts/Core/Contracts/Guild/GuildMemberRoleChanged.cs
+
+> 约定：任何新增或调整 Guild 相关 C# 契约（Scripts/Core/Contracts/Guild/**）时，必须同步更新：
+> - Game.Core.Tests/Domain/GuildContractsTests.cs（新增/调整对应测试用例）
+> - scripts/python/check_guild_contracts.py（扩展 EXPECTED 列表）
+> - 如涉及 Overlay 内容变化，仍需通过 scripts/python/validate_contracts.py 校验 Overlay ↔ Contracts 回链。

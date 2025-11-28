@@ -245,11 +245,48 @@ export async function launchAppForPerformance(
 - 环境变量（可覆盖默认）
   - `FP_P95_THRESHOLD_MS`：覆盖阈值（默认按环境：dev≤400 / staging≤300 / prod≤200）
   - `FP_RUNS`：采样次数（默认 5）
-  - `FP_SOFT_GATE` 或 `PERF_GATE_MODE`：`soft|hard`（CI 推荐 soft；预发/生产使用 hard）
+ - `FP_SOFT_GATE` 或 `PERF_GATE_MODE`：`soft|hard`（CI 推荐 soft；预发/生产使用 hard）
 
 - 采样稳定化（测试侧）
   - 复用单个 Electron 实例，多轮 `page.reload()`
   - 业务就绪信号（`data-app-ready=true`）后，执行两帧 `requestAnimationFrame` 预热
-  - 报告输出：`logs/e2e/<YYYY-MM-DD>/performance-first-paint/fcp-performance.json`
+ - 报告输出：`logs/e2e/<YYYY-MM-DD>/performance-first-paint/fcp-performance.json`
 
 详见：`docs/adr/ADR-0015-performance-budgets-and-gates.md` 的“Electron 环境附注”与“门禁策略”。
+
+## 7.y 架构依赖护栏（Godot + C# 模板）
+
+> 说明：本节为 newguild Godot+C# 模板增加最小依赖矩阵约束，避免 Core 层意外依赖 Godot/测试工程，或适配层/场景与测试工程发生反向耦合。具体规则由 ADR‑0007（端口与适配器）与 AGENTS.md 共同约束，本节只给出可执行检查的入口。
+
+### 7.y.1 项目级依赖矩阵（C# 工程）
+
+- `Game.Core/**`
+  - 允许依赖：.NET 标准库、`Game.Core` 自身命名空间。
+  - 禁止依赖：`Godot`、`Game.Godot`、`Tests.*`、`Tests.Godot` 等任何引擎或测试命名空间。
+- `Game.Godot/**`
+  - 允许依赖：`Godot`、`Game.Core` 与适配层接口（Ports）。
+  - 禁止依赖：任何 `Tests.*`/`Tests.Godot` 工程；禁止从 UI 直接依赖数据库/文件系统实现（必须通过适配层封装）。
+- `Game.Core.Tests/**`、`Game.Godot.Tests/**`、`Tests.Godot/**`
+  - 允许依赖：被测工程（Game.Core、Game.Godot）、测试库（xUnit/GdUnit4 等）。
+  - 禁止被非测试工程引用（测试工程只能作为依赖终点）。
+
+### 7.y.2 目录级依赖矩阵（Godot Scripts）
+
+- `Scripts/Core/**`
+  - 不得引用 Godot API 或任何 `Scripts/Adapters/**`、`Scripts/Scenes/**` 代码；
+  - 对外通过接口/Contracts 暴露能力，保持可单测性。
+- `Scripts/Adapters/**`
+  - 可以引用 Godot API 与 `Scripts/Core/**`；
+  - 不得依赖 `Scripts/Scenes/**`，避免 UI 细节反向渗透到适配层。
+- `Scripts/Scenes/**`
+  - 只通过 Adapters 或依赖注入使用 Core 能力，禁止直接依赖 Core 实现细节。
+
+### 7.y.3 依赖护栏检查与 CI 集成（规划）
+
+- 建议提供一个 Python 或 .NET 脚本，在 CI 中生成 `logs/ci/<date>/dependency-guard.json` 与简要文本摘要：
+  - 扫描 C# 工程引用（csproj）与 `using` 语句，检查是否违反 7.y.1 的项目级依赖矩阵；
+  - 扫描 `Scripts/Core`/`Scripts/Adapters`/`Scripts/Scenes` 目录，检查是否出现 Godot API 或跨层引用违规；
+  - 报告至少包含违规文件/命名空间/引用方向，便于在 PR 评审中定位问题。
+- 与 Taskmaster 集成：
+  - 通过 `.taskmaster/tasks/tasks_back.json` 中的专门 NG 任务（例如“架构依赖护栏与依赖图校验骨架”）约定依赖矩阵与脚本行为；
+  - 在 `windows-quality-gate` 或等价工作流中以软/硬门禁方式调用依赖护栏脚本，逐步收紧架构约束。

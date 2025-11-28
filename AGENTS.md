@@ -302,7 +302,7 @@ This template comes pre-configured with the following technology stack:
       string Role // member | admin
   )
   {
-      public const string EventType = "app.guild.member.joined";
+      public const string EventType = "core.guild.member.joined";
   }
 
 ### 6.2 测试与验收（xUnit + GdUnit4）
@@ -329,7 +329,7 @@ This template comes pre-configured with the following technology stack:
       public void Joined_event_has_expected_defaults()
       {
           var evt = new GuildMemberJoined("u1","g1",DateTimeOffset.UtcNow,"member");
-          GuildMemberJoined.EventType.Should().Be("app.guild.member.joined");
+          GuildMemberJoined.EventType.Should().Be("core.guild.member.joined");
           evt.Role.Should().Be("member");
       }
   }

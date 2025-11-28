@@ -84,6 +84,10 @@ B4（更细粒度指标，如 GC/Signal/DB）作为长期优化，收敛到 task
   - B5：日志使用规范（logging-guidelines.md）
     - 任务：`NG-0026`（story_id: `PH16-BACKLOG-B5`）
 
+> 补充：
+> - 针对“从 Sentry/错误反馈自动生成 Taskmaster 草案”这一需求，本仓库在 tasks_back.json 中新增了 `NG-0037`（story_id: `PH16-BACKLOG-TASKMASTER-SENTRY-FEEDBACK`）。
+> - 该任务只负责设计 **Sentry → Taskmaster 草案** 的自动回链骨架（Python 脚本 + 非阻断 CI Job + logs/ci/**/taskmaster/** 工件），并明确所有草案必须经过人工审阅后才能被提升为正式 NG/GM 任务，避免将噪音或未脱敏字段直接写入任务 SSoT。
+
 ### 2.5 Phase 17 – Build / Export Backlog
 
 - 文档：docs/migration/Phase-17-Build-Backlog.md
@@ -133,4 +137,3 @@ B4（更细粒度指标，如 GC/Signal/DB）作为长期优化，收敛到 task
 > 3. 再跑一遍 `task_links_validate.py` 确认通过；
 > 4. 最后在 PR 描述中引用对应的 Phase Backlog 与 ADR，保持“文档↔任务↔代码”
 >    三者一致。
-

@@ -22,6 +22,10 @@
   - 在 Game.Godot 项目中添加 Sentry Godot SDK（兼顾 Windows-only 平台与隐私合规要求）；
   - 实现最小版 `Observability.cs`，仅负责 SDK 初始化与简单日志代理，逐步扩展其他功能；
   - 将 Sentry DSN/Release/Environment 从硬编码迁移到配置文件或环境变量，避免泄露敏感信息。
+  - 初始化时机与范围：
+    - SDK 初始化仅在 Observability Autoload 中执行一次（例如 `_Ready()` 或等价初始化钩子），在主场景加载之前完成；
+    - Game.Core 与单元测试工程不直接调用 Sentry SDK，而是通过 `IObservabilityClient`/`ILogger` 等接口输出日志与事件；
+    - 在 Tests.Godot/GdUnit4 场景测试中，可通过环境变量或配置关闭真实 SDK 初始化或切换到 fake/本地后端，避免在测试环境向 Sentry 发送数据。
 - 优先级：P2（需要真实项目环境和 Sentry 账号支持，模板阶段可暂不集成）。
 
 ---
@@ -110,3 +114,11 @@
   - 当前 Phase 16 仅要求现有 LoggerAdapter + 安全审计（SecurityAudit/SqliteDataStore/SecurityHttpClient）提供最小可观测性基线；
   - 本 Backlog 文件用于记录 Sentry 集成与 Observability 蓝图，避免在模板阶段就强行引入第三方依赖和复杂工作流。
 
+### 与 Taskmaster Sentry 反馈桥接的关系（NG-0037）
+
+- 当 B1/B3（Observability Autoload + Release Health Gate）具备最小可用骨架，且项目已经接入真实 Sentry 项目并稳定收集错误/崩溃数据后，可考虑启用基于 Sentry 的 Taskmaster 草案生成：
+  - 对应任务：`NG-0037`（story_id: `PH16-BACKLOG-TASKMASTER-SENTRY-FEEDBACK`）。
+  - 行为：通过夜间或手动触发的 Python 脚本，从 Sentry API 读取近 24 小时内的新/回归错误 TopN，按环境与标签过滤后生成 `.taskmaster/tasks/tasks_sentry_draft.json` 或等价草案文件，并在 CI 中以非阻断方式写入 `logs/ci/<date>/taskmaster/**` 工件。
+- 该桥接仅负责“从监控到任务草案”的自动化，不直接修改 `tasks_back.json`/`tasks_gameplay.json`：
+  - 所有草案必须经过架构/owner 人工审阅与筛选，补齐 story_id/adr_refs/chapter_refs/overlay_refs 与 test_refs 后，才可被提升为正式 NG/GM 任务。
+  - 在任何情况下，禁止将包含敏感字段或未经脱敏的 Sentry 事件内容直接写入任务 SSoT，隐私与合规约束仍由 ADR‑0003/0019 与 privacy-compliance.md 统一约束。
