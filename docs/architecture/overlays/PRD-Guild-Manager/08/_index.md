@@ -10,3 +10,7 @@ Updated: true
 - CloudEvent 契约 — 见 `08-Contracts-CloudEvent.md`
 - 公会管理事件（Guild Manager Events）— 见 `08-Contracts-Guild-Manager-Events.md`
 - 质量指标（Quality Metrics）— 见 `08-Contracts-Quality-Metrics.md`
+
+示例：当前 Godot+C# 契约引用
+
+- 公会成员加入事件契约：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`

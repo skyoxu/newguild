@@ -26,4 +26,8 @@ Status: Proposed
 
 验收要点（就地）
 
-- 单测覆盖基本构造与字段校验；E2E 占位用例存在（见 Test-Refs）
+ - 单测覆盖基本构造与字段校验；E2E 占位用例存在（见 Test-Refs）
+
+示例：当前 Godot+C# 契约引用
+
+- 公会成员加入事件契约：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`

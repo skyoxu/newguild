@@ -56,6 +56,8 @@ Test-Refs:
 - [ ] 事件与契约：
   - 领域事件与 UI 事件命名遵循 `${DOMAIN_PREFIX}.<entity>.<action>`（见 ADR‑0004）
   - Contracts SSoT 存在于 `Game.Core` 或专门的 Contracts 项目（不依赖 Godot）
+  - 示例契约文件：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
+  - 当前 T2 最小事件集合（规划）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并计划分别落盘到 Scripts/Core/Contracts/Guild/GuildCreated.cs、Scripts/Core/Contracts/Guild/GuildMemberJoined.cs、Scripts/Core/Contracts/Guild/GuildMemberLeft.cs
 - [ ] 数据与存储：
   - SQLite 访问通过适配层封装（SqliteDataStore 或等价组件），仅使用 `user://` 路径，符合 ADR‑0006/0019 要求
   - Settings SSoT 为 ConfigFile（`user://settings.cfg`，见 ADR‑0023），DB 不再承载设置 SSoT 职责

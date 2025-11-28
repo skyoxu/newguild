@@ -111,12 +111,28 @@ jobs:
         run: |
           py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debug --godot-bin "$env:GODOT_BIN" --build-solutions
 
+      - name: Update AI assistants index (non-blocking)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          py -3 scripts/python/update_ai_index.py --write
+
       - name: Upload CI logs (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ci-logs
           path: logs/ci/**
+          if-no-files-found: ignore
+
+      - name: Upload docs encoding + ai-index logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-encoding-and-ai-index-logs
+          path: |
+            logs/ci/**/encoding/**
+            logs/ci/**/ai-index/**
           if-no-files-found: ignore
 
       - name: Dotnet coverage (soft gate via Python, optional thresholds)

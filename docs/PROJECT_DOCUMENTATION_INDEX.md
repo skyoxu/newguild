@@ -267,13 +267,14 @@ print(f'Created: {dst}')
 - [individual-test-results.md](individual-test-results.md) — 独立测试结果
 
 ### AI 助手索引（自动更新与校验）
-- 本地自动触发（Husky）
-  - 正常 `git commit` 时会执行 `.husky/pre-commit`，其中包含 `node scripts/ci/update-ai-index.mjs --write || true`（非阻断）。
-  - 如未生效，请先执行一次 `npm run prepare` 确保 Husky 安装。
+- 本地更新
+  - 手动执行：`py -3 scripts/python/update_ai_index.py --write`（推荐在修改 AGENTS/CLAUDE/.claude/commands/** 或 AI 工作流文档后运行）。
+  - 如需自动化，可将上述命令追加到本地 Git pre-commit 钩子或 Husky 脚本中，并保持“非阻断”（例如在脚本末尾追加 `|| exit 0`）。
 - CI 触发
-  - 推送到 PR 或 `main` 后，Build & Test 工作流会在构建阶段执行 “Update AI assistants index (non-blocking)”。
+  - 推送到 PR 或 `main` 后，Windows CI 工作流会在构建阶段执行 “Update AI assistants index (non-blocking)” 步骤：
+    - 调用 `py -3 scripts/python/update_ai_index.py --write`，即使失败也不会阻断构建（continue-on-error）。
 - 日志工件
-  - 工件名: `docs-encoding-and-ai-index-logs`（包含 `logs/**/ai-index/**`）。
+  - 工件名: `docs-encoding-and-ai-index-logs`（包含 `logs/**/encoding/**` 与 `logs/**/ai-index/**`）。
   - 结果文件随工作区产物可下载。
 - 校验方式
   - 本地: `git diff docs/ai-assistants.index.md docs/ai-assistants.state.json`。

@@ -129,6 +129,12 @@ jobs:
         run: |
           py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debug --godot-bin "$env:GODOT_BIN" --build-solutions
 
+      - name: Contracts vs overlays validation (soft gate)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          py -3 scripts/python/validate_contracts.py
+
       - name: Upload CI logs (always)
         if: always()
         uses: actions/upload-artifact@v4

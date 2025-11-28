@@ -44,7 +44,8 @@
       "事件引擎能够接受一组领域事件定义（来自 Contracts 或 Domain 类型），根据当前游戏状态评估触发条件，并执行对应效果。",
       "事件冲突解决规则在 EventEngine 中有清晰实现（如优先级、排他性、合并策略），并在 xUnit 测试中覆盖。",
       "Game.Core.Tests/Domain/EventEngineTests.cs 中存在针对回合循环、条件评估、事件执行、冲突解决的单元测试，全部通过。",
-      "EventEngine 不直接依赖 Godot API；与 Godot 的集成通过适配层/Signals 完成（见 NG-0020/NG-0014）。"
+      "EventEngine 不直接依赖 Godot API；与 Godot 的集成通过适配层/Signals 完成（见 NG-0020/NG-0014）。",
+      "EventEngine 至少支持上述三类 Guild 领域事件的基本调度：在 Resolution/Player/AI Simulation 周期内能够消费和发布 GuildCreated、GuildMemberJoined、GuildMemberLeft 等事件，对应的行为由 Game.Core.Tests/Domain/EventEngineTests.cs 及相关用例覆盖。"
     ],
     "test_strategy": [
       "按 PRD 中定义的核心循环（Resolution/Player/AI Simulation）为 EventEngine 设计一组最小测试场景，用 xUnit 验证每个阶段的状态变更是否符合预期。",
@@ -74,6 +75,7 @@
     "chapter_refs": [
       "CH01",
       "CH04",
+      "CH05",
       "CH06",
       "CH07",
       "CH09"
@@ -125,6 +127,7 @@
     "chapter_refs": [
       "CH01",
       "CH04",
+      "CH05",
       "CH06",
       "CH07"
     ],
@@ -143,14 +146,16 @@
       "Game.Core.Tests/Domain/GameLoopTests.cs",
       "Tests.Godot/tests/Scenes/test_guild_main_scene.gd",
       "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
-      "Tests.Godot/tests/Scenes/test_main_scene_smoke.gd"
+      "Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
+      "Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd"
     ],
     "acceptance": [
       "Game.Core 中存在表示游戏周次/阶段/时间的核心类型与服务（例如 GameTurnSystem 或等价接口），并实现 PRD 中定义的三阶段回合循环。",
       "游戏时间推进逻辑能够驱动 EventEngine 与 AICoordinator，在至少一个简单场景中完成从 Resolution → Player → AI Simulation 的完整一周循环。",
       "Godot 主场景 UI 能够显示当前周次/阶段/时间状态，并在回合推进时实时更新。",
       "Game.Core.Tests 中存在 GameLoopTests（或等价），覆盖时间推进、阶段切换以及回合边界条件；Tests.Godot 中有用例验证 UI 与 Core 状态同步。",
-      "Game.Core 与 Godot 场景的组合至少能够完成 PRD 3.0.3 T2 可玩性场景流中描述的一次完整循环：从启动主场景进入首周公会管理界面，执行一次完整的 Resolution→Player→AI Simulation 一周循环，并安全返回主菜单或结束会话；对应的 xUnit 和 GdUnit4/headless 用例挂接在 NG-0021 的 test_refs 中并在 CI 中保持绿灯。"
+      "Game.Core 与 Godot 场景的组合至少能够完成 PRD 3.0.3 T2 可玩性场景流中描述的一次完整循环：从启动主场景进入首周公会管理界面，执行一次完整的 Resolution→Player→AI Simulation 一周循环，并安全返回主菜单或结束会话；对应的 xUnit 和 GdUnit4/headless 用例挂接在 NG-0021 的 test_refs 中并在 CI 中保持绿灯。",
+      "GM-0103 所需的 T2 流程最小测试入口已经落在 Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd；后续扩展测试应在此基础上补充，而不是新建平行入口文件。"
     ],
     "test_strategy": [
       "在 xUnit 中为 GameLoop 设计一组“单周循环”用例，验证每个阶段的调用顺序与状态变化是否符合 PRD 描述。",
