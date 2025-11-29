@@ -56,11 +56,44 @@ Test-Refs:
 - [ ] 事件与契约：
   - 领域事件与 UI 事件命名遵循 `${DOMAIN_PREFIX}.<entity>.<action>`（见 ADR‑0004）
   - Contracts SSoT 存在于 `Game.Core` 或专门的 Contracts 项目（不依赖 Godot）
-  - 示例契约文件：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
-  - 当前 T2 最小事件集合（规划）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并计划分别落盘到 Scripts/Core/Contracts/Guild/GuildCreated.cs、Scripts/Core/Contracts/Guild/GuildMemberJoined.cs、Scripts/Core/Contracts/Guild/GuildMemberLeft.cs
+  - 示例契约文件：`scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
+  - 当前 T2 最小事件集合（规划）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并计划分别落盘到 scripts/Core/Contracts/Guild/GuildCreated.cs、scripts/Core/Contracts/Guild/GuildMemberJoined.cs、scripts/Core/Contracts/Guild/GuildMemberLeft.cs
+- [ ] 事件命名规范验证（ADR-0004）：
+  - 所有事件常量必须匹配正则：`^[a-z]+\.[a-z_]+\.[a-z_]+$`
+  - 验证命令（扫描所有 EventType 常量定义）：
+    ```bash
+    # Windows PowerShell
+    Get-ChildItem -Recurse -Include *.cs scripts/Core/Contracts |
+    Select-String 'EventType\s*=\s*"([^"]+)"' |
+    ForEach-Object {
+      if ($_.Matches.Groups[1].Value -notmatch '^[a-z]+\.[a-z_]+\.[a-z_]+$') {
+        Write-Host "FAIL: Invalid event name: $($_.Matches.Groups[1].Value) in $($_.Path)"
+        exit 1
+      }
+    }
+    Write-Host "PASS: All event names valid"
+    ```
+  - 前缀一致性：所有事件必须以项目定义的 `DOMAIN_PREFIX` 开头（当前为 `core.`）
+  - 禁止模式示例：
+    - ❌ CamelCase：`Core.GuildCreated`
+    - ❌ 混合分隔符：`core.guild-created`
+    - ❌ 缺少前缀：`member.joined`
+    - ✅ 正确格式：`core.guild.created`、`core.guild_member.joined`
 - [ ] 数据与存储：
   - SQLite 访问通过适配层封装（SqliteDataStore 或等价组件），仅使用 `user://` 路径，符合 ADR‑0006/0019 要求
   - Settings SSoT 为 ConfigFile（`user://settings.cfg`，见 ADR‑0023），DB 不再承载设置 SSoT 职责
+
+### 2.3 安全基线验证（ADR-0019）
+
+- [ ] 路径与网络安全检查：
+  - 扫描脚本：`py -3 scripts/python/godot_selfcheck.py`
+  - 代码禁用检查：`py -3 scripts/python/scan_code_disables.py`
+  - 乱码检测：`py -3 scripts/python/scan_garbled.py`
+  - 绝对路径检测：`grep -rn ":\\\\" Game.Core Game.Godot --include="*.cs"`
+  - HTTP 外链检测：`grep -rn "http://" Game.Core Game.Godot --include="*.cs"`
+- [ ] 配置开关验证：
+  - GD_SECURE_MODE=1 已设置
+  - ALLOWED_EXTERNAL_HOSTS 白名单已定义
 
 ---
 
@@ -91,7 +124,7 @@ Test-Refs:
 
 - [ ] xUnit 单元测试覆盖核心域逻辑：
   - Game.Core.Tests 中存在 Guild/事件引擎/AI 等模块的测试
-  - 覆盖率门禁参数与阈值由 ADR‑0005/0015 所引用的脚本负责，本清单只要求“存在且可运行”
+  - 覆盖率门禁：`py -3 scripts/python/run_dotnet.py test --coverage`（阈值 lines≥90%, branches≥85%，见 ADR-0005）
 - [ ] GdUnit4 场景/集成测试：
   - Tests.Godot 中有针对主场景、公会管理 UI、关键 Signals 的测试
   - 至少包含一条完整的“启动 → 主菜单 → 进入公会场景 → 简单操作 → 退出”冒烟用例
@@ -105,7 +138,9 @@ Test-Refs:
 ## 五、性能与监控验收（引用 ADR‑0015/0003）
 
 - [ ] PerfTracker 与性能采集：
-  - Godot 侧有性能采集组件（PerfTracker 或等价），在关键场景中输出性能数据到 `user://logs/perf/perf.json`
+  - Godot 侧有性能采集组件（PerfTracker 或等价），在关键场景中输出性能数据
+    - 开发环境：Godot 运行时输出到 `user://logs/perf/perf.json`
+    - CI 环境：归档到项目相对路径 `logs/perf/<YYYY-MM-DD>/summary.json`
   - 性能预算与 P95 等指标的具体阈值不在本清单重复，只需确认采集管线按 ADR‑0015/CH09 设计存在
 - [ ] 监控与日志：
   - Logger/ObservabilityClient（如已实现）能够针对关键事件/错误输出结构化日志
@@ -115,12 +150,41 @@ Test-Refs:
 
 ## 六、CI / 发布与平台约束验收
 
-- [ ] Windows-only CI 与构建：
+- [ ] Windows-only CI 与构建（ADR-0011）：
   - Windows CI（ci-windows.yml）在 main 分支可整体通过
+  - Shell 策略验证：
+    - 所有 Windows Job 使用 PowerShell（通过 `defaults.run.shell: pwsh` 或 step 级 `shell: pwsh`）
+    - 工作流 lint 检查：`pwsh lint_workflows.ps1` 应通过（防止 bash/cmd 混入）
   - Windows Release (Manual/Tag) 工作流可导出并运行 Game.exe（不依赖安装 Godot）
 - [ ] 质量门禁：
   - quality_gates.py/ci_pipeline.py 脚本存在且可运行，汇总 dotnet/selfcheck/编码/Smoke/GdUnit 等结果
-  - 具体阈值由 ADR‑0005/0015/CH07/CH09 负责，本清单只检查“门禁存在且已集成到 CI”
+  - 具体阈值由 ADR‑0005/0015/CH07/CH09 负责，本清单只检查"门禁存在且已集成到 CI"
+- [ ] 分支保护策略验收（ADR-0011/0005）：
+  - **main/master 分支保护规则**（Repository → Settings → Branches → Branch protection rules）：
+    - [ ] 启用 "Require a pull request before merging"
+      - [ ] Require approvals (至少 1 个审批)
+    - [ ] 启用 "Require status checks to pass before merging"
+      - [ ] Require branches to be up to date before merging
+      - [ ] 必需状态检查清单（Required checks）：
+        - `dotnet-typecheck-lint` - C# 类型检查与代码格式
+        - `dotnet-unit` - 单元测试 + 覆盖率门禁（≥90% lines, ≥85% branches）
+        - `godot-e2e` - Godot headless 冒烟/安全/性能测试
+        - `task-links-validate` - ADR/CH/Overlay 回链校验
+        - `release-health` - Sentry Crash-Free 门禁（≥99.5%）
+    - [ ] 启用 "Do not allow bypassing the above settings"
+    - [ ] 启用 "Restrict who can push to matching branches"（仅限 Admins）
+  - **验证方法**（需要 repo admin 权限）：
+    ```bash
+    # GitHub CLI 验证分支保护
+    gh api repos/:owner/:repo/branches/main/protection | ConvertFrom-Json | Select-Object `
+      @{N='RequiredChecks';E={$_.required_status_checks.contexts}}, `
+      @{N='RequireApprovals';E={$_.required_pull_request_reviews.required_approving_review_count}}, `
+      @{N='EnforceAdmins';E={$_.enforce_admins.enabled}}
+    ```
+  - **发布工作流门禁**：
+    - [ ] Manual/Tag 触发的 Release 工作流必须依赖所有 Required checks 通过
+    - [ ] Release 分支（如 release/*）应用相同保护规则
+    - [ ] 禁止直接 push 到受保护分支（force-push 永久禁用）
 
 ---
 
