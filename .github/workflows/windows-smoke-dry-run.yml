@@ -1,4 +1,4 @@
-name: Windows Smoke (Dry Run)
+name: smoke
 
 # Notes:
 # - Runs headless smoke and GdUnit tests only (no export/templates).
