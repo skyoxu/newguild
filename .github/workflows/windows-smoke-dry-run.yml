@@ -6,6 +6,10 @@ name: Windows Smoke (Dry Run)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   smoke:
