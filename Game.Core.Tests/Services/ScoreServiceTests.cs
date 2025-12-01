@@ -84,5 +84,22 @@ public class ScoreServiceTests
 
         Assert.Equal(0, added);
     }
+
+    [Fact]
+    public void ComputeAddedScore_applies_easy_difficulty_multiplier()
+    {
+        var svc = new ScoreService();
+        var cfg = new GameConfig(
+            MaxLevel: 50,
+            InitialHealth: 100,
+            ScoreMultiplier: 1.0,
+            AutoSave: false,
+            Difficulty: Difficulty.Easy
+        );
+
+        // Easy difficulty has 0.9 multiplier: 100 * 1.0 * 0.9 = 90
+        var added = svc.ComputeAddedScore(100, cfg);
+        Assert.Equal(90, added);
+    }
 }
 

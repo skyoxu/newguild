@@ -30,4 +30,19 @@ public class GameStateMachineTests
         Assert.False(fsm.End());
         Assert.False(fsm.Start());
     }
+
+    [Fact]
+    public void Pause_returns_false_when_not_in_running_state()
+    {
+        var fsm = new GameStateMachine();
+
+        // Pause in Initialized state should return false
+        Assert.Equal(GameFlowState.Initialized, fsm.State);
+        Assert.False(fsm.Pause());
+
+        // Transition to GameOver and try to pause
+        Assert.True(fsm.End());
+        Assert.Equal(GameFlowState.GameOver, fsm.State);
+        Assert.False(fsm.Pause());
+    }
 }

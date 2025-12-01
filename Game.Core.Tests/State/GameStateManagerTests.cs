@@ -109,5 +109,33 @@ public class GameStateManagerTests
         var tooLong = new string('x', 101);
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await mgr.SaveGameAsync(tooLong));
     }
+
+    [Fact]
+    public void Publish_continues_with_remaining_callbacks_when_one_throws()
+    {
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+
+        var callback1Called = false;
+        var callback2Called = false;
+        var callback3Called = false;
+
+        // First callback: succeeds
+        mgr.OnEvent(evt => callback1Called = true);
+
+        // Second callback: throws exception
+        mgr.OnEvent(evt => throw new InvalidOperationException("Callback failed"));
+
+        // Third callback: should still be called despite second callback throwing
+        mgr.OnEvent(evt => callback3Called = true);
+
+        // Trigger event publishing by setting state (which calls Publish internally)
+        mgr.SetState(MakeState(), MakeConfig());
+
+        // All callbacks should have been attempted
+        Assert.True(callback1Called);
+        Assert.True(callback3Called);
+        // callback2Called cannot be checked as it throws, but the test verifies callback3 ran
+    }
 }
 
