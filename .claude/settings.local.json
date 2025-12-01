@@ -21,7 +21,11 @@
       "Bash(git commit:*)",
       "SlashCommand(/acceptance-check)",
       "Bash(findstr:*)",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(superclaude review:*)",
+      "Bash(superclaude --help:*)",
+      "Bash(dotnet build:*)",
+      "Bash(py -3 scripts/python/check_tasks_all_refs.py:*)"
     ],
     "deny": [],
     "ask": []

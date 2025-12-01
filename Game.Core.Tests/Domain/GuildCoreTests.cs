@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Game.Core.Domain;
 using Xunit;
@@ -282,6 +283,183 @@ public class GuildCoreTests
         act.Should().Throw<ArgumentException>()
             .WithParameterName("userId")
             .WithMessage("*用户ID不能为空*");
+    }
+
+    #endregion
+
+    #region Concurrency Tests
+
+    [Fact]
+    public async Task AddMember_ShouldHandleConcurrentAdds_WhenMultipleThreadsAddDifferentMembers()
+    {
+        // Arrange
+        var guild = new Guild("guild-001", "creator-123", "并发测试公会");
+        var userIds = Enumerable.Range(1, 10).Select(i => $"user-{i}").ToList();
+
+        // Act - 并发添加 10 个不同用户
+        var tasks = userIds.Select(userId =>
+            Task.Run(() => guild.AddMember(userId, GuildRole.Member))
+        ).ToList();
+        var results = await Task.WhenAll(tasks);
+
+        // Assert
+        results.Should().AllSatisfy(r => r.Should().BeTrue(), "所有不同用户都应成功添加");
+        guild.Members.Should().HaveCount(11, "创建者 + 10个新成员");
+        foreach (var userId in userIds)
+        {
+            guild.Members.Should().ContainSingle(m => m.UserId == userId);
+        }
+    }
+
+    [Fact]
+    public async Task AddMember_ShouldHandleConcurrentAdds_WhenMultipleThreadsAddSameUser()
+    {
+        // Arrange
+        var guild = new Guild("guild-001", "creator-123", "并发测试公会");
+        var userId = "duplicate-user";
+
+        // Act - 10 个线程同时尝试添加同一个用户
+        var tasks = Enumerable.Range(0, 10).Select(_ =>
+            Task.Run(() => guild.AddMember(userId, GuildRole.Member))
+        ).ToList();
+        var results = await Task.WhenAll(tasks);
+
+        // Assert
+        var successCount = results.Count(r => r == true);
+        successCount.Should().Be(1, "同一用户只能被添加一次");
+        guild.Members.Should().HaveCount(2, "创建者 + 1个重复用户");
+        guild.Members.Should().ContainSingle(m => m.UserId == userId);
+    }
+
+    [Fact]
+    public async Task RemoveMember_ShouldHandleConcurrentRemoves_WhenMultipleThreadsRemoveDifferentMembers()
+    {
+        // Arrange
+        var guild = new Guild("guild-001", "creator-123", "并发测试公会");
+        var userIds = Enumerable.Range(1, 10).Select(i => $"user-{i}").ToList();
+        foreach (var userId in userIds)
+        {
+            guild.AddMember(userId, GuildRole.Member);
+        }
+
+        // Act - 并发移除 10 个不同用户
+        var tasks = userIds.Select(userId =>
+            Task.Run(() => guild.RemoveMember(userId))
+        ).ToList();
+        var results = await Task.WhenAll(tasks);
+
+        // Assert
+        results.Should().AllSatisfy(r => r.Should().BeTrue(), "所有成员都应成功移除");
+        guild.Members.Should().HaveCount(1, "仅剩创建者");
+        guild.Members.Should().ContainSingle(m => m.UserId == "creator-123");
+    }
+
+    [Fact]
+    public async Task RemoveMember_ShouldHandleConcurrentRemoves_WhenMultipleThreadsRemoveSameUser()
+    {
+        // Arrange
+        var guild = new Guild("guild-001", "creator-123", "并发测试公会");
+        var userId = "to-remove";
+        guild.AddMember(userId, GuildRole.Member);
+
+        // Act - 10 个线程同时尝试移除同一个用户
+        var tasks = Enumerable.Range(0, 10).Select(_ =>
+            Task.Run(() => guild.RemoveMember(userId))
+        ).ToList();
+        var results = await Task.WhenAll(tasks);
+
+        // Assert
+        var successCount = results.Count(r => r == true);
+        successCount.Should().Be(1, "同一用户只能被移除一次");
+        guild.Members.Should().HaveCount(1, "仅剩创建者");
+        guild.Members.Should().ContainSingle(m => m.UserId == "creator-123");
+    }
+
+    [Fact]
+    public async Task ChangeRole_ShouldHandleConcurrentRoleChanges_WhenMultipleThreadsChangeDifferentMembers()
+    {
+        // Arrange
+        var guild = new Guild("guild-001", "creator-123", "并发测试公会");
+        var userIds = Enumerable.Range(1, 10).Select(i => $"user-{i}").ToList();
+        foreach (var userId in userIds)
+        {
+            guild.AddMember(userId, GuildRole.Member);
+        }
+
+        // Act - 并发修改 10 个不同用户的角色
+        var tasks = userIds.Select(userId =>
+            Task.Run(() => guild.ChangeRole(userId, GuildRole.Admin))
+        ).ToList();
+        var results = await Task.WhenAll(tasks);
+
+        // Assert
+        results.Should().AllSatisfy(r => r.Should().BeTrue(), "所有角色变更都应成功");
+        guild.Members.Should().HaveCount(11);
+        foreach (var userId in userIds)
+        {
+            guild.Members.Should().ContainSingle(m => m.UserId == userId && m.Role == GuildRole.Admin);
+        }
+    }
+
+    [Fact]
+    public async Task Guild_ShouldHandleMixedConcurrentOperations_WhenMultipleThreadsPerformDifferentActions()
+    {
+        // Arrange
+        var guild = new Guild("guild-001", "creator-123", "并发测试公会");
+
+        // 预先添加一些成员
+        for (int i = 1; i <= 5; i++)
+        {
+            guild.AddMember($"existing-{i}", GuildRole.Member);
+        }
+
+        // Act - 混合并发操作
+        var tasks = new List<Task<object>>();
+
+        // 5 个线程添加新成员
+        for (int i = 1; i <= 5; i++)
+        {
+            var userId = $"new-{i}";
+            tasks.Add(Task.Run<object>(() => guild.AddMember(userId, GuildRole.Member)));
+        }
+
+        // 3 个线程移除现有成员
+        for (int i = 1; i <= 3; i++)
+        {
+            var userId = $"existing-{i}";
+            tasks.Add(Task.Run<object>(() => guild.RemoveMember(userId)));
+        }
+
+        // 2 个线程修改角色
+        for (int i = 4; i <= 5; i++)
+        {
+            var userId = $"existing-{i}";
+            tasks.Add(Task.Run<object>(() => guild.ChangeRole(userId, GuildRole.Admin)));
+        }
+
+        await Task.WhenAll(tasks);
+
+        // Assert - 验证最终状态一致性
+        guild.Members.Should().NotBeNull();
+        guild.Members.Should().Contain(m => m.UserId == "creator-123", "创建者应始终存在");
+
+        // 验证新添加的成员存在
+        for (int i = 1; i <= 5; i++)
+        {
+            guild.Members.Should().ContainSingle(m => m.UserId == $"new-{i}");
+        }
+
+        // 验证被移除的成员不存在
+        for (int i = 1; i <= 3; i++)
+        {
+            guild.Members.Should().NotContain(m => m.UserId == $"existing-{i}");
+        }
+
+        // 验证角色变更成功
+        for (int i = 4; i <= 5; i++)
+        {
+            guild.Members.Should().ContainSingle(m => m.UserId == $"existing-{i}" && m.Role == GuildRole.Admin);
+        }
     }
 
     #endregion

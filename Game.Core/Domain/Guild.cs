@@ -8,9 +8,12 @@ namespace Game.Core.Domain;
 /// Guild aggregate root entity.
 /// Manages guild lifecycle, membership, and role assignments.
 /// Follows ADR-0018 (Game.Core layer: pure C# domain logic, zero Godot dependencies).
+/// Thread-safe for concurrent member operations.
 /// </summary>
 public class Guild
 {
+    private readonly object _memberLock = new object();
+
     public string GuildId { get; private set; }
     public string CreatorId { get; private set; }
     public string Name { get; private set; }
@@ -96,6 +99,7 @@ public class Guild
 
     /// <summary>
     /// Adds a new member to the guild.
+    /// Thread-safe operation.
     /// </summary>
     /// <param name="userId">User ID to add</param>
     /// <param name="role">Role to assign</param>
@@ -106,16 +110,20 @@ public class Guild
         if (string.IsNullOrWhiteSpace(userId))
             throw new ArgumentException("用户ID不能为空", nameof(userId));
 
-        if (Members.Any(m => m.UserId == userId))
-            return false;
+        lock (_memberLock)
+        {
+            if (Members.Any(m => m.UserId == userId))
+                return false;
 
-        Members.Add(new GuildMember(userId, role));
-        return true;
+            Members.Add(new GuildMember(userId, role));
+            return true;
+        }
     }
 
     /// <summary>
     /// Removes a member from the guild.
     /// Creator cannot be removed.
+    /// Thread-safe operation.
     /// </summary>
     /// <param name="userId">User ID to remove</param>
     /// <returns>True if member was removed; false if user is creator or not found</returns>
@@ -129,16 +137,20 @@ public class Guild
         if (userId == CreatorId)
             return false;
 
-        var member = Members.FirstOrDefault(m => m.UserId == userId);
-        if (member == null)
-            return false;
+        lock (_memberLock)
+        {
+            var member = Members.FirstOrDefault(m => m.UserId == userId);
+            if (member == null)
+                return false;
 
-        Members.Remove(member);
-        return true;
+            Members.Remove(member);
+            return true;
+        }
     }
 
     /// <summary>
     /// Changes a member's role.
+    /// Thread-safe operation.
     /// </summary>
     /// <param name="userId">User ID whose role to change</param>
     /// <param name="newRole">New role to assign</param>
@@ -149,12 +161,15 @@ public class Guild
         if (string.IsNullOrWhiteSpace(userId))
             throw new ArgumentException("用户ID不能为空", nameof(userId));
 
-        var memberIndex = Members.FindIndex(m => m.UserId == userId);
-        if (memberIndex == -1)
-            return false;
+        lock (_memberLock)
+        {
+            var memberIndex = Members.FindIndex(m => m.UserId == userId);
+            if (memberIndex == -1)
+                return false;
 
-        // Record is immutable, so replace with new instance
-        Members[memberIndex] = new GuildMember(userId, newRole);
-        return true;
+            // Record is immutable, so replace with new instance
+            Members[memberIndex] = new GuildMember(userId, newRole);
+            return true;
+        }
     }
 }
