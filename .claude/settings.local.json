@@ -25,7 +25,10 @@
       "Bash(superclaude review:*)",
       "Bash(superclaude --help:*)",
       "Bash(dotnet build:*)",
-      "Bash(py -3 scripts/python/check_tasks_all_refs.py:*)"
+      "Bash(py -3 scripts/python/check_tasks_all_refs.py:*)",
+      "Bash(if not exist \"C:\\buildgame\\newguild\\Scripts\\Core\\Contracts\\Combat\" mkdir \"C:\\buildgame\\newguild\\Scripts\\Core\\Contracts\\Combat\")",
+      "Bash(cmd /c \"if not exist C:\\buildgame\\newguild\\Scripts\\Core\\Contracts\\Combat mkdir C:\\buildgame\\newguild\\Scripts\\Core\\Contracts\\Combat\")",
+      "Bash(cmd /c \"if not exist C:\\buildgame\\newguild\\Game.Core\\Contracts\\Combat mkdir C:\\buildgame\\newguild\\Game.Core\\Contracts\\Combat\")"
     ],
     "deny": [],
     "ask": []

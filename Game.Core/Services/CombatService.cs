@@ -1,3 +1,4 @@
+using Game.Contracts.Combat;
 using Game.Core.Domain;
 using Game.Core.Domain.ValueObjects;
 
@@ -17,14 +18,23 @@ public class CombatService
         player.TakeDamage(amount);
     }
 
-    public void ApplyDamage(Player player, Damage damage)
+    public void ApplyDamage(Player player, Damage damage, string playerId)
     {
         // Placeholder for future type-based mitigation; for now apply raw amount
         player.TakeDamage(damage.EffectiveAmount);
+
+        var evt = new PlayerDamaged(
+            PlayerId: playerId,
+            Amount: damage.EffectiveAmount,
+            DamageType: damage.Type.ToString(),
+            IsCritical: damage.IsCritical,
+            Timestamp: DateTimeOffset.UtcNow
+        );
+
         _ = _bus?.PublishAsync(new Contracts.DomainEvent(
-            Type: "player.damaged",
+            Type: PlayerDamaged.EventType,
             Source: nameof(CombatService),
-            Data: new { amount = damage.EffectiveAmount, type = damage.Type.ToString(), critical = damage.IsCritical },
+            Data: evt,
             Timestamp: DateTime.UtcNow,
             Id: $"dmg-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
         ));
@@ -49,14 +59,23 @@ public class CombatService
         return mitigated;
     }
 
-    public void ApplyDamage(Player player, Damage damage, CombatConfig config)
+    public void ApplyDamage(Player player, Damage damage, CombatConfig config, string playerId)
     {
         var final = CalculateDamage(damage, config);
         player.TakeDamage(final);
+
+        var evt = new PlayerDamaged(
+            PlayerId: playerId,
+            Amount: final,
+            DamageType: damage.Type.ToString(),
+            IsCritical: damage.IsCritical,
+            Timestamp: DateTimeOffset.UtcNow
+        );
+
         _ = _bus?.PublishAsync(new Contracts.DomainEvent(
-            Type: "player.damaged",
+            Type: PlayerDamaged.EventType,
             Source: nameof(CombatService),
-            Data: new { amount = final, type = damage.Type.ToString(), critical = damage.IsCritical },
+            Data: evt,
             Timestamp: DateTime.UtcNow,
             Id: $"dmg-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
         ));

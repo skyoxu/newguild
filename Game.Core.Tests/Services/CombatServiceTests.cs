@@ -39,7 +39,7 @@ public class CombatServiceTests
     {
         var p = new Player(maxHealth: 100);
         var svc = new CombatService();
-        svc.ApplyDamage(p, new Damage(25, DamageType.Physical));
+        svc.ApplyDamage(p, new Damage(25, DamageType.Physical), playerId: "player-1");
         Assert.Equal(75, p.Health.Current);
     }
 
@@ -61,7 +61,7 @@ public class CombatServiceTests
         var svc = new CombatService();
 
         // 100 damage with 50% resistance = 50 damage
-        svc.ApplyDamage(p, new Damage(100, DamageType.Fire), cfg);
+        svc.ApplyDamage(p, new Damage(100, DamageType.Fire), cfg, playerId: "player-1");
         Assert.Equal(50, p.Health.Current);
     }
 
