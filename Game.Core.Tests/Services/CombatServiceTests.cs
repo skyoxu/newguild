@@ -42,4 +42,37 @@ public class CombatServiceTests
         svc.ApplyDamage(p, new Damage(25, DamageType.Physical));
         Assert.Equal(75, p.Health.Current);
     }
+
+    [Fact]
+    public void ApplyDamage_with_int_amount_reduces_player_health()
+    {
+        var p = new Player(maxHealth: 100);
+        var svc = new CombatService();
+        svc.ApplyDamage(p, amount: 30);
+        Assert.Equal(70, p.Health.Current);
+    }
+
+    [Fact]
+    public void ApplyDamage_with_config_applies_damage_correctly()
+    {
+        var p = new Player(maxHealth: 100);
+        var cfg = new CombatConfig();
+        cfg.Resistances[DamageType.Fire] = 0.5; // 50% resistance
+        var svc = new CombatService();
+
+        // 100 damage with 50% resistance = 50 damage
+        svc.ApplyDamage(p, new Damage(100, DamageType.Fire), cfg);
+        Assert.Equal(50, p.Health.Current);
+    }
+
+    [Fact]
+    public void CalculateDamage_with_default_config_uses_fallback()
+    {
+        var svc = new CombatService();
+        var dmg = new Damage(50, DamageType.Physical);
+
+        // Null config should use default
+        var result = svc.CalculateDamage(dmg, config: null);
+        Assert.Equal(50, result);
+    }
 }

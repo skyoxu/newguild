@@ -101,4 +101,46 @@ public class GameEngineCoreEventTests
         evt.Source.Should().Be(nameof(GameEngineCore));
         evt.Data.Should().NotBeNull();
     }
+
+    [Fact]
+    public void Move_publishes_player_moved_event_and_updates_position()
+    {
+        // Arrange
+        var engine = CreateEngineAndBus(out var bus);
+        engine.Start();
+        bus.Published.Clear();
+
+        // Act
+        var state = engine.Move(5.0, 3.0);
+
+        // Assert
+        state.Position.X.Should().Be(5.0);
+        state.Position.Y.Should().Be(3.0);
+        bus.Published.Should().ContainSingle();
+        var evt = bus.Published[0];
+        evt.Type.Should().Be("player.moved");
+        evt.Source.Should().Be(nameof(GameEngineCore));
+    }
+
+    [Fact]
+    public void End_publishes_game_ended_event_and_returns_result()
+    {
+        // Arrange
+        var engine = CreateEngineAndBus(out var bus);
+        engine.Start();
+        engine.Move(10.0, 10.0);
+        engine.AddScore(100);
+        bus.Published.Clear();
+
+        // Act
+        var result = engine.End();
+
+        // Assert
+        result.FinalScore.Should().Be(100);
+        result.PlayTimeSeconds.Should().BeGreaterThan(0);
+        bus.Published.Should().ContainSingle();
+        var evt = bus.Published[0];
+        evt.Type.Should().Be("game.ended");
+        evt.Source.Should().Be(nameof(GameEngineCore));
+    }
 }
