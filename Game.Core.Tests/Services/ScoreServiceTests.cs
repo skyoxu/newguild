@@ -1,3 +1,4 @@
+using System;
 using Game.Core.Domain;
 using Game.Core.Services;
 using Xunit;
@@ -57,17 +58,19 @@ public class ScoreServiceTests
     }
 
     [Fact]
-    public void ComputeAddedScore_uses_default_multiplier_for_unknown_difficulty()
+    public void GameConfig_rejects_invalid_difficulty_enum()
     {
-        var svc = new ScoreService();
-        // Cast an invalid integer to Difficulty enum to trigger default case
+        // Cast an invalid integer to Difficulty enum
         var invalidDifficulty = (Difficulty)999;
-        var cfg = new GameConfig(MaxLevel: 10, InitialHealth: 100, ScoreMultiplier: 1.0, AutoSave: false, Difficulty: invalidDifficulty);
 
-        // Should use default multiplier of 1.0
-        var added = svc.ComputeAddedScore(100, cfg);
+        // Should throw ArgumentException when creating GameConfig
+        var ex = Assert.Throws<ArgumentException>(() =>
+            new GameConfig(MaxLevel: 10, InitialHealth: 100, ScoreMultiplier: 1.0, AutoSave: false, Difficulty: invalidDifficulty)
+        );
 
-        Assert.Equal(100, added);
+        Assert.Contains("Invalid difficulty value", ex.Message);
+        Assert.Contains("999", ex.Message);
+        Assert.Equal("Difficulty", ex.ParamName);
     }
 
     [Fact]

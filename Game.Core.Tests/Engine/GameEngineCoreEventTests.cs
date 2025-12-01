@@ -14,7 +14,7 @@ namespace Game.Core.Tests.Engine;
 
 public class GameEngineCoreEventTests
 {
-    private sealed class CapturingEventBus : IEventBus
+    private sealed class CapturingEventBus : IEventBus, IDisposable
     {
         public List<DomainEvent> Published { get; } = new();
 
@@ -25,6 +25,11 @@ public class GameEngineCoreEventTests
         }
 
         public IDisposable Subscribe(Func<DomainEvent, Task> handler) => new DummySubscription();
+
+        public void Dispose()
+        {
+            Published.Clear();
+        }
 
         private sealed class DummySubscription : IDisposable
         {
@@ -54,15 +59,18 @@ public class GameEngineCoreEventTests
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
 
-        // Act
-        engine.Start();
+        using (bus)
+        {
+            // Act
+            engine.Start();
 
-        // Assert
-        bus.Published.Should().ContainSingle();
-        var evt = bus.Published[0];
-        evt.Type.Should().Be(GameStarted.EventType);
-        evt.Source.Should().Be(nameof(GameEngineCore));
-        evt.Data.Should().NotBeNull();
+            // Assert
+            bus.Published.Should().ContainSingle();
+            var evt = bus.Published[0];
+            evt.Type.Should().Be(GameStarted.EventType);
+            evt.Source.Should().Be(nameof(GameEngineCore));
+            evt.Data.Should().NotBeNull();
+        }
     }
 
     [Fact]
@@ -70,18 +78,22 @@ public class GameEngineCoreEventTests
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
-        engine.Start();
-        bus.Published.Clear();
 
-        // Act
-        engine.AddScore(10);
+        using (bus)
+        {
+            engine.Start();
+            bus.Published.Clear();
 
-        // Assert
-        bus.Published.Should().ContainSingle();
-        var evt = bus.Published[0];
-        evt.Type.Should().Be(ScoreChanged.EventType);
-        evt.Source.Should().Be(nameof(GameEngineCore));
-        evt.Data.Should().NotBeNull();
+            // Act
+            engine.AddScore(10);
+
+            // Assert
+            bus.Published.Should().ContainSingle();
+            var evt = bus.Published[0];
+            evt.Type.Should().Be(ScoreChanged.EventType);
+            evt.Source.Should().Be(nameof(GameEngineCore));
+            evt.Data.Should().NotBeNull();
+        }
     }
 
     [Fact]
@@ -89,18 +101,22 @@ public class GameEngineCoreEventTests
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
-        engine.Start();
-        bus.Published.Clear();
 
-        // Act
-        engine.ApplyDamage(new Damage(Amount: 10, Type: DamageType.Physical, IsCritical: false));
+        using (bus)
+        {
+            engine.Start();
+            bus.Published.Clear();
 
-        // Assert
-        bus.Published.Should().ContainSingle();
-        var evt = bus.Published[0];
-        evt.Type.Should().Be(PlayerHealthChanged.EventType);
-        evt.Source.Should().Be(nameof(GameEngineCore));
-        evt.Data.Should().NotBeNull();
+            // Act
+            engine.ApplyDamage(new Damage(Amount: 10, Type: DamageType.Physical, IsCritical: false));
+
+            // Assert
+            bus.Published.Should().ContainSingle();
+            var evt = bus.Published[0];
+            evt.Type.Should().Be(PlayerHealthChanged.EventType);
+            evt.Source.Should().Be(nameof(GameEngineCore));
+            evt.Data.Should().NotBeNull();
+        }
     }
 
     [Fact]
@@ -108,19 +124,23 @@ public class GameEngineCoreEventTests
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
-        engine.Start();
-        bus.Published.Clear();
 
-        // Act
-        var state = engine.Move(5.0, 3.0);
+        using (bus)
+        {
+            engine.Start();
+            bus.Published.Clear();
 
-        // Assert
-        state.Position.X.Should().Be(5.0);
-        state.Position.Y.Should().Be(3.0);
-        bus.Published.Should().ContainSingle();
-        var evt = bus.Published[0];
-        evt.Type.Should().Be(PlayerMoved.EventType);
-        evt.Source.Should().Be(nameof(GameEngineCore));
+            // Act
+            var state = engine.Move(5.0, 3.0);
+
+            // Assert
+            state.Position.X.Should().Be(5.0);
+            state.Position.Y.Should().Be(3.0);
+            bus.Published.Should().ContainSingle();
+            var evt = bus.Published[0];
+            evt.Type.Should().Be(PlayerMoved.EventType);
+            evt.Source.Should().Be(nameof(GameEngineCore));
+        }
     }
 
     [Fact]
@@ -128,20 +148,24 @@ public class GameEngineCoreEventTests
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
-        engine.Start();
-        engine.Move(10.0, 10.0);
-        engine.AddScore(100);
-        bus.Published.Clear();
 
-        // Act
-        var result = engine.End();
+        using (bus)
+        {
+            engine.Start();
+            engine.Move(10.0, 10.0);
+            engine.AddScore(100);
+            bus.Published.Clear();
 
-        // Assert
-        result.FinalScore.Should().Be(100);
-        result.PlayTimeSeconds.Should().BeGreaterThan(0);
-        bus.Published.Should().ContainSingle();
-        var evt = bus.Published[0];
-        evt.Type.Should().Be(GameEnded.EventType);
-        evt.Source.Should().Be(nameof(GameEngineCore));
+            // Act
+            var result = engine.End();
+
+            // Assert
+            result.FinalScore.Should().Be(100);
+            result.PlayTimeSeconds.Should().BeGreaterThan(0);
+            bus.Published.Should().ContainSingle();
+            var evt = bus.Published[0];
+            evt.Type.Should().Be(GameEnded.EventType);
+            evt.Source.Should().Be(nameof(GameEngineCore));
+        }
     }
 }
