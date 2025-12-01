@@ -9,6 +9,7 @@
   <!-- Include domain contracts from Scripts/Core/Contracts as part of Game.Core -->
   <ItemGroup>
     <Compile Include="..\Scripts\Core\Contracts\Guild\*.cs" Link="Contracts\Guild\%(Filename)%(Extension)" />
+    <Compile Include="..\Scripts\Core\Contracts\GameLoop\*.cs" Link="Contracts\GameLoop\%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

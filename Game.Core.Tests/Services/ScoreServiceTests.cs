@@ -1,3 +1,4 @@
+using System;
 using Game.Core.Domain;
 using Game.Core.Services;
 using Xunit;
@@ -42,6 +43,46 @@ public class ScoreServiceTests
 
         svc.Reset();
         Assert.Equal(0, svc.Score);
+    }
+
+    [Fact]
+    public void ComputeAddedScore_clamps_negative_base_points_to_zero()
+    {
+        var svc = new ScoreService();
+        var cfg = new GameConfig(MaxLevel: 10, InitialHealth: 100, ScoreMultiplier: 1.0, AutoSave: false, Difficulty: Difficulty.Medium);
+
+        // Negative basePoints should be clamped to 0
+        var added = svc.ComputeAddedScore(-100, cfg);
+
+        Assert.Equal(0, added);
+    }
+
+    [Fact]
+    public void GameConfig_rejects_invalid_difficulty_enum()
+    {
+        // Cast an invalid integer to Difficulty enum
+        var invalidDifficulty = (Difficulty)999;
+
+        // Should throw ArgumentException when creating GameConfig
+        var ex = Assert.Throws<ArgumentException>(() =>
+            new GameConfig(MaxLevel: 10, InitialHealth: 100, ScoreMultiplier: 1.0, AutoSave: false, Difficulty: invalidDifficulty)
+        );
+
+        Assert.Contains("Invalid difficulty value", ex.Message);
+        Assert.Contains("999", ex.Message);
+        Assert.Equal("Difficulty", ex.ParamName);
+    }
+
+    [Fact]
+    public void ComputeAddedScore_returns_zero_when_negative_multiplier_result()
+    {
+        var svc = new ScoreService();
+        var cfg = new GameConfig(MaxLevel: 10, InitialHealth: 100, ScoreMultiplier: -2.0, AutoSave: false, Difficulty: Difficulty.Medium);
+
+        // Negative multiplier produces negative result, should be clamped to 0 by Math.Max
+        var added = svc.ComputeAddedScore(100, cfg);
+
+        Assert.Equal(0, added);
     }
 }
 

@@ -44,7 +44,9 @@
     "test_strategy": [
       "文档审阅：由架构负责人确认 PRD 与 ADR/Phase 一致性。",
       "链接校验：任务/回链校验脚本通过（task-links-validate）。"
-    ]
+    ],
+    "taskmaster_id": 1,
+    "taskmaster_exported": true
   },
   {
     "id": "NG-0012",
@@ -91,7 +93,9 @@
     "test_strategy": [
       "本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。",
       "CI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。"
-    ]
+    ],
+    "taskmaster_id": 5,
+    "taskmaster_exported": true
   },
   {
     "id": "NG-0013",
@@ -138,7 +142,9 @@
     "test_strategy": [
       "本地模拟：手工降低测试覆盖率，验证 quality_gates.py 将其标记为 failed，并按配置返回非零 exit code。",
       "CI 验证：在 PR 上运行 windows-quality-gate 工作流，观察 coverage 与 GdUnit4 结果是否在 Step Summary 与 artifacts 中正确展示。"
-    ]
+    ],
+    "taskmaster_exported": true,
+    "taskmaster_id": 7
   },
   {
     "id": "NG-0014",
@@ -187,7 +193,8 @@
     "test_strategy": [
       "GdUnit4 安全用例：编写/扩展 Hard 集测试外链、文件、进程三类接口的 allow/deny/invalid 行为。",
       "脚本校验：新增或扩展 scripts/python/validate_audit_logs.py，针对 security-audit.jsonl 做格式与字段校验，在 CI 中运行。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0015",
@@ -234,7 +241,8 @@
       "单元测试：为性能库编写 xUnit 基准级测试，验证统计函数在不同样本上的正确性。",
       "本地演练：运行 Godot 场景 + PerfTracker，生成 perf.json，再用 performance_gates.py 校验阈值与报告。",
       "CI 集成：在 windows-quality-gate 工作流中增加可选性能门禁 step，观察超阈值时的报告与退出码。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0016",
@@ -281,7 +289,8 @@
     "test_strategy": [
       "核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。",
       "脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0017",
@@ -330,7 +339,8 @@
     "test_strategy": [
       "本地构建：在开发机运行 build_windows.py release/debug，验证输出文件与日志。",
       "CI 集成：触发 Windows Release (Manual/Tag) 工作流，确认 Artifact 中包含 EXE、PCK、build-info.json 与 SHA256 校验文件。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0018",
@@ -375,7 +385,8 @@
     "test_strategy": [
       "本地验证：手工设置不同 RELEASE_CHANNEL，运行构建脚本并检查 release-profile.json 差异。",
       "CI 验证：在测试分支上运行带渠道参数的 Release 工作流，确认生成的 profile 与工件符合预期。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0019",
@@ -415,7 +426,8 @@
     "test_strategy": [
       "文档审阅：由架构/产品共同确认模板文档结构对真实项目足够且不过度约束。",
       "链接检查：task-links-validate 或等价脚本对新模板文档进行路径与引用校验。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0020",
@@ -473,7 +485,9 @@
       "单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。",
       "场景测试：在 Tests.Godot 中编写主场景与公会管理 UI 的 GdUnit4 用例，验证节点结构与关键 Signals。",
       "集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。"
-    ]
+    ],
+    "taskmaster_id": 2,
+    "taskmaster_exported": true
   },
   {
     "id": "NG-0021",
@@ -533,7 +547,9 @@
     "test_strategy": [
       "本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。",
       "CI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。"
-    ]
+    ],
+    "taskmaster_id": 6,
+    "taskmaster_exported": true
   },
   {
     "id": "NG-0022",
@@ -586,7 +602,8 @@
     "test_strategy": [
       "文档审阅：由架构/产品共同检查 PRD/Base/ADR/Overlay 是否互相引用、无矛盾口径。",
       "自动化：扩展或实现 task-links-validate 脚本，针对 NG-00xx 与玩法任务校验 story_id/adr_refs/chapter_refs/overlay_refs 与文档实际存在性和一致性。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0023",
@@ -637,7 +654,8 @@
     "test_strategy": [
       "本地：运行 GameEngineCoreEventTests，并通过全文搜索核对事件类型常量。",
       "CI：在质量门禁中增加针对 core.*.* 事件类型前缀的简单字符串检查脚本。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0024",
@@ -684,7 +702,8 @@
     "test_strategy": [
       "本地：为 ObservabilityClient 编写 xUnit 测试，使用 fake/spy 对象捕获日志与事件上报行为。",
       "CI：在 dotnet-unit 任务中确保 Observability 测试纳入覆盖率统计，并在质量门禁报告中展示相关用例。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0025",
@@ -731,7 +750,8 @@
     "test_strategy": [
       "文档审阅：由架构或安全角色人工检查 privacy-compliance.md 是否覆盖日志、Sentry 与审计 JSONL 的隐私约束。",
       "自动化：在 task-links-validate 中增加针对 privacy-compliance.md 的引用检查，保证后续任务不会绕过该文档。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0026",
@@ -778,7 +798,8 @@
     "test_strategy": [
       "文档审阅：在评审 PR 时检查日志相关变更是否引用 logging-guidelines.md 并符合其约定。",
       "自动化：在 task-links-validate 或等价脚本中校验日志相关任务是否引用该文档。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0027",
@@ -821,7 +842,8 @@
     "test_strategy": [
       "本地：构造一个故意高重复率、高复杂度的小示例，验证 quality_gates.py 能将其标记为 failed。",
       "CI：在 windows-quality-gate 工作流中增加对 duplication 与 complexity 报告的校验，并在 Step Summary 中展示关键指标。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0028",
@@ -870,7 +892,8 @@
     "test_strategy": [
       "单元：为 validate_perf 与 validate_audit_logs 编写测试，验证边界条件与错误路径。",
       "集成：在 CI 中对刻意构造的超阈值样例运行 quality_gates.py，验证能够正确失败并输出预期的 JSON 摘要。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0029",
@@ -918,7 +941,8 @@
     "test_strategy": [
       "GdUnit4：为安全相关 Signal 编写 Hard 套件，用于验证触发路径与 XML 注释是否齐全。",
       "CI：在 signal-compliance 相关工作流中集成健康度检查脚本，并观察在故意缺失注释或错误命名时是否会失败。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0030",
@@ -964,7 +988,8 @@
     "test_strategy": [
       "本地：构造多次性能采样结果，运行报告生成脚本，检查历史文件是否按预期累积数据。",
       "CI：在性能相关 Job 中执行报告生成步骤，并检查 artifact 中是否包含预期文件。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0031",
@@ -1013,7 +1038,8 @@
     "test_strategy": [
       "CI：针对测试分支手动触发 performance-gates 工作流，观察在性能超阈值和正常情况下的行为差异。",
       "文档：在 Phase-15 或 README 中记录如何启用或关闭性能门禁工作流。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0032",
@@ -1062,7 +1088,8 @@
     "test_strategy": [
       "本地：在具备测试证书的环境下执行构建，验证 EXE 已被签名且系统属性中可见。",
       "CI：在 Windows 构建 Job 中对 signing-summary.json 做基础格式检查，确保脚本在有与无证书两种场景下都能稳定运行。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0033",
@@ -1107,7 +1134,8 @@
     "test_strategy": [
       "本地：在 Godot 编辑器与 headless 模式下分别验证各导出预设可以成功生成可运行的 EXE。",
       "CI：在 export 相关工作流中记录所用预设名称，并检查导出 summary 中的配置字段。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0034",
@@ -1150,7 +1178,8 @@
     "test_strategy": [
       "脚本校验：为禁用扫描脚本编写最小单元测试或集成测试，验证对典型文件（TS/CS/配置文件）能正确识别和统计行级禁用标记。",
       "基线比较：在两次 CI 运行之间比较禁用基线 JSON，确认整体禁用数量单调下降或保持不变，避免在无计划的情况下新增长期禁用。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0035",
@@ -1193,7 +1222,8 @@
     "test_strategy": [
       "手动与 xUnit/GdUnit4 回归：在尝试移除或调整 pragma 前后运行 Tests.Godot 相关套件，确保测试仍然稳定。",
       "基线比较：对比两次 quality-gates-structural-refactor.json，确认 GdUnit4CSharpApi.cs 相关禁用的变化符合预期，并记录在任务备注中。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0036",
@@ -1236,7 +1266,8 @@
     "test_strategy": [
       "文档审阅：由架构/维护者确认调整后的示例仍然传达相同含义，且不会误导协作者。",
       "脚本回归：在调整脚本过滤规则后运行 scan_code_disables.py，确保不会因为新增过滤逻辑而漏报真实代码中的禁用。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0037",
@@ -1282,7 +1313,8 @@
     "test_strategy": [
       "脚本级测试：对占位的 Sentry 响应样本运行草案生成脚本，验证能够正确过滤环境与时间窗口、生成 TopN 草案条目，并写入预期 JSON 文件路径。",
       "流程级验证：在测试环境中手动触发 nightly Job，检查生成的 logs/ci/<date>/taskmaster/** 工件是否包含预期的草案与摘要，并在 task_links_validate 或等价脚本中确认草案文件不会被误解为正式回链来源。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-0038",
@@ -1329,6 +1361,7 @@
     "test_strategy": [
       "本地：构造刻意违反依赖矩阵的示例（例如在 Game.Core 中添加 using Godot; 或在 Scripts/Core 中直接引用 Godot API），运行 dependency_guard 脚本验证其能正确发现并在 JSON/文本摘要中报告。",
       "CI：在测试分支上启用依赖护栏步骤，故意保留一处违规依赖，确认 windows-quality-gate（或等价工作流）中的 Step Summary 能显示违规详情，并在规则配置为硬门禁时正确使 Job 失败。"
-    ]
+    ],
+    "taskmaster_exported": false
   }
 ]

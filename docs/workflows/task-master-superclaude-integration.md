@@ -823,6 +823,36 @@ public class GuildContractsTests
 - 契约变更需 PR review，确保不破坏现有消费者
 - 临时/草稿契约需标注 `[Obsolete("Draft contract, subject to change")]`
 
+**外圈质量门禁（结构层校验 vs 行为层 TDD）**
+
+在 newguild 中，契约与事件的质量保障分为两圈：
+
+- **内圈（行为层 TDD）**：
+  - 使用 xUnit/GdUnit4 直接针对业务行为与状态机编写测试（例如 `GameTurnSystemTests`, `EventEngineTests`, `GameLoopContractsTests`）。
+  - 这些测试决定代码设计与重构方向，是 GM/NG 任务实施时**必须优先保证**的“红–绿–重构”基础。
+- **外圈（结构层质量门禁）**：
+  - 使用专用 Python 脚本检查契约与文档的一致性和命名规范，例如：
+    - `scripts/python/validate_contracts.py`：验证 Overlay 08 中声明的契约路径是否存在并指向正确的 C# 文件。
+    - `scripts/python/check_guild_contracts.py`：检查 Guild 契约命名空间是否为 `Game.Contracts.Guild`，`EventType` 是否为 `core.guild.*` 前缀。
+    - （规划中）`check_gameloop_contracts.py`：检查 GameLoop 契约命名空间是否为 `Game.Contracts.GameLoop`，`EventType` 是否为 `core.game_turn.*` 前缀，并与 ADR/Overlay 约定一致。
+  - 这些脚本不直接验证“逻辑是否正确”，而是保证：命名、位置、EventType 前缀和文档回链不漂移。
+
+**建议的落地时机与门禁级别：**
+
+- 在首批契约与核心逻辑稳定前：
+  - 优先让 xUnit/GdUnit4 测试覆盖关键行为（内圈 TDD）。
+  - 结构校验脚本可以先在本地手动运行，作为开发者自检工具，而不是 CI 硬门禁。
+- 当某个领域模块（如 Guild、GameLoop）进入“稳定阶段”后：
+  - 为该模块补充/完善对应的结构校验脚本（如 `check_guild_contracts.py`、`check_gameloop_contracts.py`）。
+  - 在 `windows-quality-gate.yml` 中以**软门禁**方式接入：失败会生成报告与工件，但不会立即阻断合并。
+- 当 ADR-0005/相关 Base 章节明确要求该模块的契约视为“架构 SSoT”时：
+  - 再考虑把相关脚本升级为硬门禁（CI 失败即阻止合并），但应当在任务描述和 PR 说明中明确这一变更，以免影响日常开发节奏。
+
+通过这种“内圈 TDD + 外圈结构门禁”的分层方式，Task Master + SuperClaude 工作流可以：
+
+- 在实现阶段聚焦业务行为与可玩性（由单元/场景测试驱动）。
+- 在架构与长期维护阶段，靠结构校验脚本防止契约和文档慢慢偏离 ADR/Overlay 约定。
+
 #### 当前 newguild 实现状态（Guild 示例）
 
 - Guild 领域事件套装已落地，并符合 ADR-0004 的 `core.<entity>.<action>` 约定：

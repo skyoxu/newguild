@@ -9,6 +9,7 @@ public class GameStateManager
 {
     private readonly GameStateManagerOptions _options;
     private readonly IDataStore _store;
+    private readonly ILogger? _logger;
     private readonly List<Action<DomainEvent>> _callbacks = new();
 
     private GameState? _currentState;
@@ -17,10 +18,11 @@ public class GameStateManager
 
     private const string IndexSuffix = ":index";
 
-    public GameStateManager(IDataStore store, GameStateManagerOptions? options = null)
+    public GameStateManager(IDataStore store, GameStateManagerOptions? options = null, ILogger? logger = null)
     {
         _store = store;
         _options = options ?? GameStateManagerOptions.Default;
+        _logger = logger;
     }
 
     public void SetState(GameState state, GameConfig? config = null)
@@ -123,8 +125,15 @@ public class GameStateManager
         var list = new List<SaveData>();
         foreach (var id in ids)
         {
-            try { list.Add(await LoadFromStoreAsync(id)); }
-            catch { /* ignore broken entries */ }
+            try
+            {
+                list.Add(await LoadFromStoreAsync(id));
+            }
+            catch (Exception ex)
+            {
+                // Log broken save file but continue loading others
+                _logger?.Warn($"Failed to load save '{id}': {ex.Message}");
+            }
         }
         return list
             .OrderByDescending(s => s.Metadata.CreatedAt)
@@ -263,7 +272,15 @@ public class GameStateManager
     {
         foreach (var cb in _callbacks.ToArray())
         {
-            try { cb(evt); } catch { /* ignore */ }
+            try
+            {
+                cb(evt);
+            }
+            catch (Exception ex)
+            {
+                // Log callback failure but continue with other callbacks
+                _logger?.Error($"GameStateManager callback failed for event {evt.Type}", ex);
+            }
         }
     }
 

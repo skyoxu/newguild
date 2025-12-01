@@ -1,4 +1,5 @@
 using Game.Core.Contracts;
+using Game.Core.Ports;
 
 namespace Game.Core.Services;
 
@@ -12,6 +13,12 @@ public class InMemoryEventBus : IEventBus
 {
     private readonly List<Func<DomainEvent, Task>> _handlers = new();
     private readonly object _gate = new();
+    private readonly ILogger? _logger;
+
+    public InMemoryEventBus(ILogger? logger = null)
+    {
+        _logger = logger;
+    }
 
     public Task PublishAsync(DomainEvent evt)
     {
@@ -20,10 +27,17 @@ public class InMemoryEventBus : IEventBus
         return Task.WhenAll(snapshot.Select(h => SafeInvoke(h, evt)));
     }
 
-    private static async Task SafeInvoke(Func<DomainEvent, Task> h, DomainEvent evt)
+    private async Task SafeInvoke(Func<DomainEvent, Task> h, DomainEvent evt)
     {
-        try { await h(evt); }
-        catch { /* swallow to keep bus stable */ }
+        try
+        {
+            await h(evt);
+        }
+        catch (Exception ex)
+        {
+            // Log exception but keep bus stable (defensive)
+            _logger?.Error($"EventBus handler failed for event {evt.Type}", ex);
+        }
     }
 
     public IDisposable Subscribe(Func<DomainEvent, Task> handler)
