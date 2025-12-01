@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Game.Core.Contracts;
+using Game.Core.Contracts.Engine;
 using Game.Core.Domain;
 using Game.Core.Domain.ValueObjects;
 using Game.Core.Engine;
@@ -59,7 +60,7 @@ public class GameEngineCoreEventTests
         // Assert
         bus.Published.Should().ContainSingle();
         var evt = bus.Published[0];
-        evt.Type.Should().Be("game.started");
+        evt.Type.Should().Be(GameStarted.EventType);
         evt.Source.Should().Be(nameof(GameEngineCore));
         evt.Data.Should().NotBeNull();
     }
@@ -78,7 +79,7 @@ public class GameEngineCoreEventTests
         // Assert
         bus.Published.Should().ContainSingle();
         var evt = bus.Published[0];
-        evt.Type.Should().Be("score.changed");
+        evt.Type.Should().Be(ScoreChanged.EventType);
         evt.Source.Should().Be(nameof(GameEngineCore));
         evt.Data.Should().NotBeNull();
     }
@@ -97,7 +98,7 @@ public class GameEngineCoreEventTests
         // Assert
         bus.Published.Should().ContainSingle();
         var evt = bus.Published[0];
-        evt.Type.Should().Be("player.health.changed");
+        evt.Type.Should().Be(PlayerHealthChanged.EventType);
         evt.Source.Should().Be(nameof(GameEngineCore));
         evt.Data.Should().NotBeNull();
     }
@@ -118,7 +119,7 @@ public class GameEngineCoreEventTests
         state.Position.Y.Should().Be(3.0);
         bus.Published.Should().ContainSingle();
         var evt = bus.Published[0];
-        evt.Type.Should().Be("player.moved");
+        evt.Type.Should().Be(PlayerMoved.EventType);
         evt.Source.Should().Be(nameof(GameEngineCore));
     }
 
@@ -140,7 +141,7 @@ public class GameEngineCoreEventTests
         result.PlayTimeSeconds.Should().BeGreaterThan(0);
         bus.Published.Should().ContainSingle();
         var evt = bus.Published[0];
-        evt.Type.Should().Be("game.ended");
+        evt.Type.Should().Be(GameEnded.EventType);
         evt.Source.Should().Be(nameof(GameEngineCore));
     }
 }
