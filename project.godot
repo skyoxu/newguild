@@ -30,6 +30,7 @@ SecurityAudit="res://Game.Godot/Scripts/Security/SecurityAudit.cs"
 PerformanceTracker="res://Game.Godot/Scripts/Perf/PerformanceTracker.cs"
 SentryClient="res://Game.Godot/Scripts/Obs/SentryClient.cs"
 FeatureFlags="res://Game.Godot/Scripts/Config/FeatureFlags.cs"
+GuildManager="res://Game.Godot/Scripts/Autoload/GuildManager.cs"
 CompositionRoot="*res://Game.Godot/Autoloads/CompositionRoot.cs"
 
 [display]

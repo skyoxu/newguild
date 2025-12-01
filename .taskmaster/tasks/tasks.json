@@ -17,14 +17,15 @@
         "id": "2",
         "title": "公会管理器首个垂直切片的三层架构与核心类型落地",
         "description": "依据 PRD-Guild-Manager 与 08-功能纵切-公会管理器.md，在 Game.Core / Game.Godot / Tests.Godot 三层落地首个可玩的公会管理垂直切片：实现基础 Guild/GuildMember/Raid/Event 域模型与服务，提供对应的 Godot 场景与 UI Glue，并为该循环建立最小 xUnit 与 GdUnit4 测试集。",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "high",
         "dependencies": [
           "1"
         ],
         "details": "Story: PRD-GUILD-MANAGER-VS-CORE-LOOP\nADR Refs: ADR-0018; ADR-0004; ADR-0006; ADR-0007; ADR-0005; ADR-0020\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GuildCoreTests.cs; Game.Core.Tests/Domain/EventEngineTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Tests.Godot/tests/Integration/test_guild_workflow.gd\nAcceptance: Game.Core 中存在 Guild、GuildMember、Raid、Event 等核心域模型与服务，且不依赖 Godot API。; Game.Godot 中存在与 08-功能纵切-公会管理器.md 一致的主场景与公会管理 UI 节点结构，并通过 Adapters 调用 Game.Core 服务。; Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。; Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。; 上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。; 完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Scripts/Core/Contracts/Guild/GuildCreated.cs、Scripts/Core/Contracts/Guild/GuildMemberJoined.cs、Scripts/Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。\nTest Strategy: 单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。; 场景测试：在 Tests.Godot 中编写主场景与公会管理 UI 的 GdUnit4 用例，验证节点结构与关键 Signals。; 集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。\nLabels: core; guild; vertical-slice; architecture\nOwner: architecture\nLayer: core",
         "testStrategy": "单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。\n场景测试：在 Tests.Godot 中编写主场景与公会管理 UI 的 GdUnit4 用例，验证节点结构与关键 Signals。\n集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。",
-        "subtasks": []
+        "subtasks": [],
+        "updatedAt": "2025-11-30T17:25:08.209Z"
       },
       {
         "id": "3",
@@ -84,7 +85,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-30T17:00:56.082Z",
+      "lastModified": "2025-11-30T17:25:08.211Z",
       "taskCount": 6,
       "completedCount": 1,
       "tags": [

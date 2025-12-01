@@ -37,7 +37,8 @@
     ],
     "test_strategy": [
       "工具：编写简单的 C# 或 Python 脚本扫描 Godot 适配层中的 Signal XML 注释覆盖率。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-1002",
@@ -76,7 +77,8 @@
     ],
     "test_strategy": [
       "本地：在开发机上运行 Signal 基准测试，观察在不同订阅数与事件量下的性能曲线。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-1003",
@@ -117,7 +119,8 @@
     ],
     "test_strategy": [
       "CI：构造刻意缺失注释或命名错误的分支，验证 signal-compliance 工作流能够失败并输出摘要。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-1004",
@@ -156,7 +159,8 @@
     ],
     "test_strategy": [
       "GdUnit4：通过加载场景并反复 enter 与 exit tree 的方式检测是否出现重复订阅。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "NG-1005",
@@ -197,6 +201,7 @@
     ],
     "test_strategy": [
       "本地：对比开启与关闭细粒度采集时的基准结果，评估额外开销。"
-    ]
+    ],
+    "taskmaster_exported": false
   }
 ]

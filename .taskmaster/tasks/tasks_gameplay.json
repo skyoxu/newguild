@@ -51,7 +51,9 @@
       "按 PRD 中定义的核心循环（Resolution/Player/AI Simulation）为 EventEngine 设计一组最小测试场景，用 xUnit 验证每个阶段的状态变更是否符合预期。",
       "为常见事件类型（如成员加入、资源变化、活动结算）设计条件/效果组合，在测试中模拟不同初始状态并验证 EventEngine 输出。",
       "为冲突场景（多个事件作用于同一实体或互斥条件）编写专门测试，确认 EventEngine 能按预期顺序/规则处理。"
-    ]
+    ],
+    "taskmaster_id": 3,
+    "taskmaster_exported": true
   },
   {
     "id": "GM-0102",
@@ -104,7 +106,8 @@
       "为小规模 NPC 集合设计 AI 周期测试，用 xUnit 验证行为决策与状态更新是否符合 PRD 中定义的规则。",
       "构造典型冲突场景（例如资源争抢、公会关系冲突），验证 AICoordinator 能生成合理事件并与 EventEngine 协同处理。",
       "在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。"
-    ]
+    ],
+    "taskmaster_exported": false
   },
   {
     "id": "GM-0103",
@@ -161,6 +164,8 @@
       "在 xUnit 中为 GameLoop 设计一组“单周循环”用例，验证每个阶段的调用顺序与状态变化是否符合 PRD 描述。",
       "在 GdUnit4 中为主场景编写测试，通过模拟回合推进（调用 public 方法或连接信号）检查 UI 显示是否与 Core 状态一致。",
       "结合 GM-0101/GM-0102，用一个最小的“公会一周生活”场景验证事件触发、AI 行为与 UI 反馈闭环。"
-    ]
+    ],
+    "taskmaster_id": 4,
+    "taskmaster_exported": true
   }
 ]

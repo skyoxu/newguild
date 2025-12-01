@@ -1,0 +1,60 @@
+{
+  "taskmaster_id": 5,
+  "title": "Python 版 headless smoke 封装与 strict 模式开关",
+  "description": "根据 Phase-12-Headless-Smoke-Backlog.md B1/B2，在当前 Godot + C# 模板中实现 Python 版 headless smoke 封装脚本（替代/补充 PowerShell 版本），并增加 strict 模式：严格依赖 [TEMPLATE_SMOKE_READY]/[DB] opened marker 决定通过与否。",
+  "status": "pending",
+  "priority": "high",
+  "dependencies": [
+    1
+  ],
+  "testStrategy": "本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。\nCI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。",
+  "details": "Story: PH12-BACKLOG-B1-B2\nADR Refs: ADR-0005; ADR-0011; ADR-0018; ADR-0020\nChapters: CH01; CH06; CH07; CH10\nTest Refs: logs/ci/<date>/smoke/headless.log; logs/ci/<date>/smoke/selfcheck-summary.json\nAcceptance: 新增 scripts/python/smoke_headless.py（或等价脚本），支持 --godot-bin/--scene/--timeout-sec/--project-path 参数，并在 Windows 上可直接运行。; 非 strict 模式下，脚本行为与现有 PowerShell 版本等价，输出写入 logs/ci/<date>/smoke/**，并保留宽松判定。; strict 模式下，仅当日志包含 [TEMPLATE_SMOKE_READY] 或 [DB] opened 时返回 0，否则返回非零并在日志中标记为 strict-failed。; ci-windows.yml 或 windows-quality-gate.yml 至少提供一条注释示例，展示如何在受保护分支启用 strict 模式。\nTest Strategy: 本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。; CI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。\nLabels: ci; smoke; godot; python; headless\nOwner: architecture\nLayer: ci",
+  "subtasks": [],
+  "_source": {
+    "tasks_json": ".taskmaster/tasks/tasks.json",
+    "original_file": ".taskmaster/tasks/tasks_back.json",
+    "tag": "master",
+    "has_original": true
+  },
+  "original_id": "NG-0012",
+  "story_id": "PH12-BACKLOG-B1-B2",
+  "adr_refs": [
+    "ADR-0005",
+    "ADR-0011",
+    "ADR-0018",
+    "ADR-0020"
+  ],
+  "chapter_refs": [
+    "CH01",
+    "CH06",
+    "CH07",
+    "CH10"
+  ],
+  "overlay_refs": [],
+  "test_refs": [
+    "logs/ci/<date>/smoke/headless.log",
+    "logs/ci/<date>/smoke/selfcheck-summary.json"
+  ],
+  "acceptance": [
+    "新增 scripts/python/smoke_headless.py（或等价脚本），支持 --godot-bin/--scene/--timeout-sec/--project-path 参数，并在 Windows 上可直接运行。",
+    "非 strict 模式下，脚本行为与现有 PowerShell 版本等价，输出写入 logs/ci/<date>/smoke/**，并保留宽松判定。",
+    "strict 模式下，仅当日志包含 [TEMPLATE_SMOKE_READY] 或 [DB] opened 时返回 0，否则返回非零并在日志中标记为 strict-failed。",
+    "ci-windows.yml 或 windows-quality-gate.yml 至少提供一条注释示例，展示如何在受保护分支启用 strict 模式。"
+  ],
+  "labels": [
+    "ci",
+    "smoke",
+    "godot",
+    "python",
+    "headless"
+  ],
+  "owner": "architecture",
+  "layer": "ci",
+  "test_strategy": [
+    "本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。",
+    "CI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。"
+  ],
+  "depends_on": [
+    "NG-0001"
+  ]
+}
