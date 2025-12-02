@@ -5,7 +5,7 @@ namespace Game.Core.Engine;
 public interface IGameTurnSystem
 {
     GameTurnState StartNewWeek(string saveId);
-    GameTurnState Advance(GameTurnState state);
+    Task<GameTurnState> Advance(GameTurnState state);
 }
 
 public sealed class GameTurnSystem : IGameTurnSystem
@@ -29,19 +29,19 @@ public sealed class GameTurnSystem : IGameTurnSystem
         );
     }
 
-    public GameTurnState Advance(GameTurnState state)
+    public async Task<GameTurnState> Advance(GameTurnState state)
     {
         return state.Phase switch
         {
-            GameTurnPhase.Resolution => _eventEngine.ExecuteResolutionPhase(state) with
+            GameTurnPhase.Resolution => await _eventEngine.ExecuteResolutionPhaseAsync(state) with
             {
                 Phase = GameTurnPhase.Player
             },
-            GameTurnPhase.Player => _eventEngine.ExecutePlayerPhase(state) with
+            GameTurnPhase.Player => await _eventEngine.ExecutePlayerPhaseAsync(state) with
             {
                 Phase = GameTurnPhase.AiSimulation
             },
-            GameTurnPhase.AiSimulation => _eventEngine.ExecuteAiPhase(state) with
+            GameTurnPhase.AiSimulation => await _eventEngine.ExecuteAiPhaseAsync(state) with
             {
                 Phase = GameTurnPhase.Resolution,
                 Week = state.Week + 1

@@ -718,7 +718,7 @@ graph LR
 
 **步骤 2：应用契约模板（CLAUDE.md Section 6.1）**
 
-使用统一契约模板创建 C# 文件，放置于 `Scripts/Core/Contracts/<Module>/`：
+使用统一契约模板创建 C# 文件，放置于 `Game.Core/Contracts/<Module>/`：
 
 ```csharp
 namespace Game.Contracts.<Module>;

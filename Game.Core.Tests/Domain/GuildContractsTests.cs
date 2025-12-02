@@ -1,6 +1,6 @@
 using System;
 using FluentAssertions;
-using Game.Contracts.Guild;
+using Game.Core.Contracts.Guild;
 using Xunit;
 
 namespace Game.Core.Tests.Domain;
@@ -129,5 +129,73 @@ public class GuildContractsTests
         evt.NewRole.Should().Be("admin");
         evt.ChangedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
         evt.ChangedByUserId.Should().Be("u-admin");
+    }
+
+    [Fact]
+    public void GuildCreated_Equality_WithSameValues_ReturnsTrue()
+    {
+        // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var evt1 = new GuildCreated("g1", "u1", "Guild", now);
+        var evt2 = new GuildCreated("g1", "u1", "Guild", now);
+
+        // Act & Assert
+        evt1.Should().Be(evt2);
+        (evt1 == evt2).Should().BeTrue();
+    }
+
+    [Fact]
+    public void GuildCreated_Equality_WithDifferentValues_ReturnsFalse()
+    {
+        // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var evt1 = new GuildCreated("g1", "u1", "Guild1", now);
+        var evt2 = new GuildCreated("g1", "u1", "Guild2", now);
+
+        // Act & Assert
+        evt1.Should().NotBe(evt2);
+        (evt1 == evt2).Should().BeFalse();
+    }
+
+    [Fact]
+    public void GuildMemberJoined_Equality_WithSameValues_ReturnsTrue()
+    {
+        // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var evt1 = new GuildMemberJoined("u1", "g1", now, "member");
+        var evt2 = new GuildMemberJoined("u1", "g1", now, "member");
+
+        // Act & Assert
+        evt1.Should().Be(evt2);
+    }
+
+    [Fact]
+    public void GuildMemberLeft_WithEmptyReason_AcceptsEmptyString()
+    {
+        // Arrange & Act
+        var evt = new GuildMemberLeft(
+            UserId: "u1",
+            GuildId: "g1",
+            LeftAt: DateTimeOffset.UtcNow,
+            Reason: ""
+        );
+
+        // Assert
+        evt.Reason.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GuildDisbanded_WithEmptyReason_AcceptsEmptyString()
+    {
+        // Arrange & Act
+        var evt = new GuildDisbanded(
+            GuildId: "g1",
+            DisbandedByUserId: "u1",
+            DisbandedAt: DateTimeOffset.UtcNow,
+            Reason: ""
+        );
+
+        // Assert
+        evt.Reason.Should().BeEmpty();
     }
 }

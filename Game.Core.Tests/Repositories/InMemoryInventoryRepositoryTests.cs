@@ -24,4 +24,17 @@ public class InMemoryInventoryRepositoryTests
         var all = await repo.AllAsync();
         all.Should().ContainSingle(x => x.ItemId == "iron" && x.Qty == 5);
     }
+
+    [Fact]
+    public async Task GetAsync_WithNonExistentItem_ReturnsNull()
+    {
+        // Arrange
+        var repo = new InMemoryInventoryRepository();
+
+        // Act - get item that was never added
+        var result = await repo.GetAsync("nonexistent-item");
+
+        // Assert - should return null (tests line 19 false branch)
+        result.Should().BeNull();
+    }
 }

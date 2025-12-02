@@ -1,16 +1,22 @@
 using Godot;
 using Game.Core.Ports;
+using Game.Core.Domain;
 
 namespace Game.Godot.Adapters;
 
+/// <summary>
+/// Adapter implementing IResourceLoader with Godot's FileAccess API.
+/// Type-safe path validation enforced at compile time via SafeResourcePath.
+/// Per ADR-0019: Only res:// (read-only) and user:// (read-write) paths allowed.
+/// </summary>
 public partial class ResourceLoaderAdapter : Node, IResourceLoader
 {
-    public string? LoadText(string path)
+    public string? LoadText(SafeResourcePath path)
     {
         try
         {
-            if (!IsPathSafe(path)) return null;
-            using var f = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+            // SafeResourcePath guarantees path safety at type level
+            using var f = FileAccess.Open(path.Value, FileAccess.ModeFlags.Read);
             if (f == null) return null;
             return f.GetAsText();
         }
@@ -20,12 +26,12 @@ public partial class ResourceLoaderAdapter : Node, IResourceLoader
         }
     }
 
-    public byte[]? LoadBytes(string path)
+    public byte[]? LoadBytes(SafeResourcePath path)
     {
         try
         {
-            if (!IsPathSafe(path)) return null;
-            using var f = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+            // SafeResourcePath guarantees path safety at type level
+            using var f = FileAccess.Open(path.Value, FileAccess.ModeFlags.Read);
             if (f == null) return null;
             return f.GetBuffer((long)f.GetLength());
         }
@@ -33,15 +39,5 @@ public partial class ResourceLoaderAdapter : Node, IResourceLoader
         {
             return null;
         }
-    }
-
-    private static bool IsPathSafe(string path)
-    {
-        if (string.IsNullOrEmpty(path)) return false;
-        var p = path.Trim();
-        if (!(p.StartsWith("res://", System.StringComparison.OrdinalIgnoreCase) || p.StartsWith("user://", System.StringComparison.OrdinalIgnoreCase)))
-            return false;
-        if (p.Contains("../")) return false;
-        return true;
     }
 }
