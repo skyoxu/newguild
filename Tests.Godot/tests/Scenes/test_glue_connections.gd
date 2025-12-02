@@ -1,6 +1,6 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
-var _bus: Node
+var _bus
 var _etype := ""
 var _got := false
 
@@ -25,4 +25,3 @@ func test_main_scene_glue_publishes_on_menu_start() -> void:
     await get_tree().process_frame
     assert_bool(_got).is_true()
     assert_str(_etype).is_equal("ui.menu.start")
-
