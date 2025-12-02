@@ -48,7 +48,9 @@
       "Bash(Select-String -Pattern \"(Passed|Failed|Total tests)\")",
       "Bash(cd:*)",
       "Bash(python:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
