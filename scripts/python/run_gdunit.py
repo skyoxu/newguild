@@ -33,10 +33,12 @@ def run_cmd(args, cwd=None, timeout=600_000):
 def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None):
     """Run a process and stream stdout; if any line contains a break marker, kill early and return rc=1.
     This avoids long timeouts when Godot enters Debugger Break state.
+
+    Note: we only treat hard SCRIPT ERROR as a break marker by default.
+    Parser/Debugger messages are allowed to complete so that Godot's own
+    exit code and reports decide success/failure.
     """
     break_markers = break_markers or [
-        'Debugger Break',
-        'Parser Error',
         'SCRIPT ERROR',
     ]
     p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
