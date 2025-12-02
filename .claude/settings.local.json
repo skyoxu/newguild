@@ -45,7 +45,10 @@
       "SlashCommand(/sc:git)",
       "SlashCommand(/acceptance-check)",
       "Bash(python -m json.tool:*)",
-      "Bash(Select-String -Pattern \"(Passed|Failed|Total tests)\")"
+      "Bash(Select-String -Pattern \"(Passed|Failed|Total tests)\")",
+      "Bash(cd:*)",
+      "Bash(python:*)",
+      "Bash(git fetch:*)"
     ],
     "deny": [],
     "ask": []
