@@ -42,7 +42,10 @@
       "Bash(set COVERAGE_OVERRIDE_ALLOW=1:*)",
       "Bash(set COVERAGE_OVERRIDE_REASON=ADR-0020 contract migration: SafeResourcePath value object added with 19 new tests. Branch coverage 80.52pct acceptable for type-safe architecture improvement. Uncovered branches are defensive null checks in SafeResourcePath factory methods.)",
       "SlashCommand(/sc:help)",
-      "SlashCommand(/sc:git)"
+      "SlashCommand(/sc:git)",
+      "SlashCommand(/acceptance-check)",
+      "Bash(python -m json.tool:*)",
+      "Bash(Select-String -Pattern \"(Passed|Failed|Total tests)\")"
     ],
     "deny": [],
     "ask": []
