@@ -71,6 +71,8 @@ def main():
     date = dt.date.today().strftime('%Y-%m-%d')
     out_dir = args.out_dir or os.path.join(root, 'logs', 'unit', date)
     ensure_dir(out_dir)
+    ci_dir = os.path.join(root, 'logs', 'ci', date)
+    ensure_dir(ci_dir)
 
     summary = {
         'solution': args.solution,
@@ -143,16 +145,60 @@ def main():
             pass
     summary['threshold_ok'] = threshold_ok
 
-    summary['status'] = 'ok' if (rc == 0 and threshold_ok) else ('tests_failed' if rc != 0 else 'coverage_failed')
+    # Base status before applying any override
+    status = 'ok' if (rc == 0 and threshold_ok) else ('tests_failed' if rc != 0 else 'coverage_failed')
+
+    # Optional coverage override for special PRs: only applies when tests pass but coverage is below thresholds.
+    override_allow = os.environ.get('COVERAGE_OVERRIDE_ALLOW')
+    override_reason = os.environ.get('COVERAGE_OVERRIDE_REASON')
+    override_used = False
+
+    if status == 'coverage_failed' and rc == 0 and override_allow and override_allow.strip() not in ('0', '', 'false', 'False'):
+        # 只有在提供了明确的原因时才允许覆盖，否则仍然视为失败
+        if override_reason and override_reason.strip():
+            override_used = True
+            status = 'coverage_overridden'
+            summary['override'] = {
+                'reason': override_reason.strip(),
+                'lines_min': lines_min,
+                'branches_min': branches_min,
+                'line_pct': coverage.get('line_pct', 0) if coverage else None,
+                'branch_pct': coverage.get('branch_pct', 0) if coverage else None,
+            }
+
+            # 记录覆盖率豁免日志到 logs/ci/<date>/coverage-override.jsonl，便于后续审计
+            override_record = {
+                'ts': dt.datetime.utcnow().isoformat(timespec='seconds') + 'Z',
+                'status': status,
+                'solution': args.solution,
+                'configuration': args.configuration,
+                'line_pct': coverage.get('line_pct', 0) if coverage else None,
+                'branch_pct': coverage.get('branch_pct', 0) if coverage else None,
+                'lines_min': lines_min,
+                'branches_min': branches_min,
+                'override_reason': override_reason.strip(),
+                'github_ref': os.environ.get('GITHUB_REF'),
+                'github_run_id': os.environ.get('GITHUB_RUN_ID'),
+            }
+            override_log = os.path.join(ci_dir, 'coverage-override.jsonl')
+            with io.open(override_log, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(override_record, ensure_ascii=False) + '\n')
+
+    summary['status'] = status
     with io.open(os.path.join(out_dir, 'summary.json'), 'w', encoding='utf-8') as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
 
-    print(f"RUN_DOTNET status={summary['status']} line={coverage.get('line_pct', 'n/a') if coverage else 'n/a'}% branch={coverage.get('branch_pct','n/a') if coverage else 'n/a'} out={out_dir}")
-    if summary['status'] == 'ok':
+    extra = ""
+    if override_used:
+        extra = f" OVERRIDE reason={override_reason.strip()}"
+    print(
+        f"RUN_DOTNET status={summary['status']} line={coverage.get('line_pct', 'n/a') if coverage else 'n/a'}% "
+        f"branch={coverage.get('branch_pct','n/a') if coverage else 'n/a'} out={out_dir}{extra}"
+    )
+    if summary['status'] in ('ok', 'coverage_overridden'):
         return 0
     return 2 if summary['status'] == 'coverage_failed' else 1
 
 
 if __name__ == '__main__':
     sys.exit(main())
-

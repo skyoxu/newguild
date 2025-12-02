@@ -1,4 +1,4 @@
-namespace Game.Contracts.Combat;
+namespace Game.Core.Contracts.Combat;
 
 /// <summary>
 /// Domain event: core.player.damaged

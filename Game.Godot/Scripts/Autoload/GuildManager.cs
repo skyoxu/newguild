@@ -1,6 +1,7 @@
 using Godot;
 using Game.Core.Domain;
 using Game.Core.Repositories;
+using Game.Core.Contracts.Guild;
 using Game.Godot.Adapters;
 using Game.Godot.Adapters.Db;
 using System;
@@ -177,7 +178,7 @@ public partial class GuildManager : Node
     // Event publishing helpers
     private async Task PublishGuildCreatedEvent(Guild guild)
     {
-        var evt = new Game.Contracts.Guild.GuildCreated(
+        var evt = new GuildCreated(
             guild.GuildId,
             guild.CreatorId,
             guild.Name,
@@ -185,7 +186,7 @@ public partial class GuildManager : Node
         );
 
         await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
-            Game.Contracts.Guild.GuildCreated.EventType,
+            GuildCreated.EventType,
             "GuildManager",
             System.Text.Json.JsonSerializer.Serialize(new
             {
@@ -201,7 +202,7 @@ public partial class GuildManager : Node
 
     private async Task PublishGuildDisbandedEvent(string guildId, string disbandedBy)
     {
-        var evt = new Game.Contracts.Guild.GuildDisbanded(
+        var evt = new GuildDisbanded(
             guildId,
             disbandedBy,
             DateTimeOffset.UtcNow,
@@ -209,7 +210,7 @@ public partial class GuildManager : Node
         );
 
         await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
-            Game.Contracts.Guild.GuildDisbanded.EventType,
+            GuildDisbanded.EventType,
             "GuildManager",
             System.Text.Json.JsonSerializer.Serialize(new
             {
@@ -225,7 +226,7 @@ public partial class GuildManager : Node
 
     private async Task PublishMemberJoinedEvent(string guildId, string userId, string role)
     {
-        var evt = new Game.Contracts.Guild.GuildMemberJoined(
+        var evt = new GuildMemberJoined(
             userId,
             guildId,
             DateTimeOffset.UtcNow,
@@ -233,7 +234,7 @@ public partial class GuildManager : Node
         );
 
         await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
-            Game.Contracts.Guild.GuildMemberJoined.EventType,
+            GuildMemberJoined.EventType,
             "GuildManager",
             System.Text.Json.JsonSerializer.Serialize(new
             {
@@ -249,7 +250,7 @@ public partial class GuildManager : Node
 
     private async Task PublishMemberLeftEvent(string guildId, string userId)
     {
-        var evt = new Game.Contracts.Guild.GuildMemberLeft(
+        var evt = new GuildMemberLeft(
             userId,
             guildId,
             DateTimeOffset.UtcNow,
@@ -257,7 +258,7 @@ public partial class GuildManager : Node
         );
 
         await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
-            Game.Contracts.Guild.GuildMemberLeft.EventType,
+            GuildMemberLeft.EventType,
             "GuildManager",
             System.Text.Json.JsonSerializer.Serialize(new
             {
@@ -273,7 +274,7 @@ public partial class GuildManager : Node
 
     private async Task PublishMemberRoleChangedEvent(string guildId, string userId, string oldRole, string newRole)
     {
-        var evt = new Game.Contracts.Guild.GuildMemberRoleChanged(
+        var evt = new GuildMemberRoleChanged(
             userId,
             guildId,
             oldRole,
@@ -283,7 +284,7 @@ public partial class GuildManager : Node
         );
 
         await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
-            Game.Contracts.Guild.GuildMemberRoleChanged.EventType,
+            GuildMemberRoleChanged.EventType,
             "GuildManager",
             System.Text.Json.JsonSerializer.Serialize(new
             {

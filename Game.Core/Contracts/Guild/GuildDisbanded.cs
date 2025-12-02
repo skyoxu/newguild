@@ -1,4 +1,4 @@
-namespace Game.Contracts.Guild;
+namespace Game.Core.Contracts.Guild;
 
 /// <summary>
 /// Domain event: core.guild.disbanded

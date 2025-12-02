@@ -1,4 +1,4 @@
-namespace Game.Contracts.GameLoop;
+namespace Game.Core.Contracts.GameLoop;
 
 /// <summary>
 /// Domain event: core.game_turn.phase_changed

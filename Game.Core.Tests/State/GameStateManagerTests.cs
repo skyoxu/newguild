@@ -109,5 +109,190 @@ public class GameStateManagerTests
         var tooLong = new string('x', 101);
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await mgr.SaveGameAsync(tooLong));
     }
+
+    [Fact]
+    public void Publish_continues_with_remaining_callbacks_when_one_throws()
+    {
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+
+        var callback1Called = false;
+        var callback2Called = false;
+        var callback3Called = false;
+
+        // First callback: succeeds
+        mgr.OnEvent(evt => callback1Called = true);
+
+        // Second callback: throws exception
+        mgr.OnEvent(evt => throw new InvalidOperationException("Callback failed"));
+
+        // Third callback: should still be called despite second callback throwing
+        mgr.OnEvent(evt => callback3Called = true);
+
+        // Trigger event publishing by setting state (which calls Publish internally)
+        mgr.SetState(MakeState(), MakeConfig());
+
+        // All callbacks should have been attempted
+        Assert.True(callback1Called);
+        Assert.True(callback3Called);
+        // callback2Called cannot be checked as it throws, but the test verifies callback3 ran
+    }
+
+    [Fact]
+    public async Task SaveGameAsync_WithCompressionEnabled_CompressesData()
+    {
+        // Arrange
+        var store = new InMemoryDataStore();
+        var opts = new GameStateManagerOptions(EnableCompression: true);
+        var mgr = new GameStateManager(store, opts);
+        mgr.SetState(MakeState(), MakeConfig());
+
+        // Act
+        var saveId = await mgr.SaveGameAsync("compressed-save");
+
+        // Assert - compressed data should start with "gz:"
+        var rawData = store.Snapshot[saveId];
+        Assert.StartsWith("gz:", rawData);
+    }
+
+    [Fact]
+    public async Task SaveGameAsync_WithCompressionDisabled_StoresPlainJson()
+    {
+        // Arrange
+        var store = new InMemoryDataStore();
+        var opts = new GameStateManagerOptions(EnableCompression: false);
+        var mgr = new GameStateManager(store, opts);
+        mgr.SetState(MakeState(), MakeConfig());
+
+        // Act
+        var saveId = await mgr.SaveGameAsync("plain-save");
+
+        // Assert - uncompressed data should be valid JSON
+        var rawData = store.Snapshot[saveId];
+        Assert.DoesNotContain("gz:", rawData);
+        var parsed = JsonSerializer.Deserialize<JsonDocument>(rawData);
+        Assert.NotNull(parsed);
+    }
+
+    [Fact]
+    public async Task LoadGameAsync_WithCompressedData_DecompressesCorrectly()
+    {
+        // Arrange
+        var store = new InMemoryDataStore();
+        var opts = new GameStateManagerOptions(EnableCompression: true);
+        var mgr = new GameStateManager(store, opts);
+        var originalState = MakeState(level: 5, score: 1000);
+        mgr.SetState(originalState, MakeConfig());
+        var saveId = await mgr.SaveGameAsync();
+
+        // Act - load from compressed storage
+        var mgr2 = new GameStateManager(store, opts);
+        var (loadedState, _) = await mgr2.LoadGameAsync(saveId);
+
+        // Assert - decompression worked
+        Assert.Equal(5, loadedState.Level);
+        Assert.Equal(1000, loadedState.Score);
+    }
+
+    [Fact]
+    public void EnableAutoSave_CalledTwice_OnlyPublishesEventOnce()
+    {
+        // Arrange
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+        var eventCount = 0;
+        mgr.OnEvent(evt => { if (evt.Type == "game.autosave.enabled") eventCount++; });
+
+        // Act - call EnableAutoSave twice
+        mgr.EnableAutoSave();
+        mgr.EnableAutoSave();
+
+        // Assert - event published only once (early return on second call)
+        Assert.Equal(1, eventCount);
+    }
+
+    [Fact]
+    public void DisableAutoSave_CalledTwice_OnlyPublishesEventOnce()
+    {
+        // Arrange
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+        mgr.EnableAutoSave();
+        var eventCount = 0;
+        mgr.OnEvent(evt => { if (evt.Type == "game.autosave.disabled") eventCount++; });
+
+        // Act - call DisableAutoSave twice
+        mgr.DisableAutoSave();
+        mgr.DisableAutoSave();
+
+        // Assert - event published only once (early return on second call)
+        Assert.Equal(1, eventCount);
+    }
+
+    [Fact]
+    public void SetState_WithNullConfig_DoesNotCrash()
+    {
+        // Arrange
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+
+        // Act - call with null config (tests line 31 branch)
+        mgr.SetState(MakeState(), config: null);
+
+        // Assert - should not throw
+        var retrievedState = mgr.GetState();
+        Assert.NotNull(retrievedState);
+        var retrievedConfig = mgr.GetConfig();
+        Assert.Null(retrievedConfig);
+    }
+
+    [Fact]
+    public async Task CleanupOldSavesAsync_WithNoIndex_ExitsEarly()
+    {
+        // Arrange - empty store with no index
+        var store = new InMemoryDataStore();
+        var opts = new GameStateManagerOptions(MaxSaves: 2);
+        var mgr = new GameStateManager(store, opts);
+
+        // Act - save a game (which triggers cleanup internally)
+        mgr.SetState(MakeState(), MakeConfig());
+        var saveId = await mgr.SaveGameAsync();
+
+        // Assert - save succeeded even with no existing index (tests line 240 branch)
+        var list = await mgr.GetSaveListAsync();
+        Assert.Single(list);
+    }
+
+    [Fact]
+    public void SetState_WithConfig_SetsConfig()
+    {
+        // Arrange
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+
+        // Act - call with config (tests line 31-32 true branch)
+        mgr.SetState(MakeState(), MakeConfig());
+
+        // Assert
+        var retrievedConfig = mgr.GetConfig();
+        Assert.NotNull(retrievedConfig);
+        Assert.Equal(50, retrievedConfig.MaxLevel);
+    }
+
+    [Fact]
+    public async Task AutoSaveTickAsync_WhenDisabled_DoesNotSave()
+    {
+        // Arrange
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+        mgr.SetState(MakeState(), MakeConfig());
+
+        // Act - auto-save disabled by default, tick should do nothing
+        await mgr.AutoSaveTickAsync();
+
+        // Assert - no saves created (tests line 172 false branch)
+        var list = await mgr.GetSaveListAsync();
+        Assert.Empty(list);
+    }
 }
 

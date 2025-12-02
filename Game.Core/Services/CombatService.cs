@@ -1,4 +1,4 @@
-using Game.Contracts.Combat;
+using Game.Core.Contracts.Combat;
 using Game.Core.Domain;
 using Game.Core.Domain.ValueObjects;
 

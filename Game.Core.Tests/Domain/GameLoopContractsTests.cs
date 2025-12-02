@@ -1,6 +1,6 @@
 using System;
 using FluentAssertions;
-using Game.Contracts.GameLoop;
+using Game.Core.Contracts.GameLoop;
 using Xunit;
 
 namespace Game.Core.Tests.Domain;
