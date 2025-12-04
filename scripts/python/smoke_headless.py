@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as _dt
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -80,21 +81,64 @@ def _run_smoke(godot_bin: str, project: str, scene: str, timeout_sec: int, mode:
     has_db_open = "[DB] opened" in text
     has_any = bool(text.strip())
 
+    # Determine status and message
+    status = "unknown"
+    message = ""
+    exit_code = 0
+
     if has_marker:
-        print("SMOKE PASS (marker)")
+        status = "pass"
+        message = "SMOKE PASS (marker)"
+        print(message)
     elif has_db_open:
-        print("SMOKE PASS (db opened)")
+        status = "pass"
+        message = "SMOKE PASS (db opened)"
+        print(message)
     elif has_any:
-        print("SMOKE PASS (any output)")
+        status = "pass"
+        message = "SMOKE PASS (any output)"
+        print(message)
     else:
-        print("SMOKE INCONCLUSIVE (no output). Check logs.")
+        status = "inconclusive"
+        message = "SMOKE INCONCLUSIVE (no output). Check logs."
+        print(message)
 
     if mode == "strict":
         # 严格模式：至少需要 marker 或 DB opened
-        return 0 if (has_marker or has_db_open) else 1
+        if not (has_marker or has_db_open):
+            status = "strict-failed"
+            message = "SMOKE STRICT-FAILED: Required markers ([TEMPLATE_SMOKE_READY] or [DB] opened) not found"
+            print(message, file=sys.stderr)
+            exit_code = 1
+        else:
+            exit_code = 0
+    else:
+        # loose 模式永不作为硬门禁
+        exit_code = 0
 
-    # loose 模式永不作为硬门禁，只提供日志与提示
-    return 0
+    # Generate selfcheck-summary.json
+    summary = {
+        "timestamp": _dt.datetime.now().isoformat(),
+        "mode": mode,
+        "status": status,
+        "message": message,
+        "has_marker": has_marker,
+        "has_db_open": has_db_open,
+        "has_any_output": has_any,
+        "exit_code": exit_code,
+        "godot_bin": godot_bin,
+        "scene": scene,
+        "timeout_sec": timeout_sec,
+        "log_path": str(log_path),
+        "out_path": str(out_path),
+        "err_path": str(err_path)
+    }
+
+    summary_path = dest / "selfcheck-summary.json"
+    summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[smoke_headless] summary saved at {summary_path}")
+
+    return exit_code
 
 
 def main() -> int:

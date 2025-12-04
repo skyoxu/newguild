@@ -20,6 +20,8 @@ func _ready() -> void:
         $VBox/AddScoreBtn.pressed.connect(_on_add_score)
     if has_node("VBox/LoseHpBtn"):
         $VBox/LoseHpBtn.pressed.connect(_on_lose_hp)
+    if has_node("VBox/NextTurnDebugBtn"):
+        $VBox/NextTurnDebugBtn.pressed.connect(_on_next_turn_debug)
     # Listen to UI menu events to start/quit game
     var bus = get_node_or_null("/root/EventBus")
     if bus != null:
@@ -84,6 +86,11 @@ func _on_lose_hp() -> void:
         if bus != null:
             bus.PublishSimple("core.health.updated", "ui", "{\"value\":%d}" % _hp)
     _label.text = "HP = %d" % _hp
+
+func _on_next_turn_debug() -> void:
+    var hud = get_node_or_null("HUD")
+    if hud != null and hud.has_method("AdvanceTurnFromGd"):
+        hud.AdvanceTurnFromGd()
 
 func _on_domain_event(type: String, source: String, data_json: String, id: String, spec: String, ct: String, ts: String) -> void:
     if type == "ui.menu.start":

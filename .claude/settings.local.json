@@ -50,7 +50,10 @@
       "Bash(python:*)",
       "Bash(git fetch:*)",
       "Bash(git checkout:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(gh auth:*)",
+      "Bash(dotnet tool install:*)",
+      "Bash(start logs/unit/2025-12-03/coverage-report/index.html)"
     ],
     "deny": [],
     "ask": []

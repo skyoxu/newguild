@@ -207,3 +207,20 @@ jobs:
           py -3 scripts/python/db_schema_dump.py --glob "$env:APPDATA\Godot\app_userdata\GodotGame\*.db" --out "$out"
           Write-Host "SCHEMA_DUMP_OUT=$out"
 
+      - name: Headless Smoke Test (Python, soft gate)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          # Python headless smoke test - validates game can start and reach main scene
+          #
+          # MODE OPTIONS:
+          #   --mode loose (default): Never fails build, only logs PASS/FAIL hints
+          #   --mode strict: Returns non-zero if [TEMPLATE_SMOKE_READY] or [DB] opened markers missing
+          #
+          # PROTECTED BRANCH EXAMPLE (strict mode):
+          #   For main/production branches, enable strict mode to enforce quality gates:
+          #   py -3 scripts/python/smoke_headless.py --godot-bin "$env:GODOT_BIN" --project "." --scene "res://Game.Godot/Scenes/Main.tscn" --timeout-sec 5 --mode strict
+          #
+          # Current configuration: loose mode (non-blocking)
+          py -3 scripts/python/smoke_headless.py --godot-bin "$env:GODOT_BIN" --project "." --scene "res://Game.Godot/Scenes/Main.tscn" --timeout-sec 5 --mode loose
+

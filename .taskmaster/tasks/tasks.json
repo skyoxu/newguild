@@ -60,20 +60,21 @@
         "id": "5",
         "title": "Python 版 headless smoke 封装与 strict 模式开关",
         "description": "根据 Phase-12-Headless-Smoke-Backlog.md B1/B2，在当前 Godot + C# 模板中实现 Python 版 headless smoke 封装脚本（替代/补充 PowerShell 版本），并增加 strict 模式：严格依赖 [TEMPLATE_SMOKE_READY]/[DB] opened marker 决定通过与否。",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "1"
         ],
         "details": "Story: PH12-BACKLOG-B1-B2\nADR Refs: ADR-0005; ADR-0011; ADR-0018; ADR-0020\nChapters: CH01; CH06; CH07; CH10\nTest Refs: logs/ci/<date>/smoke/headless.log; logs/ci/<date>/smoke/selfcheck-summary.json\nAcceptance: 新增 scripts/python/smoke_headless.py（或等价脚本），支持 --godot-bin/--scene/--timeout-sec/--project-path 参数，并在 Windows 上可直接运行。; 非 strict 模式下，脚本行为与现有 PowerShell 版本等价，输出写入 logs/ci/<date>/smoke/**，并保留宽松判定。; strict 模式下，仅当日志包含 [TEMPLATE_SMOKE_READY] 或 [DB] opened 时返回 0，否则返回非零并在日志中标记为 strict-failed。; ci-windows.yml 或 windows-quality-gate.yml 至少提供一条注释示例，展示如何在受保护分支启用 strict 模式。\nTest Strategy: 本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。; CI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。\nLabels: ci; smoke; godot; python; headless\nOwner: architecture\nLayer: ci",
         "testStrategy": "本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。\nCI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。",
-        "subtasks": []
+        "subtasks": [],
+        "updatedAt": "2025-12-02T17:44:19.673Z"
       },
       {
         "id": "6",
         "title": "首个垂直切片的最小 xUnit/GdUnit4/Smoke 流程打通",
         "description": "在 newguild 模板下，为 PRD-Guild-Manager 的首个公会管理垂直切片建立最小可用的测试与 CI 流程：xUnit 覆盖核心域逻辑，GdUnit4 覆盖主场景与基本交互，headless smoke 验证游戏能从命令行启动到主场景并正常退出，所有步骤在 dev_cli.py 与 Windows CI 工作流中可自动执行。",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "1",
@@ -82,14 +83,15 @@
         ],
         "details": "Story: PRD-GUILD-MANAGER-VS-TEST-CI\nADR Refs: ADR-0005; ADR-0011; ADR-0018; ADR-0020\nChapters: CH01; CH06; CH07; CH10\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GuildCoreTests.cs; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Tests.Godot/tests/Scenes/test_main_scene_smoke.gd; logs/ci/<date>/ci-pipeline-summary.json; logs/e2e/<date>/smoke/selfcheck-summary.json; Game.Core.Tests/Domain/GameLoopTests.cs; Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd\nAcceptance: dev_cli.py run-ci-basic 在本地 Windows 环境下能成功运行，并至少执行一次 dotnet test 与一次 headless smoke。; Windows CI 工作流（ci-windows.yml 或 windows-quality-gate.yml）中包含对 Game.Core.Tests 与 Tests.Godot 的执行步骤，且在首个垂直切片落地后仍然全部通过。; headless smoke 用例能够在不依赖交互的情况下启动游戏主场景，并输出 [TEMPLATE_SMOKE_READY] 或 [DB] opened 标记。; 至少存在一条覆盖 PRD 3.0.3 T2 可玩性场景流的端到端测试路径：Game.Core.Tests/Domain/GameTurnSystemTests.cs（或等价用例）验证三阶段一周循环的状态推进，Tests.Godot/tests/Scenes/test_main_scene_smoke.gd（或等价用例）验证从启动主场景进入首周公会管理界面并完成一次“推进一周”的 UI 流程。; 失败的测试或 smoke 能在 logs/ci 与 logs/e2e 目录下生成可用于排查的 JSON/文本日志，与 AGENTS.md 中的日志规范一致。; Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd 已作为 PRD 3.0.3 T2 可玩性场景流的最小测试入口，分别覆盖 Core 回合状态与场景可玩闭环，并挂接在 NG-0021 与 GM-0103 的 Test-Refs 中。\nTest Strategy: 本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。; CI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。\nLabels: ci; testing; smoke; xunit; gdunit\nOwner: architecture\nLayer: ci",
         "testStrategy": "本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。\nCI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。",
-        "subtasks": []
+        "subtasks": [],
+        "updatedAt": "2025-12-04T14:19:40.651Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-02T09:24:59.750Z",
+      "lastModified": "2025-12-04T14:19:40.658Z",
       "taskCount": 6,
-      "completedCount": 4,
+      "completedCount": 6,
       "tags": [
         "master"
       ]
