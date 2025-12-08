@@ -159,3 +159,17 @@ py -3 scripts/python/task_links_validate.py
 - Godot 场景：是玩家实际看见和操作的 UI/交互入口。
 
 按照本文档的顺序推进，你可以在不一次性铺开所有 GM/NG 任务的情况下，先落地一条“首个 T2 Playable 场景流”，并让后续的 Taskmaster + SuperClaude 流程围绕这条流逐步扩展游戏玩法。
+
+## 8. Release / Sentry 软门禁脚本（godotgame 模板）
+
+- 脚本位置：`scripts/python/check_sentry_secrets.py`
+  - 检查 `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` 是否全部存在；
+  - 读取可选环境变量 `SENTRY_UPLOAD_PERFORMED`（由未来真正的 sourcemap 上传步骤设置）；
+  - 输出一行：`Sentry: secrets_detected=<true|false> upload_executed=<true|false>`，有 `GITHUB_STEP_SUMMARY` 时以 UTF-8 追加写入。
+- 工作流接入（Windows-only / Godot + C# 模板口径）：
+  - `.github/workflows/windows-release.yml`
+  - `.github/workflows/windows-release-tag.yml`
+  - 两个工作流的 Release Job 末尾均包含前述软门禁步骤。
+- 设计说明：
+  - 该脚本是 ADR-0003 中 Release Health 体系在 **godotgame 模板** 下的最小落地，不阻断构建（软门禁），只负责在 Step Summary 中提供“是否配置了 Sentry 环境、是否执行了上传步骤”的可见证据；
+  - 后续真正的 sourcemap 上传脚本只需在成功上传时设置 `SENTRY_UPLOAD_PERFORMED=1`，即可在同一 Summary 行中反映执行状态。

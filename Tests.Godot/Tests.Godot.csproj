@@ -7,8 +7,8 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Compile C# scripts from linked runtime directory -->
-    <Compile Include="Game.Godot/**/*.cs" />
+    <!-- Compile C# scripts from parent project directory -->
+    <Compile Include="../Game.Godot/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Game.Core\Game.Core.csproj" />

@@ -103,6 +103,24 @@ def run_smoke_headless(godot_bin: str) -> int:
     return proc.returncode
 
 
+def validate_security_audit_logs() -> int:
+    """验证 security-audit.jsonl 格式与字段完整性。
+
+    设计目标：
+    - 验证所有审计日志符合 JSONL 格式；
+    - 验证必需字段 {ts, action, reason, target, caller} 存在；
+    - 作为 CI 质量门禁的一部分。
+    """
+
+    args = [
+        "py",
+        "-3",
+        "scripts/python/validate_audit_logs.py",
+    ]
+    proc = subprocess.run(args, text=True)
+    return proc.returncode
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -114,6 +132,7 @@ def main() -> int:
     p_all.add_argument("--build-solutions", action="store_true")
     p_all.add_argument("--gdunit-hard", action="store_true", help="run hard GdUnit set (Adapters/Config + Security)")
     p_all.add_argument("--smoke", action="store_true", help="run headless smoke (strict marker/DB check)")
+    p_all.add_argument("--validate-audit", action="store_true", help="validate security-audit.jsonl format")
 
     args = parser.parse_args()
 
@@ -133,6 +152,14 @@ def main() -> int:
             sm_rc = run_smoke_headless(args.godot_bin)
             if sm_rc != 0:
                 hard_failed = True
+
+        # 4) 可选门禁：security-audit.jsonl 格式验证
+        if args.validate_audit:
+            audit_rc = validate_security_audit_logs()
+            if audit_rc != 0:
+                print("[WARNING] Security audit log validation failed (non-blocking)", file=sys.stderr)
+                # 暂时作为软门禁，不阻塞 CI
+                # hard_failed = True  # 未来可改为硬门禁
 
         return 0 if not hard_failed else 1
 

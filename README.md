@@ -1,8 +1,8 @@
 [![Windows Export Slim](https://github.com/skyoxu/newguild/actions/workflows/windows-export-slim.yml/badge.svg)](https://github.com/skyoxu/newguild/actions/workflows/windows-export-slim.yml) [![Windows Release](https://github.com/skyoxu/newguild/actions/workflows/windows-release.yml/badge.svg)](https://github.com/skyoxu/newguild/actions/workflows/windows-release.yml) [![Windows Quality Gate](https://github.com/skyoxu/newguild/actions/workflows/windows-quality-gate.yml/badge.svg)](https://github.com/skyoxu/newguild/actions/workflows/windows-quality-gate.yml)
 
-# Godot Windows-only Template (C#)
+# Godot game (C#)
 
-即开即用，可复制的 Godot 4 + .NET（Windows-only）项目模板。
+Godot 4.5.1 + .NET（Windows-only）游戏项目。
 
 ## 3‑Minute From Zero to Export（3 分钟从 0 到导出）
 
@@ -19,7 +19,7 @@
 One‑liner（已在 Editor 安装 Export Templates 后）：
 - PowerShell：`$env:GODOT_BIN='C:\\Godot\\Godot_v4.5.1-stable_mono_win64.exe'; ./scripts/ci/export_windows.ps1 -GodotBin "$env:GODOT_BIN" -Output build\Game.exe; ./scripts/ci/smoke_exe.ps1 -ExePath build\Game.exe`
 
-## What You Get（模板内容）
+## What You Get（内容）
 - 适配层 Autoload：EventBus/DataStore/Logger/Audio/Time/Input/SqlDb
 - 场景分层：ScreenRoot + Overlays；ScreenNavigator（淡入淡出 + Enter/Exit 钩子）
 - 安全基线：仅允许 `res://`/`user://` 读取，启动审计 JSONL，HTTP 验证示例
@@ -29,6 +29,7 @@ One‑liner（已在 Editor 安装 Export Templates 后）：
 
 ## Quick Links
 - 文档索引：`docs/PROJECT_DOCUMENTATION_INDEX.md`
+- Godot+C# 快速开始（newguild 项目）：`docs/TEMPLATE_GODOT_GETTING_STARTED.md`
 - Windows-only 快速指引：`docs/migration/Phase-17-Windows-Only-Quickstart.md`
 - FeatureFlags 快速指引：`docs/migration/Phase-18-Staged-Release-and-Canary-Strategy.md`
 - 导出清单：`docs/migration/Phase-17-Export-Checklist.md`

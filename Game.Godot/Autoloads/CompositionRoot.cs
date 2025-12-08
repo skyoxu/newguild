@@ -41,27 +41,32 @@ public partial class CompositionRoot : Node
 
     private void InitializeAdapters()
     {
-        // Create adapter nodes as children to ensure lifecycle managed by scene tree
+        // Create EventBus first - security adapters need it for audit logging
+        var busNode = new Adapters.EventBusAdapter();
+        AddChild(busNode);
+        EventBus = busNode;
+
+        // Create security adapters (require EventBus)
+        var securityFileAdapter = new SecurityFileAdapter(busNode);
+
+        // Create other adapter nodes as children to ensure lifecycle managed by scene tree
         var time = new Adapters.TimeAdapter();
         var input = new Adapters.InputAdapter();
         var loader = new Adapters.ResourceLoaderAdapter();
-        var store = new Adapters.DataStoreAdapter();
+        var store = new Adapters.DataStoreAdapter(securityFileAdapter);
         var logger = new Adapters.LoggerAdapter();
-        var busNode = new Adapters.EventBusAdapter();
 
         AddChild(time);
         AddChild(input);
         AddChild(loader);
         AddChild(store);
         AddChild(logger);
-        AddChild(busNode);
 
         Time = time;
         Input = input;
         ResourceLoader = loader;
         DataStore = store;
         Logger = logger;
-        EventBus = busNode;
     }
 
     // Expose a simple status map for GDScript without accessing C# properties directly

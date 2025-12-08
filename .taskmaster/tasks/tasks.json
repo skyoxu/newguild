@@ -85,12 +85,92 @@
         "testStrategy": "本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。\nCI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。",
         "subtasks": [],
         "updatedAt": "2025-12-04T14:19:40.651Z"
+      },
+      {
+        "id": "8",
+        "title": "Godot 安全适配层增强：外链白名单、文件访问与 OS.execute 守卫",
+        "description": "按照 Phase-14-Godot-Security-Baseline.md 与 Backlog，对当前 Godot+C# 模板补齐安全适配层：统一外链白名单配置（ALLOWED_EXTERNAL_HOSTS）、文件访问适配（仅 res:// 与 user://，拒绝 .. 和绝对路径）、显式封装 OS.execute，并为安全审计 JSONL 增加格式校验与最小测试集。",
+        "status": "blocked",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "blockers": [
+          "A1: 安全适配器位置错误 - SecurityUrlAdapter/SecurityFileAdapter/SecurityProcessAdapter 当前在 Game.Core/Services/，应移至 Game.Godot/Adapters/Security/（违反 ADR-0007 三层架构）→ NG-0014 + NG-0038",
+          "A2: 缺少端口接口 - 未定义 ISecurityUrlValidator/ISecurityFileValidator/ISecurityProcessValidator，Core 层直接依赖具体实现（违反 DIP）→ NG-0014 + NG-0038",
+          "D1-D3: 事件命名违规 - 3个安全适配器事件命名不符合 ADR-0004 格式（使用下划线而非点分隔，缺少 domain prefix）→ NG-0014",
+          "B3: Windows反斜杠路径遍历检测缺失 - SafeResourcePath.ContainsPathTraversal 仅检查 '../'，遗漏 '..\\\\' 和 '%2e%2e'（CWE-22, CVSS 9.1）→ NG-0042",
+          "C3: SSRF防护缺失 - SecurityUrlAdapter 当 allowedDomains=null 时允许任意 HTTPS URL（CWE-918, CVSS 8.6）→ NG-0042",
+          "C2: 审计日志敏感数据泄露 - SecurityProcessAdapter 日志记录完整命令参数，可能泄露密码/Token（CWE-532, CVSS 7.5）→ NG-0043"
+        ],
+        "details": "Story: PH14-BACKLOG-B1-B2-B3-B4\nADR Refs: ADR-0019; ADR-0006; ADR-0005; ADR-0011\nChapters: CH02; CH05; CH07; CH10\nOverlay: docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-安全适配.md\nTest Refs: Tests.Godot/tests/Security/Hard/test_db_path_rejection.gd; Tests.Godot/tests/Security/Hard/test_settings_config_security.gd; logs/ci/<date>/security-audit.jsonl; .taskmaster/tasks/08/ACCEPTANCE_CHECKLIST.md\nAcceptance: 外链访问统一通过 SecurityUrlAdapter（或等价组件）完成，强制 https scheme + ALLOWED_EXTERNAL_HOSTS 白名单，禁止 file://、javascript: 等高危 scheme。; 文件访问统一通过 SecurityFileAdapter（或等价组件）封装 FileAccess/DirAccess：仅允许 res:// 读取与 user:// 读写，拒绝绝对路径与 .. 越权访问，并将拒绝写入 security-audit.jsonl。; OS.execute 默认在运行时禁用，或仅在开发/CI 模式通过 SecurityProcessAdapter 白名单执行，并记录审计日志。; 安全审计 JSONL（logs/ci/<date>/security-audit.jsonl 与 user://logs/security/**）均通过验证脚本检查：每行合法 JSON，至少包含 {ts, action, reason, target, caller} 字段。; 相关 GdUnit4 Hard 测试覆盖允许/拒绝/非法三态场景，并在 CI 中作为硬门禁的一部分。; 架构验收：通过 /acceptance-check 的 50+ 条检查，无 Critical Blockers（详见 logs/ci/2025-12-07/task8-acceptance-report.md）。\nTest Strategy: GdUnit4 安全用例：编写/扩展 Hard 集测试外链、文件、进程三类接口的 allow/deny/invalid 行为。; 脚本校验：新增或扩展 scripts/python/validate_audit_logs.py，针对 security-audit.jsonl 做格式与字段校验，在 CI 中运行。\nLabels: security; godot; adapter; filesystem; process\nOwner: architecture\nLayer: adapter",
+        "testStrategy": "GdUnit4 安全用例：编写/扩展 Hard 集测试外链、文件、进程三类接口的 allow/deny/invalid 行为。\n脚本校验：新增或扩展 scripts/python/validate_audit_logs.py，针对 security-audit.jsonl 做格式与字段校验，在 CI 中运行。",
+        "updatedAt": "2025-12-08T02:45:00.000Z",
+        "subtasks": []
+      },
+      {
+        "id": "9",
+        "title": "GameLoop 安全审计基线与任务映射收口",
+        "description": "根据最新的 GameLoop 安全审计报告（logs/security-audit-gameloop.*）和 cifix.txt，对照 ADR-0019/0004/0005/0018 重新梳理 F001–F007，区分 T2 阶段必须完成与 NG 安全 backlog 的工作，并在 tasks_back.json / tasks_gameplay.json 中补齐 adr_refs/chapter_refs/overlay_refs/test_refs，使后续审计与 task_links_validate 以统一口径运行。",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "details": "Story: PH16-GAMELOOP-SECURITY-BASELINE\nADR Refs: ADR-0019; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH02; CH04; CH06; CH07\nTest Refs: logs/security-audit-gameloop.json; logs/SECURITY_AUDIT_GAMELOOP_REPORT.md; cifix.txt\nAcceptance: SECURITY_AUDIT_GAMELOOP_REPORT.md 以 ADR-0019 为基线，明确区分 T2_BLOCKING 与 NG_BACKLOG 安全问题，并与 cifix.txt 中的技术债记录一致。; F001/F002/F005 至少映射到一条 T2 相关 NG/GM 任务，F003/F004/F006/F007 映射到 NG 安全或架构 backlog 任务，且在 tasks_back.json / tasks_gameplay.json 中补齐 adr_refs/chapter_refs/overlay_refs/test_refs。; 运行 py -3 scripts/python/task_links_validate.py 时，GameLoop 相关任务不再因为 ADR/Chapter 映射或缺失 Test-Refs 报错。\nTest Strategy: 人工对比 logs/security-audit-gameloop.* 与 tasks_back.json / tasks_gameplay.json，确认每条 F00x 至少有一条对应任务可追踪。; 运行 task_links_validate.py 与 check_tasks_all_refs.py，确认新增/调整后的 NG/GM 任务全部通过回链校验。\nLabels: security; gameloop; docs; audit\nOwner: architecture\nLayer: docs",
+        "testStrategy": "人工对比 logs/security-audit-gameloop.* 与 tasks_back.json / tasks_gameplay.json，确认每条 F00x 至少有一条对应任务可追踪。\n运行 task_links_validate.py 与 check_tasks_all_refs.py，确认新增/调整后的 NG/GM 任务全部通过回链校验。",
+        "subtasks": []
+      },
+      {
+        "id": "10",
+        "title": "GameLoop SaveIdValue 值对象与白名单校验",
+        "description": "在 Game.Core 中为 GameLoop 引入 SaveIdValue 值对象（或等价验证器），实现基于 ADR-0019 的白名单规则（仅允许 [a-zA-Z0-9_-] 且长度 1-64），并在 GameTurnState/GameTurnSystem 与 GameLoop 相关合约中统一使用该类型；同时新增 SaveId 安全向单元测试，覆盖非法输入与边界值。",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "9"
+        ],
+        "details": "Story: PH16-GAMELOOP-SAVEID-VALUE\nADR Refs: ADR-0019; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH02; CH04; CH06; CH07\nTest Refs: Game.Core/Domain/Turn/SaveIdValue.cs; Game.Core.Tests/Domain/SaveIdValueTests.cs; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Game.Core.Tests/Domain/GameLoopTests.cs\nAcceptance: Game.Core/Domain/Turn 下新增 SaveIdValue（或等价类型），实现 [a-zA-Z0-9_-]{1,64} 的白名单校验，非法输入抛出 ArgumentException。; GameTurnState / GameTurnSystem 在内部使用 SaveIdValue 作为 SaveId 的入口类型，确保后续事件与存储只接受经过校验的值。; Game.Core.Tests 中新增 SaveIdValueTests 与针对无效 SaveId 的 GameTurnSystem / GameLoop 测试，覆盖空字符串、超长、SQL 片段、路径遍历等典型攻击向量。; dotnet test Game.Core.Tests 在本地与 CI 均可通过，且与 PRD 3.0.3 T2 可玩性场景流描述一致。\nTest Strategy: 单元测试：在 SaveIdValueTests 中穷举典型非法/合法输入，验证构造/工厂方法的行为与异常信息。; 集成测试：在 GameTurnSystemTests 与 GameLoopTests 中增加使用非法 SaveId 的路径，验证系统拒绝不符合白名单的存档槽 ID。\nLabels: security; gameloop; core; t2\nOwner: architecture\nLayer: core",
+        "testStrategy": "单元测试：在 SaveIdValueTests 中穷举典型非法/合法输入，验证构造/工厂方法的行为与异常信息。\n集成测试：在 GameTurnSystemTests 与 GameLoopTests 中增加使用非法 SaveId 的路径，验证系统拒绝不符合白名单的存档槽 ID。",
+        "subtasks": []
+      },
+      {
+        "id": "11",
+        "title": "SqliteDataStore 路径校验与插件后端安全收紧",
+        "description": "在 Game.Godot/Adapters/SqliteDataStore 中增强路径与扩展名校验：对 user:// 路径进行规范化后再做前缀与 .. 检查，增加 .db/.sqlite/.sqlite3 等扩展名白名单，并为已有 ValidatePath 逻辑补充文件大小上限检查；同时通过环境变量限制 plugin backend 的启用范围（如仅在开发环境允许），将 plugin backend 风险收敛为受控技术债。",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "8"
+        ],
+        "details": "Story: PH06-GAMELOOP-SQLITE-PATH-HARDENING\nADR Refs: ADR-0019; ADR-0006; ADR-0005; ADR-0011\nChapters: CH02; CH05; CH07; CH10\nTest Refs: Game.Godot/Adapters/SqliteDataStore.cs; logs/ci/<date>/security-audit.jsonl\nAcceptance: SqliteDataStore 对传入路径在检查前统一规范化分隔符，严格限制为 user:// 前缀并拒绝任何包含 .. 的路径。; SqliteDataStore 增加数据库文件扩展名白名单（如 .db/.sqlite/.sqlite3），非法扩展名会被拒绝并记录审计日志。; 针对已有数据库文件增加简单的大小上限检查（防 DoS），超限时抛出安全异常并写入 security-audit.jsonl。; 通过环境变量（例如 ALLOW_PLUGIN_BACKEND）或等价方案，将 plugin backend 限定在开发/实验环境，生产默认使用 managed backend，并在文档中明确记录。\nTest Strategy: 单元/集成测试：为 SqliteDataStore 增加路径与扩展名相关的测试用例，覆盖非法前缀、..、非法扩展名、超大文件等场景。; 安全审计：在启用/禁用 plugin backend 的不同配置下运行最小数据库操作，验证 security-audit.jsonl 中有预期的审计条目。\nLabels: security; sqlite; godot; adapter\nOwner: architecture\nLayer: adapter",
+        "testStrategy": "单元/集成测试：为 SqliteDataStore 增加路径与扩展名相关的测试用例，覆盖非法前缀、..、非法扩展名、超大文件等场景。\n安全审计：在启用/禁用 plugin backend 的不同配置下运行最小数据库操作，验证 security-audit.jsonl 中有预期的审计条目。",
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on setup core game loop.",
+        "subtasks": []
+      },
+      {
+        "id": "12",
+        "title": "GodotSQLiteDatabase 错误脱敏与审计挂钩",
+        "description": "在 Game.Godot/Adapters/Db/GodotSQLiteDatabase 中按 ADR-0019 要求改造错误处理：开发环境保留详细异常信息方便排查；生产环境仅抛出脱敏后的通用错误消息，并将包含路径/SQL 明细的诊断信息写入安全审计日志或内部日志文件；同时为 OpenAsync/Execute* 等路径补充最小测试或 smoke 验证。",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [
+          "11"
+        ],
+        "details": "Story: PH06-GAMELOOP-DB-ERROR-AND-AUDIT\nADR Refs: ADR-0019; ADR-0006; ADR-0005; ADR-0011\nChapters: CH02; CH05; CH07; CH10\nTest Refs: Game.Godot/Adapters/Db/GodotSQLiteDatabase.cs; logs/ci/<date>/security-audit.jsonl\nAcceptance: GodotSQLiteDatabase 在 DEBUG 构建下仍然抛出包含路径/SQL 的详细异常，方便开发调试。; 在 Release/CI 环境下，同一代码路径仅向调用方暴露脱敏后的通用错误消息，详细路径与 SQL 片段被写入受控的审计/诊断日志。; 新增或扩展现有 smoke/集成测试，验证在数据库打开失败、SQL 执行失败等典型失败场景下，错误信息不会直接泄露敏感实现细节。\nTest Strategy: 环境对比测试：在 DEBUG 与 Release 配置下分别触发数据库异常，验证对调用方的异常消息差异以及 security-audit.jsonl 中的记录行为。; CI 验证：在 windows-quality-gate 或等价工作流中加入一次最小化的 GodotSQLiteDatabase smoke 调用，确保改造后不会破坏现有管线。\nLabels: security; sqlite; godot; error-handling\nOwner: architecture\nLayer: adapter",
+        "testStrategy": "环境对比测试：在 DEBUG 与 Release 配置下分别触发数据库异常，验证对调用方的异常消息差异以及 security-audit.jsonl 中的记录行为。\nCI 验证：在 windows-quality-gate 或等价工作流中加入一次最小化的 GodotSQLiteDatabase smoke 调用，确保改造后不会破坏现有管线。",
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on develop event system.",
+        "subtasks": []
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-04T14:19:40.658Z",
-      "taskCount": 6,
+      "lastModified": "2025-12-06T07:17:04.482Z",
+      "taskCount": 11,
       "completedCount": 6,
       "tags": [
         "master"
@@ -133,6 +213,11 @@
         "details": "Story: PH13-BACKLOG-B1-B2-B5\nADR Refs: ADR-0005; ADR-0015; ADR-0018; ADR-0020\nChapters: CH01; CH06; CH07; CH09\nTest Refs: logs/ci/<date>/unit/coverage.json; logs/e2e/<date>/gdunit-hard/run-summary.json; logs/ci/<date>/quality-gates-summary.json\nAcceptance: scripts/python/run_dotnet.py 读取覆盖率结果并在 summary.json 中写入 lines/branches 与阈值配置（默认 90/85，可由环境变量覆盖）。; 当覆盖率低于阈值时，quality_gates.py 在 summary 中标记为 failed，并可配置为软/硬门禁（至少支持硬门禁）。; quality_gates.py 能调用 run_gdunit.py 或等价封装，执行 Adapters+Security 硬门禁集合，并在 quality-gates-summary.json 中汇总结果。; Windows Quality Gate 工作流调用 quality_gates.py all 时，能在 Step Summary 中清晰展示 dotnet 覆盖率与 GdUnit4 集合结果。\nTest Strategy: 本地模拟：手工降低测试覆盖率，验证 quality_gates.py 将其标记为 failed，并按配置返回非零 exit code。; CI 验证：在 PR 上运行 windows-quality-gate 工作流，观察 coverage 与 GdUnit4 结果是否在 Step Summary 与 artifacts 中正确展示。\nLabels: ci; quality-gates; coverage; gdunit\nOwner: architecture\nLayer: ci",
         "testStrategy": "本地模拟：手工降低测试覆盖率，验证 quality_gates.py 将其标记为 failed，并按配置返回非零 exit code。\nCI 验证：在 PR 上运行 windows-quality-gate 工作流，观察 coverage 与 GdUnit4 结果是否在 Step Summary 与 artifacts 中正确展示。"
       }
-    ]
+    ],
+    "metadata": {
+      "created": "2025-12-05T13:26:03.323Z",
+      "updated": "2025-12-05T13:26:03.323Z",
+      "description": "Tasks for feature-docs context"
+    }
   }
 }

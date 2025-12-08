@@ -62,3 +62,10 @@ Status: Proposed
 > - Game.Core.Tests/Domain/GuildContractsTests.cs（新增/调整对应测试用例）
 > - scripts/python/check_guild_contracts.py（扩展 EXPECTED 列表）
 > - 如涉及 Overlay 内容变化，仍需通过 scripts/python/validate_contracts.py 校验 Overlay ↔ Contracts 回链。
+## SaveId 值对象（GameLoop 关联）
+
+- **SaveIdValue**
+  - 用途：作为长生命周期存档槽的逻辑标识，避免直接使用原始字符串参与路径或 SQL 片段拼接。
+  - 规则：仅允许 `[a-zA-Z0-9_-]`，长度 1–64，违反规则时抛出异常。
+  - 契约位置：`Game.Core/Domain/Turn/SaveIdValue.cs`
+  - 关联事件：`core.game_turn.started` / `core.game_turn.phase_changed` / `core.game_turn.week_advanced` 中的 `SaveId` 字段应基于该值对象生成，避免未经验证的输入进入事件与持久化层。
