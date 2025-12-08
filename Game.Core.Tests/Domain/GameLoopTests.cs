@@ -26,14 +26,14 @@ public class GameLoopTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: "test-save",
+            SaveId: new SaveIdValue("test-save"),
             CurrentTime: now
         );
 
         // Assert
         state.Week.Should().Be(1);
         state.Phase.Should().Be(GameTurnPhase.Resolution);
-        state.SaveId.Should().Be("test-save");
+        state.SaveId.ToString().Should().Be("test-save");
         state.CurrentTime.Should().Be(now);
     }
 
@@ -60,7 +60,7 @@ public class GameLoopTests
         state.Should().NotBeNull();
         state.Week.Should().Be(1);
         state.Phase.Should().Be(GameTurnPhase.Resolution);
-        state.SaveId.Should().Be("smoke-test-save");
+        state.SaveId.ToString().Should().Be("smoke-test-save");
     }
 
     [Fact]

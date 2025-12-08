@@ -5,7 +5,7 @@ namespace Game.Core.Domain.Turn;
 public sealed record GameTurnState(
     int Week,
     GameTurnPhase Phase,
-    string SaveId,
+    SaveIdValue SaveId,
     DateTimeOffset CurrentTime
 );
 

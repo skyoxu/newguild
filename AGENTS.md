@@ -28,6 +28,31 @@ This file provides guidance to Codex Cli when working with code in this reposito
 - **Upstream**: BMAD v6 produces PRD + Architecture (arc42 overlays; CH01/CH03 at minimum; ADR-0001…0005 adopted, more as needed).
 - **Planning**: Taskmaster converts **PRD → Tasks** with back-links to ADR/CH/Overlay.
 
+## 0.1 New Session Quick Reference
+
+**Starting a fresh session? Read these in order:**
+
+1. **This file** (`AGENTS.md`) - You're already here ✓
+2. **Project indexes** - Context entry points:
+   - `architecture_base.index` - Architecture docs (CH01-CH12 + ADRs)
+   - `prd_chunks.index` - PRD fragments index
+   - `shards/flattened-adr.xml` - All ADRs in single XML
+   - `shards/flattened-prd.xml` - All PRD in single XML
+3. **Test framework** - `docs/testing-framework.md` (critical for TDD)
+
+**File locations quick reference:**
+- PRD input: `.taskmaster/docs/prd.txt` (auto-generated from prd_chunks)
+- ADRs: `docs/adr/ADR-*.md` (21 files)
+- Architecture: `docs/architecture/base/*.md` (CH01-CH12)
+- Tasks: `tasks/tasks.json` (Taskmaster output)
+- Logs: `logs/**` (Security/E2E/Unit/Perf audit trails)
+
+**Typical workflow:**
+- **Taskmaster**: `npx task-master parse-prd .taskmaster/docs/prd.txt -n 30`
+- **Validate**: `py -3 scripts/python/validate_task_links.py`
+
+---
+
 ## Project Background
 
 This is a **production-ready Godot 4.5.1 project template** designed for rapid game development with enterprise-grade tooling. It serves as a reusable, out-of-the-box foundation for Windows desktop games.

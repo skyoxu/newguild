@@ -101,7 +101,7 @@ public class GameTurnSystemTests
         // Assert
         state.Week.Should().Be(1);
         state.Phase.Should().Be(GameTurnPhase.Resolution);
-        state.SaveId.Should().Be(saveId);
+        state.SaveId.ToString().Should().Be(saveId);
         state.CurrentTime.Should().BeOnOrAfter(DateTimeOffset.UtcNow.AddMinutes(-1));
     }
 
@@ -113,7 +113,7 @@ public class GameTurnSystemTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -133,7 +133,7 @@ public class GameTurnSystemTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Player,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -153,7 +153,7 @@ public class GameTurnSystemTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.AiSimulation,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -190,7 +190,7 @@ public class GameTurnSystemTests
 
         afterAi.Week.Should().Be(2);
         afterAi.Phase.Should().Be(GameTurnPhase.Resolution);
-        afterAi.SaveId.Should().Be(saveId);
+        afterAi.SaveId.ToString().Should().Be(saveId);
     }
 
     [Fact]
@@ -206,7 +206,7 @@ public class GameTurnSystemTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -230,7 +230,7 @@ public class GameTurnSystemTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Player,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -254,7 +254,7 @@ public class GameTurnSystemTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.AiSimulation,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -277,7 +277,7 @@ public class GameTurnSystemTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -300,7 +300,7 @@ public class GameTurnSystemTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -328,7 +328,7 @@ public class GameTurnSystemTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.AiSimulation,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -383,5 +383,114 @@ public class GameTurnSystemTests
         var weekAdvanced = eventBus.Published[3].Data as Game.Core.Contracts.GameLoop.GameWeekAdvanced;
         weekAdvanced!.PreviousWeek.Should().Be(1);
         weekAdvanced.CurrentWeek.Should().Be(2);
+    }
+
+    // =====================================================================
+    // SaveIdValue Validation Tests (NG-0040: F001 Security Finding)
+    // ADR-0019: Godot Security Baseline - Input Validation with Whitelists
+    // =====================================================================
+
+    [Theory]
+    [InlineData("")]  // Empty string
+    [InlineData("   ")]  // Whitespace only
+    [InlineData(null)]  // Null
+    public void StartNewWeek_RejectsNullOrEmptySaveId(string? invalidSaveId)
+    {
+        // Arrange
+        var system = CreateSystem();
+
+        // Act & Assert - RED: This will fail because StartNewWeek currently accepts string without validation
+        // Expected: Should throw ArgumentException for invalid SaveId
+        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(invalidSaveId!));
+        exception.Message.Should().Contain("SaveId");
+    }
+
+    [Theory]
+    [InlineData("a")]  // Minimum valid length (1 char)
+    [InlineData("valid-save-123")]  // Valid with hyphens
+    [InlineData("ABC_def-789")]  // Valid with underscores and hyphens
+    [InlineData("0123456789012345678901234567890123456789012345678901234567890123")]  // Maximum valid length (64 chars)
+    public void StartNewWeek_AcceptsValidSaveId(string validSaveId)
+    {
+        // Arrange
+        var system = CreateSystem();
+
+        // Act - RED: This will fail because StartNewWeek signature needs to change
+        var state = system.StartNewWeek(validSaveId);
+
+        // Assert
+        state.SaveId.Should().NotBeNull();
+        state.SaveId.ToString().Should().Be(validSaveId);  // SaveIdValue should have meaningful ToString()
+    }
+
+    [Theory]
+    [InlineData("01234567890123456789012345678901234567890123456789012345678901234")]  // 65 chars - too long
+    [InlineData("this-is-a-very-long-save-id-that-exceeds-the-maximum-allowed-length-of-64-characters")]  // Way too long
+    public void StartNewWeek_RejectsOverlongSaveId(string overlongSaveId)
+    {
+        // Arrange
+        var system = CreateSystem();
+
+        // Act & Assert - RED: Should reject SaveIds longer than 64 characters
+        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(overlongSaveId));
+        exception.Message.Should().Contain("Must match [a-zA-Z0-9_-]{1,64}");
+    }
+
+    [Theory]
+    [InlineData("'; DROP TABLE saves--")]  // SQL injection attempt
+    [InlineData("1' UNION SELECT * FROM users--")]  // SQL union injection
+    [InlineData("admin'--")]  // SQL comment injection
+    public void StartNewWeek_RejectsSqlInjectionPatterns(string sqlInjectionPattern)
+    {
+        // Arrange
+        var system = CreateSystem();
+
+        // Act & Assert - RED: Should reject SaveIds with SQL special characters
+        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(sqlInjectionPattern));
+        exception.Message.Should().Contain("SaveId");
+    }
+
+    [Theory]
+    [InlineData("../../etc/passwd")]  // Unix path traversal
+    [InlineData("..\\..\\Windows\\System32")]  // Windows path traversal
+    [InlineData("../../../secrets")]  // Relative path traversal
+    public void StartNewWeek_RejectsPathTraversalPatterns(string pathTraversalPattern)
+    {
+        // Arrange
+        var system = CreateSystem();
+
+        // Act & Assert - RED: Should reject SaveIds with path traversal patterns
+        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(pathTraversalPattern));
+        exception.Message.Should().Contain("SaveId");
+    }
+
+    [Theory]
+    [InlineData("save@#$%")]  // Special characters
+    [InlineData("save id with spaces")]  // Spaces
+    [InlineData("save\nid\r\nwith\nnewlines")]  // Newlines
+    [InlineData("save<script>alert('xss')</script>")]  // XSS attempt
+    [InlineData("save|id&cmd")]  // Shell metacharacters
+    public void StartNewWeek_RejectsInvalidCharacters(string invalidCharsPattern)
+    {
+        // Arrange
+        var system = CreateSystem();
+
+        // Act & Assert - RED: Should only accept [a-zA-Z0-9_-]{1,64}
+        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(invalidCharsPattern));
+        exception.Message.Should().Contain("SaveId");
+    }
+
+    [Fact]
+    public void GameTurnState_SaveId_ShouldUseSaveIdValueType()
+    {
+        // Arrange & Act - RED: This will fail because GameTurnState.SaveId is currently string
+        // We want to verify that SaveId is of type SaveIdValue, not string
+        var stateType = typeof(GameTurnState);
+        var saveIdProperty = stateType.GetProperty("SaveId");
+
+        // Assert
+        saveIdProperty.Should().NotBeNull();
+        saveIdProperty!.PropertyType.Should().Be(typeof(SaveIdValue),
+            "SaveId should use SaveIdValue type for type-safe validation (ADR-0019)");
     }
 }
