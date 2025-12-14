@@ -63,7 +63,7 @@
       "ADR-0005",
       "ADR-0011",
       "ADR-0018",
-      "ADR-0020"
+      "ADR-0024"
     ],
     "chapter_refs": [
       "CH01",
@@ -112,7 +112,7 @@
       "ADR-0005",
       "ADR-0015",
       "ADR-0018",
-      "ADR-0020"
+      "ADR-0024"
     ],
     "chapter_refs": [
       "CH01",
@@ -196,7 +196,12 @@
       "脚本校验：新增或扩展 scripts/python/validate_audit_logs.py，针对 security-audit.jsonl 做格式与字段校验，在 CI 中运行。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 8
+    "taskmaster_id": 8,
+    "contract_refs": [
+      "security.url_access.denied",
+      "security.file_access.denied",
+      "security.process.denied"
+    ]
   },
   {
     "id": "NG-0015",
@@ -448,7 +453,7 @@
       "ADR-0006",
       "ADR-0007",
       "ADR-0005",
-      "ADR-0020"
+      "ADR-0024"
     ],
     "chapter_refs": [
       "CH01",
@@ -481,7 +486,7 @@
       "Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。",
       "Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。",
       "上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。",
-      "完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Scripts/Core/Contracts/Guild/GuildCreated.cs、Scripts/Core/Contracts/Guild/GuildMemberJoined.cs、Scripts/Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。"
+      "完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。"
     ],
     "test_strategy": [
       "单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。",
@@ -508,7 +513,7 @@
       "ADR-0005",
       "ADR-0011",
       "ADR-0018",
-      "ADR-0020"
+      "ADR-0024"
     ],
     "chapter_refs": [
       "CH01",
@@ -817,7 +822,7 @@
     "adr_refs": [
       "ADR-0005",
       "ADR-0018",
-      "ADR-0020"
+      "ADR-0024"
     ],
     "chapter_refs": [
       "CH01",
@@ -1196,7 +1201,7 @@
     ],
     "adr_refs": [
       "ADR-0005",
-      "ADR-0020",
+      "ADR-0024",
       "ADR-0018"
     ],
     "chapter_refs": [
@@ -1413,7 +1418,15 @@
       "运行 task_links_validate.py 与 check_tasks_all_refs.py，确认新增/调整后的 NG/GM 任务全部通过回链校验。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 9
+    "taskmaster_id": 9,
+    "contract_refs": [
+      "core.game_turn.started",
+      "core.game_turn.phase_changed",
+      "core.game_turn.week_advanced",
+      "security.file_access.denied",
+      "security.process.denied",
+      "security.url_access.denied"
+    ]
   },
   {
     "id": "NG-0040",
@@ -1464,7 +1477,12 @@
       "集成测试：在 GameTurnSystemTests 与 GameLoopTests 中增加使用非法 SaveId 的路径，验证系统拒绝不符合白名单的存档槽 ID。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 10
+    "taskmaster_id": 10,
+    "contract_refs": [
+      "core.game_turn.started",
+      "core.game_turn.phase_changed",
+      "core.game_turn.week_advanced"
+    ]
   },
   {
     "id": "NG-0041",
@@ -1560,7 +1578,10 @@
       "安全审计：在启用/禁用 plugin backend 的不同配置下运行最小数据库操作，验证 security-audit.jsonl 中有预期的审计条目。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 11
+    "taskmaster_id": 11,
+    "contract_refs": [
+      "security.file_access.denied"
+    ]
   },
   {
     "id": "NG-0043",
@@ -1607,7 +1628,10 @@
       "CI 验证：在 windows-quality-gate 或等价工作流中加入一次最小化的 GodotSQLiteDatabase smoke 调用，确保改造后不会破坏现有管线。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 12
+    "taskmaster_id": 12,
+    "contract_refs": [
+      "security.file_access.denied"
+    ]
   },
   {
     "id": "NG-0044",
@@ -1655,6 +1679,14 @@
       "脚本级测试：在本地构造刻意破坏 GameLoop 契约/测试/Overlay 的分支，运行 check_gameloop_contracts.py 验证其能准确发现并报告问题。",
       "流程测试：在 CI 或本地通过 build_taskmaster_tasks.py + Taskmaster MCP 读取 gameloop-quality-guard.json，验证报告能被后续工作流消费。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": [
+      "core.game_turn.started",
+      "core.game_turn.phase_changed",
+      "core.game_turn.week_advanced",
+      "security.file_access.denied",
+      "security.process.denied",
+      "security.url_access.denied"
+    ]
   }
 ]
