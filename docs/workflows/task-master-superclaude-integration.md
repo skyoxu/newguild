@@ -60,7 +60,7 @@ pending → in_progress → review → completed
   "id": "1.1",
   "status": "blocked",
   "blockers": [
-    "架构验收失败：事件命名不符合 ADR-0004（期望 core.guild.created，实际 GuildCreated）- Scripts/Core/Contracts/Guild/GuildCreated.cs:15",
+    "架构验收失败：事件命名不符合 ADR-0004（期望 core.guild.created，实际 GuildCreated）- Game.Core/Contracts/Guild/GuildCreated.cs:15",
     "性能 SLO 超标：帧耗时 P95 = 22.3ms（门禁 ≤ 16.6ms）- logs/perf/<YYYY-MM-DD>/summary.json"
   ]
 }
@@ -93,7 +93,7 @@ dotnet run  # ✅ 窗口正常显示，关键功能可操作
 ## 架构验收报告
 
 ### CloudEvents 合规性 ❌
-- 文件：Scripts/Core/Contracts/Guild/GuildCreated.cs:15
+- 文件：Game.Core/Contracts/Guild/GuildCreated.cs:15
 - 问题：事件类型命名不符合 ADR-0004
 - 期望：core.guild.created
 - 实际：guild.created（缺少 domain prefix）
@@ -457,7 +457,7 @@ superclaude commit
 
 # ADR-0004 事件契约合规性
 # - 事件命名：core.window.initialized
-# - 契约位置：Scripts/Core/Contracts/Window/WindowInitialized.cs
+# - 契约位置：Game.Core/Contracts/Window/WindowInitialized.cs
 # - 包含 XML 文档注释
 
 # 性能 SLO
@@ -479,7 +479,7 @@ npx task-master set-status 1.1 done
 # - 事件命名不符合规范
 # - 期望：core.window.initialized
 # - 实际：window.initialized（缺少 domain prefix）
-# - 文件位置：Scripts/Core/Contracts/Window/WindowInitialized.cs:15
+# - 文件位置：Game.Core/Contracts/Window/WindowInitialized.cs:15
 
 # 性能 SLO
 # - 启动时间：3.8s（门禁 ≤ 3s）
@@ -499,7 +499,7 @@ npx task-master set-status 1.1 blocked
 #   "id": "1.1",
 #   "status": "blocked",
 #   "blockers": [
-#     "架构验收失败：事件命名不符合 ADR-0004（期望 core.window.initialized，实际 window.initialized）- Scripts/Core/Contracts/Window/WindowInitialized.cs:15",
+#     "架构验收失败：事件命名不符合 ADR-0004（期望 core.window.initialized，实际 window.initialized）- Game.Core/Contracts/Window/WindowInitialized.cs:15",
 #     "性能 SLO 超标：启动时间 3.8s（门禁 ≤ 3s）- 建议异步化资源加载"
 #   ]
 # }
@@ -687,7 +687,7 @@ npx task-master generate
 在识别契约需求之前，优先用 MCP 工具收集上下文，避免“重复造轮子”或破坏既有契约：
 
 - 使用 **Context7 MCP** 检索代码与文档：
-  - 典型查询对象：`Game.Core`、`Scripts/Core/Contracts/**`、`docs/adr/ADR-0004-*`、Overlay 08；
+  - 典型查询对象：`Game.Core`、`Game.Core/Contracts/**`、`docs/adr/ADR-0004-*`、Overlay 08；
   - 目标：确认是否已有同名或语义相近的事件/DTO/接口定义；
   - 示例（在 Claude Code 中）：`@context7 search "GuildCreated EventType"`。
 - 使用 **Serena MCP**（如已配置）在仓库中搜索符号：
@@ -696,7 +696,7 @@ npx task-master generate
 - 如涉及外部协议（OpenAPI/HTTP/第三方 SDK），可按需启用对应 MCP：
   - 只将协议片段作为契约模板输入，不直接生成实现代码。
 
- > 约束：MCP 只用于“找资料”和“补充上下文”，契约文件的最终内容仍以 `Scripts/Core/Contracts/**` 中的人工确认版本为 SSoT，并需经过步骤 3 和步骤 5 的审查与文档更新。
+ > 约束：MCP 只用于“找资料”和“补充上下文”，契约文件的最终内容仍以 `Game.Core/Contracts/**` 中的人工确认版本为 SSoT，并需经过步骤 3 和步骤 5 的审查与文档更新。
 
 ```mermaid
 graph LR
@@ -757,13 +757,13 @@ public sealed record <EventName>(
 
 契约文件必须且只能放置在：
 ```
-Scripts/Core/Contracts/<Module>/<EventName>.cs
+Game.Core/Contracts/<Module>/<EventName>.cs
 ```
 
 例如：
-- `Scripts/Core/Contracts/Guild/GuildCreated.cs`
-- `Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
-- `Scripts/Core/Contracts/Guild/IGuildService.cs`
+- `Game.Core/Contracts/Guild/GuildCreated.cs`
+- `Game.Core/Contracts/Guild/GuildMemberJoined.cs`
+- `Game.Core/Contracts/Guild/IGuildService.cs`
 
 **步骤 5：更新 Overlay 08 文档**
 
@@ -776,13 +776,13 @@ Scripts/Core/Contracts/<Module>/<EventName>.cs
 - **GuildCreated** (`core.guild.created`)
   - 触发时机：公会创建成功后
   - 字段：`GuildId`, `CreatorId`, `GuildName`, `CreatedAt`
-  - 契约位置：`Scripts/Core/Contracts/Guild/GuildCreated.cs`
+  - 契约位置：`Game.Core/Contracts/Guild/GuildCreated.cs`
 
 ### DTO
 - **CreateGuildRequest**
   - 用途：创建公会 API 请求
   - 字段：`GuildName`, `Description`, `MaxMembers`
-  - 契约位置：`Scripts/Core/Contracts/Guild/CreateGuildRequest.cs`
+  - 契约位置：`Game.Core/Contracts/Guild/CreateGuildRequest.cs`
 ```
 
 **步骤 6：生成占位测试用例**
@@ -856,18 +856,18 @@ public class GuildContractsTests
 #### 当前 newguild 实现状态（Guild 示例）
 
 - Guild 领域事件套装已落地，并符合 ADR-0004 的 `core.<entity>.<action>` 约定：
-  - `core.guild.created` → `Scripts/Core/Contracts/Guild/GuildCreated.cs`
-  - `core.guild.member.joined` → `Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
-  - `core.guild.member.left` → `Scripts/Core/Contracts/Guild/GuildMemberLeft.cs`
-  - `core.guild.disbanded` → `Scripts/Core/Contracts/Guild/GuildDisbanded.cs`
-  - `core.guild.member.role_changed` → `Scripts/Core/Contracts/Guild/GuildMemberRoleChanged.cs`
+  - `core.guild.created` → `Game.Core/Contracts/Guild/GuildCreated.cs`
+  - `core.guild.member.joined` → `Game.Core/Contracts/Guild/GuildMemberJoined.cs`
+  - `core.guild.member.left` → `Game.Core/Contracts/Guild/GuildMemberLeft.cs`
+  - `core.guild.disbanded` → `Game.Core/Contracts/Guild/GuildDisbanded.cs`
+  - `core.guild.member.role_changed` → `Game.Core/Contracts/Guild/GuildMemberRoleChanged.cs`
 - 契约测试：
   - `Game.Core.Tests/Domain/GuildContractsTests.cs` 已创建，使用 xUnit + FluentAssertions 校验上述事件的 `EventType` 常量和关键字段。
 - 自动化校验：
   - `scripts/python/validate_contracts.py` 检查 Overlay 08 中的契约路径是否指向存在的 C# 契约，并已在 `windows-quality-gate.yml` 中以软门禁方式运行。
   - `scripts/python/check_guild_contracts.py` 检查 Guild 契约文件是否存在、命名空间是否为 `Game.Contracts.Guild`，以及 `EventType` 是否为预期的 `core.guild.*` 值。
 - 同步更新约定：
-  - `08-Contracts-Guild-Manager-Events.md` 中记录了 Guild 主要事件契约，并明确要求：新增或调整 `Scripts/Core/Contracts/Guild/**` 下的 C# 契约时，必须同步更新 `GuildContractsTests.cs` 与 `check_guild_contracts.py`，并通过 `validate_contracts.py` 重新校验 Overlay ↔ Contracts 回链。
+  - `08-Contracts-Guild-Manager-Events.md` 中记录了 Guild 主要事件契约，并明确要求：新增或调整 `Game.Core/Contracts/Guild/**` 下的 C# 契约时，必须同步更新 `GuildContractsTests.cs` 与 `check_guild_contracts.py`，并通过 `validate_contracts.py` 重新校验 Overlay ↔ Contracts 回链。
 
 ---
 
@@ -1437,7 +1437,7 @@ dotnet run  # ✅ 窗口正常显示，关键功能可操作
 ## 架构验收报告
 
 ### CloudEvents 合规性 ❌
-- 文件：Scripts/Core/Contracts/Guild/GuildCreated.cs:15
+- 文件：Game.Core/Contracts/Guild/GuildCreated.cs:15
 - 问题：事件类型命名不符合 ADR-0004
 - 期望：core.guild.created
 - 实际：guild.created（缺少 domain prefix）
@@ -1526,7 +1526,7 @@ description: 执行架构级验收检查（Subagents）
    - ADR-0004 事件契约合规性（命名规范、CloudEvents 字段）
    - Godot 安全基线（res:// 和 user:// 路径使用）
    - 性能 SLO（帧耗时 P95 ≤ 16.6ms）
-   - TypeScript 契约文件验证（Scripts/Core/Contracts/**）
+   - TypeScript 契约文件验证（Game.Core/Contracts/**）
    - ADR 关联验证（引用的 ADR 是否 Accepted 状态）
 4. 生成验收报告，标注通过/失败项及具体文件行号
 
@@ -1537,7 +1537,7 @@ description: 执行架构级验收检查（Subagents）
 
 ### ADR-0004 事件契约合规性
 - ✅ 事件命名：core.guild.created (符合 ${DOMAIN_PREFIX}.<entity>.<action>)
-- ✅ 契约位置：Scripts/Core/Contracts/Guild/GuildCreated.cs
+- ✅ 契约位置：Game.Core/Contracts/Guild/GuildCreated.cs
 - ❌ CloudEvents 字段缺失：Type 字段未定义
 
 ### Godot 安全基线（ADR-0002）
@@ -1561,7 +1561,7 @@ description: 执行架构级验收检查（Subagents）
 - 使用 Subagents read + analyze 模式
 - 优先检查 ADR Accepted 状态（读取 docs/adr/ 目录）
 - 性能 SLO 检查：解析 logs/perf/ 目录的 summary.json
-- 事件契约检查：扫描 Scripts/Core/Contracts/** 目录
+- 事件契约检查：扫描 Game.Core/Contracts/** 目录
 - 路径检查：grep 扫描 Scripts/** 查找非 res:// 和 user:// 的文件系统调用
 ```
 
@@ -1586,7 +1586,7 @@ description: 执行架构级验收检查（Subagents）
 
 ## ADR-0004 事件契约合规性
 - [ ] 事件命名遵循 ${DOMAIN_PREFIX}.<entity>.<action>
-- [ ] 契约文件位于 Scripts/Core/Contracts/<Module>/
+- [ ] 契约文件位于 Game.Core/Contracts/<Module>/
 - [ ] 包含 XML 文档注释（<summary>, <remarks>）
 - [ ] 定义 EventType 常量（CloudEvents type 字段）
 - [ ] 不依赖 Godot API（纯 C#）

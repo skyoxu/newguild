@@ -70,7 +70,7 @@ find_symbol "Guild" --substring_matching=true --depth=1
 
 ```bash
 # 精确查找 GuildCreated 事件的定义
-find_symbol "GuildCreated" --relative_path "Scripts/Core/Contracts/Guild/" --include_body=true
+find_symbol "GuildCreated" --relative_path "Game.Core/Contracts/Guild/" --include_body=true
 
 # 返回示例：
 # namespace Game.Contracts.Guild;
@@ -145,7 +145,7 @@ find_referencing_symbols "<name_path>" --relative_path "<file_path>" [选项]
 
 ```bash
 # 查找所有使用 IGuildRepository 接口的代码
-find_referencing_symbols "IGuildRepository" --relative_path "Scripts/Core/Interfaces/IGuildRepository.cs"
+find_referencing_symbols "IGuildRepository" --relative_path "Game.Core/Interfaces/IGuildRepository.cs"
 
 # 返回示例（含代码片段）：
 # - GuildService.cs:15
@@ -163,7 +163,7 @@ find_referencing_symbols "IGuildRepository" --relative_path "Scripts/Core/Interf
 
 ```bash
 # 重命名前检查所有引用点
-find_referencing_symbols "GuildService" --relative_path "Scripts/Core/Services/GuildService.cs"
+find_referencing_symbols "GuildService" --relative_path "Game.Core/Services/GuildService.cs"
 
 # 返回所有引用位置，确保重命名工具能覆盖所有文件
 ```
@@ -177,7 +177,7 @@ find_referencing_symbols "GuildService" --relative_path "Scripts/Core/Services/G
 
 ```bash
 # 查找谁调用了 CreateGuild 方法
-find_referencing_symbols "GuildService/CreateGuild" --relative_path "Scripts/Core/Services/GuildService.cs"
+find_referencing_symbols "GuildService/CreateGuild" --relative_path "Game.Core/Services/GuildService.cs"
 
 # 返回调用链：
 # - GuildManager.cs:45 → CreateGuild()
@@ -257,7 +257,7 @@ search_for_pattern "// TODO:.*" --context_lines_after=2
 
 ```bash
 # 查找所有 EventType 常量定义
-search_for_pattern "public const string EventType = \".*\"" --paths_include_glob "Scripts/Core/Contracts/**/*.cs"
+search_for_pattern "public const string EventType = \".*\"" --paths_include_glob "Game.Core/Contracts/**/*.cs"
 
 # 返回所有事件契约的 EventType 定义
 ```
@@ -299,7 +299,7 @@ replace_symbol_body "<name_path>" --relative_path "<file_path>" --body "<new_cod
 ```bash
 # 替换 CreateGuild 方法的完整实现
 replace_symbol_body "GuildService/CreateGuild" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --body "public async Task<Guild> CreateGuild(string name)
 {
     // 新的实现逻辑
@@ -320,7 +320,7 @@ replace_symbol_body "GuildService/CreateGuild" \
 ```bash
 # 替换整个类定义（添加新字段/方法）
 replace_symbol_body "GuildService" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --body "public class GuildService : IGuildService
 {
     private readonly IGuildRepository _repo;
@@ -360,7 +360,7 @@ insert_after_symbol "<name_path>" --relative_path "<file_path>" --body "<new_cod
 ```bash
 # 在 GuildService 的最后一个方法后添加新方法
 insert_after_symbol "GuildService/DeleteGuild" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --body "
     public async Task<bool> ArchiveGuild(string id)
     {
@@ -380,7 +380,7 @@ insert_after_symbol "GuildService/DeleteGuild" \
 ```bash
 # 在文件最后一个符号后添加新类
 insert_after_symbol "GuildService" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --body "
 public class GuildValidator
 {
@@ -410,7 +410,7 @@ insert_before_symbol "<name_path>" --relative_path "<file_path>" --body "<new_co
 ```bash
 # 在文件第一个类之前添加 using
 insert_before_symbol "GuildService" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --body "using System.Linq;"
 ```
 
@@ -423,7 +423,7 @@ insert_before_symbol "GuildService" \
 ```bash
 # 在类定义前添加重要说明
 insert_before_symbol "GuildService" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --body "// IMPORTANT: This service is thread-safe"
 ```
 
@@ -453,7 +453,7 @@ rename_symbol "<name_path>" --relative_path "<file_path>" --new_name "<new_name>
 ```bash
 # 重命名 GuildService → GuildManagerService
 rename_symbol "GuildService" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --new_name "GuildManagerService"
 
 # 自动更新：
@@ -473,7 +473,7 @@ rename_symbol "GuildService" \
 ```bash
 # 重命名方法 CreateGuild → CreateNewGuild
 rename_symbol "GuildService/CreateGuild" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --new_name "CreateNewGuild"
 
 # 自动更新所有调用点
@@ -509,14 +509,14 @@ read_file "<relative_path>" [--start_line=N] [--end_line=M]
 ##### 场景 1：查看完整文件
 
 ```bash
-read_file "Scripts/Core/Contracts/Guild/GuildCreated.cs"
+read_file "Game.Core/Contracts/Guild/GuildCreated.cs"
 ```
 
 ##### 场景 2：只读文件片段
 
 ```bash
 # 读取第 10-20 行
-read_file "Scripts/Core/Services/GuildService.cs" --start_line=10 --end_line=20
+read_file "Game.Core/Services/GuildService.cs" --start_line=10 --end_line=20
 ```
 
 ---
@@ -552,7 +552,7 @@ replace_content --relative_path "<file_path>" --needle "<pattern>" --repl "<repl
 ```bash
 # 字面量模式
 replace_content \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --needle "private readonly IGuildRepository _repo;" \
   --repl "private readonly IGuildRepository _guildRepo;" \
   --mode literal
@@ -563,7 +563,7 @@ replace_content \
 ```bash
 # 正则模式：将所有 Logger.Log() 改为 Logger.Info()
 replace_content \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --needle "Logger\.Log\((.*?)\)" \
   --repl "Logger.Info($!1)" \
   --mode regex \
@@ -593,7 +593,7 @@ get_symbols_overview "<relative_path>"
 ##### 场景 1：理解新文件结构
 
 ```bash
-get_symbols_overview "Scripts/Core/Services/GuildService.cs"
+get_symbols_overview "Game.Core/Services/GuildService.cs"
 
 # 返回示例：
 # - class GuildService
@@ -654,10 +654,10 @@ read_memory "task-1.1-findings"
 find_symbol "Guild" --substring_matching=true --depth=1
 
 # 步骤 2：精确定位 - 查看契约
-find_symbol "GuildCreated" --relative_path "Scripts/Core/Contracts/Guild/" --include_body=true
+find_symbol "GuildCreated" --relative_path "Game.Core/Contracts/Guild/" --include_body=true
 
 # 步骤 3：依赖分析 - 理解使用模式
-find_referencing_symbols "IGuildRepository" --relative_path "Scripts/Core/Interfaces/IGuildRepository.cs"
+find_referencing_symbols "IGuildRepository" --relative_path "Game.Core/Interfaces/IGuildRepository.cs"
 
 # 步骤 4：保存发现
 write_memory "task-context" --content "已有 GuildService, IGuildRepository, GuildCreated 事件"
@@ -682,7 +682,7 @@ insert_after_symbol "GuildServiceTests/TestCreateGuild" \
 
 # 绿灯：实现验证逻辑
 replace_symbol_body "GuildService/CreateGuild" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --body "public async Task<Guild> CreateGuild(string name)
 {
     if (string.IsNullOrWhiteSpace(name))
@@ -698,11 +698,11 @@ replace_symbol_body "GuildService/CreateGuild" \
 
 ```bash
 # 步骤 1：检查影响范围
-find_referencing_symbols "GuildService" --relative_path "Scripts/Core/Services/GuildService.cs"
+find_referencing_symbols "GuildService" --relative_path "Game.Core/Services/GuildService.cs"
 
 # 步骤 2：安全重命名
 rename_symbol "GuildService" \
-  --relative_path "Scripts/Core/Services/GuildService.cs" \
+  --relative_path "Game.Core/Services/GuildService.cs" \
   --new_name "GuildManagerService"
 
 # 步骤 3：验证引用更新
@@ -737,7 +737,7 @@ search_for_pattern "class.*MyClass" --paths_include_glob "**/*.cs"
 ```bash
 # 使用更精确的路径
 rename_symbol "MyClass" \
-  --relative_path "Scripts/Core/Services/MyClass.cs" \
+  --relative_path "Game.Core/Services/MyClass.cs" \
   --new_name "MyService"
 
 # 检查是否有重载方法需要指定索引

@@ -422,7 +422,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ##### 场景 2: 审查特定文件
 
 ```bash
-git add Scripts/Core/Services/GuildService.cs
+git add Game.Core/Services/GuildService.cs
 /sc:review --staged
 
 # 仅审查 GuildService.cs 的变更
@@ -610,7 +610,7 @@ npx task-master set-status 1.1 in-progress
 # 步骤 4: Serena 前置检索 (可选但推荐)
 # 在 Claude Code 对话中:
 # find_symbol "Guild" --substring_matching=true --depth=1
-# find_symbol "GuildCreated" --relative_path "Scripts/Core/Contracts/Guild/" --include_body=true
+# find_symbol "GuildCreated" --relative_path "Game.Core/Contracts/Guild/" --include_body=true
 
 # 步骤 5: SuperClaude 分析任务
 /sc:analyze --task 1.1 --focus architecture,security
@@ -843,7 +843,7 @@ claude mcp add context7
 # 步骤 1: Serena 查找现有代码
 # 在 Claude Code 对话中:
 # find_symbol "Guild" --substring_matching=true --depth=1
-# find_symbol "GuildCreated" --relative_path "Scripts/Core/Contracts/Guild/" --include_body=true
+# find_symbol "GuildCreated" --relative_path "Game.Core/Contracts/Guild/" --include_body=true
 
 # 步骤 2: SuperClaude 分析 (已包含 Serena 注入的上下文)
 /sc:analyze --task 1.1 --focus architecture,security

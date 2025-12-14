@@ -56,14 +56,14 @@ Test-Refs:
 - [ ] 事件与契约：
   - 领域事件与 UI 事件命名遵循 `${DOMAIN_PREFIX}.<entity>.<action>`（见 ADR‑0004）
   - Contracts SSoT 存在于 `Game.Core` 或专门的 Contracts 项目（不依赖 Godot）
-  - 示例契约文件：`scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
-  - 当前 T2 最小事件集合（规划）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并计划分别落盘到 scripts/Core/Contracts/Guild/GuildCreated.cs、scripts/Core/Contracts/Guild/GuildMemberJoined.cs、scripts/Core/Contracts/Guild/GuildMemberLeft.cs
+  - 示例契约文件：`Game.Core/Contracts/Guild/GuildMemberJoined.cs`（per ADR-0020）
+  - 当前 T2 最小事件集合（规划）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并计划分别落盘到 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs
 - [ ] 事件命名规范验证（ADR-0004）：
   - 所有事件常量必须匹配正则：`^[a-z]+\.[a-z_]+\.[a-z_]+$`
   - 验证命令（扫描所有 EventType 常量定义）：
     ```bash
     # Windows PowerShell
-    Get-ChildItem -Recurse -Include *.cs scripts/Core/Contracts |
+    Get-ChildItem -Recurse -Include *.cs Game.Core/Contracts |
     Select-String 'EventType\s*=\s*"([^"]+)"' |
     ForEach-Object {
       if ($_.Matches.Groups[1].Value -notmatch '^[a-z]+\.[a-z_]+\.[a-z_]+$') {

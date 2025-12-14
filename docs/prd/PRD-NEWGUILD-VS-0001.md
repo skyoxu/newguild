@@ -87,7 +87,7 @@ PRD-NEWGUILD-VS-0001
 ### 3.1 领域数据存储
 - **Guild 领域数据**：godot-sqlite（user://game.db）
   - 表：`Guilds`, `GuildMembers`
-  - 契约：Scripts/Core/Contracts/Guild/**（SSoT）
+  - 契约：Game.Core/Contracts/Guild/**（per ADR-0020）（SSoT）
 - **玩家 UI 设置**：ConfigFile（user://settings.cfg）
   - 仅存储 UI 偏好（语言、音量），不存储领域数据
 
@@ -132,7 +132,7 @@ PRD-NEWGUILD-VS-0001
   - 示例：`core.guild.created`, `core.guild.member.joined`
 - **CloudEvents 1.0 基础**：
   - 必需字段：`id`, `source`, `type`, `time`
-  - 契约 SSoT：Scripts/Core/Contracts/Guild/**
+  - 契约 SSoT：Game.Core/Contracts/Guild/**（per ADR-0020）
 - **适用场景**：
   - 内部私有事件（公会管理、游戏逻辑）
   - 不对外发布，不需要跨组织互操作
@@ -226,11 +226,11 @@ docs/adr/ADR-0011-windows-only-platform-and-ci.md
 
 ### A.2 Guild 契约文件（规划）
 ```
-Scripts/Core/Contracts/Guild/GuildCreated.cs
-Scripts/Core/Contracts/Guild/GuildMemberJoined.cs
-Scripts/Core/Contracts/Guild/GuildMemberLeft.cs
-Scripts/Core/Contracts/Guild/GuildMemberRoleChanged.cs
-Scripts/Core/Contracts/Guild/GuildDisbanded.cs
+Game.Core/Contracts/Guild/GuildCreated.cs（per ADR-0020）
+Game.Core/Contracts/Guild/GuildMemberJoined.cs（per ADR-0020）
+Game.Core/Contracts/Guild/GuildMemberLeft.cs（per ADR-0020）
+Game.Core/Contracts/Guild/GuildMemberRoleChanged.cs（per ADR-0020）
+Game.Core/Contracts/Guild/GuildDisbanded.cs（per ADR-0020）
 ```
 
 ### A.3 测试文件（待创建）
@@ -264,7 +264,7 @@ docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md
 - **迁移范围**：仅外部发布事件使用反向 DNS
 - **保留范围**：内部私有事件继续使用简化前缀
 - **迁移步骤**：
-  1. 在 Scripts/Core/Contracts/ 新增反向 DNS 事件类型
+  1. 在 Game.Core/Contracts/ 新增反向 DNS 事件类型
   2. 在 Overlay/08 中注明迁移计划与适用范围
   3. 更新 EventBusAdapter 支持两种命名约定
   4. 添加 ADR 记录迁移决策

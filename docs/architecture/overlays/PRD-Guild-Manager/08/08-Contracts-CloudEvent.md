@@ -30,4 +30,4 @@ Status: Proposed
 
 示例：当前 Godot+C# 契约引用
 
-- 公会成员加入事件契约：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
+- 公会成员加入事件契约：`Game.Core/Contracts/Guild/GuildMemberJoined.cs`（per ADR-0020）
