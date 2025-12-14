@@ -37,6 +37,7 @@ logs/
 gitlog/
 godot_local/
 tmp/
+/tmp*/
 **/bin/
 **/obj/
 .vs/
@@ -80,6 +81,31 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 dev-debug.log
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyc.*
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local AI / analysis artifacts (do not version)
+claudedocs/
+.mcp-server-context.md
+*.backup
+*.bak
+*.tmp
+
+# One-off local scripts/tests created during analysis (do not version)
+/scripts/Core/
+scripts/python/inspect_task8_triplet.py
+scripts/python/prd_coverage_report.py
+scripts/python/report_uncommitted_docs.py
+scripts/python/validate_task_master_triplet.py
+scripts/python/tests/
+Tests.Godot/tests/Security/Hard/test_adapter_init_debug.gd
+Tests.Godot/tests/Security/Hard/test_minimal.gd
 # Dependency directories
 node_modules/
 # Environment variables
