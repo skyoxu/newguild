@@ -16,6 +16,9 @@ import shutil
 import subprocess
 import json
 import time
+from pathlib import Path
+
+from godot_cli import build_userdir_args, default_user_dir
 
 
 def run_cmd(args, cwd=None, timeout=600_000):
@@ -31,15 +34,22 @@ def run_cmd(args, cwd=None, timeout=600_000):
 
 
 def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None):
-    """Run a process and stream stdout; if any line contains a break marker, kill early and return rc=1.
-    This avoids long timeouts when Godot enters Debugger Break state.
+    """Run a process and stream stdout; if any line contains a break marker, kill early.
 
-    Note: we only treat hard SCRIPT ERROR as a break marker by default.
-    Parser/Debugger messages are allowed to complete so that Godot's own
-    exit code and reports decide success/failure.
+    In Godot headless/script mode, a Debugger Break (for example GdUnit4 failing
+    to preload a script and printing `Debugger Break, Reason: 'Parser Error: ...'`)
+    will block waiting for interactive input and never exit by itself.
+
+    To avoid long CI timeouts we treat the following patterns as hard failures
+    and terminate the process early:
+    - SCRIPT ERROR
+    - Debugger Break
+    - Parser Error:
     """
     break_markers = break_markers or [
         'SCRIPT ERROR',
+        'Debugger Break',
+        'Parser Error:',
     ]
     p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          text=True, encoding='utf-8', errors='ignore')
@@ -89,6 +99,15 @@ def main():
     ap.add_argument('--timeout-sec', type=int, default=600, help='Timeout seconds for test run (default 600)')
     ap.add_argument('--prewarm', action='store_true', help='Prewarm: build solutions before running tests')
     ap.add_argument('--rd', dest='report_dir', default=None, help='Custom destination to copy reports into (defaults to logs/e2e/<date>/gdunit-reports)')
+    ap.add_argument('--user-dir', default=None, help='Redirect Godot user:// to this directory (default: logs/_godot_userdir/<project>)')
+    ap.add_argument('--userdir-flag', default=os.environ.get('GODOT_USERDIR_FLAG', 'auto'),
+                    help='Godot CLI flag for user dir (auto|--user-dir|--user-data-dir); env: GODOT_USERDIR_FLAG')
+    ap.add_argument('--no-userdir', action='store_true', help='Disable user dir redirection (writes to default OS location)')
+    ap.add_argument('--skip-userlogs', action='store_true', help='Skip archiving/pruning Godot user:// logs (not recommended)')
+    ap.add_argument('--userlog-retention-days', type=int, default=int(os.environ.get('GODOT_USERLOG_RETENTION_DAYS', '7')))
+    ap.add_argument('--userlog-max-file-mb', type=int, default=int(os.environ.get('GODOT_USERLOG_MAX_FILE_MB', '256')))
+    ap.add_argument('--userlog-tail-mb', type=int, default=int(os.environ.get('GODOT_USERLOG_TAIL_MB', '4')))
+    ap.add_argument('--userlog-max-full-copy-mb', type=int, default=int(os.environ.get('GODOT_USERLOG_MAX_FULL_COPY_MB', '16')))
     args = ap.parse_args()
 
     root = os.getcwd()
@@ -97,11 +116,24 @@ def main():
     out_dir = os.path.join(root, 'logs', 'e2e', date)
     os.makedirs(out_dir, exist_ok=True)
 
+    # Redirect Godot user:// to a repo-local directory (default under logs/).
+    user_dir = None
+    userdir_flag_used = None
+    userdir_args = []
+    if not args.no_userdir:
+        user_dir = args.user_dir or default_user_dir(proj, root_dir=root)
+        try:
+            os.makedirs(user_dir, exist_ok=True)
+        except Exception:
+            # Best-effort; if it fails, we will run without userdir args.
+            user_dir = None
+        userdir_args, userdir_flag_used = build_userdir_args(args.godot_bin, user_dir, preferred_flag=args.userdir_flag)
+
     # Optional prewarm with fallback
     prewarm_rc = None
     prewarm_note = None
     if args.prewarm:
-        pre_cmd = [args.godot_bin, '--headless', '--path', proj, '--build-solutions', '--quit']
+        pre_cmd = [args.godot_bin] + userdir_args + ['--headless', '--path', proj, '--build-solutions', '--quit']
         _rcp, _outp = run_cmd(pre_cmd, cwd=proj, timeout=300_000)
         prewarm_attempts = 1
         prewarm_rc = _rcp
@@ -142,9 +174,9 @@ def main():
                 write_text(os.path.join(out_dir, 'prewarm-dotnet.txt'), '\n'.join(agg) if agg else 'NO_DOTNET_BUILD_TARGETS')
                 prewarm_note = 'fallback-dotnet'
 
-    # Run tests（带 Debugger Break fail-fast）
+    # Run tests (Debugger Break fail-fast)
     # Build command with optional -a filters
-    cmd = [args.godot_bin, '--headless', '--path', proj, '-s', '-d', 'res://addons/gdUnit4/bin/GdUnitCmdTool.gd', '--ignoreHeadlessMode']
+    cmd = [args.godot_bin] + userdir_args + ['--headless', '--path', proj, '-s', '-d', 'res://addons/gdUnit4/bin/GdUnitCmdTool.gd', '--ignoreHeadlessMode']
     for a in args.add:
         apath = a
         if not apath.startswith('res://'):
@@ -157,7 +189,7 @@ def main():
         f.write(out)
 
     # Generate HTML log frame (optional)
-    _rc2, _out2 = run_cmd([args.godot_bin, '--headless', '--path', proj, '--quiet', '-s', 'res://addons/gdUnit4/bin/GdUnitCopyLog.gd'], cwd=proj)
+    _rc2, _out2 = run_cmd([args.godot_bin] + userdir_args + ['--headless', '--path', proj, '--quiet', '-s', 'res://addons/gdUnit4/bin/GdUnitCopyLog.gd'], cwd=proj)
 
     # Archive reports
     reports_dir = os.path.join(proj, 'reports')
@@ -181,7 +213,14 @@ def main():
             else:
                 shutil.copy2(src, dst)
     # Write a small summary json for CI
-    summary = {'rc': rc, 'project': proj, 'added': args.add, 'timeout_sec': args.timeout_sec}
+    summary = {
+        'rc': rc,
+        'project': proj,
+        'added': args.add,
+        'timeout_sec': args.timeout_sec,
+        'user_dir': user_dir,
+        'userdir_flag_used': userdir_flag_used,
+    }
     if prewarm_rc is not None:
         summary['prewarm_rc'] = prewarm_rc
         if prewarm_note:
@@ -195,6 +234,39 @@ def main():
             json.dump(summary, f, ensure_ascii=False)
     except Exception:
         pass
+
+    # Archive + prune Godot user:// logs (Windows: %APPDATA%/Godot/app_userdata/<ProjectName>/logs).
+    # This prevents uncontrolled growth of godot.log files in AppData.
+    if not args.skip_userlogs:
+        try:
+            from godot_userlog_manager import archive_and_prune_user_logs, UserLogPolicy
+
+            userlogs_dest = Path(dest) / 'godot-userlogs'
+            source_logs_dir = None
+            if userdir_flag_used and user_dir:
+                # When userdir redirection is active, Godot logs are expected under <user_dir>/logs.
+                source_logs_dir = (Path(user_dir).resolve() / 'logs')
+            userlogs_summary = archive_and_prune_user_logs(
+                project_dir=Path(proj),
+                dest_dir=userlogs_dest,
+                policy=UserLogPolicy(
+                    retention_days=max(0, args.userlog_retention_days),
+                    max_file_bytes=max(0, args.userlog_max_file_mb) * 1024 * 1024,
+                    tail_bytes=max(0, args.userlog_tail_mb) * 1024 * 1024,
+                    max_full_copy_bytes=max(0, args.userlog_max_full_copy_mb) * 1024 * 1024,
+                ),
+                dry_run=False,
+                source_logs_dir=source_logs_dir,
+            )
+            try:
+                (userlogs_dest / 'userlogs-summary.json').write_text(
+                    json.dumps(userlogs_summary, ensure_ascii=False, indent=2),
+                    encoding='utf-8',
+                )
+            except Exception:
+                pass
+        except Exception as e:
+            write_text(os.path.join(dest, 'godot-userlogs-error.txt'), str(e))
     print(f'GDUNIT_DONE rc={rc} out={out_dir}')
     return 0 if rc == 0 else rc
 

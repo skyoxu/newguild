@@ -48,19 +48,39 @@ public sealed partial class SecurityUrlAdapter : RefCounted, ISecurityUrlValidat
     {
         _allowedHosts = allowedHosts;
 
-        // Default audit log path follows ADR-0019 logging convention
-        _auditLogPath = auditLogPath ?? Path.Combine(
-            "logs",
-            "ci",
-            DateTime.UtcNow.ToString("yyyy-MM-dd"),
-            "security-audit.jsonl"
-        );
+        _auditLogPath = ResolveAuditLogPath(auditLogPath);
 
         // Ensure audit log directory exists
         var directory = Path.GetDirectoryName(_auditLogPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
+        }
+    }
+
+    private static string ResolveAuditLogPath(string? auditLogPath)
+    {
+        // Default audit log path follows ADR-0019 logging convention.
+        var path = string.IsNullOrWhiteSpace(auditLogPath)
+            ? Path.Combine("logs", "ci", DateTime.UtcNow.ToString("yyyy-MM-dd"), "security-audit.jsonl")
+            : auditLogPath;
+
+        // Convert Godot virtual paths (user://, res://) to absolute filesystem paths for .NET IO APIs.
+        if (path.StartsWith("user://", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("res://", StringComparison.OrdinalIgnoreCase))
+        {
+            return ProjectSettings.GlobalizePath(path);
+        }
+
+        // For filesystem-relative paths, resolve under the project root (res://).
+        var baseDir = ProjectSettings.GlobalizePath("res://");
+        try
+        {
+            return Path.GetFullPath(path, baseDir);
+        }
+        catch
+        {
+            return Path.GetFullPath(path);
         }
     }
 

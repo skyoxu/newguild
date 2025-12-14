@@ -51,7 +51,7 @@ func after_test() -> void:
 
 	# Cleanup audit log file
 	if FileAccess.file_exists(_test_audit_log):
-		DirAccess.remove_absolute(_test_audit_log)
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(_test_audit_log))
 
 	_adapter = null
 	_bus_adapter = null

@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 ## GdUnit4 audit log compliance test suite
 ## Tests security audit log format compliance per ADR-0019 and ADR-0004
 ##
@@ -39,7 +39,7 @@ func before_test() -> void:
 func after_test() -> void:
 	# Cleanup audit log
 	if FileAccess.file_exists(_test_audit_log):
-		DirAccess.remove_absolute(_test_audit_log)
+		DirAccess.remove_absolute(ProjectSettings.globalize_path("res://" + _test_audit_log))
 
 	_url_adapter = null
 	_file_adapter = null
