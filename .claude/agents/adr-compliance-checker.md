@@ -45,17 +45,17 @@ grep -rn "Path\." Scripts/ --include="*.cs"
 ```
 
 **合规标准**：
-- ✅ 允许：`"res://data/config.json"`, `"user://saves/game.dat"`
-- ❌ 违规：`"C:/config.json"`, `"/tmp/data"`, `"../../../etc/passwd"`
+- [PASS] 允许：`"res://data/config.json"`, `"user://saves/game.dat"`
+- [FAIL] 违规：`"C:/config.json"`, `"/tmp/data"`, `"../../../etc/passwd"`
 
 **输出格式**：
 ```markdown
 #### 路径使用检查
-✅ Scripts/Adapters/FileSystem.cs:45 - 使用 user:// 路径
+[PASS] Scripts/Adapters/FileSystem.cs:45 - 使用 user:// 路径
   ```csharp
   var path = "user://saves/guild.db";
   ```
-❌ Scripts/Services/ConfigLoader.cs:78 - 发现绝对路径
+[FAIL] Scripts/Services/ConfigLoader.cs:78 - 发现绝对路径
   ```csharp
   var path = "C:/config.json";  // 违规！
   ```
@@ -71,9 +71,9 @@ grep -rn "OpenExternalUrl" Scripts/ --include="*.cs"
 ```
 
 **合规标准**：
-- ✅ 允许：`https://api.example.com` (在 `ALLOWED_EXTERNAL_HOSTS` 中)
-- ❌ 违规：`http://api.example.com` (HTTP 非 HTTPS)
-- ❌ 违规：`https://random-site.com` (不在白名单)
+- [PASS] 允许：`https://api.example.com` (在 `ALLOWED_EXTERNAL_HOSTS` 中)
+- [FAIL] 违规：`http://api.example.com` (HTTP 非 HTTPS)
+- [FAIL] 违规：`https://random-site.com` (不在白名单)
 
 **检查**：
 ```csharp
@@ -99,7 +99,7 @@ var allowedHosts = Environment.GetEnvironmentVariable("ALLOWED_EXTERNAL_HOSTS")?
 
 **核心要求**：
 - 事件命名遵循 `${DOMAIN_PREFIX}.<entity>.<action>` 格式
-- 契约文件统一位于 `Scripts/Core/Contracts/**`
+- 契约文件统一位于 `Game.Core/Contracts/**`
 - CloudEvents 字段完整（Type, Source, Subject, Data）
 
 **检查步骤**：
@@ -107,17 +107,17 @@ var allowedHosts = Environment.GetEnvironmentVariable("ALLOWED_EXTERNAL_HOSTS")?
 #### 1. 事件命名规范
 ```bash
 # 扫描契约文件
-grep -rn "EventType" Scripts/Core/Contracts/ --include="*.cs"
-grep -rn "const string" Scripts/Core/Contracts/ --include="*.cs"
+grep -rn "EventType" Game.Core/Contracts/ --include="*.cs"
+grep -rn "const string" Game.Core/Contracts/ --include="*.cs"
 ```
 
 **合规标准**：
 ```csharp
-// ✅ 正确格式
+// [PASS] 正确格式
 public const string EventType = "core.guild.created";        // domain.entity.action
 public const string EventType = "core.guild.member.joined";  // domain.entity.subentity.action
 
-// ❌ 错误格式
+// [FAIL] 错误格式
 public const string EventType = "GuildCreated";              // 缺少 domain prefix
 public const string EventType = "guild.created";             // 缺少 domain prefix
 public const string EventType = "core-guild-created";        // 错误分隔符
@@ -131,7 +131,7 @@ var pattern = @"^[a-z]+\.[a-z]+\.[a-z]+(\.[a-z]+)?$";
 ```
 
 #### 2. 契约文件位置
-**要求**：所有事件/DTO/接口必须在 `Scripts/Core/Contracts/**`
+**要求**：所有事件/DTO/接口必须在 `Game.Core/Contracts/**`
 
 **检查**：
 ```bash
@@ -140,8 +140,8 @@ find Scripts/ -name "*Event.cs" -o -name "*Contract.cs" -o -name "*DTO.cs"
 
 # 验证它们都在正确位置
 for file in $(find Scripts/ -name "*Event.cs"); do
-  if [[ ! "$file" =~ ^Scripts/Core/Contracts/ ]]; then
-    echo "❌ 契约文件位置错误: $file"
+  if [[ ! "$file" =~ ^Game.Core/Contracts/ ]]; then
+    echo "[FAIL] 契约文件位置错误: $file"
   fi
 done
 ```
@@ -151,19 +151,19 @@ done
 ```csharp
 public sealed record GuildCreatedEvent
 {
-    public const string EventType = "core.guild.created";  // ✅ Type
-    public string Source { get; init; }                    // ✅ Source (e.g., "/guilds/service")
-    public string Subject { get; init; }                   // ✅ Subject (e.g., "guild/123")
-    public object Data { get; init; }                      // ✅ Data (payload)
-    public DateTimeOffset Time { get; init; }              // ✅ Time
-    public string Id { get; init; }                        // ✅ Id (unique event id)
+    public const string EventType = "core.guild.created";  // [PASS] Type
+    public string Source { get; init; }                    // [PASS] Source (e.g., "/guilds/service")
+    public string Subject { get; init; }                   // [PASS] Subject (e.g., "guild/123")
+    public object Data { get; init; }                      // [PASS] Data (payload)
+    public DateTimeOffset Time { get; init; }              // [PASS] Time
+    public string Id { get; init; }                        // [PASS] Id (unique event id)
 }
 ```
 
 **检查方法**：
 ```bash
 # 读取契约文件，验证字段存在
-grep -A 10 "sealed record.*Event" Scripts/Core/Contracts/**/*.cs
+grep -A 10 "sealed record.*Event" Game.Core/Contracts/**/*.cs
 ```
 
 ---
@@ -199,9 +199,9 @@ var lineCoverage = report["summary"]["lineCoverage"];
 var branchCoverage = report["summary"]["branchCoverage"];
 
 if (lineCoverage < 90.0)
-    violations.Add($"❌ Line coverage {lineCoverage}% < 90%");
+    violations.Add($"[FAIL] Line coverage {lineCoverage}% < 90%");
 if (branchCoverage < 85.0)
-    violations.Add($"❌ Branch coverage {branchCoverage}% < 85%");
+    violations.Add($"[FAIL] Branch coverage {branchCoverage}% < 85%");
 ```
 
 #### 2. 重复度检查
@@ -214,7 +214,7 @@ duplicate_lines=$(... 重复检测逻辑 ...)
 duplication_rate=$(echo "scale=2; $duplicate_lines / $total_lines * 100" | bc)
 
 if [ $(echo "$duplication_rate > 3.0" | bc) -eq 1 ]; then
-  echo "❌ Duplication rate ${duplication_rate}% > 3%"
+  echo "[FAIL] Duplication rate ${duplication_rate}% > 3%"
 fi
 ```
 
@@ -226,7 +226,7 @@ dotnet test --no-build --logger "trx;LogFileName=test_results.trx"
 # 解析结果
 grep -q 'outcome="Failed"' test_results.trx
 if [ $? -eq 0 ]; then
-  echo "❌ 存在失败的测试"
+  echo "[FAIL] 存在失败的测试"
 fi
 ```
 
@@ -255,7 +255,7 @@ grep -i "windows-only" CLAUDE.md
 #### 2. 禁止跨平台抽象
 **违规示例**（应避免）：
 ```csharp
-// ❌ 不必要的跨平台抽象
+// [FAIL] 不必要的跨平台抽象
 public interface IPlatformService { }
 public class WindowsPlatformService : IPlatformService { }
 public class LinuxPlatformService : IPlatformService { }  // Windows-only 项目不需要
@@ -263,7 +263,7 @@ public class LinuxPlatformService : IPlatformService { }  // Windows-only 项目
 
 **合规示例**：
 ```csharp
-// ✅ 直接使用 Windows API
+// [PASS] 直接使用 Windows API
 using System.Runtime.InteropServices;
 [DllImport("user32.dll")]
 public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
@@ -286,11 +286,11 @@ public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 ## ADR-0002: 安全基线（Godot 4.5）
 
 ### 路径使用检查
-✅ **通过**: 所有文件系统访问使用 res:// 或 user:// 路径
+[PASS] **通过**: 所有文件系统访问使用 res:// 或 user:// 路径
   - Scripts/Adapters/FileSystem.cs:45 - `user://saves/guild.db`
   - Scripts/Core/Services/ConfigService.cs:23 - `res://config/settings.json`
 
-❌ **失败**: 发现 1 处绝对路径违规
+[FAIL] **失败**: 发现 1 处绝对路径违规
   - Scripts/Services/ConfigLoader.cs:78
     ```csharp
     var path = "C:/config.json";  // 违规！
@@ -298,35 +298,35 @@ public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     **修复建议**: 改用 `user://config.json`
 
 ### 外链白名单验证
-✅ **通过**: 所有外链使用 HTTPS 且在白名单中
+[PASS] **通过**: 所有外链使用 HTTPS 且在白名单中
   - Scripts/Services/ApiClient.cs:102 - `https://api.example.com` (已在白名单)
 
 ### 配置开关验证
-✅ **通过**: 所有必需配置已设置
+[PASS] **通过**: 所有必需配置已设置
   - .env:12 - `GD_SECURE_MODE=1`
   - .env:13 - `ALLOWED_EXTERNAL_HOSTS=api.example.com,cdn.example.com`
 
-**ADR-0002 总结**: ❌ FAIL (1 个路径违规需修复)
+**ADR-0002 总结**: [FAIL] FAIL (1 个路径违规需修复)
 
 ---
 
 ## ADR-0004: 事件总线和契约
 
 ### 事件命名规范
-✅ **通过**: 所有事件遵循 `${DOMAIN_PREFIX}.<entity>.<action>` 格式
-  - Scripts/Core/Contracts/Guild/GuildCreated.cs:8
+[PASS] **通过**: 所有事件遵循 `${DOMAIN_PREFIX}.<entity>.<action>` 格式
+  - Game.Core/Contracts/Guild/GuildCreated.cs:8
     ```csharp
-    public const string EventType = "core.guild.created";  // ✅ 正确
+    public const string EventType = "core.guild.created";  // [PASS] 正确
     ```
 
 ### 契约文件位置
-✅ **通过**: 所有契约文件位于 Scripts/Core/Contracts/**
-  - Scripts/Core/Contracts/Guild/GuildCreated.cs
-  - Scripts/Core/Contracts/Guild/GuildMemberJoined.cs
+[PASS] **通过**: 所有契约文件位于 Game.Core/Contracts/**
+  - Game.Core/Contracts/Guild/GuildCreated.cs
+  - Game.Core/Contracts/Guild/GuildMemberJoined.cs
 
 ### CloudEvents 字段完整性
-❌ **失败**: GuildCreated.cs 缺少 Source 字段
-  - Scripts/Core/Contracts/Guild/GuildCreated.cs:15
+[FAIL] **失败**: GuildCreated.cs 缺少 Source 字段
+  - Game.Core/Contracts/Guild/GuildCreated.cs:15
     ```csharp
     // 缺少: public string Source { get; init; }
     ```
@@ -337,43 +337,43 @@ public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     public string Id { get; init; }
     ```
 
-**ADR-0004 总结**: ❌ FAIL (CloudEvents 字段不完整)
+**ADR-0004 总结**: [FAIL] FAIL (CloudEvents 字段不完整)
 
 ---
 
 ## ADR-0005: 质量门禁
 
 ### 覆盖率验证
-✅ **通过**: 覆盖率符合阈值
-  - Line coverage: 92.5% (✅ ≥90%)
-  - Branch coverage: 87.3% (✅ ≥85%)
+[PASS] **通过**: 覆盖率符合阈值
+  - Line coverage: 92.5% ([PASS] ≥90%)
+  - Branch coverage: 87.3% ([PASS] ≥85%)
   - 报告: logs/unit/2025-11-29/coverage.json
 
 ### 重复度检查
-✅ **通过**: 重复度在限制内
-  - Duplication rate: 2.1% (✅ ≤3%)
+[PASS] **通过**: 重复度在限制内
+  - Duplication rate: 2.1% ([PASS] ≤3%)
 
 ### 测试通过验证
-✅ **通过**: 所有测试通过
+[PASS] **通过**: 所有测试通过
   - Total: 127 tests
   - Passed: 127
   - Failed: 0
 
-**ADR-0005 总结**: ✅ PASS
+**ADR-0005 总结**: [PASS] PASS
 
 ---
 
 ## ADR-0011: Windows-only 平台策略
 
 ### 文档标注检查
-✅ **通过**: 文档明确标注 Windows-only
+[PASS] **通过**: 文档明确标注 Windows-only
   - README.md:5 - "This is a Windows-only Godot 4.5 project"
   - CLAUDE.md:8 - "操作系统限定：默认环境为 Windows"
 
 ### 跨平台抽象检查
-✅ **通过**: 无不必要的跨平台抽象层
+[PASS] **通过**: 无不必要的跨平台抽象层
 
-**ADR-0011 总结**: ✅ PASS
+**ADR-0011 总结**: [PASS] PASS
 
 ---
 
@@ -387,7 +387,7 @@ public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
 ### 阻断问题
 1. **ADR-0002**: Scripts/Services/ConfigLoader.cs:78 - 绝对路径违规
-2. **ADR-0004**: Scripts/Core/Contracts/Guild/GuildCreated.cs - CloudEvents 字段缺失
+2. **ADR-0004**: Game.Core/Contracts/Guild/GuildCreated.cs - CloudEvents 字段缺失
 
 ### 建议
 **必须修复** (阻断合并):
@@ -401,7 +401,7 @@ public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
 ---
 
-**最终结果**: ❌ **FAIL** - 需修复 2 个阻断问题
+**最终结果**: [FAIL] **FAIL** - 需修复 2 个阻断问题
 ```
 
 ## 工作流程
