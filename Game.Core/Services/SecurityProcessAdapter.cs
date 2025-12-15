@@ -1,5 +1,6 @@
+using System;
+using System.Diagnostics;
 using Game.Core.Contracts;
-using Game.Core.Ports;
 
 namespace Game.Core.Services;
 
@@ -26,15 +27,69 @@ public class SecurityProcessAdapter
 
     public async Task<ProcessExecuteResult?> ExecuteAsync(string command, string[] args)
     {
+        // ADR-0019: Check if process execution is enabled (development mode only)
+        // Production mode (default): GD_ENABLE_PROCESS_EXECUTION not set or != "1"
+        // Development mode: GD_ENABLE_PROCESS_EXECUTION = "1"
+        var executionEnabled = Environment.GetEnvironmentVariable("GD_ENABLE_PROCESS_EXECUTION") == "1";
+
+        if (!executionEnabled)
+        {
+            // Production mode: reject all process execution attempts
+            await PublishDeniedEvent(command, args, "process_execution_disabled_in_production");
+            return null;
+        }
+
+        // Development mode: continue with whitelist check
         if (!IsCommandAllowed(command))
         {
             await PublishDeniedEvent(command, args, "command_not_whitelisted");
             return null;
         }
 
-        // Minimal implementation: whitelist check only
-        // Real OS.execute integration would go here in production
-        return null;
+        // Development mode with whitelisted command: execute process
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = command,
+                Arguments = string.Join(" ", args),
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process == null)
+            {
+                await PublishDeniedEvent(command, args, "process_start_failed");
+                return null;
+            }
+
+            // Read output and error asynchronously
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            var errorTask = process.StandardError.ReadToEndAsync();
+
+            await process.WaitForExitAsync();
+
+            var output = await outputTask;
+            var error = await errorTask;
+
+            // Publish success audit event per ADR-0019
+            await PublishApprovedEvent(command, args, process.ExitCode);
+
+            return new ProcessExecuteResult(
+                ExitCode: process.ExitCode,
+                Output: output,
+                Error: error
+            );
+        }
+        catch (Exception ex)
+        {
+            // Log exception and publish denial event
+            await PublishDeniedEvent(command, args, $"execution_exception: {ex.Message}");
+            return null;
+        }
     }
 
     private async Task PublishDeniedEvent(string command, string[] args, string reason)
@@ -48,6 +103,24 @@ public class SecurityProcessAdapter
                 reason,
                 target = command,
                 arguments = string.Join(" ", args),
+                caller = "SecurityProcessAdapter.ExecuteAsync"
+            },
+            Timestamp: DateTime.UtcNow,
+            Id: Guid.NewGuid().ToString()
+        ));
+    }
+
+    private async Task PublishApprovedEvent(string command, string[] args, int exitCode)
+    {
+        await _eventBus.PublishAsync(new DomainEvent(
+            Type: "security.process.approved",
+            Source: "SecurityProcessAdapter",
+            Data: new
+            {
+                action = "execute_process",
+                target = command,
+                arguments = string.Join(" ", args),
+                exitCode,
                 caller = "SecurityProcessAdapter.ExecuteAsync"
             },
             Timestamp: DateTime.UtcNow,

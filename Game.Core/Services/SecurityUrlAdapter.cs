@@ -1,58 +1,84 @@
 using Game.Core.Contracts;
-using Game.Core.Ports;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Game.Core.Services;
 
 /// <summary>
-/// Security adapter for URL validation with audit logging.
-/// Enforces HTTPS-only whitelist policy and blocks dangerous schemes.
+/// Core service for URL security validation with event-driven architecture.
+/// Validates URLs against dangerous schemes and optional domain whitelist.
+/// Publishes security.url_access.denied events when validation fails.
 /// </summary>
 public class SecurityUrlAdapter
 {
-    private readonly IEventBus _eventBus;
+    private readonly IEventBus _bus;
     private readonly string[]? _allowedDomains;
 
-    public SecurityUrlAdapter(IEventBus bus, string[]? allowedDomains = null)
+    private static readonly string[] DangerousSchemes = new[]
     {
-        _eventBus = bus;
-        _allowedDomains = allowedDomains;
+        "javascript:",
+        "file:",
+        "data:",
+        "blob:"
+    };
+
+    public SecurityUrlAdapter(InMemoryEventBus bus)
+    {
+        _bus = bus ?? throw new ArgumentNullException(nameof(bus));
+        _allowedDomains = null;
     }
 
+    public SecurityUrlAdapter(InMemoryEventBus bus, string[] allowedDomains)
+    {
+        _bus = bus ?? throw new ArgumentNullException(nameof(bus));
+        _allowedDomains = allowedDomains ?? throw new ArgumentNullException(nameof(allowedDomains));
+    }
+
+    /// <summary>
+    /// Validates URL against security policies.
+    /// Returns true if URL is safe, false if rejected.
+    /// Publishes security.url_access.denied event on rejection.
+    /// </summary>
     public async Task<bool> ValidateAsync(string url)
     {
-        Uri uri;
-        try
+        if (string.IsNullOrWhiteSpace(url))
         {
-            uri = new Uri(url);
-        }
-        catch
-        {
-            await PublishDeniedEvent(url, "invalid_uri");
+            await PublishDeniedEventAsync(url ?? string.Empty, "URL is null or empty");
             return false;
         }
 
-        // Block dangerous schemes (ADR-0019)
-        if (uri.Scheme == "javascript" || uri.Scheme == "data" ||
-            uri.Scheme == "blob" || uri.Scheme == "file")
+        // Check for dangerous schemes
+        var lowerUrl = url.ToLowerInvariant();
+        foreach (var scheme in DangerousSchemes)
         {
-            await PublishDeniedEvent(url, $"{uri.Scheme}_scheme_blocked");
-            return false;
-        }
-
-        // Domain whitelist enforcement
-        if (_allowedDomains != null)
-        {
-            // Enforce HTTPS when whitelist is enabled
-            if (uri.Scheme != "https")
+            if (lowerUrl.StartsWith(scheme))
             {
-                await PublishDeniedEvent(url, "non_https_scheme");
+                await PublishDeniedEventAsync(url, $"Dangerous scheme detected: {scheme}");
+                return false;
+            }
+        }
+
+        // If domain whitelist configured, validate domain
+        if (_allowedDomains != null && _allowedDomains.Length > 0)
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            {
+                await PublishDeniedEventAsync(url, "Invalid URI format");
                 return false;
             }
 
-            // Check domain whitelist
-            if (!_allowedDomains.Contains(uri.Host))
+            // Enforce HTTPS-only when whitelist is configured (ADR-0019)
+            if (!uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
             {
-                await PublishDeniedEvent(url, "domain_not_whitelisted");
+                await PublishDeniedEventAsync(url, $"Non-HTTPS scheme rejected: {uri.Scheme}");
+                return false;
+            }
+
+            var host = uri.Host.ToLowerInvariant();
+            if (!_allowedDomains.Any(domain => host.Equals(domain, StringComparison.OrdinalIgnoreCase)))
+            {
+                await PublishDeniedEventAsync(url, $"Domain not in whitelist: {host}");
                 return false;
             }
         }
@@ -60,20 +86,15 @@ public class SecurityUrlAdapter
         return true;
     }
 
-    private async Task PublishDeniedEvent(string url, string reason)
+    private async Task PublishDeniedEventAsync(string url, string reason)
     {
-        await _eventBus.PublishAsync(new DomainEvent(
+        var evt = new DomainEvent(
             Type: "security.url_access.denied",
             Source: "SecurityUrlAdapter",
-            Data: new
-            {
-                action = "validate_url",
-                reason,
-                target = url,
-                caller = "SecurityUrlAdapter.ValidateAsync"
-            },
+            Data: new { Url = url, Reason = reason },
             Timestamp: DateTime.UtcNow,
             Id: Guid.NewGuid().ToString()
-        ));
+        );
+        await _bus.PublishAsync(evt);
     }
 }

@@ -19,6 +19,17 @@ internal sealed class InMemoryDataStore : IDataStore
     public IReadOnlyDictionary<string,string> Snapshot => _dict;
 }
 
+internal sealed class CapturingLogger : ILogger
+{
+    public int WarnCalls { get; private set; }
+    public int ErrorCalls { get; private set; }
+
+    public void Info(string message) { }
+    public void Warn(string message) => WarnCalls++;
+    public void Error(string message) => ErrorCalls++;
+    public void Error(string message, Exception ex) => ErrorCalls++;
+}
+
 public class GameStateManagerTests
 {
     private static GameState MakeState(int level=1, int score=0)
@@ -108,6 +119,89 @@ public class GameStateManagerTests
         mgr.SetState(MakeState(), MakeConfig());
         var tooLong = new string('x', 101);
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await mgr.SaveGameAsync(tooLong));
+    }
+
+    [Fact]
+    public async Task Save_throws_when_screenshot_too_large()
+    {
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+        mgr.SetState(MakeState(), MakeConfig());
+
+        var tooLargeScreenshot = new string('x', 2_000_001);
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await mgr.SaveGameAsync(screenshot: tooLargeScreenshot));
+    }
+
+    [Fact]
+    public void GetState_returns_null_when_unset()
+    {
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+        Assert.Null(mgr.GetState());
+        Assert.Null(mgr.GetConfig());
+    }
+
+    [Fact]
+    public async Task LoadGameAsync_throws_when_save_not_found()
+    {
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await mgr.LoadGameAsync("missing-save-id"));
+    }
+
+    [Fact]
+    public async Task LoadGameAsync_throws_when_checksum_mismatch()
+    {
+        var store = new InMemoryDataStore();
+
+        var saveId = "bad-checksum-save";
+        var state = MakeState(level: 2, score: 10);
+        var cfg = MakeConfig();
+        var save = new SaveData(
+            Id: saveId,
+            State: state,
+            Config: cfg,
+            Metadata: new SaveMetadata(DateTime.UtcNow, DateTime.UtcNow, "1.0.0", "BAD")
+        );
+        await store.SaveAsync(saveId, JsonSerializer.Serialize(save));
+
+        var mgr = new GameStateManager(store);
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await mgr.LoadGameAsync(saveId));
+    }
+
+    [Fact]
+    public async Task GetSaveListAsync_skips_broken_saves_and_logs_warning()
+    {
+        var store = new InMemoryDataStore();
+        var logger = new CapturingLogger();
+        var mgr = new GameStateManager(store, logger: logger);
+
+        mgr.SetState(MakeState(level: 1), MakeConfig());
+        var goodId = await mgr.SaveGameAsync("good");
+
+        mgr.SetState(MakeState(level: 2), MakeConfig());
+        var badId = await mgr.SaveGameAsync("bad");
+
+        // Corrupt the second save payload to trigger JSON deserialize failure.
+        await store.SaveAsync(badId, "{");
+
+        var list = await mgr.GetSaveListAsync();
+        Assert.Contains(list, s => s.Id == goodId);
+        Assert.DoesNotContain(list, s => s.Id == badId);
+        Assert.True(logger.WarnCalls >= 1, "broken save should emit at least one warning");
+    }
+
+    [Fact]
+    public async Task GetSaveListAsync_returns_empty_when_index_is_null_literal()
+    {
+        var store = new InMemoryDataStore();
+        var mgr = new GameStateManager(store);
+
+        // Simulate a corrupted index file content that deserializes to null.
+        await store.SaveAsync("guild-manager-game:index", "null");
+
+        var list = await mgr.GetSaveListAsync();
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -295,4 +389,3 @@ public class GameStateManagerTests
         Assert.Empty(list);
     }
 }
-
