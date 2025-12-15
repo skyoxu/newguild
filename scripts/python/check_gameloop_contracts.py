@@ -5,9 +5,9 @@ This script validates that the core game turn domain events
 are present and have expected EventType constants and namespace.
 
 Contracts checked:
-- Scripts/Core/Contracts/GameLoop/GameTurnStarted.cs
-- Scripts/Core/Contracts/GameLoop/GameTurnPhaseChanged.cs
-- Scripts/Core/Contracts/GameLoop/GameWeekAdvanced.cs
+- Game.Core/Contracts/GameLoop/GameTurnStarted.cs
+- Game.Core/Contracts/GameLoop/GameTurnPhaseChanged.cs
+- Game.Core/Contracts/GameLoop/GameWeekAdvanced.cs
 
 Exit code:
 - 0 when all checks pass.
@@ -34,15 +34,15 @@ class ContractExpectation:
 
 EXPECTED: List[ContractExpectation] = [
     ContractExpectation(
-        path="Scripts/Core/Contracts/GameLoop/GameTurnStarted.cs",
+        path="Game.Core/Contracts/GameLoop/GameTurnStarted.cs",
         event_type="core.game_turn.started",
     ),
     ContractExpectation(
-        path="Scripts/Core/Contracts/GameLoop/GameTurnPhaseChanged.cs",
+        path="Game.Core/Contracts/GameLoop/GameTurnPhaseChanged.cs",
         event_type="core.game_turn.phase_changed",
     ),
     ContractExpectation(
-        path="Scripts/Core/Contracts/GameLoop/GameWeekAdvanced.cs",
+        path="Game.Core/Contracts/GameLoop/GameWeekAdvanced.cs",
         event_type="core.game_turn.week_advanced",
     ),
 ]

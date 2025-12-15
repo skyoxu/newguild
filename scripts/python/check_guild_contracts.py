@@ -5,9 +5,9 @@ This script validates that the three core guild domain events
 are present and have expected EventType constants and namespace.
 
 Contracts checked:
-- Scripts/Core/Contracts/Guild/GuildCreated.cs
-- Scripts/Core/Contracts/Guild/GuildMemberJoined.cs
-- Scripts/Core/Contracts/Guild/GuildMemberLeft.cs
+- Game.Core/Contracts/Guild/GuildCreated.cs
+- Game.Core/Contracts/Guild/GuildMemberJoined.cs
+- Game.Core/Contracts/Guild/GuildMemberLeft.cs
 
 Exit code:
 - 0 when all checks pass.
@@ -34,23 +34,23 @@ class ContractExpectation:
 
 EXPECTED: List[ContractExpectation] = [
     ContractExpectation(
-        path="Scripts/Core/Contracts/Guild/GuildCreated.cs",
+        path="Game.Core/Contracts/Guild/GuildCreated.cs",
         event_type="core.guild.created",
     ),
     ContractExpectation(
-        path="Scripts/Core/Contracts/Guild/GuildMemberJoined.cs",
+        path="Game.Core/Contracts/Guild/GuildMemberJoined.cs",
         event_type="core.guild.member.joined",
     ),
     ContractExpectation(
-        path="Scripts/Core/Contracts/Guild/GuildMemberLeft.cs",
+        path="Game.Core/Contracts/Guild/GuildMemberLeft.cs",
         event_type="core.guild.member.left",
     ),
     ContractExpectation(
-        path="Scripts/Core/Contracts/Guild/GuildDisbanded.cs",
+        path="Game.Core/Contracts/Guild/GuildDisbanded.cs",
         event_type="core.guild.disbanded",
     ),
     ContractExpectation(
-        path="Scripts/Core/Contracts/Guild/GuildMemberRoleChanged.cs",
+        path="Game.Core/Contracts/Guild/GuildMemberRoleChanged.cs",
         event_type="core.guild.member.role_changed",
     ),
 ]

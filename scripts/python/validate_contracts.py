@@ -5,7 +5,7 @@ This script is designed for the newguild Godot + C# template.
 
 Responsibilities:
 - Scan overlay 08 docs under docs/architecture/overlays/**/08/.
-- Extract contract paths like `Scripts/Core/Contracts/...cs`.
+- Extract contract paths like `Game.Core/Contracts/...cs`.
 - Check that referenced contract files exist.
 - Optionally detect contracts that are not referenced by any overlay doc.
 - Write a JSON report to logs/ci/<YYYY-MM-DD>/contracts-validate.json.
@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Dict, List
 
 
-CONTRACTS_PREFIX = "Scripts/Core/Contracts/"
+CONTRACTS_PREFIX = "Game.Core/Contracts/"
 
 
 def find_overlay_docs(root: Path) -> List[Path]:
@@ -55,7 +55,7 @@ def extract_contract_paths(md_path: Path) -> List[str]:
     """Extract contract paths from a markdown file.
 
     Contract references are expected in backticks, e.g.
-    `Scripts/Core/Contracts/Guild/GuildCreated.cs`.
+    `Game.Core/Contracts/Guild/GuildCreated.cs`.
     Returned paths use forward slashes.
     """
 
@@ -73,7 +73,7 @@ def extract_contract_paths(md_path: Path) -> List[str]:
 
 
 def find_all_contract_files(root: Path) -> List[str]:
-    """Return all contract .cs files under Scripts/Core/Contracts.
+    """Return all contract .cs files under Game.Core/Contracts.
 
     Returned paths are relative to project root and use forward slashes.
     """
