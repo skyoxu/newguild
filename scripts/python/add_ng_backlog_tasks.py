@@ -182,7 +182,7 @@ def update_tasks_back(tasks_back_path: Path) -> None:
             "priority": "P2",
             "layer": "ci",
             "depends_on": ["NG-0013"],
-            "adr_refs": ["ADR-0005", "ADR-0018", "ADR-0020"],
+            "adr_refs": ["ADR-0005", "ADR-0018", "ADR-0024"],
             "chapter_refs": ["CH01", "CH06", "CH07"],
             "overlay_refs": [],
             "labels": ["ci", "quality-gates", "duplication", "complexity"],

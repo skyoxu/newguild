@@ -29,7 +29,7 @@ ADR_FOR_CH: dict[str, list[str]] = {
     "ADR-0008": ["CH10"],
     "ADR-0015": ["CH09"],
     "ADR-0018": ["CH01", "CH06", "CH07"],
-    "ADR-0020": ["CH06", "CH07"],
+    "ADR-0024": ["CH06", "CH07"],
     "ADR-0023": ["CH05"],
 }
 
