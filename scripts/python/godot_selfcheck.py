@@ -21,6 +21,8 @@ import shutil
 import sys
 import subprocess
 
+from godot_cli import build_userdir_args, default_user_dir
+
 AUT_LOAD_NAME = 'CompositionRoot'
 AUT_LOAD_VALUE = '"*res://Game.Godot/Autoloads/CompositionRoot.cs"'
 
@@ -86,23 +88,43 @@ def run_cmd(args: list[str], cwd: str | None = None, timeout: int = 120000) -> t
     return p.returncode, out, err
 
 
-def run_selfcheck(godot_bin: str, project_godot: str, build_solutions: bool) -> dict:
+def run_selfcheck(
+    godot_bin: str,
+    project_godot: str,
+    build_solutions: bool,
+    user_dir: str | None,
+    userdir_flag: str,
+    no_userdir: bool,
+) -> dict:
     root = os.path.dirname(os.path.abspath(project_godot))
     date = dt.date.today().strftime('%Y-%m-%d')
     out_dir = os.path.join(root, 'logs', 'e2e', date)
     os.makedirs(out_dir, exist_ok=True)
+
+    effective_user_dir = None
+    userdir_flag_used = None
+    userdir_args = []
+    if not no_userdir:
+        effective_user_dir = user_dir or default_user_dir(root, root_dir=root, suffix="selfcheck")
+        try:
+            os.makedirs(effective_user_dir, exist_ok=True)
+        except Exception:
+            effective_user_dir = None
+        userdir_args, userdir_flag_used = build_userdir_args(godot_bin, effective_user_dir, preferred_flag=userdir_flag)
 
     summary = {
         'godot': godot_bin,
         'project': project_godot,
         'out_dir': out_dir,
         'status': 'fail',
+        'user_dir': effective_user_dir,
+        'userdir_flag_used': userdir_flag_used,
     }
 
     ts = dt.datetime.now().strftime('%H%M%S%f')
     if build_solutions:
         # Be explicit with --path to avoid project resolution flakiness on CI
-        rc, out, err = run_cmd([godot_bin, '--headless', '--no-window', '--path', root, '--build-solutions', '--quit'], cwd=root, timeout=600000)
+        rc, out, err = run_cmd([godot_bin] + userdir_args + ['--headless', '--no-window', '--path', root, '--build-solutions', '--quit'], cwd=root, timeout=600000)
         with open(os.path.join(out_dir, f'godot-buildsolutions-{ts}.txt'), 'w', encoding='utf-8') as f:
             f.write(out or '')
             if err:
@@ -111,7 +133,7 @@ def run_selfcheck(godot_bin: str, project_godot: str, build_solutions: bool) -> 
         summary['build_rc'] = rc
 
     # Run the selfcheck script with explicit --path and verbose output
-    args = [godot_bin, '--headless', '--no-window', '--path', root, '-s', 'res://Game.Godot/Scripts/Diagnostics/CompositionRootSelfCheck.gd', '--verbose']
+    args = [godot_bin] + userdir_args + ['--headless', '--no-window', '--path', root, '-s', 'res://Game.Godot/Scripts/Diagnostics/CompositionRootSelfCheck.gd', '--verbose']
     console_path = os.path.join(out_dir, f'godot-selfcheck-console-{ts}.txt')
     stderr_path = os.path.join(out_dir, f'godot-selfcheck-stderr-{ts}.txt')
     # Write call header for traceability
@@ -126,7 +148,7 @@ def run_selfcheck(godot_bin: str, project_godot: str, build_solutions: bool) -> 
     m = re.search(r'SELF_CHECK_OUT:(.*)$', out or '', flags=re.M)
     if not m:
         # Retry once after a lightweight prewarm
-        _rcpw, _outpw, _errpw = run_cmd([godot_bin, '--headless', '--no-window', '--path', root, '--quit'], cwd=root, timeout=120000)
+        _rcpw, _outpw, _errpw = run_cmd([godot_bin] + userdir_args + ['--headless', '--no-window', '--path', root, '--quit'], cwd=root, timeout=120000)
         rc2, out2, err2 = run_cmd(args, cwd=root, timeout=300000)
         with open(console_path, 'a', encoding='utf-8') as f:
             f.write('\n--- RETRY ---\n')
@@ -173,6 +195,10 @@ def main():
     ap_run.add_argument('--godot-bin', required=True)
     ap_run.add_argument('--project', default='project.godot')
     ap_run.add_argument('--build-solutions', action='store_true')
+    ap_run.add_argument('--user-dir', default=None, help='Redirect Godot user:// to this directory (default: logs/_godot_userdir/<project>/selfcheck)')
+    ap_run.add_argument('--userdir-flag', default=os.environ.get('GODOT_USERDIR_FLAG', 'auto'),
+                        help='Godot CLI flag for user dir (auto|--user-dir|--user-data-dir); env: GODOT_USERDIR_FLAG')
+    ap_run.add_argument('--no-userdir', action='store_true', help='Disable user dir redirection (writes to default OS location)')
 
     args = ap.parse_args()
 
@@ -181,7 +207,7 @@ def main():
         print(f'AUTOLOAD_CHANGED={changed}')
         return 0
     if args.cmd == 'run':
-        summary = run_selfcheck(args.godot_bin, args.project, args.build_solutions)
+        summary = run_selfcheck(args.godot_bin, args.project, args.build_solutions, args.user_dir, args.userdir_flag, args.no_userdir)
         out_dir = summary.get('out_dir', '.')
         # write summary next to logs for traceability
         with open(os.path.join(out_dir, 'selfcheck-summary.json'), 'w', encoding='utf-8') as f:

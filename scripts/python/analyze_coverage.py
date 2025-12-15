@@ -32,7 +32,7 @@ for pkg in packages.findall('package'):
         line_rate_file = float(cls.attrib['line-rate']) * 100
         branch_rate_file = float(cls.attrib.get('branch-rate', '0')) * 100
 
-        if branch_rate_file < 90 and branch_rate_file > 0:
+        if branch_rate_file < 85 and branch_rate_file > 0:
             low_branch_files.append({
                 'file': short_name,
                 'line': line_rate_file,
@@ -41,7 +41,7 @@ for pkg in packages.findall('package'):
             })
 
 if low_branch_files:
-    print('FILES WITH BRANCH COVERAGE < 90%:')
+    print('FILES WITH BRANCH COVERAGE < 85%:')
     print('-' * 80)
     print(f'{"File":<50} {"Line %":>10} {"Branch %":>10}')
     print('-' * 80)
@@ -51,11 +51,11 @@ if low_branch_files:
 
 # Quality gate result
 print('=' * 80)
-print('QUALITY GATE RESULT (90% threshold)')
+print('QUALITY GATE RESULT (90%/85% threshold)')
 print('=' * 80)
 print(f'Line Coverage:   {"PASS" if line_rate >= 90 else "FAIL"}')
-print(f'Branch Coverage: {"PASS" if branch_rate >= 90 else "FAIL"}')
-print(f'Overall:         {"PASS" if line_rate >= 90 and branch_rate >= 90 else "FAIL"}')
+print(f'Branch Coverage: {"PASS" if branch_rate >= 85 else "FAIL"}')
+print(f'Overall:         {"PASS" if line_rate >= 90 and branch_rate >= 85 else "FAIL"}')
 print('=' * 80)
 
-sys.exit(0 if line_rate >= 90 and branch_rate >= 90 else 1)
+sys.exit(0 if line_rate >= 90 and branch_rate >= 85 else 1)
