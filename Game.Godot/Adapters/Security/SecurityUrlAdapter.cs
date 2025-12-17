@@ -188,7 +188,7 @@ public sealed class SecurityUrlAdapter : ISecurityUrlValidator
             };
 
             // Serialize to single-line JSON (JSONL format)
-            string jsonLine = JsonSerializer.Serialize(auditEntry) + Environment.NewLine;
+            string jsonLine = JsonSerializer.Serialize(auditEntry) + System.Environment.NewLine;
 
             // Append to audit log (thread-safe file locking)
             File.AppendAllText(_auditLogPath, jsonLine);
