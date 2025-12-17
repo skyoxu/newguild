@@ -53,7 +53,7 @@ public class GameStateManagerTests
         );
 
     [Fact]
-    public async Task Save_load_delete_and_index_flow_works_with_compression()
+    public async Task Save_Load_Delete_And_Index_Flow_Works_With_Compression()
     {
         var store = new InMemoryDataStore();
         var opts = new GameStateManagerOptions(MaxSaves: 2, EnableCompression: true);
@@ -97,7 +97,7 @@ public class GameStateManagerTests
     }
 
     [Fact]
-    public async Task AutoSave_toggle_and_tick()
+    public async Task AutoSave_Toggle_And_Tick()
     {
         var store = new InMemoryDataStore();
         var mgr = new GameStateManager(store);
@@ -110,7 +110,7 @@ public class GameStateManagerTests
     }
 
     [Fact]
-    public async Task Save_throws_when_state_missing_or_title_too_long()
+    public async Task Save_Throws_When_State_Missing_Or_Title_Too_Long()
     {
         var store = new InMemoryDataStore();
         var mgr = new GameStateManager(store);
@@ -122,7 +122,7 @@ public class GameStateManagerTests
     }
 
     [Fact]
-    public async Task Save_throws_when_screenshot_too_large()
+    public async Task Save_Throws_When_Screenshot_Too_Large()
     {
         var store = new InMemoryDataStore();
         var mgr = new GameStateManager(store);
@@ -133,7 +133,7 @@ public class GameStateManagerTests
     }
 
     [Fact]
-    public void GetState_returns_null_when_unset()
+    public void GetState_Returns_Null_When_Unset()
     {
         var store = new InMemoryDataStore();
         var mgr = new GameStateManager(store);
@@ -142,7 +142,7 @@ public class GameStateManagerTests
     }
 
     [Fact]
-    public async Task LoadGameAsync_throws_when_save_not_found()
+    public async Task LoadGameAsync_Throws_When_Save_Not_Found()
     {
         var store = new InMemoryDataStore();
         var mgr = new GameStateManager(store);
@@ -150,7 +150,7 @@ public class GameStateManagerTests
     }
 
     [Fact]
-    public async Task LoadGameAsync_throws_when_checksum_mismatch()
+    public async Task LoadGameAsync_Throws_When_Checksum_Mismatch()
     {
         var store = new InMemoryDataStore();
 
@@ -170,7 +170,7 @@ public class GameStateManagerTests
     }
 
     [Fact]
-    public async Task GetSaveListAsync_skips_broken_saves_and_logs_warning()
+    public async Task GetSaveListAsync_Skips_Broken_Saves_And_Logs_Warning()
     {
         var store = new InMemoryDataStore();
         var logger = new CapturingLogger();
@@ -192,7 +192,7 @@ public class GameStateManagerTests
     }
 
     [Fact]
-    public async Task GetSaveListAsync_returns_empty_when_index_is_null_literal()
+    public async Task GetSaveListAsync_Returns_Empty_When_Index_Is_Null_Literal()
     {
         var store = new InMemoryDataStore();
         var mgr = new GameStateManager(store);
@@ -205,7 +205,7 @@ public class GameStateManagerTests
     }
 
     [Fact]
-    public void Publish_continues_with_remaining_callbacks_when_one_throws()
+    public void Publish_Continues_With_Remaining_Callbacks_When_One_Throws()
     {
         var store = new InMemoryDataStore();
         var mgr = new GameStateManager(store);

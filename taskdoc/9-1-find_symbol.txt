@@ -1,0 +1,46 @@
+﻿# Task 9 - Serena MCP find_symbol outputs
+
+## 1) GameTurnSystem (Game.Core)
+Tool: serena.find_symbol
+Params: name_path_pattern=GameTurnSystem; relative_path=Game.Core; substring_matching=true; include_body=false
+Result:
+[{"name_path": "Game.Core/Engine/GameTurnSystem", "kind": "File", "body_location": {"start_line": 0, "end_line": 127}, "relative_path": "Game.Core\\Engine\\GameTurnSystem.cs"}, {"name_path": "GameTurnSystem", "kind": "Class", "body_location": {"start_line": 14, "end_line": 124}, "relative_path": "Game.Core\\Engine\\GameTurnSystem.cs"}, {"name_path": "GameTurnSystem/GameTurnSystem", "kind": "Method", "body_location": {"start_line": 22, "end_line": 33}, "relative_path": "Game.Core\\Engine\\GameTurnSystem.cs"}, {"name_path": "IGameTurnSystem", "kind": "Interface", "body_location": {"start_line": 8, "end_line": 12}, "relative_path": "Game.Core\\Engine\\GameTurnSystem.cs"}]
+
+## 2) EventBus / IEventBus / InMemoryEventBus (Game.Core)
+Tool: serena.find_symbol
+Params: name_path_pattern=EventBus; relative_path=Game.Core; substring_matching=true; include_body=false
+Result:
+[{"name_path": "Game.Core/Services/EventBus", "kind": "File", "body_location": {"start_line": 0, "end_line": 68}, "relative_path": "Game.Core\\Services\\EventBus.cs"}, {"name_path": "IEventBus", "kind": "Interface", "body_location": {"start_line": 5, "end_line": 9}, "relative_path": "Game.Core\\Services\\EventBus.cs"}, {"name_path": "InMemoryEventBus", "kind": "Class", "body_location": {"start_line": 11, "end_line": 65}, "relative_path": "Game.Core\\Services\\EventBus.cs"}, {"name_path": "InMemoryEventBus/InMemoryEventBus", "kind": "Method", "body_location": {"start_line": 17, "end_line": 20}, "relative_path": "Game.Core\\Services\\EventBus.cs"}]
+
+## 3) DomainEvent (Game.Core)
+Tool: serena.find_symbol
+Params: name_path_pattern=DomainEvent; relative_path=Game.Core; substring_matching=true; include_body=false
+Result:
+[{"name_path": "Game.Core/Contracts/DomainEvent", "kind": "File", "body_location": {"start_line": 0, "end_line": 13}, "relative_path": "Game.Core\\Contracts\\DomainEvent.cs"}, {"name_path": "DomainEvent", "kind": "Class", "body_location": {"start_line": 2, "end_line": 10}, "relative_path": "Game.Core\\Contracts\\DomainEvent.cs"}, {"name_path": "DomainEvent/DomainEvent", "kind": "Method", "body_location": {"start_line": 2, "end_line": 10}, "relative_path": "Game.Core\\Contracts\\DomainEvent.cs"}]
+
+## 4) Security adapters (Game.Core)
+Tool: serena.find_symbol
+Params: name_path_pattern=SecurityUrlAdapter; relative_path=Game.Core; substring_matching=true; include_body=false
+Result:
+[{"name_path": "Game.Core/Services/SecurityUrlAdapter", "kind": "File", "body_location": {"start_line": 0, "end_line": 101}, "relative_path": "Game.Core\\Services\\SecurityUrlAdapter.cs"}, {"name_path": "SecurityUrlAdapter", "kind": "Class", "body_location": {"start_line": 12, "end_line": 99}, "relative_path": "Game.Core\\Services\\SecurityUrlAdapter.cs"}, {"name_path": "SecurityUrlAdapter/SecurityUrlAdapter[0]", "kind": "Method", "body_location": {"start_line": 31, "end_line": 35}, "relative_path": "Game.Core\\Services\\SecurityUrlAdapter.cs"}, {"name_path": "SecurityUrlAdapter/SecurityUrlAdapter[1]", "kind": "Method", "body_location": {"start_line": 25, "end_line": 29}, "relative_path": "Game.Core\\Services\\SecurityUrlAdapter.cs"}]
+
+Tool: serena.find_symbol
+Params: name_path_pattern=SecurityFileAdapter; relative_path=Game.Core; substring_matching=true; include_body=false
+Result:
+[{"name_path": "Game.Core/Services/SecurityFileAdapter", "kind": "File", "body_location": {"start_line": 0, "end_line": 71}, "relative_path": "Game.Core\\Services\\SecurityFileAdapter.cs"}, {"name_path": "SecurityFileAdapter", "kind": "Class", "body_location": {"start_line": 10, "end_line": 69}, "relative_path": "Game.Core\\Services\\SecurityFileAdapter.cs"}, {"name_path": "SecurityFileAdapter/SecurityFileAdapter", "kind": "Method", "body_location": {"start_line": 14, "end_line": 17}, "relative_path": "Game.Core\\Services\\SecurityFileAdapter.cs"}]
+
+Tool: serena.find_symbol
+Params: name_path_pattern=SecurityProcessAdapter; relative_path=Game.Core; substring_matching=true; include_body=false
+Result:
+[{"name_path": "Game.Core/Services/SecurityProcessAdapter", "kind": "File", "body_location": {"start_line": 0, "end_line": 140}, "relative_path": "Game.Core\\Services\\SecurityProcessAdapter.cs"}, {"name_path": "SecurityProcessAdapter", "kind": "Class", "body_location": {"start_line": 10, "end_line": 129}, "relative_path": "Game.Core\\Services\\SecurityProcessAdapter.cs"}, {"name_path": "SecurityProcessAdapter/SecurityProcessAdapter", "kind": "Method", "body_location": {"start_line": 15, "end_line": 19}, "relative_path": "Game.Core\\Services\\SecurityProcessAdapter.cs"}]
+
+## 5) Godot-side adapters/audit
+Tool: serena.find_symbol
+Params: name_path_pattern=SecurityAudit; relative_path=Game.Godot; substring_matching=true; include_body=false
+Result:
+[{"name_path": "Game.Godot/Adapters/SecurityAuditLogger", "kind": "File", "body_location": {"start_line": 0, "end_line": 165}, "relative_path": "Game.Godot\\Adapters\\SecurityAuditLogger.cs"}, {"name_path": "SecurityAuditLogger", "kind": "Class", "body_location": {"start_line": 14, "end_line": 163}, "relative_path": "Game.Godot\\Adapters\\SecurityAuditLogger.cs"}, {"name_path": "SecurityAuditLogger/SecurityAuditLogger", "kind": "Method", "body_location": {"start_line": 21, "end_line": 25}, "relative_path": "Game.Godot\\Adapters\\SecurityAuditLogger.cs"}, {"name_path": "Game.Godot/Scripts/Security/SecurityAudit", "kind": "File", "body_location": {"start_line": 0, "end_line": 60}, "relative_path": "Game.Godot\\Scripts\\Security\\SecurityAudit.cs"}, {"name_path": "SecurityAudit", "kind": "Class", "body_location": {"start_line": 7, "end_line": 57}, "relative_path": "Game.Godot\\Scripts\\Security\\SecurityAudit.cs"}]
+
+Tool: serena.find_symbol
+Params: name_path_pattern=EventBusAdapter; relative_path=Game.Godot; substring_matching=true; include_body=false
+Result:
+[{"name_path": "Game.Godot/Adapters/EventBusAdapter", "kind": "File", "body_location": {"start_line": 0, "end_line": 69}, "relative_path": "Game.Godot\\Adapters\\EventBusAdapter.cs"}, {"name_path": "EventBusAdapter", "kind": "Class", "body_location": {"start_line": 10, "end_line": 67}, "relative_path": "Game.Godot\\Adapters\\EventBusAdapter.cs"}]

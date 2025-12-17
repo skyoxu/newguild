@@ -7,7 +7,7 @@ namespace Game.Core.Tests.Domain.ValueObjects;
 public class DamageTests
 {
     [Fact]
-    public void EffectiveAmount_is_never_negative()
+    public void EffectiveAmount_Is_Never_Negative()
     {
         // Arrange
         var d1 = new Damage(-10, DamageType.Physical);
@@ -30,7 +30,7 @@ public class DamageTests
     [InlineData(-10, 0)]
     [InlineData(0, 0)]
     [InlineData(5, 5)]
-    public void EffectiveAmount_clamps_negative_and_keeps_positive(int rawAmount, int expected)
+    public void EffectiveAmount_Clamps_Negative_And_Keeps_Positive(int rawAmount, int expected)
     {
         // Arrange
         var damage = new Damage(rawAmount, DamageType.Physical);

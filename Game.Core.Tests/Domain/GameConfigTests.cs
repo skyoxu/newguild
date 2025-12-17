@@ -7,7 +7,7 @@ namespace Game.Core.Tests.Domain;
 public class GameConfigTests
 {
     [Fact]
-    public void Ctor_sets_properties_as_expected()
+    public void Ctor_Sets_Properties_As_Expected()
     {
         // Arrange
         var config = new GameConfig(

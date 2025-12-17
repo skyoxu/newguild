@@ -7,7 +7,7 @@ namespace Game.Core.Tests.Services;
 public class InventoryServiceTests
 {
     [Fact]
-    public void Add_succeeds_when_within_max_slots()
+    public void Add_Succeeds_When_Within_Max_Slots()
     {
         var inv = new Inventory();
         var svc = new InventoryService(inv, maxSlots: 10);
@@ -20,7 +20,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public void Add_fails_when_max_slots_reached_for_new_item()
+    public void Add_Fails_When_Max_Slots_Reached_For_New_Item()
     {
         var inv = new Inventory();
         var svc = new InventoryService(inv, maxSlots: 2);
@@ -37,7 +37,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public void Add_succeeds_for_existing_item_even_when_max_slots_reached()
+    public void Add_Succeeds_For_Existing_Item_Even_When_Max_Slots_Reached()
     {
         var inv = new Inventory();
         var svc = new InventoryService(inv, maxSlots: 2);
@@ -54,7 +54,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public void CountDistinct_returns_number_of_unique_items()
+    public void CountDistinct_Returns_Number_Of_Unique_Items()
     {
         var inv = new Inventory();
         var svc = new InventoryService(inv);
@@ -67,7 +67,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public void HasItem_returns_true_when_item_exists_with_required_count()
+    public void HasItem_Returns_True_When_Item_Exists_With_Required_Count()
     {
         var inv = new Inventory();
         var svc = new InventoryService(inv);
@@ -80,7 +80,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public void Remove_reduces_item_count()
+    public void Remove_Reduces_Item_Count()
     {
         var inv = new Inventory();
         var svc = new InventoryService(inv);
@@ -93,7 +93,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public void Remove_returns_zero_when_item_not_found()
+    public void Remove_Returns_Zero_When_Item_Not_Found()
     {
         var inv = new Inventory();
         var svc = new InventoryService(inv);

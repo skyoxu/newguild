@@ -6,7 +6,7 @@ namespace Game.Core.Tests.Utilities;
 public class MathHelperTests
 {
     [Fact]
-    public void Clamp_and_Lerp_basic()
+    public void Clamp_And_Lerp_Basic()
     {
         Assert.Equal(5, MathHelper.Clamp(5, 0, 10));
         Assert.Equal(0, MathHelper.Clamp(-1, 0, 10));

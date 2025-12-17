@@ -54,7 +54,7 @@ public class GameEngineCoreEventTests
     }
 
     [Fact]
-    public void Start_publishes_game_started_event()
+    public void Start_Publishes_Game_Started_Event()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
@@ -74,7 +74,7 @@ public class GameEngineCoreEventTests
     }
 
     [Fact]
-    public void AddScore_publishes_score_changed_event()
+    public void AddScore_Publishes_Score_Changed_Event()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
@@ -97,7 +97,7 @@ public class GameEngineCoreEventTests
     }
 
     [Fact]
-    public void ApplyDamage_publishes_player_health_changed_event()
+    public void ApplyDamage_Publishes_Player_Health_Changed_Event()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
@@ -120,7 +120,7 @@ public class GameEngineCoreEventTests
     }
 
     [Fact]
-    public void Move_publishes_player_moved_event_and_updates_position()
+    public void Move_Publishes_Player_Moved_Event_And_Updates_Position()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
@@ -144,7 +144,7 @@ public class GameEngineCoreEventTests
     }
 
     [Fact]
-    public void End_publishes_game_ended_event_and_returns_result()
+    public void End_Publishes_Game_Ended_Event_And_Returns_Result()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);

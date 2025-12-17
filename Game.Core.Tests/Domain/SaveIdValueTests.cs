@@ -12,7 +12,7 @@ public class SaveIdValueTests
     [InlineData("save_2")]
     [InlineData("save123")]
     [InlineData("SLOT_01")]
-    public void Constructor_accepts_valid_ids(string value)
+    public void Constructor_Accepts_Valid_Ids(string value)
     {
         var id = new SaveIdValue(value);
 
@@ -34,7 +34,7 @@ public class SaveIdValueTests
     }
 
     [Fact]
-    public void Constructor_rejects_ids_longer_than_64_characters()
+    public void Constructor_Rejects_Ids_Longer_Than_T64_Characters()
     {
         var tooLong = new string('a', 65);
 
@@ -44,7 +44,7 @@ public class SaveIdValueTests
     }
 
     [Fact]
-    public void TryCreate_returns_true_for_valid_value()
+    public void TryCreate_Returns_True_For_Valid_Value()
     {
         var ok = SaveIdValue.TryCreate("save-1", out var value);
 
@@ -54,7 +54,7 @@ public class SaveIdValueTests
     }
 
     [Fact]
-    public void TryCreate_returns_false_for_invalid_value()
+    public void TryCreate_Returns_False_For_Invalid_Value()
     {
         var ok = SaveIdValue.TryCreate("invalid/value", out var value);
 

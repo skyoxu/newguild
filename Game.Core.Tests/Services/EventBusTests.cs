@@ -9,7 +9,7 @@ namespace Game.Core.Tests.Services;
 public class EventBusTests
 {
     [Fact]
-    public async Task Publish_invokes_subscribers_and_unsubscribe_works()
+    public async Task Publish_Invokes_Subscribers_And_Unsubscribe_Works()
     {
         var bus = new InMemoryEventBus();
         int called = 0;
@@ -37,7 +37,7 @@ public class EventBusTests
     }
 
     [Fact]
-    public async Task Subscriber_exception_is_swallowed_and_others_still_called()
+    public async Task Subscriber_Exception_Is_Swallowed_And_Others_Still_Called()
     {
         var bus = new InMemoryEventBus();
         int ok = 0;

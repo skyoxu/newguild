@@ -8,7 +8,7 @@ namespace Game.Core.Tests.Services;
 public class ScoreServiceTests
 {
     [Fact]
-    public void ComputeAddedScore_respects_multiplier_and_difficulty()
+    public void ComputeAddedScore_Respects_Multiplier_And_Difficulty()
     {
         var svc = new ScoreService();
         var cfg = new GameConfig(
@@ -28,7 +28,7 @@ public class ScoreServiceTests
     }
 
     [Fact]
-    public void Add_accumulates_and_reset_clears_score()
+    public void Add_Accumulates_And_Reset_Clears_Score()
     {
         var svc = new ScoreService();
         var cfg = new GameConfig(50, 100, 1.0, false, Difficulty.Medium);
@@ -46,7 +46,7 @@ public class ScoreServiceTests
     }
 
     [Fact]
-    public void ComputeAddedScore_clamps_negative_base_points_to_zero()
+    public void ComputeAddedScore_Clamps_Negative_Base_Points_To_Zero()
     {
         var svc = new ScoreService();
         var cfg = new GameConfig(MaxLevel: 10, InitialHealth: 100, ScoreMultiplier: 1.0, AutoSave: false, Difficulty: Difficulty.Medium);
@@ -58,7 +58,7 @@ public class ScoreServiceTests
     }
 
     [Fact]
-    public void GameConfig_rejects_invalid_difficulty_enum()
+    public void GameConfig_Rejects_Invalid_Difficulty_Enum()
     {
         // Cast an invalid integer to Difficulty enum
         var invalidDifficulty = (Difficulty)999;
@@ -74,7 +74,7 @@ public class ScoreServiceTests
     }
 
     [Fact]
-    public void ComputeAddedScore_returns_zero_when_negative_multiplier_result()
+    public void ComputeAddedScore_Returns_Zero_When_Negative_Multiplier_Result()
     {
         var svc = new ScoreService();
         var cfg = new GameConfig(MaxLevel: 10, InitialHealth: 100, ScoreMultiplier: -2.0, AutoSave: false, Difficulty: Difficulty.Medium);
@@ -86,7 +86,7 @@ public class ScoreServiceTests
     }
 
     [Fact]
-    public void ComputeAddedScore_applies_easy_difficulty_multiplier()
+    public void ComputeAddedScore_Applies_Easy_Difficulty_Multiplier()
     {
         var svc = new ScoreService();
         var cfg = new GameConfig(

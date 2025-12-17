@@ -116,7 +116,7 @@ public class EventEngineTests
     }
 
     [Fact]
-    public async Task ExecuteResolutionPhase_does_not_change_week_or_phase_by_default()
+    public async Task ExecuteResolutionPhase_Does_Not_Change_Week_Or_Phase_By_Default()
     {
         // Arrange
         var (engine, _) = CreateEngine();
@@ -136,7 +136,7 @@ public class EventEngineTests
     }
 
     [Fact]
-    public async Task ExecutePlayerPhase_does_not_change_week_or_phase_by_default()
+    public async Task ExecutePlayerPhase_Does_Not_Change_Week_Or_Phase_By_Default()
     {
         // Arrange
         var (engine, _) = CreateEngine();
@@ -156,7 +156,7 @@ public class EventEngineTests
     }
 
     [Fact]
-    public async Task ExecuteAiPhase_does_not_change_week_or_phase_by_default()
+    public async Task ExecuteAiPhase_Does_Not_Change_Week_Or_Phase_By_Default()
     {
         // Arrange
         var (engine, _) = CreateEngine();
