@@ -1,14 +1,16 @@
 ---
 PRD-ID: PRD-Guild-Manager
 Title: CloudEvents Core 契约更新
+Arch-Refs:
+  - CH01
+  - CH03
 ADR-Refs:
   - ADR-0004
   - ADR-0005
 Test-Refs:
-  - tests/unit/contracts/contracts-cloudevents-core.spec.ts
-  - tests/e2e/contracts/contracts-docs-sync.spec.ts
+  - Game.Core.Tests/Contracts/DomainEventTests.cs
 Contracts-Refs:
-  - src/shared/contracts/cloudevents-core.ts
+  - Game.Core/Contracts/DomainEvent.cs
 Status: Proposed
 ---
 
@@ -21,7 +23,7 @@ Status: Proposed
 
 影响范围
 
-- 合同文件：`src/shared/contracts/cloudevents-core.ts`
+- 合同文件：`Game.Core/Contracts/DomainEvent.cs`
 - 受影响模块：事件发布/订阅、日志与可观测性链路
 
 验收要点

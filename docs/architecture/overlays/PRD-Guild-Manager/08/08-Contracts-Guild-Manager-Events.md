@@ -1,6 +1,9 @@
 ---
 PRD-ID: PRD-Guild-Manager
 Title: 公会管理事件（Guild Manager Events）契约更新
+Arch-Refs:
+  - CH01
+  - CH03
 ADR-Refs:
   - ADR-0004
   - ADR-0005

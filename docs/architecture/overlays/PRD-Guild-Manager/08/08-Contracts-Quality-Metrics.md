@@ -1,14 +1,21 @@
 ---
 PRD-ID: PRD-Guild-Manager
 Title: 质量指标（Quality Metrics）契约更新
+Arch-Refs:
+  - CH01
+  - CH03
 ADR-Refs:
   - ADR-0004
   - ADR-0005
 Test-Refs:
-  - tests/unit/contracts/contracts-quality-metrics.spec.ts
-  - tests/e2e/contracts/contracts-docs-sync.spec.ts
+  - scripts/python/tests/test_validate_audit_logs.py
+  - scripts/python/quality_gates.py
+  - scripts/ci/quality_gate.ps1
 Contracts-Refs:
-  - src/shared/contracts/quality/metrics.ts
+  - scripts/python/quality_gates.py
+  - scripts/python/task_links_validate.py
+  - scripts/python/validate_audit_logs.py
+  - scripts/ci/quality_gate.ps1
 Status: Proposed
 ---
 
@@ -20,8 +27,11 @@ Status: Proposed
 
 影响范围
 
-- 合同文件：`src/shared/contracts/quality/metrics.ts`
-- 受影响模块：性能埋点、发布健康、报表聚合
+- 产出契约（脚本与产物）：
+  - 质量门禁入口：`scripts/ci/quality_gate.ps1`、`scripts/python/quality_gates.py`
+  - 回链校验：`scripts/python/task_links_validate.py`
+  - 审计日志校验：`scripts/python/validate_audit_logs.py`
+- 受影响模块：质量门禁、发布健康、审计日志与归档工件
 
 验收要点（就地）
 
