@@ -56,7 +56,10 @@ public class GameStateManager
         if (!string.IsNullOrEmpty(screenshot) && screenshot!.Length > MaxScreenshotChars)
             throw new ArgumentOutOfRangeException(nameof(screenshot), $"Screenshot too large (>{MaxScreenshotChars} chars).");
 
-        var saveId = $"{_options.StorageKey}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+        // Avoid collisions when multiple saves occur within the same millisecond (CI can be very fast).
+        // Keep ID within 64 chars to remain compatible with SaveIdValue constraints.
+        var nonce = Guid.NewGuid().ToString("N")[..8];
+        var saveId = $"{_options.StorageKey}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{nonce}";
         var checksum = CalculateChecksum(_currentState);
         var now = DateTime.UtcNow;
 

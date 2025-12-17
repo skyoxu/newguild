@@ -1,5 +1,4 @@
 using Game.Core.Ports;
-using Game.Core.Services;
 using Godot;
 
 namespace Game.Godot.Autoloads;
@@ -25,48 +24,69 @@ public partial class CompositionRoot : Node
     public override void _EnterTree()
     {
         Instance = this;
-        if (!_initialized)
-        {
-            InitializeAdapters();
-            _initialized = true;
-        }
     }
 
     public override void _Ready()
     {
-        if (_initialized) return;
-        InitializeAdapters();
+        if (_initialized)
+            return;
+
+        InitializePorts();
         _initialized = true;
     }
 
-    private void InitializeAdapters()
+    private void InitializePorts()
     {
-        // Create EventBus first - security adapters need it for audit logging
-        var busNode = new Adapters.EventBusAdapter();
-        AddChild(busNode);
-        EventBus = busNode;
+        // Prefer root-level autoload singletons if present; create minimal fallbacks if missing.
+        var root = GetTree().Root;
 
-        // Create security adapters (require EventBus)
-        var securityFileAdapter = new SecurityFileAdapter(busNode);
+        var bus = GetNodeOrNull<Adapters.EventBusAdapter>("/root/EventBus");
+        if (bus == null)
+        {
+            bus = new Adapters.EventBusAdapter { Name = "EventBus" };
+            root.AddChild(bus);
+        }
+        EventBus = bus;
 
-        // Create other adapter nodes as children to ensure lifecycle managed by scene tree
-        var time = new Adapters.TimeAdapter();
-        var input = new Adapters.InputAdapter();
-        var loader = new Adapters.ResourceLoaderAdapter();
-        var store = new Adapters.DataStoreAdapter(securityFileAdapter);
-        var logger = new Adapters.LoggerAdapter();
-
-        AddChild(time);
-        AddChild(input);
-        AddChild(loader);
-        AddChild(store);
-        AddChild(logger);
-
+        var time = GetNodeOrNull<Adapters.TimeAdapter>("/root/Time");
+        if (time == null)
+        {
+            time = new Adapters.TimeAdapter { Name = "Time" };
+            root.AddChild(time);
+        }
         Time = time;
+
+        var input = GetNodeOrNull<Adapters.InputAdapter>("/root/Input");
+        if (input == null)
+        {
+            input = new Adapters.InputAdapter { Name = "Input" };
+            root.AddChild(input);
+        }
         Input = input;
-        ResourceLoader = loader;
-        DataStore = store;
+
+        var logger = GetNodeOrNull<Adapters.LoggerAdapter>("/root/Logger");
+        if (logger == null)
+        {
+            logger = new Adapters.LoggerAdapter { Name = "Logger" };
+            root.AddChild(logger);
+        }
         Logger = logger;
+
+        var store = GetNodeOrNull<Adapters.DataStoreAdapter>("/root/DataStore");
+        if (store == null)
+        {
+            store = new Adapters.DataStoreAdapter { Name = "DataStore" };
+            root.AddChild(store);
+        }
+        DataStore = store;
+
+        var loader = GetNodeOrNull<Adapters.ResourceLoaderAdapter>("/root/ResourceLoader");
+        if (loader == null)
+        {
+            loader = new Adapters.ResourceLoaderAdapter { Name = "ResourceLoader" };
+            root.AddChild(loader);
+        }
+        ResourceLoader = loader;
     }
 
     // Expose a simple status map for GDScript without accessing C# properties directly

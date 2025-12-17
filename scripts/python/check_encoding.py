@@ -73,6 +73,8 @@ BINARY_EXT = {
     ".sqlite",
     ".sav",
     ".bak",
+    ".pyc",
+    ".pyo",
 }
 
 # Exclude vendor/test asset folders and known binaries

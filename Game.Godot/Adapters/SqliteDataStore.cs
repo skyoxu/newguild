@@ -15,7 +15,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
 {
     private enum Backend { Plugin, Managed }
 
-    private readonly SecurityFileAdapter _securityFileAdapter;
+    private SecurityFileAdapter? _securityFileAdapter;
     private Backend _backend = Backend.Managed;
     private GodotObject? _pluginDb;
     private SqliteConnection? _conn;
@@ -23,9 +23,25 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     private string? _dbPath;
     public string? LastError { get; private set; }
 
-    public SqliteDataStore(SecurityFileAdapter securityFileAdapter)
+    public override void _Ready()
     {
-        _securityFileAdapter = securityFileAdapter ?? throw new ArgumentNullException(nameof(securityFileAdapter));
+        _ = GetSecurityFileAdapter();
+    }
+
+    private SecurityFileAdapter? GetSecurityFileAdapter()
+    {
+        if (_securityFileAdapter != null) return _securityFileAdapter;
+
+        // Autoload dependency: EventBus is initialized before SqlDb in project.godot.
+        var bus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
+        if (bus == null)
+        {
+            GD.PushWarning("[SqliteDataStore] EventBus not found at /root/EventBus; DB operations will be blocked.");
+            return null;
+        }
+
+        _securityFileAdapter = new SecurityFileAdapter(bus);
+        return _securityFileAdapter;
     }
 
     public void Open(string dbPath)
@@ -34,7 +50,14 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         if (string.IsNullOrWhiteSpace(dbPath))
             throw new ArgumentException("Empty database path");
 
-        var validatedPath = _securityFileAdapter.ValidateWritePath(dbPath);
+        var sec = GetSecurityFileAdapter();
+        if (sec == null)
+        {
+            GD.PrintErr("[SqliteDataStore] SecurityFileAdapter not initialized");
+            throw new NotSupportedException("SecurityFileAdapter not initialized");
+        }
+
+        var validatedPath = sec.ValidateWritePath(dbPath);
         if (validatedPath == null)
         {
             GD.PrintErr($"[SqliteDataStore] Database path validation failed: {dbPath}");
@@ -285,7 +308,14 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             var schemaPath = "res://scripts/db/schema.sql";
 
             // Validate schema path using SecurityFileAdapter
-            var validatedSchemaPath = _securityFileAdapter.ValidateReadPath(schemaPath);
+            var sec = GetSecurityFileAdapter();
+            if (sec == null)
+            {
+                GD.PrintErr("[SqliteDataStore] SecurityFileAdapter not initialized");
+                return;
+            }
+
+            var validatedSchemaPath = sec.ValidateReadPath(schemaPath);
             if (validatedSchemaPath == null)
             {
                 GD.PrintErr($"[SqliteDataStore] Schema file access denied: {schemaPath}");
@@ -384,8 +414,6 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         return s.Length <= max ? s : s.Substring(0, max);
     }
 }
-
-
 
 
 
