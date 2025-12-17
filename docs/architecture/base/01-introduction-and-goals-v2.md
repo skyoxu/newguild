@@ -26,7 +26,7 @@ Stable anchors preserved for cross-references.
 ### 系统定位
 
 - **产品类型**: 深度生态模拟游戏 - 玩家作为 ${DOMAIN_GUILD} ${DOMAIN_LEADER} 管理完整虚拟生态系统
-- **技术栈核心**: Electron + React 19 + Phaser 3 + Vite + TypeScript + Tailwind CSS v4
+- **技术栈核心**: 旧桌面壳 + 旧前端框架 19 + 旧游戏引擎 3 + 旧构建工具 + TypeScript + Tailwind CSS v4
 - **平台约束**: Windows（主要）、macOS（次要），桌面端发行
 
 ### 核心边界
@@ -131,7 +131,7 @@ C4Container
 - 可观测性
   - 覆盖率（错误/日志/Sentry 采样）
 - 安全性
-  - Electron 基线（Node/Context/Sandbox/CSP/Policy）
+  - 旧桌面壳 基线（Node/Context/Sandbox/CSP/Policy）
 
 <!-- sec:1.2 -->
 
@@ -142,7 +142,7 @@ C4Container
 | NFR-1 | **可靠性**       | Crash-Free Sessions | `>= 99.5%`（滚动24h）    | Sentry Release Health   | 全局        |
 | NFR-2 | **性能效率**     | 帧率                | 60 FPS（≈ 16.7ms/frame） | 内置性能计与自定义埋点  | 游戏循环    |
 | NFR-3 | **事件处理时延** | TP95                | `<= 50ms`                | 自定义事件总线计量      | 事件处理    |
-| NFR-4 | **关键交互时延** | TP95                | `<= 100ms`               | Playwright E2E + 自埋点 | UI 关键操作 |
+| NFR-4 | **关键交互时延** | TP95                | `<= 100ms`               | 旧端到端测试工具 E2E + 自埋点 | UI 关键操作 |
 | NFR-5 | **可观测性**     | 错误上报覆盖率      | `>= 95%`（关键路径）     | Sentry/日志             | 全局        |
 
 **说明**
@@ -241,11 +241,11 @@ node scripts/release-health-gate.js   --window %RH_WINDOW_HOURS%   --adoption %R
 
 > 说明：具体阈值与窗口在 §07 门禁与 §03 报警模板中落地，且需干系人（PM/Dev/Ops）共同批准。
 
-## 1.5 硬约束（含 Electron 安全基线）
+## 1.5 硬约束（含 旧桌面壳 安全基线）
 
 <!-- sec:1.5 -->
 
-### Electron 安全基线（强制）
+### 旧桌面壳 安全基线（强制）
 
 - `nodeIntegration=false`、`contextIsolation=true`、`sandbox=true`
 - 严格 `Content-Security-Policy`（生产通过**响应头**注入；开发可 `meta` 兜底）
@@ -255,8 +255,8 @@ node scripts/release-health-gate.js   --window %RH_WINDOW_HOURS%   --adoption %R
 
 ### 技术栈与版本约束
 
-- Electron/Node/Chromium 主版本下限由 §7 质量门禁脚本校验
-- 前端栈：Electron + React 18 + Vite + TypeScript + Tailwind CSS + Phaser 3
+- 旧桌面壳/Node/旧渲染内核 主版本下限由 §7 质量门禁脚本校验
+- 前端栈：旧桌面壳 + 旧前端框架 18 + 旧构建工具 + TypeScript + Tailwind CSS + 旧游戏引擎 3
 
 ## 1.6 干系人（Stakeholders）
 
@@ -296,7 +296,7 @@ node scripts/release-health-gate.js   --window %RH_WINDOW_HOURS%   --adoption %R
 ### 核心假设
 
 - 允许在发布管道中拉取 Sentry Release Health 指标
-- 允许在 Electron 主进程注入响应头（自定义 `app://` 协议）
+- 允许在 旧桌面壳 主进程注入响应头（自定义 `app://` 协议）
 
 ## 1.8 术语表（Glossary）
 
@@ -336,7 +336,7 @@ node scripts/release-health-gate.js   --window %RH_WINDOW_HOURS%   --adoption %R
 
 - [ ] 小节完整（1.1–1.10）且 **锚点齐全**（`<!-- sec:X.X -->`）
 - [ ] **NFR/SLO 可量化**，并与 §1.4 放量门禁联动
-- [ ] **硬约束清晰**（Electron 安全基线、策略头、IPC 白名单）
+- [ ] **硬约束清晰**（旧桌面壳 安全基线、策略头、IPC 白名单）
 - [ ] **追踪矩阵**可双向检索（PRD ↔ NFR/SLO ↔ ADR ↔ 测试）
 - [ ] **契约代码/测试占位**存在并能 `pnpm test` 通过
 

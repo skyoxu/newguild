@@ -10,9 +10,9 @@
 
 ## 1. 背景与动机
 
-### 原版（vitegame）可观测性
+### 原版（旧项目）可观测性
 
-**Electron + Sentry**：
+**旧桌面壳 + Sentry**：
 - Sentry 初始化在主进程与渲染进程
 - Release 标签化（git commit sha）
 - 自动捕获未处理异常与 Promise rejection
@@ -194,30 +194,30 @@ newguild/
 ├── src/
 │   ├── Game.Core/
 │   │   ├── Observability/
-│   │   │   ├── ObservabilityClient.cs           ★ Sentry SDK 包装
-│   │   │   ├── StructuredLogger.cs              ★ 结构化日志接口
-│   │   │   ├── ReleaseHealthGate.cs             ★ 发布健康检查
-│   │   │   └── PiiDataScrubber.cs               ★ PII 脱敏
+│   │   │   ├── ObservabilityClient.cs            Sentry SDK 包装
+│   │   │   ├── StructuredLogger.cs               结构化日志接口
+│   │   │   ├── ReleaseHealthGate.cs              发布健康检查
+│   │   │   └── PiiDataScrubber.cs                PII 脱敏
 │   │   │
 │   │   └── Offline/
-│   │       └── OfflineEventQueue.cs             ★ 离线队列（SQLite）
+│   │       └── OfflineEventQueue.cs              离线队列（SQLite）
 │   │
 │   └── Godot/
-│       ├── Observability.cs                     ★ Autoload 入口
-│       ├── BreadcrumbRecorder.cs                ★ 操作记录
-│       └── SessionManager.cs                    ★ 会话管理
+│       ├── Observability.cs                      Autoload 入口
+│       ├── BreadcrumbRecorder.cs                 操作记录
+│       └── SessionManager.cs                     会话管理
 │
 ├── scripts/
-│   ├── release_health_gate.py                   ★ 发布健康门禁脚本
-│   ├── generate_release_metadata.py             ★ Release 元数据生成
-│   └── upload_sourcemaps.py                     ★ 源码映射上传
+│   ├── release_health_gate.py                    发布健康门禁脚本
+│   ├── generate_release_metadata.py              Release 元数据生成
+│   └── upload_sourcemaps.py                      源码映射上传
 │
 ├── config/
-│   └── sentry_config.json                       ★ Sentry 配置文件
+│   └── sentry_config.json                        Sentry 配置文件
 │
 └── docs/
-    ├── logging-guidelines.md                    ★ 日志使用规范
-    └── privacy-compliance.md                    ★ 隐私与合规文档
+    ├── logging-guidelines.md                     日志使用规范
+    └── privacy-compliance.md                     隐私与合规文档
 ```
 
 ---

@@ -327,7 +327,7 @@ export class ReleaseHealthGate {
 
   private async fetchLiveMetrics(config: any): Promise<any> {
     if (!this.options.sentryToken) {
-      console.warn('⚠️ SENTRY_TOKEN未配置，使用本地数据');
+      console.warn('[WARN] SENTRY_TOKEN未配置，使用本地数据');
       return config.metrics;
     }
 
@@ -345,7 +345,7 @@ export class ReleaseHealthGate {
       // 转换Sentry API响应到标准格式
       return this.transformSentryMetrics(sessionData);
     } catch (error) {
-      console.error('❌ Sentry API查询失败，回退到本地数据:', error.message);
+      console.error('[FAIL] Sentry API查询失败，回退到本地数据:', error.message);
       return config.metrics;
     }
   }
@@ -423,15 +423,15 @@ export async function runHealthGateCLI(): Promise<void> {
   const result = await gate.checkHealth();
 
   // 输出结果
-  console.log(`🔍 Release Health检查完成: ${result.report.verdict}`);
+  console.log(` Release Health检查完成: ${result.report.verdict}`);
 
   if (result.recommendations.length > 0) {
-    console.log('\n📋 建议行动:');
+    console.log('\n 建议行动:');
     result.recommendations.forEach(rec => console.log(`  - ${rec}`));
   }
 
   if (options.verbose) {
-    console.log('\n📊 详细报告:', JSON.stringify(result.report, null, 2));
+    console.log('\n 详细报告:', JSON.stringify(result.report, null, 2));
   }
 
   // 写入报告文件
@@ -503,9 +503,9 @@ jobs:
             const report = JSON.parse(fs.readFileSync('.release-health-report.json', 'utf8'));
 
             const statusIcon = {
-              'PASSED': '✅',
-              'WARNING': '⚠️',
-              'BLOCKED': '❌'
+              'PASSED': '[PASS]',
+              'WARNING': '[WARN]',
+              'BLOCKED': '[FAIL]'
             }[report.verdict];
 
             const comment = `${statusIcon} **Release Health Gate**: ${report.verdict}

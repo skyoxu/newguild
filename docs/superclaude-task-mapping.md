@@ -50,9 +50,9 @@
 
 **SuperClaude 的 `/sc` 命令无法访问原始任务的完整元数据**：
 
-- ✅ 能读取 `tasks.json` 中的基础信息（title、description、dependencies）
-- ❌ 无法读取 `adr_refs`、`chapter_refs`、`test_refs`、`acceptance` 等关键字段
-- ❌ 缺失这些字段会导致：
+- [PASS] 能读取 `tasks.json` 中的基础信息（title、description、dependencies）
+- [FAIL] 无法读取 `adr_refs`、`chapter_refs`、`test_refs`、`acceptance` 等关键字段
+- [FAIL] 缺失这些字段会导致：
   - Commit 消息无法引用正确的 ADR
   - 代码审查无法检查验收标准
   - 测试策略信息不完整
@@ -439,14 +439,14 @@ export TASK_ORIGINAL_FILES=".taskmaster/tasks/tasks_back.json,.taskmaster/tasks/
 TASK_ID=$(git branch --show-current | grep -oP '(?<=task-)\d+')
 
 if [ -n "$TASK_ID" ]; then
-    echo "📋 加载任务 #$TASK_ID 的完整上下文..."
+    echo " 加载任务 #$TASK_ID 的完整上下文..."
     TASK_JSON=$(py -3 scripts/python/load_enhanced_task.py "$TASK_ID" --json)
 
     # 提取 ADR 引用
     ADR_REFS=$(echo "$TASK_JSON" | jq -r '.adr_refs[]' 2>/dev/null)
 
     if [ -n "$ADR_REFS" ]; then
-        echo "✅ 任务关联 ADR："
+        echo "[PASS] 任务关联 ADR："
         echo "$ADR_REFS"
     fi
 fi
@@ -683,11 +683,11 @@ jobs:
           ADR_REFS=$(cat task_context.json | jq -r '.adr_refs[]')
           for adr in $ADR_REFS; do
             if [ ! -f "docs/adr/$adr.md" ]; then
-              echo "❌ ADR 文件不存在: $adr"
+              echo "[FAIL] ADR 文件不存在: $adr"
               exit 1
             fi
           done
-          echo "✅ 所有 ADR 引用有效"
+          echo "[PASS] 所有 ADR 引用有效"
 ```
 
 ---
@@ -723,9 +723,9 @@ jobs:
 ### 8.2 团队协作
 
 **约定**：
-- ✅ 所有任务必须通过 `build_taskmaster_tasks.py` 映射
-- ✅ Commit 消息必须包含任务 ID 和 ADR 引用
-- ✅ PR 描述必须附加任务上下文（使用 `load_enhanced_task.py` 生成）
+- [PASS] 所有任务必须通过 `build_taskmaster_tasks.py` 映射
+- [PASS] Commit 消息必须包含任务 ID 和 ADR 引用
+- [PASS] PR 描述必须附加任务上下文（使用 `load_enhanced_task.py` 生成）
 
 ---
 

@@ -17,26 +17,26 @@
 ```
 .taskmaster/
 ├── tasks/
-│   └── tasks.json          # ✅ 唯一可识别的任务文件
+│   └── tasks.json          # [PASS] 唯一可识别的任务文件
 ├── docs/
-│   └── prd.txt/prd.md      # ✅ PRD 解析输入文件
-├── config.json             # ✅ 模型配置文件
-└── reports/                # ✅ 复杂度报告输出目录
+│   └── prd.txt/prd.md      # [PASS] PRD 解析输入文件
+├── config.json             # [PASS] 模型配置文件
+└── reports/                # [PASS] 复杂度报告输出目录
 ```
 
 ### 1.2 不支持的功能
 
-❌ **无法指定自定义 JSON 文件路径**
+[FAIL] **无法指定自定义 JSON 文件路径**
 - 命令如 `task-master list --file custom.json` **不存在**
 - 唯一可用参数：`-p, --project <path>` （仅指定项目根目录）
 
-❌ **无法使用多个任务文件**
+[FAIL] **无法使用多个任务文件**
 - 不支持类似 Git 的多分支任务管理（除了 Tag 系统）
 - `tasks_back.json`、`tasks_gameplay.json` 等文件会被忽略
 
 ### 1.3 Tag 系统（v0.17+ 功能）
 
-✅ **支持通过 Tag 隔离任务上下文**
+[PASS] **支持通过 Tag 隔离任务上下文**
 
 ```bash
 # 创建新 Tag
@@ -62,7 +62,7 @@ task-master list-tags
 
 **必须使用嵌套对象，不能是数组**
 
-✅ **正确格式**：
+[PASS] **正确格式**：
 ```json
 {
   "master": {
@@ -73,7 +73,7 @@ task-master list-tags
 }
 ```
 
-❌ **错误格式**：
+[FAIL] **错误格式**：
 ```json
 [
   { "id": "NG-0001", "title": "..." }
@@ -103,12 +103,12 @@ task-master list-tags
 
 **仅支持数字 ID 系统**
 
-✅ **允许的格式**：
+[PASS] **允许的格式**：
 - 主任务：`1`, `2`, `3`, ...
 - 子任务：`1.1`, `1.2`, `2.1`, ...（CLI 显示格式，内部仍是 `id: 1` + 嵌套）
 - 三级任务：`1.1.1`, `1.1.2`, ...
 
-❌ **不支持的格式**：
+[FAIL] **不支持的格式**：
 - 字符串 ID：`"NG-0001"`, `"T-001"`, `"TASK-123"`
 - UUID：`"550e8400-e29b-41d4-a716-446655440000"`
 - 混合格式：`"1A"`, `"v2.1"`
@@ -126,7 +126,7 @@ task-master list-tags
 
 **Task Master 使用固定 Schema，无插件/扩展 API**
 
-❌ **以下字段会被静默忽略**：
+[FAIL] **以下字段会被静默忽略**：
 - `adr_refs`
 - `chapter_refs`
 - `overlay_refs`
@@ -147,7 +147,7 @@ https://github.com/eyaltoledano/claude-task-master/issues/786
 
 ### 3.3 字段名冲突
 
-❌ **不要使用不同字段名**：
+[FAIL] **不要使用不同字段名**：
 - `depends_on` → 必须改为 `dependencies`
 - `test_strategy`（数组） → 必须改为 `testStrategy`（字符串）
 
@@ -163,7 +163,7 @@ https://github.com/eyaltoledano/claude-task-master/issues/786
 type Priority = "high" | "medium" | "low";
 ```
 
-❌ **不支持的格式**：
+[FAIL] **不支持的格式**：
 - 数字优先级：`1`, `2`, `3`
 - P 系统：`"P0"`, `"P1"`, `"P2"`
 - 自定义级别：`"critical"`, `"urgent"`, `"nice-to-have"`
@@ -187,7 +187,7 @@ type Status =
   | "blocked";      // 被阻塞
 ```
 
-❌ **不支持自定义状态**：
+[FAIL] **不支持自定义状态**：
 - `"review"`, `"testing"`, `"deployed"`
 - 中文状态：`"待办"`, `"进行中"`
 
@@ -197,14 +197,14 @@ type Status =
 
 ### 6.1 任务选择
 
-❌ **无法直接指定任务 ID 执行**
+[FAIL] **无法直接指定任务 ID 执行**
 
 ```bash
-# ❌ 不存在的命令
+# [FAIL] 不存在的命令
 task-master next --id=5
 task-master run 5
 
-# ✅ 实际工作流
+# [PASS] 实际工作流
 task-master next              # 自动选择下一个可用任务
 task-master show 5            # 查看特定任务（不执行）
 task-master set-status --id=5 --status=in-progress
@@ -222,10 +222,10 @@ task-master [command] --project /path/to/project
 
 **作用**：指定项目根目录（自动查找 `.taskmaster/tasks/tasks.json`）
 
-❌ **不支持**：
+[FAIL] **不支持**：
 ```bash
-task-master list --file custom.json        # ❌ 无此参数
-task-master parse-prd --output custom.json  # ❌ 输出路径固定
+task-master list --file custom.json        # [FAIL] 无此参数
+task-master parse-prd --output custom.json  # [FAIL] 输出路径固定
 ```
 
 ---
@@ -251,7 +251,7 @@ task-master parse-prd .taskmaster/docs/prd.md
 
 ### 7.3 Front Matter 限制
 
-❌ **不支持自定义 Front Matter**
+[FAIL] **不支持自定义 Front Matter**
 
 PRD 文件的 YAML Front Matter 会被解析，但**不会保留到任务数据**：
 
@@ -314,10 +314,10 @@ adr_refs: [ADR-0001, ADR-0002]
 | `"priority": "P1"` | `"priority": "high"` | `P0/P1 → high, P2 → medium, P3+ → low` |
 | `"depends_on": [...]` | `"dependencies": [...]` | 字段改名 + 转换 ID 为数字 |
 | `"test_strategy": [...]` | `"testStrategy": "..."` | 数组合并为字符串（换行分隔） |
-| `"story_id"` | ❌ 丢弃 | 无对应字段 |
-| `"adr_refs"` | ❌ 丢弃 | 可写入 `details` 或 `description` |
-| `"chapter_refs"` | ❌ 丢弃 | 同上 |
-| `"labels"` | ❌ 丢弃 | 可用 Tag 系统部分替代 |
+| `"story_id"` | [FAIL] 丢弃 | 无对应字段 |
+| `"adr_refs"` | [FAIL] 丢弃 | 可写入 `details` 或 `description` |
+| `"chapter_refs"` | [FAIL] 丢弃 | 同上 |
+| `"labels"` | [FAIL] 丢弃 | 可用 Tag 系统部分替代 |
 
 ### 9.2 根结构转换
 
@@ -400,8 +400,8 @@ tasks_back.json  (源头真相)
 
 **.gitignore 配置**：
 ```gitignore
-.taskmaster/tasks/tasks.json   # ✅ 追踪（标准格式）
-.taskmaster/tasks/tasks_*.json # ❌ 忽略（自定义格式）
+.taskmaster/tasks/tasks.json   # [PASS] 追踪（标准格式）
+.taskmaster/tasks/tasks_*.json # [FAIL] 忽略（自定义格式）
 ```
 
 **分支策略**：
@@ -525,8 +525,8 @@ def convert_tasks_back_to_standard(input_file: str, output_file: str):
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(standard_format, f, ensure_ascii=False, indent=2)
 
-    print(f"✅ 转换完成：{len(converted_tasks)} 个任务")
-    print(f"📁 输出文件：{output_file}")
+    print(f"[PASS] 转换完成：{len(converted_tasks)} 个任务")
+    print(f" 输出文件：{output_file}")
 
 # 使用示例
 convert_tasks_back_to_standard(

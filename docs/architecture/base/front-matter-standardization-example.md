@@ -42,15 +42,15 @@ placeholders: unknown-app, Unknown Product, unknown-product, gamedev, dev-team, 
 
 ### 1. 与其他 Base 文档一致
 
-- ✅ 统一的 `title` 字段格式
-- ✅ 明确的 `status: base-SSoT` 标识
-- ✅ 清晰的 `adr_refs` 追踪关系
+- [PASS] 统一的 `title` 字段格式
+- [PASS] 明确的 `status: base-SSoT` 标识
+- [PASS] 清晰的 `adr_refs` 追踪关系
 
 ### 2. 明确占位符声明
 
-- ✅ `placeholders` 字段明确列出所有占位符
-- ✅ 便于自动化工具验证和替换
-- ✅ 提供完整的依赖关系映射
+- [PASS] `placeholders` 字段明确列出所有占位符
+- [PASS] 便于自动化工具验证和替换
+- [PASS] 提供完整的依赖关系映射
 
 ### 3. 配置分层实现示例
 
@@ -80,8 +80,8 @@ placeholders: unknown-app, Unknown Product, unknown-product, gamedev, dev-team, 
 
 | 占位符            | 配置层     | 实际值                        | 来源                     |
 | ----------------- | ---------- | ----------------------------- | ------------------------ |
-| `unknown-app`     | Package    | `gamedev-vitegame`            | package.json name        |
-| `Unknown Product` | Package    | `ViteGame - 深度生态模拟游戏` | package.json productName |
+| `unknown-app`     | Package    | `gamedev-旧项目`            | package.json name        |
+| `Unknown Product` | Package    | `旧项目 - 深度生态模拟游戏` | package.json productName |
 | `0.0.0`           | Package    | `0.1.0`                       | package.json version     |
 | `gamedev`         | Domain     | `gamedev`                     | 硬编码域配置             |
 | `dev-team`        | CI Secrets | `my-company`                  | 环境变量/CI密钥          |
@@ -128,20 +128,20 @@ grep -n "\${" docs/architecture/base/01-*.md docs/architecture/base/02-*.md
 
 ## 配置验证清单
 
-### ✅ Front-Matter 必需字段检查
+### [PASS] Front-Matter 必需字段检查
 
 - [x] `title` - 清晰的文档标题
 - [x] `status: base-SSoT` - 标识为 Base 文档
 - [x] `adr_refs` - 引用相关的 ADR
 - [x] `placeholders` - 声明所有使用的占位符
 
-### ✅ 占位符一致性检查
+### [PASS] 占位符一致性检查
 
 - [x] `placeholders` 字段中声明的占位符与正文中使用的一致
 - [x] 所有 `${VAR}` 格式的占位符都有对应的配置源
 - [x] 敏感占位符（如 SENTRY\_\*）标识为 CI Secrets
 
-### ✅ 配置分层完整性检查
+### [PASS] 配置分层完整性检查
 
 - [x] Package Layer: `APP_NAME`, `PRODUCT_NAME`, `VERSION`
 - [x] CI Secrets Layer: `SENTRY_ORG`, `SENTRY_PROJECT`
@@ -152,20 +152,20 @@ grep -n "\${" docs/architecture/base/01-*.md docs/architecture/base/02-*.md
 
 ### 开发体验改善
 
-- 🚀 **统一的文档结构** - 所有 Base 文档遵循相同标准
-- 🔧 **自动化配置管理** - 通过工具链处理占位符替换
-- 📊 **完整的追踪矩阵** - ADR 引用和占位符依赖清晰可见
+-  **统一的文档结构** - 所有 Base 文档遵循相同标准
+-  **自动化配置管理** - 通过工具链处理占位符替换
+-  **完整的追踪矩阵** - ADR 引用和占位符依赖清晰可见
 
 ### 部署流程优化
 
-- ⚡ **环境适配自动化** - 不同环境自动使用对应配置
-- 🔒 **安全配置分离** - 敏感信息通过 CI 密钥管理
-- ✅ **配置验证门禁** - 自动检查配置完整性和合规性
+-  **环境适配自动化** - 不同环境自动使用对应配置
+-  **安全配置分离** - 敏感信息通过 CI 密钥管理
+- [PASS] **配置验证门禁** - 自动检查配置完整性和合规性
 
 ### 维护成本降低
 
-- 📚 **Base 文档保持通用** - 占位符机制确保模板可复用
-- 🔄 **项目配置独立管理** - 配置变更不影响 Base 文档结构
-- 🛡️ **分层安全策略** - 不同类型配置采用适当的安全级别
+-  **Base 文档保持通用** - 占位符机制确保模板可复用
+-  **项目配置独立管理** - 配置变更不影响 Base 文档结构
+-  **分层安全策略** - 不同类型配置采用适当的安全级别
 
 这种混合配置管理策略既保持了 Base 文档的可复用性，又实现了项目实施时的配置安全性和灵活性。

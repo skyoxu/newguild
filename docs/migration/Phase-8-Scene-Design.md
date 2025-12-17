@@ -15,9 +15,9 @@
 
 ## Scene Tree 核心概念
 
-### Godot 场景树 vs React 组件树
+### Godot 场景树 vs 旧前端框架 组件树
 
-| 概念 | React (vitegame) | Godot (newguild) |
+| 概念 | 旧前端框架 (旧项目) | Godot (newguild) |
 |-----|-----------------|------------------|
 | 基本单元 | Component (函数/类) | Node (场景节点) |
 | 组织方式 | JSX 嵌套 | Scene Tree 树形结构 |
@@ -1102,7 +1102,7 @@ public partial class ExampleTest
 
 完成本阶段后，继续：
 
-➡️ [Phase-9-Signal-System.md](Phase-9-Signal-System.md) — CloudEvents → Godot Signals 迁移
+ [Phase-9-Signal-System.md](Phase-9-Signal-System.md) — CloudEvents → Godot Signals 迁移
 
 ## Root 分层建议 / Root Layering
 

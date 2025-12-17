@@ -9,7 +9,7 @@ scope: Windows-only CI, Godot 4.5 (.NET)
 # Addendum to ADR-0005: Quality Gates (Godot Alignment)
 
 ## Context
-Move from Electron/Vitest/Playwright gates to Godot+C# (xUnit + GdUnit4) while preserving single-entry orchestration and artifact collection.
+Move from 旧桌面壳/旧单元测试工具/旧端到端测试工具 gates to Godot+C# (xUnit + GdUnit4) while preserving single-entry orchestration and artifact collection.
 
 ## Decisions
 - Unit tests: `dotnet test` with coverlet; enforce Lines ≥ 90%, Branches ≥ 85%.

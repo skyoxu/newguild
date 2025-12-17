@@ -48,17 +48,17 @@
 **理由**:
 
 - [OK] 统一运行时：游戏引擎 + UI + 渲染 + 物理统一到 Godot
-- [OK] 原生性能：无 Chromium 开销，启动速度提升 60%+
+- [OK] 原生性能：无 旧渲染内核 开销，启动速度提升 60%+
 - [OK] 成熟工具链：Scene Editor + Node 系统 + 可视化调试
 - [OK] C# 强类型：避免 GDScript 动态类型风险，利于 AI 生成代码
 - [警告] 学习曲线：团队需要熟悉 Godot Scene Tree 与 Signals
 
 **后果**:
 
-- Electron/React/Phaser 完全弃用
-- UI 从 React 组件迁移到 Godot Control 节点
+- 旧桌面壳/旧前端框架/旧游戏引擎 完全弃用
+- UI 从 旧前端框架 组件迁移到 Godot Control 节点
 - 事件系统从 CloudEvents 迁移到 Godot Signals
-- 测试栈从 Vitest/Playwright 迁移到 xUnit/GdUnit4
+- 测试栈从 旧单元测试工具/旧端到端测试工具 迁移到 xUnit/GdUnit4
 
 **实施约束**:
 
@@ -80,7 +80,7 @@
 
 **核心决策**:
 
-取代 ADR-0002（Electron 安全基线），建立 Godot 特定的安全口径：
+取代 ADR-0002（旧桌面壳 安全基线），建立 Godot 特定的安全口径：
 
 1. **外链打开**: 仅允许 `https://` + 域白名单 + 审计日志
 2. **HTTP 请求**: 统一 HTTPRequest 封装 + 域白名单 + 审计
@@ -190,11 +190,11 @@ public void OpenUrlSafe_ShouldAllowWhitelistedHttps()
 
 **迁移对照**:
 
-| Electron 概念 | Godot 对应 | 实施方式 |
+| 旧桌面壳 概念 | Godot 对应 | 实施方式 |
 |-------------|-----------|---------|
 | webContents.setWindowOpenHandler | OS.shell_open() 封装 | Security.open_url_safe() |
 | CSP (Content-Security-Policy) | HTTPRequest 白名单 | Security.http_request_safe() |
-| Preload 白名单 | Autoload 单例白名单 | project.godot [autoload] 受控 |
+| 旧预加载脚本 白名单 | Autoload 单例白名单 | project.godot [autoload] 受控 |
 | contextIsolation | - | 不适用（无 Renderer 进程） |
 
 ---
@@ -890,4 +890,4 @@ public void LogGameEvent(string eventType, object data)
 
 完成本阶段后，继续：
 
-➡️ [Phase-3-Project-Structure.md](Phase-3-Project-Structure.md) — Godot 项目结构设计
+ [Phase-3-Project-Structure.md](Phase-3-Project-Structure.md) — Godot 项目结构设计

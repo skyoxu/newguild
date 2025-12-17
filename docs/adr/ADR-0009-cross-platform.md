@@ -13,7 +13,7 @@ verification:
   - path: scripts/perf/os-baselines.json
     assert: Per-OS performance baselines are within drift threshold
 impact-scope:
-  - electron/
+  - 旧桌面壳/
   - scripts/platform/
   - tests/e2e/platform/
 tech-tags:
@@ -30,7 +30,7 @@ monitoring-metrics:
   - compliance_rate
 executable-deliverables:
   - scripts/platform-detection.mjs
-  - electron/platform-specific.ts
+  - 旧桌面壳/platform-specific.ts
   - tests/e2e/platform/cross-platform.spec.ts
 supersedes: []
 superseded-by: [ADR-0011]
@@ -1121,9 +1121,9 @@ export class PlatformPerformanceOptimizer {
 ## References
 
 - **CH章节关联**: CH09, CH01, CH10
-- **相关ADR**: ADR-0001-tech-stack, ADR-0008-deployment-release, ADR-0002-electron-security
+- **相关ADR**: ADR-0001-tech-stack, ADR-0008-deployment-release, ADR-0002-旧桌面壳-security
 - **外部文档**:
-  - [Electron Platform APIs](https://www.electronjs.org/docs/api/process)
+  - [旧桌面壳 Platform APIs](https://www.electronjs.org/docs/api/process)
   - [Windows Design Guidelines](https://docs.microsoft.com/en-us/windows/apps/design/)
   - [macOS Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/macos)
   - [GNOME Human Interface Guidelines](https://developer.gnome.org/hig/)

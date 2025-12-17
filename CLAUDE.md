@@ -34,7 +34,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Starting a fresh session? Read these in order:**
 
-1. **This file** (`CLAUDE.md`) - You're already here ✓
+1. **This file** (`CLAUDE.md`) - You're already here [OK]
 2. **Project indexes** - Context entry points:
    - `architecture_base.index` - Architecture docs (CH01-CH12 + ADRs)
    - `prd_chunks.index` - PRD fragments index

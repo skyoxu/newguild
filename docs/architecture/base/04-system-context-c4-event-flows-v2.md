@@ -15,7 +15,7 @@ placeholders: unknown-app, Unknown Product, gamedev
 ## 1. System Context（最小）
 
 - Actors：Player、Updater、Telemetry（Sentry）、Content CDN、Crash Reporter。
-- 系统边界：Electron App（Main/Renderer）、Local Store、Extension Sandbox。
+- 系统边界：旧桌面壳 App（Main/Renderer）、Local Store、Extension Sandbox。
 
 ```mermaid
 C4Context
@@ -35,7 +35,7 @@ C4Context
 
 ## 2. Container（最小）
 
-- Main（进程）/ Renderer（Web 框架）/ Preload（桥接）/ Worker（资产处理）/ Event Bus（进程内）。
+- Main（进程）/ Renderer（Web 框架）/ 旧预加载脚本（桥接）/ Worker（资产处理）/ Event Bus（进程内）。
 - 跨容器通信：IPC（主↔渲染/预加载）、HTTP(s)（远端）、文件系统（本地）。
 
 ```mermaid

@@ -651,4 +651,4 @@ pwsh scripts/init-godot-project.ps1 -ProjectRoot "C:\buildgame\newguild"
 
 完成本阶段后，继续：
 
-➡️ [Phase-4-Domain-Layer.md](Phase-4-Domain-Layer.md) — 纯 C# 领域层迁移
+ [Phase-4-Domain-Layer.md](Phase-4-Domain-Layer.md) — 纯 C# 领域层迁移

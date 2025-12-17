@@ -486,4 +486,4 @@ git config --global i18n.logoutputencoding utf-8
 
 完成本阶段后，继续：
 
-➡️ [Phase-2-ADR-Updates.md](Phase-2-ADR-Updates.md) — ADR 更新与新增
+ [Phase-2-ADR-Updates.md](Phase-2-ADR-Updates.md) — ADR 更新与新增

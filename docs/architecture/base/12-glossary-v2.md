@@ -116,12 +116,12 @@ const duplicates = detectDuplicates(terms);
 const i18nIssues = validateI18nConsistency(GlossaryTerms, i18nKeys);
 
 if (duplicates.duplicates.length || duplicates.aliases.length) {
-  console.error('❌ 发现重复术语:', duplicates);
+  console.error('[FAIL] 发现重复术语:', duplicates);
   process.exit(1);
 }
 if (i18nIssues.missing.length || i18nIssues.invalid.length) {
-  console.error('❌ i18n不一致:', i18nIssues);
+  console.error('[FAIL] i18n不一致:', i18nIssues);
   process.exit(1);
 }
-console.log(`✅ 词汇表校验通过 (${terms.length}个术语)`);
+console.log(`[PASS] 词汇表校验通过 (${terms.length}个术语)`);
 ```

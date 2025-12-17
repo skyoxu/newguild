@@ -84,7 +84,7 @@ graph TD
 
 ```bash
 # 1. 开发者完成功能并自检通过
-dotnet run  # ✅ 窗口正常显示，关键功能可操作
+dotnet run  # [PASS] 窗口正常显示，关键功能可操作
 
 # 2. 执行架构验收
 /acceptance-check 1.1
@@ -92,13 +92,13 @@ dotnet run  # ✅ 窗口正常显示，关键功能可操作
 # 3. Subagents 返回报告
 ## 架构验收报告
 
-### CloudEvents 合规性 ❌
+### CloudEvents 合规性 [FAIL]
 - 文件：Game.Core/Contracts/Guild/GuildCreated.cs:15
 - 问题：事件类型命名不符合 ADR-0004
 - 期望：core.guild.created
 - 实际：guild.created（缺少 domain prefix）
 
-### 性能 SLO ✅
+### 性能 SLO [PASS]
 - 帧耗时 P95：14.2ms（门禁 ≤ 16.6ms）
 
 # 4. 标记 blocked 并记录问题
@@ -112,9 +112,9 @@ public const string EventType = "core.guild.created";  // 修正 domain prefix
 # 6. 重新架构验收
 /acceptance-check 1.1
 ## 架构验收报告
-### CloudEvents 合规性 ✅
-### 性能 SLO ✅
-### 全部通过 ✅
+### CloudEvents 合规性 [PASS]
+### 性能 SLO [PASS]
+### 全部通过 [PASS]
 
 # 7. 标记完成
 npx task-master set-status 1.1 done
@@ -187,7 +187,7 @@ SuperClaude v4 提供三种运行模式,根据任务特征选择合适的模式�
 | 模式 | 适用场景 | 主要优势 | 典型任务 |
 |------|---------|---------|---------|
 | **Token-Efficiency** | 大型 PRD/长代码文件 | 降低上下文占用 30-50% | PRD 30+ 页,单文件 >500 行 |
-| **Orchestration** | 需要串联多个 MCP 工具 | 优化工具调度效率 | Context7 → Serena → Playwright 流水线 |
+| **Orchestration** | 需要串联多个 MCP 工具 | 优化工具调度效率 | Context7 → Serena → 旧端到端测试工具 流水线 |
 | **Business Panel** | 里程碑决策/ADR 权衡 | 多专家会诊口径 | ADR 批准,架构方案选型 |
 
 #### 专长旗标说明
@@ -213,10 +213,10 @@ SuperClaude v4 推荐的"黄金三角" MCP 工具组合:
    - 场景: Godot/Cocos API 查询,库用法学习
    - 配置: 详见 Phase 3.15
 
-3. **Playwright MCP** (可选，主要面向 Web/Electron 子项目)
-   - 用途: E2E 回归测试自动化（仅当项目存在 HTML5/Web/Electron 前端时适用），默认 Godot+C# 模板的 E2E 由 GdUnit4/headless Godot 承担。
-   - 场景: Web UI 测试、Electron 包装应用的回归验证（newguild 默认不开启）。
-   - 配置: 如需启用，需在项目层单独配置 Playwright 与 MCP 集成，不属于模板必备能力。
+3. **旧端到端测试工具 MCP** (可选，主要面向 Web/旧桌面壳 子项目)
+   - 用途: E2E 回归测试自动化（仅当项目存在 HTML5/Web/旧桌面壳 前端时适用），默认 Godot+C# 模板的 E2E 由 GdUnit4/headless Godot 承担。
+   - 场景: Web UI 测试、旧桌面壳 包装应用的回归验证（newguild 默认不开启）。
+   - 配置: 如需启用，需在项目层单独配置 旧端到端测试工具 与 MCP 集成，不属于模板必备能力。
 
 ---
 
@@ -224,9 +224,9 @@ SuperClaude v4 推荐的"黄金三角" MCP 工具组合:
 
 在开始日常开发循环前，需要完成以下一次性配置任务，确保工作流基础设施就绪。
 
-#### 🔴 高优先级（本周完成）
+####  高优先级（本周完成）
 
-##### ✅ 1. 批量更新 overlay 字段
+##### [PASS] 1. 批量更新 overlay 字段
 
 创建自动化脚本将任务与架构验收清单关联：
 
@@ -250,7 +250,7 @@ py -3 scripts/python/task_links_validate.py
 }
 ```
 
-##### ✅ 2. 创建 Subagents 提示模板
+##### [PASS] 2. 创建 Subagents 提示模板
 
 定义架构验收执行逻辑：
 
@@ -282,7 +282,7 @@ description: 执行架构级验收检查（Subagents）
 # 应返回架构验收报告
 ```
 
-##### ✅ 3. 确立 SuperClaude 提交规范
+##### [PASS] 3. 确立 SuperClaude 提交规范
 
 定义 Git commit 消息格式，确保 Task ID、ADR、Overlay 引用统一：
 
@@ -313,9 +313,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 **注意**：当前 SuperClaude 需要手动添加 Task ID 引用（未来版本可能支持自动提取）。
 
-#### 🟡 中优先级（本月完成）
+####  中优先级（本月完成）
 
-##### 🔄 4. 试运行第一个任务（完整演示）
+#####  4. 试运行第一个任务（完整演示）
 
 选择简单任务（如实现 Godot 窗口初始化或基础场景加载）完整走一遍三阶段流程，验证工作流可用性。
 
@@ -565,7 +565,7 @@ npx task-master set-status 1.1 done
 4. **补充验收检查项**：如发现 ACCEPTANCE_CHECKLIST.md 遗漏检查项，补充
 5. **团队培训**：分享试运行经验，培训团队成员使用新工作流
 
-##### 🔄 5. 优化工作流
+#####  5. 优化工作流
 
 根据试运行结果调整流程：
 - 更新文档中的步骤说明
@@ -573,9 +573,9 @@ npx task-master set-status 1.1 done
 - 补充缺失的验收检查项
 - 培训团队成员使用新工作流
 
-#### 🟢 低优先级（按需执行）
+####  低优先级（按需执行）
 
-##### ⏸️ 6. 自动化增强（需要开发插件）
+##### ⏸ 6. 自动化增强（需要开发插件）
 
 以下功能暂不优先实现，可在工作流成熟后按需添加：
 
@@ -583,7 +583,7 @@ npx task-master set-status 1.1 done
 - Subagents 结果自动写入任务（需要 API 集成）
 - CI 集成架构验收（需要配置 GitHub Actions）
 
-📈 预期收益
+ 预期收益
 
 开发效率：减少返工，一次做对，架构问题在开发阶段就被发现
 
@@ -591,7 +591,7 @@ npx task-master set-status 1.1 done
 
 团队协作：统一流程，标准化产出，降低沟通成本
 
-🔑 核心洞察
+ 核心洞察
 
 Task Master 和 BMAD 不是竞争关系而是互补关系：
 
@@ -989,9 +989,9 @@ find_symbol "GuildCreated" --relative_path "Game.Core/Contracts/Guild/"
 /sc:analyze --task 1.1 --focus architecture,security
 
 # SuperClaude 分析时已知：
-# - ✅ 已存在 GuildService，需扩展方法而非新建类
-# - ✅ 事件命名遵循 core.guild.* 规范
-# - ✅ 依赖注入模式已在 GuildRepository 中使用
+# - [PASS] 已存在 GuildService，需扩展方法而非新建类
+# - [PASS] 事件命名遵循 core.guild.* 规范
+# - [PASS] 依赖注入模式已在 GuildRepository 中使用
 ```
 
 **注意事项**：
@@ -1006,7 +1006,7 @@ find_symbol "GuildCreated" --relative_path "Game.Core/Contracts/Guild/"
 | 任务特征 | 推荐模式 | 命令示例 |
 |---------|---------|---------|
 | PRD 30+ 页,长代码文件 | Token-Efficiency | `/sc:analyze --mode token-efficiency --task 1.1` |
-| 需要串联 Context7/Serena/Playwright | Orchestration | `/sc:analyze --mode orchestration --task 1.1 --mcp context7,serena` |
+| 需要串联 Context7/Serena/旧端到端测试工具 | Orchestration | `/sc:analyze --mode orchestration --task 1.1 --mcp context7,serena` |
 | 标准任务(默认) | 标准模式 | `/sc:analyze --task 1.1 --focus architecture,security` |
 
 **示例**:
@@ -1241,10 +1241,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 输出示例：
 ```
-✅ 单元测试: 15/15 通过
-✅ 覆盖率: 95% (gate: 90%)
-✅ 无安全告警（ADR-0002 路径校验通过）
-✅ 已自动 commit: abc123f
+[PASS] 单元测试: 15/15 通过
+[PASS] 覆盖率: 95% (gate: 90%)
+[PASS] 无安全告警（ADR-0002 路径校验通过）
+[PASS] 已自动 commit: abc123f
 
 下一步建议：
 - 补充 GdUnit4 场景测试（可选）
@@ -1321,9 +1321,9 @@ py -3 scripts/python/run_gdunit.py --prewarm --godot-bin "%GODOT_BIN%" --project
 
 输出示例：
 ```
-✅ TDD 模式: 3 个 red→green→refactor 周期
-✅ 命名规范: 100% 符合 PascalCase/camelCase 约定
-⚠️  建议: GuildCreationTests.cs:45 测试名可更明确
+[PASS] TDD 模式: 3 个 red→green→refactor 周期
+[PASS] 命名规范: 100% 符合 PascalCase/camelCase 约定
+[WARN]  建议: GuildCreationTests.cs:45 测试名可更明确
 ```
 
 **3.14 深度审查（Subagents）**
@@ -1353,16 +1353,16 @@ py -3 scripts/python/run_gdunit.py --prewarm --godot-bin "%GODOT_BIN%" --project
 ```markdown
 ## Subagent 审查报告
 
-### ADR 合规性 ✅
+### ADR 合规性 [PASS]
 - ADR-0002 路径校验: 100% 实现
 - ADR-0006 SQLite 使用: 符合规范
 
-### 安全评估 ✅
+### 安全评估 [PASS]
 - 无未验证路径操作
 - 无 SQL 注入风险
 - 审计日志完整
 
-### 架构评估 ⚠️
+### 架构评估 [WARN]
 - 三层架构: 符合规范
 - Godot API 隔离: 符合规范
 - 建议: GuildCreationService.cs:67 可提取接口
@@ -1428,7 +1428,7 @@ graph TD
 
 ```bash
 # 1. 开发者完成功能并自检通过
-dotnet run  # ✅ 窗口正常显示，关键功能可操作
+dotnet run  # [PASS] 窗口正常显示，关键功能可操作
 
 # 2. 执行架构验收
 /acceptance-check 1.1
@@ -1436,13 +1436,13 @@ dotnet run  # ✅ 窗口正常显示，关键功能可操作
 # 3. Subagents 返回报告
 ## 架构验收报告
 
-### CloudEvents 合规性 ❌
+### CloudEvents 合规性 [FAIL]
 - 文件：Game.Core/Contracts/Guild/GuildCreated.cs:15
 - 问题：事件类型命名不符合 ADR-0004
 - 期望：core.guild.created
 - 实际：guild.created（缺少 domain prefix）
 
-### 性能 SLO ✅
+### 性能 SLO [PASS]
 - 帧耗时 P95：14.2ms（门禁 ≤ 16.6ms）
 
 # 4. 标记 blocked 并记录问题
@@ -1456,9 +1456,9 @@ public const string EventType = "core.guild.created";  // 修正 domain prefix
 # 6. 重新架构验收
 /acceptance-check 1.1
 ## 架构验收报告
-### CloudEvents 合规性 ✅
-### 性能 SLO ✅
-### 全部通过 ✅
+### CloudEvents 合规性 [PASS]
+### 性能 SLO [PASS]
+### 全部通过 [PASS]
 
 # 7. 标记完成
 npx task-master set-status 1.1 done
@@ -1475,11 +1475,11 @@ superclaude review --staged
 ## 代码审查摘要
 
 ### 质量门禁
-- ✅ TDD 模式检查（Skills）
-- ✅ 命名规范检查（Skills）
-- ✅ ADR 合规审查（Subagent）
-- ✅ 安全审查（Subagent）
-- ⚠️  架构审查（Subagent）：1 条优化建议
+- [PASS] TDD 模式检查（Skills）
+- [PASS] 命名规范检查（Skills）
+- [PASS] ADR 合规审查（Subagent）
+- [PASS] 安全审查（Subagent）
+- [WARN]  架构审查（Subagent）：1 条优化建议
 
 ### 风险评估
 - 安全风险：低（已遵循 ADR-0002 路径校验规范）
@@ -1536,19 +1536,19 @@ description: 执行架构级验收检查（Subagents）
 ## 架构验收报告
 
 ### ADR-0004 事件契约合规性
-- ✅ 事件命名：core.guild.created (符合 ${DOMAIN_PREFIX}.<entity>.<action>)
-- ✅ 契约位置：Game.Core/Contracts/Guild/GuildCreated.cs
-- ❌ CloudEvents 字段缺失：Type 字段未定义
+- [PASS] 事件命名：core.guild.created (符合 ${DOMAIN_PREFIX}.<entity>.<action>)
+- [PASS] 契约位置：Game.Core/Contracts/Guild/GuildCreated.cs
+- [FAIL] CloudEvents 字段缺失：Type 字段未定义
 
 ### Godot 安全基线（ADR-0002）
-- ✅ 仅使用 res:// 和 user:// 路径
-- ✅ 无绝对路径引用
+- [PASS] 仅使用 res:// 和 user:// 路径
+- [PASS] 无绝对路径引用
 
 ### 性能 SLO
-- ✅ 帧耗时 P95：14.2ms（门禁 ≤ 16.6ms）
+- [PASS] 帧耗时 P95：14.2ms（门禁 ≤ 16.6ms）
 
 ### ADR 关联验证
-- ✅ 任务引用的 ADR-0002, ADR-0004 均为 Accepted 状态
+- [PASS] 任务引用的 ADR-0002, ADR-0004 均为 Accepted 状态
 
 ### 总结
 - 通过：4 项
@@ -1641,18 +1641,18 @@ description: 执行架构级验收检查（Subagents）
 claude mcp add context7
 ```
 
-**3.17 Playwright MCP 集成(可选)**
+**3.17 旧端到端测试工具 MCP 集成(可选)**
 
-**⚠️ 重要提示**：本项目为 **Windows Desktop 游戏**（ADR-0011），默认导出为原生 `.exe`。
-Playwright 仅在以下情况有用：
+**[WARN] 重要提示**：本项目为 **Windows Desktop 游戏**（ADR-0011），默认导出为原生 `.exe`。
+旧端到端测试工具 仅在以下情况有用：
 - 项目有 **HTML5 Web 版本**计划
-- 需要测试 **Electron 包装**的桌面版
+- 需要测试 **旧桌面壳 包装**的桌面版
 
 如果项目只做原生 Windows 游戏，**可跳过此 MCP 配置**。
 
 ---
 
-使用 Playwright MCP 进行 E2E 回归测试(适用于 Godot 导出的 HTML5 版本或 Electron 包装):
+使用 旧端到端测试工具 MCP 进行 E2E 回归测试(适用于 Godot 导出的 HTML5 版本或 旧桌面壳 包装):
 
 ```bash
 # 在 Claude Code 对话中使用 Playwright
@@ -1671,7 +1671,7 @@ Playwright 仅在以下情况有用：
 - 关键用户流程的回归测试
 - UI 交互逻辑验证
 
-**配置 Playwright MCP**:
+**配置 旧端到端测试工具 MCP**:
 ```bash
 # 在 Claude Code 中启用 Playwright MCP
 # 详见 SuperClaude v4 安装清单(Phase 6)
@@ -1707,7 +1707,7 @@ gh pr create \
 
 Refs: #1.1
 
-🤖 Generated with SuperClaude
+ Generated with SuperClaude
 EOF
 )"
 ```
@@ -1760,10 +1760,10 @@ npx task-master set-status 1.1 completed
 - **ROI 计算**：$9/月 成本 vs. 节省 10% 任务的 67% 时间 = **负收益 -$59/月**
 
 **何时考虑 claude-context**：
-- ✅ 遗留代码重构项目（需要大量"找相似实现"）
-- ✅ 代码考古（理解陌生代码库）
-- ✅ 跨仓库模式分析（如"整个组织如何处理认证"）
-- ❌ 当前项目（需求明确、结构清晰、已有 ADR/CH 文档）
+- [PASS] 遗留代码重构项目（需要大量"找相似实现"）
+- [PASS] 代码考古（理解陌生代码库）
+- [PASS] 跨仓库模式分析（如"整个组织如何处理认证"）
+- [FAIL] 当前项目（需求明确、结构清晰、已有 ADR/CH 文档）
 
 **推荐工作流（仅 Serena）**：
 1. **明确任务**（80%）：`find_symbol` → `find_referencing_symbols` → 精准上下文
@@ -2002,7 +2002,7 @@ def run_tests():
     # 运行单元测试
     result = subprocess.run(["dotnet", "test"], capture_output=True)
     if result.returncode != 0:
-        print("❌ 单元测试失败，拒绝提交")
+        print("[FAIL] 单元测试失败，拒绝提交")
         print(result.stderr.decode())
         return False
 
@@ -2346,7 +2346,7 @@ npx task-master set-status 1.1 completed
    @context7 godot node
    ```
 
-3. **Playwright MCP** (可选，E2E 测试)：
+3. **旧端到端测试工具 MCP** (可选，E2E 测试)：
    ```bash
    claude mcp add playwright
 
@@ -2418,7 +2418,7 @@ superclaude review --staged
 - [ ] Claude Code 可识别 `/sc:*` 命令
 - [ ] Serena MCP 连接正常：`@serena list_memories`
 - [ ] Context7 MCP 连接正常：`@context7 godot` 返回结果
-- [ ] Playwright MCP 连接正常（如已安装）：`@playwright test --help`
+- [ ] 旧端到端测试工具 MCP 连接正常（如已安装）：`@旧端到端测试工具 test --help`
 - [ ] 默认模式配置正确：检查 `.claude/settings.json`
 - [ ] 可以正常运行完整工作流（分析 → 实现 → 测试 → 审查）
 
@@ -2502,6 +2502,6 @@ superclaude review --staged
 ## 10. Node / Web 生态说明（可选附加）
 
 - 在 newguild 模板中，**主线工具链** 是：`.taskmaster/tasks/*.json` + Python 脚本 + dotnet/xUnit + GdUnit4，用于驱动 PRD/Base/ADR 约束下的 Godot+C# 游戏开发。
-- 文档中出现的 Node / npm / Playwright MCP 等内容，默认视为 **仅在存在 Web/HTML5/Electron 子项目时启用的可选能力**，不是本仓库的硬依赖。
-- 如果当前项目只构建原生 Windows Godot 游戏，可以暂时忽略所有 Node/Vitest/Playwright 相关命令与脚本，不影响 T2 场景和核心回合循环的实现与验证。
-- 当你未来引入 Web/Electron 前端、需要前端专用 E2E/可用性测试时，可以参考文档中的 Node/Vitest/Playwright 段落，将其视为在 newguild 之上的“额外层”，并保持 ADR/任务回链与现有 Godot+C# 工具链一致。
+- 文档中出现的 Node / npm / 旧端到端测试工具 MCP 等内容，默认视为 **仅在存在 Web/HTML5/旧桌面壳 子项目时启用的可选能力**，不是本仓库的硬依赖。
+- 如果当前项目只构建原生 Windows Godot 游戏，可以暂时忽略所有 Node/旧单元测试工具/旧端到端测试工具 相关命令与脚本，不影响 T2 场景和核心回合循环的实现与验证。
+- 当你未来引入 Web/旧桌面壳 前端、需要前端专用 E2E/可用性测试时，可以参考文档中的 Node/旧单元测试工具/旧端到端测试工具 段落，将其视为在 newguild 之上的“额外层”，并保持 ADR/任务回链与现有 Godot+C# 工具链一致。

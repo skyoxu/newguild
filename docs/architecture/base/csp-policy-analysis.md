@@ -15,7 +15,7 @@
 
 - **适用场景**: 需要加载本地资源的应用
 - **优势**:
-  - 允许加载同源资源，适合 Electron 应用的本地文件结构
+  - 允许加载同源资源，适合 旧桌面壳 应用的本地文件结构
   - 为其他指令提供合理的默认值
   - 在保证安全的前提下提供更好的开发体验
 - **安全性**: 高（仍然阻止外部恶意资源）
@@ -39,36 +39,36 @@
 | `font-src`    | `'self'`                                                                              | 高       | 只允许本地字体文件               |
 | `connect-src` | `'self' ws: wss: https://api.${DOMAIN_OBSERVABILITY} https://${DOMAIN_OBSERVABILITY}` | 高       | 明确允许必要的网络连接           |
 
-## Electron 安全最佳实践符合性
+## 旧桌面壳 安全最佳实践符合性
 
-### ✅ 符合要求
+### [PASS] 符合要求
 
 1. **阻止外部脚本执行**: `script-src 'self'` 完全阻止外部脚本
 2. **限制网络请求**: `connect-src` 明确白名单化必要连接
 3. **防止代码注入**: 无 `'unsafe-eval'` 配置
 4. **资源控制**: 所有资源类型都有明确限制
 
-### ⚠️ 需要注意
+### [WARN] 需要注意
 
 1. **内联样式**: `'unsafe-inline'` 在 style-src 中存在一定风险
    - **原因**: Tailwind CSS 和某些 UI 框架需要内联样式
    - **缓解**: 样式内容来源可控，不接受用户输入
 
-### 🔐 安全强化建议
+###  安全强化建议
 
 1. **考虑使用 nonce**: 为内联样式添加 nonce 以替代 `'unsafe-inline'`
 2. **监控 CSP 违规**: 添加 `report-uri` 或 `report-to` 指令
 3. **定期审查白名单**: 确保 connect-src 中的域名仍然必要
 
-## 与 Electron 安全模型的集成
+## 与 旧桌面壳 安全模型的集成
 
 ```typescript
 // electron/main.ts
 new BrowserWindow({
   webPreferences: {
-    nodeIntegration: false, // ✅ 配合 CSP 阻止 Node.js 访问
-    contextIsolation: true, // ✅ 隔离上下文，CSP 作为额外防护层
-    sandbox: true, // ✅ 沙箱模式 + CSP 双重防护
+    nodeIntegration: false, // [PASS] 配合 CSP 阻止 Node.js 访问
+    contextIsolation: true, // [PASS] 隔离上下文，CSP 作为额外防护层
+    sandbox: true, // [PASS] 沙箱模式 + CSP 双重防护
     preload: path.join(__dirname, 'preload.js'),
   },
 });
@@ -92,11 +92,11 @@ test('CSP configuration is properly applied', async () => {
 
 ## 结论
 
-当前的 `default-src 'self'` 配置在 Electron 应用场景下是**安全且实用**的选择：
+当前的 `default-src 'self'` 配置在 旧桌面壳 应用场景下是**安全且实用**的选择：
 
 1. **安全性**: 有效防止外部资源注入和XSS攻击
-2. **实用性**: 支持本地资源加载，适合 Electron 架构
-3. **合规性**: 符合 Electron 安全最佳实践要求
+2. **实用性**: 支持本地资源加载，适合 旧桌面壳 架构
+3. **合规性**: 符合 旧桌面壳 安全最佳实践要求
 4. **可维护性**: 配置清晰，易于理解和维护
 
 这种配置在提供足够安全保护的同时，保持了良好的开发和用户体验。

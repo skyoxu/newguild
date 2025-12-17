@@ -40,7 +40,7 @@ CI/CD 集成
   状态: 完善覆盖
   - Security.gd Autoload（URL 白名单、HTTPRequest 约束、文件系统保护）
   - JSONL 审计日志（结构化记录）
-  - 与 Electron CSP 基线功能等价
+  - 与 旧桌面壳 CSP 基线功能等价
 
 文档质量
   状态: 优秀
@@ -52,16 +52,16 @@ CI/CD 集成
 功能对照验证
 ================================================================================
 
-原项目功能（vitegame）→ 迁移后功能（newguild）对标：
+原项目功能（旧项目）→ 迁移后功能（newguild）对标：
 
-菜单 UI:          React + Tailwind → Godot Control    无差异
-游戏场景:        Phaser 3 → Godot Scene Tree          等功能
-场景测试:        Playwright E2E → GUT scenes          更轻更快
+菜单 UI:          旧前端框架 + Tailwind → Godot Control    无差异
+游戏场景:        旧游戏引擎 3 → Godot Scene Tree          等功能
+场景测试:        旧端到端测试工具 E2E → GUT scenes          更轻更快
 信号系统:        CloudEvents → Godot Signals          原生支持
 可观测性:        Sentry.io → Sentry Godot SDK        API 一致
 安全审计:        CSP → Security.gd + JSONL           覆盖等价
 性能基准:        FPS → P50/P95/P99                   更科学
-打包交付:        Electron .exe → Godot Export .exe   同形式
+打包交付:        旧桌面壳 .exe → Godot Export .exe   同形式
 
 结论: 功能完全对应，无遗漏，可行性评估通过
 

@@ -9,13 +9,13 @@
 
 ## 目标
 
-将 vitegame 的 better-sqlite3 数据库迁移到 newguild 的 godot-sqlite，建立类型安全的仓储层和迁移系统。
+将 旧项目 的 better-sqlite3 数据库迁移到 newguild 的 godot-sqlite，建立类型安全的仓储层和迁移系统。
 
 ---
 
 ## 技术栈对比
 
-| 功能 | vitegame (Node.js) | newguild (Godot) |
+| 功能 | 旧项目 (Node.js) | newguild (Godot) |
 |-----|-------------------|------------------|
 | 库 | better-sqlite3 | godot-sqlite (GDNative) |
 | 初始化 | `new Database('game.db')` | `SQLite.new() + open_db()` |
@@ -28,7 +28,7 @@
 
 ## 数据库架构
 
-### 当前 Schema (vitegame)
+### 当前 Schema (旧项目)
 
 ```sql
 -- 用户数据
@@ -955,7 +955,7 @@ public class DatabaseMigrationTests : IDisposable
 
 ## 数据迁移脚本
 
-### 从 vitegame 迁移数据
+### 从 旧项目 迁移数据
 
 ```csharp
 // scripts/MigrateData.cs (CLI 工具)
@@ -1132,7 +1132,7 @@ jobs:
 - [ ] 数据库迁移系统可运行（Migration001-003）
 - [ ] 所有仓储通过单元测试（内存 SQLite）
 - [ ] 迁移系统通过集成测试
-- [ ] 数据迁移脚本可从 vitegame 导入数据
+- [ ] 数据迁移脚本可从 旧项目 导入数据
 - [ ] ServiceLocator 集成数据库初始化
 - [ ] CI 管道包含数据库测试和迁移完整性检查
 
@@ -1152,4 +1152,4 @@ jobs:
 
 完成本阶段后，继续：
 
-➡️ [Phase-7-UI-Migration.md](Phase-7-UI-Migration.md) — React → Godot Control 迁移
+ [Phase-7-UI-Migration.md](Phase-7-UI-Migration.md) — 旧前端框架 → Godot Control 迁移

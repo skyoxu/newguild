@@ -53,15 +53,15 @@ Build Game需要支持多语言和多地区，提供本地化的用户体验。�
 
 ## Considered Options
 
-- **react-i18next + 命名空间 + 懒加载** (选择方案)
-- **Format.js (React Intl) + 分包加载**
+- **旧前端框架-i18next + 命名空间 + 懒加载** (选择方案)
+- **Format.js (旧前端框架 Intl) + 分包加载**
 - **自定义i18n引擎 + JSON语言包**
-- **Electron locales API + React context**
+- **旧桌面壳 locales API + 旧前端框架 context**
 - **第三方云端翻译服务集成**
 
 ## Decision Outcome
 
-选择的方案：**react-i18next + 命名空间 + 懒加载**
+选择的方案：**旧前端框架-i18next + 命名空间 + 懒加载**
 
 ### 核心配置与初始化
 
@@ -75,13 +75,13 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
 
 export const SUPPORTED_LANGUAGES = {
-  'zh-CN': { name: '中文（简体）', flag: '🇨🇳', rtl: false },
-  'zh-TW': { name: '中文（繁體）', flag: '🇹🇼', rtl: false },
-  en: { name: 'English', flag: '🇺🇸', rtl: false },
-  ja: { name: '日本語', flag: '🇯🇵', rtl: false },
-  ko: { name: '한국어', flag: '🇰🇷', rtl: false },
-  de: { name: 'Deutsch', flag: '🇩🇪', rtl: false },
-  ar: { name: 'العربية', flag: '🇸🇦', rtl: true },
+  'zh-CN': { name: '中文（简体）', flag: '', rtl: false },
+  'zh-TW': { name: '中文（繁體）', flag: '', rtl: false },
+  en: { name: 'English', flag: '', rtl: false },
+  ja: { name: '日本語', flag: '', rtl: false },
+  ko: { name: '한국어', flag: '', rtl: false },
+  de: { name: 'Deutsch', flag: '', rtl: false },
+  ar: { name: 'العربية', flag: '', rtl: true },
 } as const;
 
 export const DEFAULT_NAMESPACE = 'common';
@@ -1016,7 +1016,7 @@ test.describe('Internationalization E2E', () => {
     const htmlDir = await window.evaluate(() => document.documentElement.dir);
     expect(htmlDir).toBe('rtl');
 
-    // 🆕 验证CSS样式是否正确响应RTL布局
+    //  验证CSS样式是否正确响应RTL布局
     const bodyElement = window.locator('body');
     await expect(bodyElement).toHaveCSS('direction', 'rtl');
 
@@ -1034,7 +1034,7 @@ test.describe('Internationalization E2E', () => {
       .textContent();
     expect(title).toContain('العاب'); // Arabic text
 
-    // 🆕 验证Flexbox布局在RTL下的正确性
+    //  验证Flexbox布局在RTL下的正确性
     const flexContainer = window.locator('[data-testid="flex-container"]');
     if ((await flexContainer.count()) > 0) {
       await expect(flexContainer).toHaveCSS(
@@ -1113,7 +1113,7 @@ class I18nValidator {
   }
 
   async validate() {
-    console.log('🌐 Validating internationalization...');
+    console.log(' Validating internationalization...');
 
     await this.validateDirectoryStructure();
     await this.validateLanguageFiles();
@@ -1296,20 +1296,20 @@ class I18nValidator {
   }
 
   reportResults() {
-    console.log('\n📊 I18n Validation Results:');
+    console.log('\n I18n Validation Results:');
 
     if (this.errors.length === 0 && this.warnings.length === 0) {
-      console.log('✅ All internationalization files are valid!');
+      console.log('[PASS] All internationalization files are valid!');
       return;
     }
 
     if (this.errors.length > 0) {
-      console.log(`\n❌ ${this.errors.length} Error(s):`);
+      console.log(`\n[FAIL] ${this.errors.length} Error(s):`);
       this.errors.forEach(error => console.log(`   • ${error}`));
     }
 
     if (this.warnings.length > 0) {
-      console.log(`\n⚠️  ${this.warnings.length} Warning(s):`);
+      console.log(`\n[WARN]  ${this.warnings.length} Warning(s):`);
       this.warnings.forEach(warning => console.log(`   • ${warning}`));
     }
   }
@@ -1355,7 +1355,7 @@ validator.validate().catch(console.error);
 
 ## Verification
 
-- **核心验证**: tests/unit/i18n/i18n.spec.ts, tests/e2e/i18n.electron.spec.ts
+- **核心验证**: tests/unit/i18n/i18n.spec.ts, tests/e2e/i18n.旧桌面壳.spec.ts
 - **验证脚本**: scripts/verify_i18n.mjs
 - **监控指标**: i18n.language_switch_success_rate, i18n.translation_load_time, i18n.missing_keys_count
 - **质量门禁**: 100%翻译键覆盖率，语言切换E2E测试100%通过率
@@ -1403,9 +1403,9 @@ validator.validate().catch(console.error);
 - **CH章节关联**: CH01, CH04, CH10
 - **相关ADR**: ADR-0001-tech-stack, ADR-0005-quality-gates
 - **外部文档**:
-  - [react-i18next Documentation](https://react.i18next.com/)
+  - [旧前端框架-i18next Documentation](https://旧前端框架.i18next.com/)
   - [i18next Configuration](https://www.i18next.com/overview/configuration-options)
   - [Unicode Locale Data Markup Language](https://unicode.org/reports/tr35/)
-  - [Electron Localization](https://www.electronjs.org/docs/latest/tutorial/localization)
+  - [旧桌面壳 Localization](https://www.electronjs.org/docs/latest/tutorial/localization)
 - **国际化标准**: BCP 47 Language Tags, Unicode CLDR, ISO 639 Language Codes
 - **相关PRD-ID**: 适用于所有需要多语言支持的PRD功能模块

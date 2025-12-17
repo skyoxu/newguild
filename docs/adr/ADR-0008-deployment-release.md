@@ -1,24 +1,24 @@
 ---
 ADR-ID: ADR-0008
-title: 部署与发布策略（Windows-only）- Electron Builder + GitHub Releases
+title: 部署与发布策略（Windows-only）- 旧桌面壳 Builder + GitHub Releases
 status: Accepted
 decision-time: '2025-08-17'
 deciders: [架构团队, DevOps团队, 安全团队]
 archRefs: [CH03, CH07, CH10]
 verification:
   - path: scripts/release/updater-config-check.mjs
-    assert: electron-updater configured with correct channel and provider
+    assert: 旧桌面壳-updater configured with correct channel and provider
   - path: scripts/release/signing-verify.mjs
     assert: Windows Authenticode 代码签名验证通过（仅 Windows）
   - path: scripts/release/rollout.mjs
     assert: Rollout gates on Release Health and supports pause/rollback
 impact-scope:
   - build/
-  - electron-builder.json
+  - 旧桌面壳-builder.json
   - .github/workflows/（Windows-only runners）
   - scripts/release.mjs
 tech-tags:
-  - electron-builder
+  - 旧桌面壳-builder
   - github-releases
   - deployment
   - ci-cd
@@ -31,7 +31,7 @@ monitoring-metrics:
   - implementation_coverage
   - compliance_rate
 executable-deliverables:
-  - electron-builder.json（仅 Windows 目标）
+  - 旧桌面壳-builder.json（仅 Windows 目标）
   - .github/workflows/release.yml（windows-latest + pwsh）
   - scripts/release-automation.mjs
 supersedes: []
@@ -43,7 +43,7 @@ supersedes: []
 
 ## Context and Problem Statement
 
-仅面向 Windows 平台分发的 Electron 应用需要建立可靠的部署发布与自动更新流程，确保安全性（代码签名）、可靠性（渐进式发布与回滚）、以及良好的使用体验（无缝更新）。
+仅面向 Windows 平台分发的 旧桌面壳 应用需要建立可靠的部署发布与自动更新流程，确保安全性（代码签名）、可靠性（渐进式发布与回滚）、以及良好的使用体验（无缝更新）。
 
 ## Decision Drivers
 
@@ -54,13 +54,13 @@ supersedes: []
 
 ## Considered Options
 
-- electron-updater + Windows 签名 + 渐进式发布（选定）
+- 旧桌面壳-updater + Windows 签名 + 渐进式发布（选定）
 - Squirrel.Windows + 手动分发
 - 仅 GitHub Releases 无自动更新（高运维成本）
 
 ## Decision Outcome
 
-选择的方案：electron-updater + Windows 代码签名 + 渐进式发布（Windows-only）
+选择的方案：旧桌面壳-updater + Windows 代码签名 + 渐进式发布（Windows-only）
 
 ## CI Runner & Shell 策略（Windows-only）
 
@@ -145,7 +145,7 @@ jobs:
   continue-on-error: true
 ```
 
-### electron-updater 核心配置
+### 旧桌面壳-updater 核心配置
 
 ```ts
 // electron/main/auto-updater.ts
@@ -279,4 +279,4 @@ jobs:
 
 - Windows Code Signing Guide
 - GitHub Releases API
-- electron-builder / electron-updater 文档
+- 旧桌面壳-builder / 旧桌面壳-updater 文档

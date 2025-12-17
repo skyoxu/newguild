@@ -10,10 +10,10 @@
 
 ## 1. 背景与动机
 
-### 原版（vitegame）性能管理
-- **Electron 工具链**：DevTools Timeline + 自定义计时
-- **Vite HMR**：热更新导致性能指标波动大
-- **Playwright E2E**：性能数据基于浏览器事件，准确性有限
+### 原版（旧项目）性能管理
+- **旧桌面壳 工具链**：DevTools Timeline + 自定义计时
+- **旧构建工具 HMR**：热更新导致性能指标波动大
+- **旧端到端测试工具 E2E**：性能数据基于浏览器事件，准确性有限
 - **缺乏基准**：无历史对标，难以判断性能劣化
 
 ### 新版（newguild）性能机遇与挑战
@@ -139,34 +139,34 @@ newguild/
 ├── src/
 │   ├── Game.Core/
 │   │   └── Performance/
-│   │       ├── PerformanceTracker.cs         ★ 核心计时库
-│   │       ├── PerformanceMetrics.cs         ★ 指标定义
-│   │       └── QueryPerformanceTracker.cs    ★ 数据库计时
+│   │       ├── PerformanceTracker.cs          核心计时库
+│   │       ├── PerformanceMetrics.cs          指标定义
+│   │       └── QueryPerformanceTracker.cs     数据库计时
 │   │
 │   └── Godot/
-│       ├── TestRunner.cs                     ★ 冒烟测试运行器（含性能采集）
-│       └── PerformanceGates.cs               ★ 性能门禁检查
+│       ├── TestRunner.cs                      冒烟测试运行器（含性能采集）
+│       └── PerformanceGates.cs                性能门禁检查
 │
 ├── benchmarks/
-│   ├── baseline-startup.json                 ★ 首屏基准（初始化）
-│   ├── baseline-menu.json                    ★ 菜单帧时间基准
-│   ├── baseline-game.json                    ★ 游戏场景基准
-│   ├── baseline-db.json                      ★ 数据库查询基准
-│   └── current-run/                          ★ 当前构建的采集结果
+│   ├── baseline-startup.json                  首屏基准（初始化）
+│   ├── baseline-menu.json                     菜单帧时间基准
+│   ├── baseline-game.json                     游戏场景基准
+│   ├── baseline-db.json                       数据库查询基准
+│   └── current-run/                           当前构建的采集结果
 │       ├── startup-results.json
 │       ├── menu-frame-times.json
 │       ├── game-frame-times.json
 │       └── db-query-results.json
 │
 ├── scripts/
-│   ├── performance_gates.py                  ★ Python 聚合脚本
-│   └── establish_baseline.sh                 ★ 基准建立脚本
+│   ├── performance_gates.py                   Python 聚合脚本
+│   └── establish_baseline.sh                  基准建立脚本
 │
 └── reports/
     └── performance/
-        ├── current-run-report.html           ★ 网页报告
-        ├── current-run-report.json           ★ 结构化报告
-        └── performance-history.csv           ★ 历史数据
+        ├── current-run-report.html            网页报告
+        ├── current-run-report.json            结构化报告
+        └── performance-history.csv            历史数据
 ```
 
 ---
@@ -840,7 +840,7 @@ jobs:
 
 ## 附录 A：性能指标对标表
 
-| 指标 | vitegame（Electron） | newguild（Godot） | 对标情况 |
+| 指标 | 旧项目（旧桌面壳） | newguild（Godot） | 对标情况 |
 |-----|-------------------|------------------|---------|
 | 启动时间 | ~2.5-3.0s | ≤3.0s | [OK] 持平 |
 | 菜单 FPS | 60fps (16.67ms) | ≤14ms P95 | [OK] 改进 |
