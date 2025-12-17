@@ -42,6 +42,9 @@ tmp/
 **/obj/
 .vs/
 TestResults/
+# Keep workflow helper sources under scripts/sc/build (not build artifacts)
+!scripts/sc/build/
+!scripts/sc/build/**
 # Keep GdUnit4 CLI runner scripts inside plugin bin
 !Tests.Godot/addons/gdUnit4/bin/
 !Tests.Godot/addons/gdUnit4/bin/**
