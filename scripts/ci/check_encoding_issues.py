@@ -40,7 +40,6 @@ UTF8_FILES = [
     "adr/ADR-0022-godot-signal-system-and-contracts.md",
     "adr/guide.md",
     "adr/addenda/ADR-0005-godot-quality-gates-addendum.md",
-    "adr/addenda/ADR-0015-godot-performance-budgets-addendum.md",
     "architecture/ADR_INDEX_GODOT.md",
     "architecture/base/00-README.md",
     "architecture/base/01-introduction-and-goals-v2.md",
