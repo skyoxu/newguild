@@ -46,6 +46,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="ScreenNavigator" type="Node" parent="."]
 script = ExtResource("13")
@@ -60,7 +61,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 z_index = 100
-mouse_filter = 1
+mouse_filter = 2
 
 
 
@@ -71,9 +72,9 @@ mouse_filter = 1
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 2
 offset_left = 20.0
-offset_top = 20.0
+offset_top = 260.0
 offset_right = 420.0
-offset_bottom = 260.0
+offset_bottom = 500.0
 
 [node name="PublishBtn" type="Button" parent="VBox"]
 layout_mode = 2
@@ -99,3 +100,6 @@ text = "+10 Score"
 layout_mode = 2
 text = "-5 HP"
 
+[node name="NextTurnDebugBtn" type="Button" parent="VBox"]
+layout_mode = 2
+text = "Next Turn (Debug)"

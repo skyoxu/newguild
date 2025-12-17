@@ -23,7 +23,7 @@ description: 执行架构级验收检查（Multi-Subagent Orchestration）
 
 此命令自动协调以下 6 个专业 Subagents 进行全面验收：
 
-### 1️⃣ adr-compliance-checker（项目特定）
+### 1 adr-compliance-checker（项目特定）
 **职责**: ADR 合规性验证
 **检查项**:
 - ADR-0002: 安全基线（路径使用、外链白名单、配置开关）
@@ -35,7 +35,7 @@ description: 执行架构级验收检查（Multi-Subagent Orchestration）
 
 ---
 
-### 2️⃣ performance-slo-validator（项目特定）
+### 2 performance-slo-validator（项目特定）
 **职责**: 性能 SLO 验证
 **检查项**:
 - 启动时间 ≤3s
@@ -49,7 +49,7 @@ description: 执行架构级验收检查（Multi-Subagent Orchestration）
 
 ---
 
-### 3️⃣ architect-reviewer（社区 - lst97）
+### 3 architect-reviewer（社区 - lst97）
 **职责**: 架构一致性审查
 **检查项**:
 - 架构模式遵循（MVC、Ports & Adapters、Event-Driven）
@@ -62,18 +62,18 @@ description: 执行架构级验收检查（Multi-Subagent Orchestration）
 
 ---
 
-### 4️⃣ code-reviewer（社区 - lst97）
+### 4 code-reviewer（社区 - lst97）
 **职责**: 代码质量审查
 **检查项**:
-- 🚨 Critical & Security（漏洞、认证授权、输入验证）
-- ⚠️ Quality & Best Practices（DRY、SOLID、测试覆盖）
-- 💡 Performance & Maintainability（算法效率、资源管理）
+- Critical & Security（漏洞、认证授权、输入验证）
+- [WARN] Quality & Best Practices（DRY、SOLID、测试覆盖）
+- Performance & Maintainability（算法效率、资源管理）
 
 **输出**: 代码审查报告（Critical/Warning/Suggestion 分级）
 
 ---
 
-### 5️⃣ security-auditor（社区 - lst97）
+### 5 security-auditor（社区 - lst97）
 **职责**: 安全审计
 **检查项**:
 - OWASP Top 10 覆盖
@@ -86,7 +86,7 @@ description: 执行架构级验收检查（Multi-Subagent Orchestration）
 
 ---
 
-### 6️⃣ test-automator（社区 - lst97）
+### 6 test-automator（社区 - lst97）
 **职责**: 测试质量验证
 **检查项**:
 - 测试金字塔比例（Unit 80% / Integration 15% / E2E 5%）
@@ -122,8 +122,8 @@ graph TD
     E6 --> F
 
     F --> G{所有检查通过?}
-    G -->|是| H[✅ PASS - 可标记 done]
-    G -->|否| I[❌ FAIL - 标记 blocked]
+    G -->|是| H[PASS - 可标记 done]
+    G -->|否| I[FAIL - 标记 blocked]
 
     I --> J[生成 blockers 列表]
     J --> K[返回修复建议]
@@ -200,23 +200,23 @@ wait  # 等待所有 Subagents 完成
 
 | Subagent | 状态 | Critical | High | Medium | Low |
 |---------|------|----------|------|--------|-----|
-| adr-compliance-checker | ❌ FAIL | 2 | 0 | 0 | 0 |
-| performance-slo-validator | ✅ PASS | 0 | 0 | 0 | 0 |
-| architect-reviewer | ✅ PASS | 0 | 0 | 1 | 2 |
-| code-reviewer | ⚠️ WARN | 0 | 1 | 2 | 3 |
-| security-auditor | ✅ PASS | 0 | 0 | 0 | 1 |
-| test-automator | ✅ PASS | 0 | 0 | 0 | 0 |
+| adr-compliance-checker | [FAIL] FAIL | 2 | 0 | 0 | 0 |
+| performance-slo-validator | [PASS] PASS | 0 | 0 | 0 | 0 |
+| architect-reviewer | [PASS] PASS | 0 | 0 | 1 | 2 |
+| code-reviewer | [WARN] WARN | 0 | 1 | 2 | 3 |
+| security-auditor | [PASS] PASS | 0 | 0 | 0 | 1 |
+| test-automator | [PASS] PASS | 0 | 0 | 0 | 0 |
 
 **统计**:
-- ✅ 通过: 4 个 Subagents
-- ⚠️ 警告: 1 个 Subagent (有 High 级别问题)
-- ❌ 失败: 1 个 Subagent (有 Critical 问题)
+- [PASS] 通过: 4 个 Subagents
+- [WARN] 警告: 1 个 Subagent (有 High 级别问题)
+- [FAIL] 失败: 1 个 Subagent (有 Critical 问题)
 
 ---
 
 ## 阻断问题（必须修复）
 
-### 🚨 Critical Issues (2)
+### Critical Issues (2)
 
 #### 1. ADR-0002 违规: 绝对路径使用
 **来源**: adr-compliance-checker
@@ -232,7 +232,7 @@ var path = "user://config.json";  // 使用 Godot 路径
 
 #### 2. ADR-0004 违规: CloudEvents 字段缺失
 **来源**: adr-compliance-checker
-**位置**: Scripts/Core/Contracts/Guild/GuildCreated.cs:15
+**位置**: Game.Core/Contracts/Guild/GuildCreated.cs:15
 **问题**: 缺少 Source, Subject, Id 字段
 **修复**:
 ```csharp
@@ -245,7 +245,7 @@ public string Id { get; init; }
 
 ## 警告问题（建议修复）
 
-### ⚠️ High Issues (1)
+### [WARN] High Issues (1)
 
 #### 1. 潜在 SQL 注入风险
 **来源**: code-reviewer
@@ -329,7 +329,7 @@ task-master set-status --id={task_id} --status=done
 
 ## 最终判定
 
-❌ **FAIL** - 存在 2 个 Critical 阻断问题
+[FAIL] **FAIL** - 存在 2 个 Critical 阻断问题
 
 **下一步**:
 1. 修复上述 2 个 Critical 问题
@@ -376,10 +376,10 @@ logs/acceptance/
 ## Best Practices
 
 ### 何时运行验收检查
-- ✅ 完成任务后，标记 `done` 之前
-- ✅ 重构后验证架构一致性
-- ✅ 提交 PR 前最终检查
-- ✅ 发布前质量守门
+- [PASS] 完成任务后，标记 `done` 之前
+- [PASS] 重构后验证架构一致性
+- [PASS] 提交 PR 前最终检查
+- [PASS] 发布前质量守门
 
 ### 如何处理失败
 1. **Critical 问题**: 必须修复，不可合并

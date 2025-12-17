@@ -463,4 +463,124 @@ public class GuildCoreTests
     }
 
     #endregion
+
+    #region ReconstructFromDatabase Factory Method Tests
+
+    [Fact]
+    public void ReconstructFromDatabase_ShouldCreateGuildWithValidParameters()
+    {
+        // Arrange
+        var guildId = "guild-001";
+        var creatorId = "creator-123";
+        var name = "测试公会";
+        var createdAt = DateTimeOffset.UtcNow;
+        var members = new List<GuildMember>
+        {
+            new GuildMember(creatorId, GuildRole.Admin)
+        };
+
+        // Act
+        var guild = Guild.ReconstructFromDatabase(guildId, creatorId, name, createdAt, members);
+
+        // Assert
+        guild.Should().NotBeNull("ReconstructFromDatabase should create guild with valid parameters");
+        guild.GuildId.Should().Be(guildId);
+        guild.CreatorId.Should().Be(creatorId);
+        guild.Name.Should().Be(name);
+        guild.CreatedAt.Should().Be(createdAt);
+        guild.Members.Should().HaveCount(1);
+        guild.Members.Should().ContainSingle(m => m.UserId == creatorId && m.Role == GuildRole.Admin);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ReconstructFromDatabase_ShouldThrowException_WhenGuildIdIsInvalid(string invalidGuildId)
+    {
+        // Arrange
+        var members = new List<GuildMember>
+        {
+            new GuildMember("creator-123", GuildRole.Admin)
+        };
+
+        // Act
+        var act = () => Guild.ReconstructFromDatabase(invalidGuildId, "creator-123", "公会名称", DateTimeOffset.UtcNow, members);
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("guildId")
+            .WithMessage("*公会ID不能为空*");
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ReconstructFromDatabase_ShouldThrowException_WhenCreatorIdIsInvalid(string invalidCreatorId)
+    {
+        // Arrange
+        var members = new List<GuildMember>
+        {
+            new GuildMember("creator-123", GuildRole.Admin)
+        };
+
+        // Act
+        var act = () => Guild.ReconstructFromDatabase("guild-001", invalidCreatorId, "公会名称", DateTimeOffset.UtcNow, members);
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("creatorId")
+            .WithMessage("*创建者ID不能为空*");
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ReconstructFromDatabase_ShouldThrowException_WhenNameIsInvalid(string invalidName)
+    {
+        // Arrange
+        var members = new List<GuildMember>
+        {
+            new GuildMember("creator-123", GuildRole.Admin)
+        };
+
+        // Act
+        var act = () => Guild.ReconstructFromDatabase("guild-001", "creator-123", invalidName, DateTimeOffset.UtcNow, members);
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("name")
+            .WithMessage("*公会名称不能为空*");
+    }
+
+    [Fact]
+    public void ReconstructFromDatabase_ShouldThrowException_WhenMembersIsNull()
+    {
+        // Act
+        var act = () => Guild.ReconstructFromDatabase("guild-001", "creator-123", "公会名称", DateTimeOffset.UtcNow, members: null!);
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("members")
+            .WithMessage("*成员列表不能为空*");
+    }
+
+    [Fact]
+    public void ReconstructFromDatabase_ShouldThrowException_WhenMembersIsEmpty()
+    {
+        // Arrange
+        var emptyMembers = new List<GuildMember>();
+
+        // Act
+        var act = () => Guild.ReconstructFromDatabase("guild-001", "creator-123", "公会名称", DateTimeOffset.UtcNow, emptyMembers);
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithParameterName("members")
+            .WithMessage("*成员列表不能为空*");
+    }
+
+    #endregion
 }

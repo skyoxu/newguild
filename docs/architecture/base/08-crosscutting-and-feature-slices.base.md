@@ -64,11 +64,11 @@ export function mkEvent<T = unknown>(
 
 **验收标准**：
 
-- ✅ 所有事件使用统一`mkEvent`工厂函数
-- ✅ 禁止使用废弃的`createCloudEvent`
-- ✅ 事件类型采用reverse DNS格式（如`guild.member.joined`）
-- ✅ 运行时验证使用`assertCe`函数
-- ✅ `npm run cloudevents:check`全绿通过
+- [PASS] 所有事件使用统一`mkEvent`工厂函数
+- [PASS] 禁止使用废弃的`createCloudEvent`
+- [PASS] 事件类型采用reverse DNS格式（如`guild.member.joined`）
+- [PASS] 运行时验证使用`assertCe`函数
+- [PASS] `npm run cloudevents:check`全绿通过
 
 ## 08.3 目录结构（Base vs Overlays）
 
@@ -183,7 +183,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const dir = process.argv[2]; // overlays/08/<${PRD_ID}>-<feature>
 function fail(msg) {
-  console.error('❌ feature-slice gate:', msg);
+  console.error('[FAIL] feature-slice gate:', msg);
   process.exit(1);
 }
 const must = ['08-<feature>.md', 'c4/context.mmd', 'c4/container.mmd'];
@@ -193,7 +193,7 @@ for (const f of must) {
 const md = fs.readFileSync(path.join(dir, '08-<feature>.md'), 'utf8');
 if (!/^adr_refs:\s*\[.*\]/m.test(md)) fail('missing front-matter adr_refs');
 if (!/\$\{DOMAIN_PREFIX\}/.test(md)) fail('missing placeholders');
-console.log('✅ feature-slice gate passed');
+console.log('[PASS] feature-slice gate passed');
 ```
 
 ## 08.6 验收清单（Base）

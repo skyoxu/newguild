@@ -104,7 +104,7 @@ report_path="logs/perf/$latest_dir/summary.json"
 
 # 验证文件存在
 if [ ! -f "$report_path" ]; then
-  echo "❌ 未找到性能报告: $report_path"
+  echo "[FAIL] 未找到性能报告: $report_path"
   exit 1
 fi
 ```
@@ -133,26 +133,26 @@ MEMORY_PEAK_THRESHOLD=${MEMORY_PEAK_THRESHOLD:-1024}       # 1GB
 
 # 启动时间验证
 if (( $(echo "$startup_time > $STARTUP_THRESHOLD" | bc -l) )); then
-  echo "❌ 启动时间超标: ${startup_time}ms > ${STARTUP_THRESHOLD}ms"
+  echo "[FAIL] 启动时间超标: ${startup_time}ms > ${STARTUP_THRESHOLD}ms"
   violations=$((violations + 1))
 else
-  echo "✅ 启动时间: ${startup_time}ms (≤${STARTUP_THRESHOLD}ms)"
+  echo "[PASS] 启动时间: ${startup_time}ms (≤${STARTUP_THRESHOLD}ms)"
 fi
 
 # 帧耗时验证
 if (( $(echo "$frame_p95 > $FRAME_P95_THRESHOLD" | bc -l) )); then
-  echo "❌ 帧耗时 P95 超标: ${frame_p95}ms > ${FRAME_P95_THRESHOLD}ms"
+  echo "[FAIL] 帧耗时 P95 超标: ${frame_p95}ms > ${FRAME_P95_THRESHOLD}ms"
   violations=$((violations + 1))
 else
-  echo "✅ 帧耗时 P95: ${frame_p95}ms (≤${FRAME_P95_THRESHOLD}ms)"
+  echo "[PASS] 帧耗时 P95: ${frame_p95}ms (≤${FRAME_P95_THRESHOLD}ms)"
 fi
 
 # 内存验证
 if (( $(echo "$memory_initial > $MEMORY_INITIAL_THRESHOLD" | bc -l) )); then
-  echo "❌ 初始内存超标: ${memory_initial}MB > ${MEMORY_INITIAL_THRESHOLD}MB"
+  echo "[FAIL] 初始内存超标: ${memory_initial}MB > ${MEMORY_INITIAL_THRESHOLD}MB"
   violations=$((violations + 1))
 else
-  echo "✅ 初始内存: ${memory_initial}MB (≤${MEMORY_INITIAL_THRESHOLD}MB)"
+  echo "[PASS] 初始内存: ${memory_initial}MB (≤${MEMORY_INITIAL_THRESHOLD}MB)"
 fi
 ```
 
@@ -169,7 +169,7 @@ done
 if [ -n "$prev_frame_p95" ]; then
   degradation=$(echo "scale=2; ($frame_p95 - $prev_frame_p95) / $prev_frame_p95 * 100" | bc)
   if (( $(echo "$degradation > 10" | bc -l) )); then
-    echo "⚠️ 性能退化: +${degradation}% (相比上次)"
+    echo "[WARN] 性能退化: +${degradation}% (相比上次)"
   fi
 fi
 ```
@@ -190,13 +190,13 @@ fi
 ### 1. 启动时间
 - **实际值**: 2.8s
 - **阈值**: ≤3s
-- **状态**: ✅ **PASS**
+- **状态**: [PASS] **PASS**
 - **余量**: 0.2s (6.7%)
 
 ### 2. 逻辑帧耗时 P95
 - **实际值**: 14.2ms
 - **阈值**: ≤16.6ms (60 FPS)
-- **状态**: ✅ **PASS**
+- **状态**: [PASS] **PASS**
 - **余量**: 2.4ms (14.5%)
 - **实际帧率**: ~70 FPS
 
@@ -209,27 +209,27 @@ fi
 ### 3. 初始内存占用
 - **实际值**: 420MB
 - **阈值**: ≤500MB
-- **状态**: ✅ **PASS**
+- **状态**: [PASS] **PASS**
 - **余量**: 80MB (16%)
 
 ### 4. 峰值内存占用
 - **实际值**: 780MB
 - **阈值**: ≤1024MB (1GB)
-- **状态**: ✅ **PASS**
+- **状态**: [PASS] **PASS**
 - **余量**: 244MB (23.8%)
 
 ### 5. 内存增长率
 - **实际值**: 2.3% /小时
 - **阈值**: ≤5% /小时
-- **状态**: ✅ **PASS**
+- **状态**: [PASS] **PASS**
 - **评估**: 无明显内存泄漏
 
 ### 6. 场景加载时间
 | 场景 | 实际耗时 | 阈值 | 状态 |
 |------|---------|------|------|
-| MainMenu | 320ms | ≤500ms | ✅ PASS |
-| GuildHall | 1200ms | ≤1500ms | ✅ PASS |
-| WorldMap | 2800ms | ≤3000ms | ✅ PASS |
+| MainMenu | 320ms | ≤500ms | [PASS] PASS |
+| GuildHall | 1200ms | ≤1500ms | [PASS] PASS |
+| WorldMap | 2800ms | ≤3000ms | [PASS] PASS |
 
 ---
 
@@ -243,9 +243,9 @@ fi
 | 2025-11-27 | 3.1s | 14.0ms | 410MB |
 
 **趋势**：
-- ✅ 启动时间：改善 -0.3s (-9.7%)
-- ⚠️ 帧耗时 P95：轻微上升 +0.4ms (+2.9%)
-- ✅ 内存占用：稳定增长 +10MB (+2.4%)
+- [PASS] 启动时间：改善 -0.3s (-9.7%)
+- [WARN] 帧耗时 P95：轻微上升 +0.4ms (+2.9%)
+- [PASS] 内存占用：稳定增长 +10MB (+2.4%)
 
 ---
 
@@ -290,7 +290,7 @@ fi
 - **警告**: 1 项（帧耗时轻微上升）
 
 ### 判定
-✅ **PASS** - 所有性能 SLO 均满足要求
+[PASS] **PASS** - 所有性能 SLO 均满足要求
 
 ### 建议
 **可选优化**（不阻断）：
@@ -310,7 +310,7 @@ fi
 
 **验收日期**: 2025-11-30
 **报告来源**: logs/perf/2025-11-30/summary.json
-**验收结果**: ❌ **FAIL**
+**验收结果**: [FAIL] **FAIL**
 
 ---
 
@@ -319,7 +319,7 @@ fi
 ### 1. 启动时间
 - **实际值**: 3.5s
 - **阈值**: ≤3s
-- **状态**: ❌ **FAIL**
+- **状态**: [FAIL] **FAIL**
 - **超标**: +0.5s (+16.7%)
 
 **原因分析**：
@@ -329,15 +329,15 @@ fi
 ### 2. 逻辑帧耗时 P95
 - **实际值**: 22.3ms
 - **阈值**: ≤16.6ms (60 FPS)
-- **状态**: ❌ **FAIL**
+- **状态**: [FAIL] **FAIL**
 - **超标**: +5.7ms (+34.3%)
 - **实际帧率**: ~45 FPS
 
 **帧耗时分布**：
 - P50: 12.1ms
-- P95: 22.3ms ⚠️
-- P99: 28.7ms ⚠️
-- Max: 45.2ms ⚠️
+- P95: 22.3ms [WARN]
+- P99: 28.7ms [WARN]
+- Max: 45.2ms [WARN]
 
 **原因分析**：
 - GuildHall 场景的 AI 计算未优化
@@ -345,7 +345,7 @@ fi
 
 **修复建议**：
 ```csharp
-// ❌ 当前实现：每帧遍历所有 NPC
+// [FAIL] 当前实现：每帧遍历所有 NPC
 public override void _Process(double delta)
 {
     foreach (var npc in AllNPCs)  // 100+ NPCs
@@ -354,7 +354,7 @@ public override void _Process(double delta)
     }
 }
 
-// ✅ 优化：分帧更新 + 空间分区
+// [PASS] 优化：分帧更新 + 空间分区
 private int _frameOffset = 0;
 public override void _Process(double delta)
 {
@@ -370,7 +370,7 @@ public override void _Process(double delta)
 ### 3. 峰值内存占用
 - **实际值**: 1150MB
 - **阈值**: ≤1024MB (1GB)
-- **状态**: ❌ **FAIL**
+- **状态**: [FAIL] **FAIL**
 - **超标**: +126MB (+12.3%)
 
 **原因分析**：
@@ -387,7 +387,7 @@ public override void _Process(double delta)
 - **失败**: 3 项（阻断）
 
 ### 判定
-❌ **FAIL** - 存在 3 个性能阻断问题
+[FAIL] **FAIL** - 存在 3 个性能阻断问题
 
 ### 必须修复（阻断合并）
 1. **启动时间超标**: 优化资源加载策略

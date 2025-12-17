@@ -52,7 +52,7 @@ C4Container
 
 ### B.1 Windows 单测稳定脚本与日志归档
 
-- 使用 `npm run test:unit:ps` 调用 `scripts/windows/test-unit.ps1`，在 Windows 环境下稳定运行 Vitest，避免 PowerShell 将下游进程的 stderr 误判为错误。
+- 使用 `npm run test:unit:ps` 调用 `scripts/windows/test-unit.ps1`，在 Windows 环境下稳定运行 旧单元测试工具，避免 PowerShell 将下游进程的 stderr 误判为错误。
 - 所有测试与门禁输出统一归档至 `logs/<日期>/<模块>/`，例如：`logs/20251004/unit/test-unit-ps-<time>.log`。
 - 本地与 CI 推荐一致使用该脚本或等效参数，确保可重复与可追溯。
 
@@ -90,8 +90,8 @@ C4Dynamic
 | ------------- | -------------------------- | ----------------------------- | -------- |
 | TS            | `tsc --noEmit`             | 严格模式                      | fail     |
 | Lint          | `eslint`                   | `maxWarnings:0`               | fail     |
-| Unit          | `vitest --coverage`        | lines≥90%/branches≥85%        | fail     |
-| E2E           | `playwright`               | retries=2（CI）               | fail     |
+| Unit          | `旧单元测试工具 --coverage`        | lines≥90%/branches≥85%        | fail     |
+| E2E           | `旧端到端测试工具`               | retries=2（CI）               | fail     |
 | Security      | `scan_electron_safety.mjs` | nodeIntegration=false 等      | fail     |
 | Base          | `verify_base_clean.mjs`    | 禁业务耦合/占位符齐全         | fail     |
 | ReleaseHealth | `release_health_check.mjs` | crash‑free 用户/会话 + 采用率 | fail     |
@@ -109,7 +109,7 @@ node scripts/release_health_check.mjs
 npm run guard:base
 ```
 
-## C) Electron 安全基线 & CSP 验证
+## C) 旧桌面壳 安全基线 & CSP 验证
 
 ```js
 // scripts/verify_csp.mjs（片段）
@@ -225,68 +225,19 @@ export async function launchAppForPerformance(
 - [ ] `.ps1` 变体可在 Windows 运行
 - [ ] `.release-health.json` 的 crash-free 与 adoption 达标
 - [ ] `index.html` 含 CSP meta 且限制 `default-src 'self'`
-- [ ] 所有E2E测试使用官方 `_electron as electron` API
-- [ ] `tests/e2e/utils/electron-launcher.ts` 提供跨平台启动器
+- [ ] 所有E2E测试使用官方 `_electron as 旧桌面壳` API
+- [ ] `tests/e2e/utils/旧桌面壳-launcher.ts` 提供跨平台启动器
 - [ ] Windows环境下 `ELECTRON_DISABLE_SANDBOX=true` 生效
 
-## 7.x 性能门禁（Electron 环境）
+## 7.x 性能门禁（Godot Headless）
 
-为 Electron 渲染路径的 FCP P95 测试提供“软/硬门禁 + 环境阈值 + 稳定采样”。策略在 ADR‑0015 附注中定义，这里给出可执行脚本与环境变量。
+为 Godot 运行时提供最小可执行的帧时间 P95 门禁：通过 Autoload `PerformanceTracker` 输出 `[PERF] ... p95_ms=...`，CI 侧解析 `headless.log` 并对比预算阈值。
 
-- 运行脚本（Windows 兼容，使用 cross-env）
-  - `npm run perf:fcp:dev:soft`：开发环境软门禁（默认 5 次采样）
-  - `npm run perf:fcp:dev:hard`：开发环境硬门禁
-  - `npm run perf:fcp:staging:soft`：预发软门禁
-  - `npm run perf:fcp:staging:hard`：预发硬门禁
-  - `npm run perf:fcp:prod:soft`：生产软门禁（仅告警）
-  - `npm run perf:fcp:prod:hard`：生产硬门禁（阈值不达直接失败）
-  - `npm run perf:fcp:ci`：CI 默认（软门禁，单 worker，稳定配置）
-
-- 环境变量（可覆盖默认）
-  - `FP_P95_THRESHOLD_MS`：覆盖阈值（默认按环境：dev≤400 / staging≤300 / prod≤200）
-  - `FP_RUNS`：采样次数（默认 5）
- - `FP_SOFT_GATE` 或 `PERF_GATE_MODE`：`soft|hard`（CI 推荐 soft；预发/生产使用 hard）
-
-- 采样稳定化（测试侧）
-  - 复用单个 Electron 实例，多轮 `page.reload()`
-  - 业务就绪信号（`data-app-ready=true`）后，执行两帧 `requestAnimationFrame` 预热
- - 报告输出：`logs/e2e/<YYYY-MM-DD>/performance-first-paint/fcp-performance.json`
-
-详见：`docs/adr/ADR-0015-performance-budgets-and-gates.md` 的“Electron 环境附注”与“门禁策略”。
-
-## 7.y 架构依赖护栏（Godot + C# 模板）
-
-> 说明：本节为 newguild Godot+C# 模板增加最小依赖矩阵约束，避免 Core 层意外依赖 Godot/测试工程，或适配层/场景与测试工程发生反向耦合。具体规则由 ADR‑0007（端口与适配器）与 AGENTS.md 共同约束，本节只给出可执行检查的入口。
-
-### 7.y.1 项目级依赖矩阵（C# 工程）
-
-- `Game.Core/**`
-  - 允许依赖：.NET 标准库、`Game.Core` 自身命名空间。
-  - 禁止依赖：`Godot`、`Game.Godot`、`Tests.*`、`Tests.Godot` 等任何引擎或测试命名空间。
-- `Game.Godot/**`
-  - 允许依赖：`Godot`、`Game.Core` 与适配层接口（Ports）。
-  - 禁止依赖：任何 `Tests.*`/`Tests.Godot` 工程；禁止从 UI 直接依赖数据库/文件系统实现（必须通过适配层封装）。
-- `Game.Core.Tests/**`、`Game.Godot.Tests/**`、`Tests.Godot/**`
-  - 允许依赖：被测工程（Game.Core、Game.Godot）、测试库（xUnit/GdUnit4 等）。
-  - 禁止被非测试工程引用（测试工程只能作为依赖终点）。
-
-### 7.y.2 目录级依赖矩阵（Godot Scripts）
-
-- `Scripts/Core/**`
-  - 不得引用 Godot API 或任何 `Scripts/Adapters/**`、`Scripts/Scenes/**` 代码；
-  - 对外通过接口/Contracts 暴露能力，保持可单测性。
-- `Scripts/Adapters/**`
-  - 可以引用 Godot API 与 `Scripts/Core/**`；
-  - 不得依赖 `Scripts/Scenes/**`，避免 UI 细节反向渗透到适配层。
-- `Scripts/Scenes/**`
-  - 只通过 Adapters 或依赖注入使用 Core 能力，禁止直接依赖 Core 实现细节。
-
-### 7.y.3 依赖护栏检查与 CI 集成（规划）
-
-- 建议提供一个 Python 或 .NET 脚本，在 CI 中生成 `logs/ci/<date>/dependency-guard.json` 与简要文本摘要：
-  - 扫描 C# 工程引用（csproj）与 `using` 语句，检查是否违反 7.y.1 的项目级依赖矩阵；
-  - 扫描 `Scripts/Core`/`Scripts/Adapters`/`Scripts/Scenes` 目录，检查是否出现 Godot API 或跨层引用违规；
-  - 报告至少包含违规文件/命名空间/引用方向，便于在 PR 评审中定位问题。
-- 与 Taskmaster 集成：
-  - 通过 `.taskmaster/tasks/tasks_back.json` 中的专门 NG 任务（例如“架构依赖护栏与依赖图校验骨架”）约定依赖矩阵与脚本行为；
-  - 在 `windows-quality-gate` 或等价工作流中以软/硬门禁方式调用依赖护栏脚本，逐步收紧架构约束。
+- 前置：`Game.Godot/Scripts/Perf/PerformanceTracker.cs` 已启用（Autoload，默认按窗口采样并周期性输出 `[PERF]` 标记）。
+- 运行与产物（Windows）：
+  - 生成 headless 日志：`pwsh -File scripts/ci/smoke_headless.ps1 -GodotBin "$env:GODOT_BIN" -Scene "res://Game.Godot/Scenes/Main.tscn" -TimeoutSec 5`
+  - 门禁判定（直接脚本）：`pwsh -File scripts/ci/check_perf_budget.ps1 -MaxP95Ms <ms>`
+  - 门禁判定（质量门禁入口）：`pwsh -File scripts/ci/quality_gate.ps1 -GodotBin "$env:GODOT_BIN" -PerfP95Ms <ms>`
+- 说明：
+  - `check_perf_budget.ps1` 自动寻找 `logs/ci/**/smoke/headless.log` 的最新一份，并使用最后一次 `[PERF]` 刷新的 `p95_ms` 做比较。
+  - 阈值口径与环境策略以 `docs/adr/ADR-0015-performance-budgets-and-gates.md` 为准（本节不重复阈值表）。

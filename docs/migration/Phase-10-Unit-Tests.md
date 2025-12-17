@@ -9,13 +9,13 @@
 
 ## 目标
 
-将 vitegame 的 Jest + TypeScript 单元测试迁移到 newguild 的 xUnit + C# 单元测试，建立类型安全的测试套件与 AI-first 覆盖率门禁。
+将 旧项目 的 Jest + TypeScript 单元测试迁移到 newguild 的 xUnit + C# 单元测试，建立类型安全的测试套件与 AI-first 覆盖率门禁。
 
 ---
 
 ## 技术栈对比
 
-| 功能 | vitegame (Node.js) | newguild (.NET 8) |
+| 功能 | 旧项目 (Node.js) | newguild (.NET 8) |
 |-----|-------------------|-------------------|
 | 测试框架 | Jest 29 | xUnit 2.x |
 | 断言库 | Jest expect() | FluentAssertions |
@@ -50,7 +50,7 @@
 
 ## Jest 测试结构回顾
 
-### 典型 Jest 测试 (vitegame)
+### 典型 Jest 测试 (旧项目)
 
 ```typescript
 // src/domain/entities/Player.test.ts

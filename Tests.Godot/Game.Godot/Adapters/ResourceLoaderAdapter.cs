@@ -1,16 +1,16 @@
 using Godot;
 using Game.Core.Ports;
+using Game.Core.Domain;
 
 namespace Game.Godot.Adapters;
 
 public partial class ResourceLoaderAdapter : Node, IResourceLoader
 {
-    public string? LoadText(string path)
+    public string? LoadText(SafeResourcePath path)
     {
         try
         {
-            if (!IsPathSafe(path)) return null;
-            using var f = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+            using var f = FileAccess.Open(path.Value, FileAccess.ModeFlags.Read);
             if (f == null) return null;
             return f.GetAsText();
         }
@@ -20,12 +20,11 @@ public partial class ResourceLoaderAdapter : Node, IResourceLoader
         }
     }
 
-    public byte[]? LoadBytes(string path)
+    public byte[]? LoadBytes(SafeResourcePath path)
     {
         try
         {
-            if (!IsPathSafe(path)) return null;
-            using var f = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+            using var f = FileAccess.Open(path.Value, FileAccess.ModeFlags.Read);
             if (f == null) return null;
             return f.GetBuffer((long)f.GetLength());
         }
@@ -33,15 +32,5 @@ public partial class ResourceLoaderAdapter : Node, IResourceLoader
         {
             return null;
         }
-    }
-
-    private static bool IsPathSafe(string path)
-    {
-        if (string.IsNullOrEmpty(path)) return false;
-        var p = path.Trim();
-        if (!(p.StartsWith("res://", System.StringComparison.OrdinalIgnoreCase) || p.StartsWith("user://", System.StringComparison.OrdinalIgnoreCase)))
-            return false;
-        if (p.Contains("../")) return false;
-        return true;
     }
 }

@@ -2,11 +2,15 @@
 PRD-ID: PRD-Guild-Manager
 Title: PRD-Guild-Manager 功能纵切实现验收清单（Godot + C# 变体）
 Status: Template
+Arch-Refs:
+  - CH01
+  - CH03
 ADR-Refs:
   - ADR-0018  # Godot 4.5 + C# 技术栈
   - ADR-0019  # Godot 安全基线
   - ADR-0004  # 事件总线与契约
   - ADR-0005  # 质量门禁
+  - ADR-0003  # 可观测性与发布健康
   - ADR-0015  # 性能预算
 Test-Refs:
   # 具体项目应将占位路径替换为真实测试文件
@@ -21,7 +25,7 @@ Test-Refs:
 ---
 
 > 说明：本清单用于 **newguild（Godot 4.5 + C# 模板）** 下的 “PRD-Guild-Manager 公会管理器” 功能纵切验收骨架。
-> 旧版 Electron + React + TypeScript 的完整验收内容请参考迁移文档（docs/migration/**）与原 Electron 仓库，本文件不再作为 Electron 版本的 SSoT。
+> 旧版 旧桌面壳 + 旧前端框架 + TypeScript 的完整验收内容请参考迁移文档（docs/migration/**）与原 旧桌面壳 仓库，本文件不再作为 旧桌面壳 版本的 SSoT。
 
 本清单只做 **结构与对齐检查**，所有阈值/策略/门禁的具体口径一律引用：
 
@@ -56,14 +60,14 @@ Test-Refs:
 - [ ] 事件与契约：
   - 领域事件与 UI 事件命名遵循 `${DOMAIN_PREFIX}.<entity>.<action>`（见 ADR‑0004）
   - Contracts SSoT 存在于 `Game.Core` 或专门的 Contracts 项目（不依赖 Godot）
-  - 示例契约文件：`scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
-  - 当前 T2 最小事件集合（规划）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并计划分别落盘到 scripts/Core/Contracts/Guild/GuildCreated.cs、scripts/Core/Contracts/Guild/GuildMemberJoined.cs、scripts/Core/Contracts/Guild/GuildMemberLeft.cs
+  - 示例契约文件：`Game.Core/Contracts/Guild/GuildMemberJoined.cs`（per ADR-0020）
+  - 当前 T2 最小事件集合（规划）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并计划分别落盘到 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs
 - [ ] 事件命名规范验证（ADR-0004）：
   - 所有事件常量必须匹配正则：`^[a-z]+\.[a-z_]+\.[a-z_]+$`
   - 验证命令（扫描所有 EventType 常量定义）：
     ```bash
     # Windows PowerShell
-    Get-ChildItem -Recurse -Include *.cs scripts/Core/Contracts |
+    Get-ChildItem -Recurse -Include *.cs Game.Core/Contracts |
     Select-String 'EventType\s*=\s*"([^"]+)"' |
     ForEach-Object {
       if ($_.Matches.Groups[1].Value -notmatch '^[a-z]+\.[a-z_]+\.[a-z_]+$') {
@@ -75,10 +79,10 @@ Test-Refs:
     ```
   - 前缀一致性：所有事件必须以项目定义的 `DOMAIN_PREFIX` 开头（当前为 `core.`）
   - 禁止模式示例：
-    - ❌ CamelCase：`Core.GuildCreated`
-    - ❌ 混合分隔符：`core.guild-created`
-    - ❌ 缺少前缀：`member.joined`
-    - ✅ 正确格式：`core.guild.created`、`core.guild_member.joined`
+    - [FAIL] CamelCase：`Core.GuildCreated`
+    - [FAIL] 混合分隔符：`core.guild-created`
+    - [FAIL] 缺少前缀：`member.joined`
+    - [PASS] 正确格式：`core.guild.created`、`core.guild_member.joined`
 - [ ] 数据与存储：
   - SQLite 访问通过适配层封装（SqliteDataStore 或等价组件），仅使用 `user://` 路径，符合 ADR‑0006/0019 要求
   - Settings SSoT 为 ConfigFile（`user://settings.cfg`，见 ADR‑0023），DB 不再承载设置 SSoT 职责
@@ -124,7 +128,7 @@ Test-Refs:
 
 - [ ] xUnit 单元测试覆盖核心域逻辑：
   - Game.Core.Tests 中存在 Guild/事件引擎/AI 等模块的测试
-  - 覆盖率门禁：`py -3 scripts/python/run_dotnet.py test --coverage`（阈值 lines≥90%, branches≥85%，见 ADR-0005）
+  - 覆盖率门禁：`py -3 scripts/python/run_dotnet.py test --coverage`（阈值见 ADR-0005）
 - [ ] GdUnit4 场景/集成测试：
   - Tests.Godot 中有针对主场景、公会管理 UI、关键 Signals 的测试
   - 至少包含一条完整的“启动 → 主菜单 → 进入公会场景 → 简单操作 → 退出”冒烟用例
@@ -141,7 +145,7 @@ Test-Refs:
   - Godot 侧有性能采集组件（PerfTracker 或等价），在关键场景中输出性能数据
     - 开发环境：Godot 运行时输出到 `user://logs/perf/perf.json`
     - CI 环境：归档到项目相对路径 `logs/perf/<YYYY-MM-DD>/summary.json`
-  - 性能预算与 P95 等指标的具体阈值不在本清单重复，只需确认采集管线按 ADR‑0015/CH09 设计存在
+  - 性能预算与分位数等指标的具体阈值不在本清单重复，只需确认采集管线按 ADR‑0015/CH09 设计存在
 - [ ] 监控与日志：
   - Logger/ObservabilityClient（如已实现）能够针对关键事件/错误输出结构化日志
   - 日志与审计算法遵循 ADR‑0003/0019 的隐私与安全要求
@@ -167,10 +171,10 @@ Test-Refs:
       - [ ] Require branches to be up to date before merging
       - [ ] 必需状态检查清单（Required checks）：
         - `dotnet-typecheck-lint` - C# 类型检查与代码格式
-        - `dotnet-unit` - 单元测试 + 覆盖率门禁（≥90% lines, ≥85% branches）
+        - `dotnet-unit` - 单元测试 + 覆盖率门禁（阈值见 ADR-0005）
         - `godot-e2e` - Godot headless 冒烟/安全/性能测试
         - `task-links-validate` - ADR/CH/Overlay 回链校验
-        - `release-health` - Sentry Crash-Free 门禁（≥99.5%）
+        - `release-health` - Sentry 发布健康门禁（阈值见 ADR-0003）
     - [ ] 启用 "Do not allow bypassing the above settings"
     - [ ] 启用 "Restrict who can push to matching branches"（仅限 Admins）
   - **验证方法**（需要 repo admin 权限）：

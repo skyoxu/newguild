@@ -26,12 +26,24 @@ from __future__ import annotations
 
 import argparse
 import datetime as _dt
+import json
+import os
 import subprocess
 import sys
 from pathlib import Path
 
+from godot_cli import build_userdir_args, default_user_dir
 
-def _run_smoke(godot_bin: str, project: str, scene: str, timeout_sec: int, mode: str) -> int:
+
+def _run_smoke(
+    godot_bin: str,
+    project: str,
+    scene: str,
+    timeout_sec: int,
+    mode: str,
+    user_dir: str | None,
+    userdir_flag: str,
+) -> int:
     bin_path = Path(godot_bin)
     if not bin_path.is_file():
         print(f"[smoke_headless] GODOT_BIN not found: {godot_bin}", file=sys.stderr)
@@ -45,7 +57,8 @@ def _run_smoke(godot_bin: str, project: str, scene: str, timeout_sec: int, mode:
     err_path = dest / "headless.err.log"
     log_path = dest / "headless.log"
 
-    cmd = [str(bin_path), "--headless", "--path", project, "--scene", scene]
+    userdir_args, userdir_flag_used = build_userdir_args(str(bin_path), user_dir, preferred_flag=userdir_flag)
+    cmd = [str(bin_path)] + userdir_args + ["--headless", "--path", project, "--scene", scene]
     print(f"[smoke_headless] starting Godot: {' '.join(cmd)} (timeout={timeout_sec}s)")
 
     with out_path.open("w", encoding="utf-8", errors="ignore") as f_out, \
@@ -80,21 +93,66 @@ def _run_smoke(godot_bin: str, project: str, scene: str, timeout_sec: int, mode:
     has_db_open = "[DB] opened" in text
     has_any = bool(text.strip())
 
+    # Determine status and message
+    status = "unknown"
+    message = ""
+    exit_code = 0
+
     if has_marker:
-        print("SMOKE PASS (marker)")
+        status = "pass"
+        message = "SMOKE PASS (marker)"
+        print(message)
     elif has_db_open:
-        print("SMOKE PASS (db opened)")
+        status = "pass"
+        message = "SMOKE PASS (db opened)"
+        print(message)
     elif has_any:
-        print("SMOKE PASS (any output)")
+        status = "pass"
+        message = "SMOKE PASS (any output)"
+        print(message)
     else:
-        print("SMOKE INCONCLUSIVE (no output). Check logs.")
+        status = "inconclusive"
+        message = "SMOKE INCONCLUSIVE (no output). Check logs."
+        print(message)
 
     if mode == "strict":
         # 严格模式：至少需要 marker 或 DB opened
-        return 0 if (has_marker or has_db_open) else 1
+        if not (has_marker or has_db_open):
+            status = "strict-failed"
+            message = "SMOKE STRICT-FAILED: Required markers ([TEMPLATE_SMOKE_READY] or [DB] opened) not found"
+            print(message, file=sys.stderr)
+            exit_code = 1
+        else:
+            exit_code = 0
+    else:
+        # loose 模式永不作为硬门禁
+        exit_code = 0
 
-    # loose 模式永不作为硬门禁，只提供日志与提示
-    return 0
+    # Generate selfcheck-summary.json
+    summary = {
+        "timestamp": _dt.datetime.now().isoformat(),
+        "mode": mode,
+        "status": status,
+        "message": message,
+        "has_marker": has_marker,
+        "has_db_open": has_db_open,
+        "has_any_output": has_any,
+        "exit_code": exit_code,
+        "godot_bin": godot_bin,
+        "scene": scene,
+        "timeout_sec": timeout_sec,
+        "user_dir": user_dir,
+        "userdir_flag_used": userdir_flag_used,
+        "log_path": str(log_path),
+        "out_path": str(out_path),
+        "err_path": str(err_path)
+    }
+
+    summary_path = dest / "selfcheck-summary.json"
+    summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[smoke_headless] summary saved at {summary_path}")
+
+    return exit_code
 
 
 def main() -> int:
@@ -104,11 +162,23 @@ def main() -> int:
     parser.add_argument("--scene", default="res://Game.Godot/Scenes/Main.tscn", help="Scene to load")
     parser.add_argument("--timeout-sec", type=int, default=5, help="Timeout seconds before kill")
     parser.add_argument("--mode", choices=["loose", "strict"], default="loose", help="Gate mode")
+    parser.add_argument("--user-dir", default=None, help="Redirect Godot user:// to this directory (default: logs/_godot_userdir/<project>/smoke)")
+    parser.add_argument("--userdir-flag", default=os.environ.get("GODOT_USERDIR_FLAG", "auto"),
+                        help="Godot CLI flag for user dir (auto|--user-dir|--user-data-dir); env: GODOT_USERDIR_FLAG")
+    parser.add_argument("--no-userdir", action="store_true", help="Disable user dir redirection (writes to default OS location)")
 
     args = parser.parse_args()
-    return _run_smoke(args.godot_bin, args.project, args.scene, args.timeout_sec, args.mode)
+
+    user_dir = None
+    if not args.no_userdir:
+        user_dir = args.user_dir or default_user_dir(args.project, suffix="smoke")
+        try:
+            Path(user_dir).mkdir(parents=True, exist_ok=True)
+        except Exception:
+            user_dir = None
+
+    return _run_smoke(args.godot_bin, args.project, args.scene, args.timeout_sec, args.mode, user_dir, args.userdir_flag)
 
 
 if __name__ == "__main__":
     sys.exit(main())
-

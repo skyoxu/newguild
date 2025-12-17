@@ -1,14 +1,16 @@
 ---
 PRD-ID: PRD-Guild-Manager
 Title: CloudEvent 契约更新（事件封装与字段）
+Arch-Refs:
+  - CH01
+  - CH03
 ADR-Refs:
   - ADR-0004
   - ADR-0005
 Test-Refs:
-  - tests/unit/contracts/contracts-cloudevent.spec.ts
-  - tests/e2e/contracts/contracts-docs-sync.spec.ts
+  - Game.Core.Tests/Contracts/DomainEventTests.cs
 Contracts-Refs:
-  - src/shared/contracts/events/CloudEvent.ts
+  - Game.Core/Contracts/DomainEvent.cs
 Status: Proposed
 ---
 
@@ -21,7 +23,7 @@ Status: Proposed
 
 影响范围
 
-- 合同文件：`src/shared/contracts/events/CloudEvent.ts`
+- 合同文件：`Game.Core/Contracts/DomainEvent.cs`
 - 受影响模块：事件总线发布/订阅、日志关联与可观测性埋点
 
 验收要点（就地）
@@ -30,4 +32,4 @@ Status: Proposed
 
 示例：当前 Godot+C# 契约引用
 
-- 公会成员加入事件契约：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
+- 公会成员加入事件契约：`Game.Core/Contracts/Guild/GuildMemberJoined.cs`（per ADR-0020）

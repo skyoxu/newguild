@@ -2,15 +2,20 @@
 PRD-ID: PRD-Guild-Manager
 Title: 08 章功能纵切索引（契约与测试对齐）
 Updated: true
+Arch-Refs:
+  - CH01
+  - CH03
 ---
 
 本目录聚合本次契约变更的功能纵切页面与对应测试引用（仅引用 01/02/03 章口径，不在此复制阈值/策略）。
 
-- 预加载白名单（Preload Whitelist） — 见 `08-Contracts-Preload-Whitelist.md`
+- 外链白名单（ALLOWED_EXTERNAL_HOSTS） — 见 `08-Contracts-Allowed-External-Hosts.md`
 - CloudEvent 契约 — 见 `08-Contracts-CloudEvent.md`
+- CloudEvents Core 契约 — 见 `08-Contracts-CloudEvents-Core.md`
 - 公会管理事件（Guild Manager Events）— 见 `08-Contracts-Guild-Manager-Events.md`
 - 质量指标（Quality Metrics）— 见 `08-Contracts-Quality-Metrics.md`
+- 安全契约 — 见 `08-Contracts-Security.md`
 
 示例：当前 Godot+C# 契约引用
 
-- 公会成员加入事件契约：`Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
+- 公会成员加入事件契约：`Game.Core/Contracts/Guild/GuildMemberJoined.cs`（per ADR-0020）

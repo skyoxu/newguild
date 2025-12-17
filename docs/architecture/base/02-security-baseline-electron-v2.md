@@ -1,5 +1,5 @@
 ---
-title: 02 security baseline electron v2
+title: 02 security baseline 旧桌面壳 v2
 status: base-SSoT
 adr_refs: [ADR-0002, ADR-0005]
 placeholders: unknown-app, Unknown Product, unknown-product, gamedev, dev-team, dev-project, dev, 0.0.0, production
@@ -9,14 +9,14 @@ placeholders: unknown-app, Unknown Product, unknown-product, gamedev, dev-team, 
 THIS IS THE V2 BASE VERSION - CLEAN TEMPLATE WITH PLACEHOLDERS.
 All domain-specific terms replaced with ${DOMAIN_*} placeholders.
 Stable anchors preserved for cross-references.
-References: ADR-0002 (Electron Security Baseline), ADR-0005 (Quality Gates)
+References: ADR-0002 (旧桌面壳 Security Baseline), ADR-0005 (Quality Gates)
 -->
 
-# 02 安全基线（Electron）v2 - 深度防御体系
+# 02 安全基线（旧桌面壳）v2 - 深度防御体系
 
-> **目的**: 建立 Electron 应用的全面安全基线，覆盖进程隔离、IPC 安全、供应链防护等关键维度，确保 Unknown Product 在桌面环境下的安全运行。
+> **目的**: 建立 旧桌面壳 应用的全面安全基线，覆盖进程隔离、IPC 安全、供应链防护等关键维度，确保 Unknown Product 在桌面环境下的安全运行。
 
-> **v2 改进**: 对齐最新 Electron 安全最佳实践，强化自动化验证机制，整合 CSP 2.0 规范，建立完整的安全追踪体系。
+> **v2 改进**: 对齐最新 旧桌面壳 安全最佳实践，强化自动化验证机制，整合 CSP 2.0 规范，建立完整的安全追踪体系。
 
 ---
 
@@ -171,10 +171,10 @@ C4Container
 
 | 进程类型       | Node.js API         | 文件系统    | 网络访问    | 系统调用    | IPC通信        |
 | -------------- | ------------------- | ----------- | ----------- | ----------- | -------------- |
-| **主进程**     | ✅ 完全访问         | ✅ 完全访问 | ✅ 完全访问 | ✅ 完全访问 | ✅ 服务端      |
-| **渲染进程**   | ❌ 禁止             | ❌ 禁止     | ⚠️ 仅HTTPS  | ❌ 禁止     | ✅ 客户端      |
-| **预加载脚本** | ⚠️ 仅Context Bridge | ❌ 禁止     | ❌ 禁止     | ❌ 禁止     | ✅ 桥接        |
-| **Web Worker** | ❌ 禁止             | ❌ 禁止     | ⚠️ 仅HTTPS  | ❌ 禁止     | ⚠️ PostMessage |
+| **主进程**     | [PASS] 完全访问         | [PASS] 完全访问 | [PASS] 完全访问 | [PASS] 完全访问 | [PASS] 服务端      |
+| **渲染进程**   | [FAIL] 禁止             | [FAIL] 禁止     | [WARN] 仅HTTPS  | [FAIL] 禁止     | [PASS] 客户端      |
+| **预加载脚本** | [WARN] 仅Context Bridge | [FAIL] 禁止     | [FAIL] 禁止     | [FAIL] 禁止     | [PASS] 桥接        |
+| **Web Worker** | [FAIL] 禁止             | [FAIL] 禁止     | [WARN] 仅HTTPS  | [FAIL] 禁止     | [WARN] PostMessage |
 
 ### 关键配置强制要求
 
@@ -255,7 +255,7 @@ export const ALLOWED_IPC_CHANNELS: readonly SecureIpcChannel[] = [
 
 ---
 
-## 2.3 BrowserWindow 安全配置清单（Security Configuration Checklist）
+## 2.3 旧窗口容器 安全配置清单（Security Configuration Checklist）
 
 <!-- sec:2.3 -->
 
@@ -320,7 +320,7 @@ function setupEnhancedNavigationSecurity(webContents: WebContents): void {
     });
 
     if (!navigationDecision.allowed) {
-      console.warn(`🔒 导航被阻止: ${navigationUrl} (原因: ${navigationDecision.reason})`);
+      console.warn(` 导航被阻止: ${navigationUrl} (原因: ${navigationDecision.reason})`);
       event.preventDefault();
 
       // 发送安全事件到渲染进程
@@ -356,7 +356,7 @@ function setupEnhancedNavigationSecurity(webContents: WebContents): void {
     });
 
     if (windowOpenDecision.action === 'deny') {
-      console.warn(`🔒 新窗口创建被阻止: ${url} (原因: ${windowOpenDecision.reason})`);
+      console.warn(` 新窗口创建被阻止: ${url} (原因: ${windowOpenDecision.reason})`);
 
       // 通知渲染进程窗口创建被阻止
       webContents.send('security:window-open-blocked', {
@@ -378,7 +378,7 @@ function setupEnhancedNavigationSecurity(webContents: WebContents): void {
   // Step 3: 协调安全监控
   webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
     if (isMainFrame && errorCode === -3) { // ERR_ABORTED，可能是安全拦截导致
-      console.log(`🔒 主框架加载中止，可能被安全策略拦截: ${validatedURL}`);
+      console.log(` 主框架加载中止，可能被安全策略拦截: ${validatedURL}`);
     }
   });
 
@@ -544,13 +544,13 @@ function setupDualPermissionHandlers(session: Session, webContents: WebContents)
     const matchedOrigin = allowedOrigins.find(allowed => origin.startsWith(allowed));
 
     if (!matchedOrigin) {
-      console.warn(`🔒 权限检查拒绝：未授权来源 ${origin} 请求权限 ${permission}`);
+      console.warn(` 权限检查拒绝：未授权来源 ${origin} 请求权限 ${permission}`);
       return false;
     }
 
     const allowed = staticPermissions[matchedOrigin]?.includes(permission) || false;
     if (!allowed) {
-      console.warn(`🔒 权限检查拒绝：来源 ${matchedOrigin} 无权限 ${permission}`);
+      console.warn(` 权限检查拒绝：来源 ${matchedOrigin} 无权限 ${permission}`);
     }
     return allowed;
   });
@@ -573,7 +573,7 @@ function setupDualPermissionHandlers(session: Session, webContents: WebContents)
 
     if (highRiskPermissions.includes(permission)) {
       // 高风险权限：记录并拒绝（未来可增加用户确认对话框）
-      console.error(`🔒 高风险权限请求被拒绝: ${permission} from ${origin}`);
+      console.error(` 高风险权限请求被拒绝: ${permission} from ${origin}`);
 
       // 发送安全事件到监控系统
       webContents.send('security:permission-denied', {
@@ -597,13 +597,13 @@ function setupDualPermissionHandlers(session: Session, webContents: WebContents)
         webContents
       });
 
-      console.log(`🔒 中风险权限决策: ${permission} -> ${shouldAllow ? '允许' : '拒绝'}`);
+      console.log(` 中风险权限决策: ${permission} -> ${shouldAllow ? '允许' : '拒绝'}`);
       callback(shouldAllow);
       return;
     }
 
     // 默认拒绝未知权限
-    console.warn(`🔒 未知权限请求被拒绝: ${permission} from ${origin}`);
+    console.warn(` 未知权限请求被拒绝: ${permission} from ${origin}`);
     callback(false);
   });
 }
@@ -700,11 +700,11 @@ export function verifySecurityConfig(configPath) {
 if (process.argv[2]) {
   const violations = verifySecurityConfig(process.argv[2]);
   if (violations.length > 0) {
-    console.error('❌ Security violations detected:');
+    console.error('[FAIL] Security violations detected:');
     violations.forEach(v => console.error(`  - ${v}`));
     process.exit(1);
   } else {
-    console.log('✅ Security configuration verified');
+    console.log('[PASS] Security configuration verified');
   }
 }
 ```
@@ -910,7 +910,7 @@ export function installCspHeaderV2(ses: Session, env = process.env.NODE_ENV) {
         'X-Content-Type-Options': ['nosniff'],
         'X-Frame-Options': ['DENY'],
         'Referrer-Policy': ['strict-origin-when-cross-origin'],
-        // 🆕 现代跨源隔离安全头（防御Spectre攻击）
+        //  现代跨源隔离安全头（防御Spectre攻击）
         'Cross-Origin-Opener-Policy': ['same-origin'],
         'Cross-Origin-Embedder-Policy': ['require-corp'],
         'Cross-Origin-Resource-Policy': ['cross-origin'],
@@ -1013,7 +1013,7 @@ export function updateProductionCsp(distDir: string): void {
 
   fs.writeFileSync(indexPath, indexHtml);
   console.log(
-    `✅ CSP生产配置已更新，包含${scripts.length}个脚本hash和${styles.length}个样式hash`
+    `[PASS] CSP生产配置已更新，包含${scripts.length}个脚本hash和${styles.length}个样式hash`
   );
 }
 ```
@@ -1037,7 +1037,7 @@ export class CspReporter {
 
     // 严重违规立即记录
     if (['script-src', 'object-src'].includes(report.violatedDirective)) {
-      console.error('🔒 Critical CSP violation:', report);
+      console.error(' Critical CSP violation:', report);
     }
   }
 
@@ -1285,7 +1285,7 @@ import { createHash } from 'crypto';
 import { writeFileSync, readdirSync, readFileSync } from 'fs';
 
 export async function buildAndSign() {
-  console.log('🔨 Building and signing application...');
+  console.log(' Building and signing application...');
 
   // 1. 构建应用
   await build({
@@ -1317,7 +1317,7 @@ export async function buildAndSign() {
 
   // 3. 生成校验和
   generateChecksums();
-  console.log('✅ Build complete');
+  console.log('[PASS] Build complete');
 }
 
 function generateChecksums() {
@@ -1382,7 +1382,7 @@ function generateChecksums() {
 
 <!-- sec:2.7 -->
 
-### Playwright Electron 安全测试
+### 旧端到端测试工具 旧桌面壳 安全测试
 
 ```typescript
 // tests/e2e/security.smoke.spec.ts
@@ -1489,7 +1489,7 @@ const scanFiles = async () => {
     const content = fs.readFileSync(file, 'utf-8');
     for (const { pattern, severity, message } of SECURITY_PATTERNS) {
       if (pattern.test(content) && ['critical', 'high'].includes(severity)) {
-        console.log(`❌ ${file} [${severity}] ${message}`);
+        console.log(`[FAIL] ${file} [${severity}] ${message}`);
         violations++;
       }
     }
@@ -1510,10 +1510,10 @@ const auditDeps = () => {
 // 执行完整扫描
 const violations = (await scanFiles()) + auditDeps();
 if (violations > 0) {
-  console.log('💥 Security scan failed');
+  console.log(' Security scan failed');
   process.exit(1);
 }
-console.log('✅ Security scan passed');
+console.log('[PASS] Security scan passed');
 ```
 
 ---
@@ -1526,11 +1526,11 @@ console.log('✅ Security scan passed');
 
 | ID      | 需求                 | ADR引用            | 测试覆盖                          | 状态 |
 | ------- | -------------------- | ------------------ | --------------------------------- | ---- |
-| SEC-001 | 进程隔离             | ADR-0002           | tests/e2e/security.smoke.spec.ts  | ✅   |
-| SEC-002 | Context Bridge白名单 | ADR-0002, ADR-0004 | tests/e2e/security.smoke.spec.ts  | ✅   |
-| SEC-003 | 严格CSP防护          | ADR-0002           | tests/e2e/security.smoke.spec.ts  | ✅   |
-| SEC-004 | 供应链安全           | ADR-0002           | scripts/security-static-scan.mjs  | 🔄   |
-| SEC-005 | 安全监控             | ADR-0003           | src/main/security/csp-reporter.ts | ✅   |
+| SEC-001 | 进程隔离             | ADR-0002           | tests/e2e/security.smoke.spec.ts  | [PASS]   |
+| SEC-002 | Context Bridge白名单 | ADR-0002, ADR-0004 | tests/e2e/security.smoke.spec.ts  | [PASS]   |
+| SEC-003 | 严格CSP防护          | ADR-0002           | tests/e2e/security.smoke.spec.ts  | [PASS]   |
+| SEC-004 | 供应链安全           | ADR-0002           | scripts/security-static-scan.mjs  |    |
+| SEC-005 | 安全监控             | ADR-0003           | src/main/security/csp-reporter.ts | [PASS]   |
 
 ---
 
@@ -1543,31 +1543,31 @@ console.log('✅ Security scan passed');
 ```markdown
 # 安全基线验收清单
 
-## 开发配置 ✅
+## 开发配置 [PASS]
 
 - [ ] Electron: nodeIntegration=false, contextIsolation=true, sandbox=true
 - [ ] CSP: 严格策略，object-src='none', script-src='self'
 - [ ] Context Bridge: 白名单API，参数验证，速率限制
 
-## 代码质量 ✅
+## 代码质量 [PASS]
 
 - [ ] 静态扫描: 无eval()、innerHTML直接赋值、document.write()
 - [ ] 依赖安全: npm audit通过，许可证合规
 - [ ] IPC安全: 白名单通道，类型验证，频率限制
 
-## 自动化测试 ✅
+## 自动化测试 [PASS]
 
 - [ ] E2E测试: Playwright覆盖关键安全场景
 - [ ] 单元测试: 安全配置验证≥90%覆盖率
 - [ ] CSP测试: 违规阻止和报告功能验证
 
-## 构建分发 ✅
+## 构建分发 [PASS]
 
 - [ ] 代码签名: Windows Authenticode, macOS公证, Linux GPG
 - [ ] 构建安全: 环境隔离，SHA256校验和生成
 - [ ] 依赖扫描: 构建流程集成安全扫描
 
-## 生产监控 ✅
+## 生产监控 [PASS]
 
 - [ ] 监控配置: 安全事件监控，CSP违规报告
 - [ ] 应急响应: 响应流程文档化，紧急更新机制
@@ -1586,14 +1586,14 @@ const execAsync = promisify(exec);
 let results = { passed: 0, failed: 0, warnings: 0 };
 
 const log = (status, msg) => {
-  const icon = status === 'passed' ? '✅' : status === 'failed' ? '❌' : '⚠️';
+  const icon = status === 'passed' ? '[PASS]' : status === 'failed' ? '[FAIL]' : '[WARN]';
   console.log(`  ${icon} ${msg}`);
   results[status]++;
 };
 
 // 验证Electron安全配置
 const validateElectronConfig = async () => {
-  console.log('\n📋 Phase 1: Electron安全配置验证...');
+  console.log('\n Phase 1: Electron安全配置验证...');
   const files = await glob('src/main/**/*.{js,ts}');
   const patterns = {
     'nodeIntegration: false': /nodeIntegration:\s*false/,
@@ -1622,7 +1622,7 @@ const validateElectronConfig = async () => {
 
 // 验证CSP配置
 const validateCSP = () => {
-  console.log('\n📋 Phase 2: CSP配置验证...');
+  console.log('\n Phase 2: CSP配置验证...');
   const indexPath = 'public/index.html';
   if (!fs.existsSync(indexPath)) {
     log('failed', 'index.html文件不存在');
@@ -1651,7 +1651,7 @@ const validateCSP = () => {
 
 // 完整验收执行
 const runFullValidation = async () => {
-  console.log('🔒 Security Acceptance Validation');
+  console.log(' Security Acceptance Validation');
   console.log('================================');
 
   await validateElectronConfig();
@@ -1666,16 +1666,16 @@ const runFullValidation = async () => {
   }
 
   // 生成报告
-  console.log('\n📊 最终报告');
+  console.log('\n 最终报告');
   console.log(
-    `✅ 通过: ${results.passed}, ❌ 失败: ${results.failed}, ⚠️ 警告: ${results.warnings}`
+    `[PASS] 通过: ${results.passed}, [FAIL] 失败: ${results.failed}, [WARN] 警告: ${results.warnings}`
   );
 
   if (results.failed > 0) {
-    console.log('💥 安全验收失败');
+    console.log(' 安全验收失败');
     process.exit(1);
   } else {
-    console.log('🎉 安全验收通过');
+    console.log(' 安全验收通过');
   }
 };
 
@@ -1687,13 +1687,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 ---
 
-**📋 第2部分完成确认**
+** 第2部分完成确认**
 
-- ✅ **小节2.5**: IPC/ContextBridge 白名单策略完整实现
-- ✅ **小节2.6**: 供应链/签名与公证配置详细
-- ✅ **小节2.7**: 自动化验证（Playwright E2E + 静态扫描）
-- ✅ **小节2.8**: 追踪表（Overlay/ADR/Test/SLO 映射）
-- ✅ **小节2.9**: 验收清单（6阶段完整流程）
-- ✅ **硬约束覆盖**: nodeIntegration=false, contextIsolation=true, sandbox=true, 严格CSP, preload仅白名单导出
-- ✅ **ADR引用**: ADR-0002, ADR-0005明确引用
-- ✅ **稳定锚点**: 所有小节包含 `<!-- sec:X.X -->` 交叉引用标识
+- [PASS] **小节2.5**: IPC/ContextBridge 白名单策略完整实现
+- [PASS] **小节2.6**: 供应链/签名与公证配置详细
+- [PASS] **小节2.7**: 自动化验证（旧端到端测试工具 E2E + 静态扫描）
+- [PASS] **小节2.8**: 追踪表（Overlay/ADR/Test/SLO 映射）
+- [PASS] **小节2.9**: 验收清单（6阶段完整流程）
+- [PASS] **硬约束覆盖**: nodeIntegration=false, contextIsolation=true, sandbox=true, 严格CSP, preload仅白名单导出
+- [PASS] **ADR引用**: ADR-0002, ADR-0005明确引用
+- [PASS] **稳定锚点**: 所有小节包含 `<!-- sec:X.X -->` 交叉引用标识

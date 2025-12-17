@@ -16,11 +16,13 @@ public partial class SecurityAuditLogger : Node
 {
     private const string AuditLogPath = "user://logs/security-audit.jsonl";
     private readonly IEventBus _eventBus;
+    private readonly SecurityFileAdapter _securityFileAdapter;
     private bool _isSubscribed;
 
-    public SecurityAuditLogger(IEventBus eventBus)
+    public SecurityAuditLogger(IEventBus eventBus, SecurityFileAdapter securityFileAdapter)
     {
         _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        _securityFileAdapter = securityFileAdapter ?? throw new ArgumentNullException(nameof(securityFileAdapter));
     }
 
     public override void _Ready()
@@ -96,8 +98,16 @@ public partial class SecurityAuditLogger : Node
             WriteIndented = false // JSONL format: one line per entry
         });
 
+        // Validate audit log path before writing
+        var validatedPath = _securityFileAdapter.ValidateWritePath(AuditLogPath);
+        if (validatedPath == null)
+        {
+            GD.PrintErr($"[SecurityAuditLogger] Write access denied: {AuditLogPath}");
+            return;
+        }
+
         // Append to JSONL file (one JSON object per line)
-        using var file = FileAccess.Open(AuditLogPath, FileAccess.ModeFlags.ReadWrite);
+        using var file = FileAccess.Open(validatedPath.Value, FileAccess.ModeFlags.ReadWrite);
         if (file != null)
         {
             file.SeekEnd();
@@ -107,13 +117,28 @@ public partial class SecurityAuditLogger : Node
         await Task.CompletedTask;
     }
 
-    private static void EnsureLogDirectoryExists()
+    private void EnsureLogDirectoryExists()
     {
         const string logDir = "user://logs";
 
-        if (!DirAccess.DirExistsAbsolute(logDir))
+        // Validate log directory path
+        var validatedLogDir = _securityFileAdapter.ValidateWritePath(logDir);
+        if (validatedLogDir == null)
         {
-            var dir = DirAccess.Open("user://");
+            GD.PrintErr($"[SecurityAuditLogger] Cannot validate log directory: {logDir}");
+            return;
+        }
+
+        if (!DirAccess.DirExistsAbsolute(validatedLogDir.Value))
+        {
+            var validatedUserDir = _securityFileAdapter.ValidateWritePath("user://");
+            if (validatedUserDir == null)
+            {
+                GD.PrintErr("[SecurityAuditLogger] Cannot validate user:// directory");
+                return;
+            }
+
+            var dir = DirAccess.Open(validatedUserDir.Value);
             if (dir != null)
             {
                 var err = dir.MakeDir("logs");

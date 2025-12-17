@@ -30,12 +30,12 @@ supersedes: []
 
 ## Context
 
-需要一套统一的可观测性与发布健康（Release Health）机制：在 Electron 主进程与每个渲染进程尽早初始化 Sentry，启用会话跟踪、错误采集与结构化日志，使用 Crash‑Free Users/Sessions 作为发布门禁的核心指标；同时满足隐私合规与 Windows-only 仓库的运行规范（日志统一落盘 `logs/`）。
+需要一套统一的可观测性与发布健康（Release Health）机制：在 旧桌面壳 主进程与每个渲染进程尽早初始化 Sentry，启用会话跟踪、错误采集与结构化日志，使用 Crash‑Free Users/Sessions 作为发布门禁的核心指标；同时满足隐私合规与 Windows-only 仓库的运行规范（日志统一落盘 `logs/`）。
 
 **重要术语澄清**：
 
 - **Release Health Gate（本 ADR 范围）**：基于 Sentry Sessions/Users 的 Crash-Free 指标进行发布健康评估（如 24h ≥ 99.5%），属于可观测性与崩溃监控范畴。数据源为 Sentry SDK 自动收集的会话数据。
-- **Gameplay Telemetry Gate（已移除）**：曾基于游戏内自定义埋点事件（如 first_build、first_wave 等）衡量可玩度与会话质量的门禁，依赖本地 SQLite/JSON 存储。该实现已于 2025 年完全移除（`electron/telemetry/**`、`scripts/export-telemetry-metrics.mjs`），替代方案为 T2 Playable E2E + 性能基线 Gate（见 ADR-0005）。
+- **Gameplay Telemetry Gate（已移除）**：曾基于游戏内自定义埋点事件（如 first_build、first_wave 等）衡量可玩度与会话质量的门禁，依赖本地 SQLite/JSON 存储。该实现已于 2025 年完全移除（`旧桌面壳/telemetry/**`、`scripts/export-telemetry-metrics.mjs`），替代方案为 T2 Playable E2E + 性能基线 Gate（见 ADR-0005）。
 
 ## Decision
 
@@ -69,13 +69,13 @@ supersedes: []
 
 - CH 章节：CH01、CH03、CH07
 - 相关 ADR：ADR‑0005（质量门禁）、ADR‑0002（安全）
-- 外部：Sentry Electron, Release Health 文档
+- 外部：Sentry 旧桌面壳, Release Health 文档
 - Godot 变体实现与规划：`docs/migration/Phase-16-Observability-Sentry-Integration.md`、`docs/migration/Phase-16-Observability-Backlog.md`
 ---
 
 ## Addendum (2025-11-08): Godot Alignment
 
-- SDK: Replace Electron integration with Sentry Godot SDK. Initialize in an Autoload singleton during project startup; scrub PII at source（当前模板尚未集成，具体任务参见 Phase-16 Backlog B1/B2）。
+- SDK: Replace 旧桌面壳 integration with Sentry Godot SDK. Initialize in an Autoload singleton during project startup; scrub PII at source（当前模板尚未集成，具体任务参见 Phase-16 Backlog B1/B2）。
 - Sessions/Release Health: Map Godot sessions to releases; keep Crash-Free Users/Sessions as primary gates. Keep logs under `logs/YYYYMMDD/observability/`（当前模板仍以本地 JSONL 日志与测试报告为主，不提供 Release Health 硬门禁）。
 - Test/CI: Collect GdUnit4 JUnit/XML and HTML reports under `reports/`; aggregate into CI summary. Windows-only runners (`pwsh`) remain.
 - Config: Provide `sentry.dsn` and environment via `project.godot` or environment variables; disallow hard-coded secrets。

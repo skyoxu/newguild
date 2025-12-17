@@ -6,19 +6,19 @@ decision-time: '2025-08-17'
 deciders: [架构团队, 安全团队]
 archRefs: [CH01, CH02, CH03, CH04]
 verification:
-  - path: electron/security/handlers.ts
+  - path: 旧桌面壳/security/handlers.ts
     assert: nodeIntegration=false, contextIsolation=true, sandbox=true are enforced
   - path: tests/e2e/security.spec.ts
     assert: External windows denied by default and non-whitelisted navigations blocked
   - path: scripts/security/scan-csp.mjs
     assert: Production CSP contains no 'unsafe-inline' and connect-src is whitelisted only
-  - path: electron/security/permissions.ts
+  - path: 旧桌面壳/security/permissions.ts
     assert: PermissionRequest/PermissionCheck handlers default-deny
-impact-scope: [electron/, preload/, security/, tests/e2e/security/]
-tech-tags: [electron, security, sandbox, CSP, contextIsolation, nodeIntegration]
+impact-scope: [旧桌面壳/, 旧预加载脚本/, security/, tests/e2e/security/]
+tech-tags: [旧桌面壳, security, sandbox, CSP, contextIsolation, nodeIntegration]
 depends-on: []
 depended-by: [ADR-0005, ADR-0008]
-test-coverage: tests/e2e/security/electron-security.spec.ts
+test-coverage: tests/e2e/security/旧桌面壳-security.spec.ts
 monitoring-metrics:
   [
     security_config_compliance,
@@ -26,8 +26,8 @@ monitoring-metrics:
     security_csp_violations,
   ]
 executable-deliverables:
-  - electron/security.ts
-  - tests/e2e/security/electron-security.spec.ts
+  - 旧桌面壳/security.ts
+  - tests/e2e/security/旧桌面壳-security.spec.ts
   - scripts/scan_electron_safety.mjs
 supersedes: []
 ---
@@ -173,7 +173,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 #### 1. 配置安全验证
 
-- **测试验证**: tests/e2e/security/electron-config.spec.ts
+- **测试验证**: tests/e2e/security/旧桌面壳-config.spec.ts
 - **门禁脚本**: scripts/scan_electron_safety.mjs
 - **监控指标**: security.config_compliance, security.sandbox_enabled
 - **验证频率**: 每次构建 + 每日定时扫描
@@ -207,7 +207,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 #### 3. Preload脚本安全验证
 
-- **测试验证**: tests/unit/security/preload-whitelist.spec.ts
+- **测试验证**: tests/unit/security/旧预加载脚本-whitelist.spec.ts
 - **门禁脚本**: scripts/audit_preload_apis.mjs
 - **监控指标**: security.api_exposure_count, security.dangerous_apis
 - **验证频率**: 每次代码提交 + 安全审计
@@ -342,8 +342,8 @@ const PROHIBITED_LICENSES = [
 
 **理由**：
 
-- **GPL/AGPL**: 强 Copyleft 许可证，要求整个项目开源，与商业闭源 Electron 应用不兼容
-- **LGPL**: 虽然比 GPL 宽松，但在 Electron 动态链接场景下仍存在合规风险，禁止使用以避免法律纠纷
+- **GPL/AGPL**: 强 Copyleft 许可证，要求整个项目开源，与商业闭源 旧桌面壳 应用不兼容
+- **LGPL**: 虽然比 GPL 宽松，但在 旧桌面壳 动态链接场景下仍存在合规风险，禁止使用以避免法律纠纷
 
 **允许的许可证（Permissive）**：
 
@@ -473,9 +473,9 @@ const blocksMerge =
 - **CH章节关联**: CH01, CH02
 - **相关ADR**: ADR-0004-event-bus-and-contracts, ADR-0005-quality-gates
 - **外部文档**:
-  - [Electron Security Guide](https://www.electronjs.org/docs/tutorial/security)
+  - [旧桌面壳 Security Guide](https://www.electronjs.org/docs/tutorial/security)
   - [Electronegativity Scanner](https://github.com/doyensec/electronegativity)
-  - [OWASP Electron Security](https://owasp.org/www-project-electron-security/)
+  - [OWASP 旧桌面壳 Security](https://owasp.org/www-project-旧桌面壳-security/)
   - [CSP Level 3 Specification](https://www.w3.org/TR/CSP3/)
 - **安全工具**: Electronegativity, ESLint security rules, Snyk vulnerability scanner, npm audit, license-checker
 - **合规框架**: SOC2 CC6.1, ISO27001 A.12.6.1

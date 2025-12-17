@@ -152,7 +152,7 @@ public partial class {{CLASS_NAME}} : {{BASE_CLASS}}
 
    - Core 层:
      - 推荐路径: `Game.Core/Domain/<脚本名称>.cs` 或 `Game.Core/Services/<脚本名称>.cs`
-     - 若是纯契约/事件/DTO，则使用 `Scripts/Core/Contracts/**`，该目录是 Contracts 的 SSoT
+     - 若是纯契约/事件/DTO，则使用 `Game.Core/Contracts/**`，该目录是 Contracts 的 SSoT
      - 要求: 不引用任何 Godot 类型，保持可单元测试
    - Adapter 层:
      - 推荐路径: `Game.Godot/Adapters/<脚本名称>.cs` 或子目录（例如 Security/Db 等）

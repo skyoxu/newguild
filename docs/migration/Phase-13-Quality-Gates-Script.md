@@ -10,9 +10,9 @@
 
 ## 1. 背景与动机
 
-### 原版（vitegame）质量控制
-- Electron + JavaScript/TypeScript
-- Playwright E2E + Vitest 单元测试
+### 原版（旧项目）质量控制
+- 旧桌面壳 + JavaScript/TypeScript
+- 旧端到端测试工具 E2E + 旧单元测试工具 单元测试
 - ESLint + Prettier 自动化
 - GitHub Actions 单一工作流
 

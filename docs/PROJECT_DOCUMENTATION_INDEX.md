@@ -1,7 +1,7 @@
 # 项目完整文档索引
 
 > 最后更新: 2025-11-06
-> 项目: vitegame — Phaser 3 + React 19 + Electron 桌面游戏框架
+> 项目: 旧项目 — 旧游戏引擎 3 + 旧前端框架 19 + 旧桌面壳 桌面游戏框架
 > 核心理念: AI 优先 + arc42/C4 规范 + 不可回退基座（Base/Overlay 分离）
 
 ---
@@ -25,6 +25,19 @@
 - [README.md](README.md) — 文档导航中心
 - [CONTRIBUTING.md](../CONTRIBUTING.md) — 贡献指南
 
+### Release / Sentry / CI 流水线
+- [WINDOWS_MANUAL_RELEASE.md](release/WINDOWS_MANUAL_RELEASE.md) — Windows 手动发布与导出指引
+- [GM-NG-T2-playable-guide.md](workflows/GM-NG-T2-playable-guide.md) — sanguo 可玩度 / Release 工作流与 Sentry 软门禁说明
+- [serena-mcp-command-reference.md](workflows/serena-mcp-command-reference.md) — Serena / Codex CLI 命令与常用任务入口
+- [superclaude-command-reference.md](workflows/superclaude-command-reference.md) — SuperClaude 工作流与常见命令说明
+- [task-master-superclaude-integration.md](workflows/task-master-superclaude-integration.md) — Taskmaster + SuperClaude 集成与任务回链规范
+
+### Release / Sentry / CI 流水线
+- [WINDOWS_MANUAL_RELEASE.md](release/WINDOWS_MANUAL_RELEASE.md) — Windows 手动发布与导出指引
+- [PRD-NEWGUILD-VS-0001.md](prd/PRD-NEWGUILD-VS-0001.md) — 示例垂直切片 PRD（包含 Test-Refs 与 Release 约束）
+- [GM-NG-T2-playable-guide.md](workflows/GM-NG-T2-playable-guide.md) — newguild 可玩度 T2 流水线说明
+- [task-master-superclaude-integration.md](workflows/task-master-superclaude-integration.md) — Taskmaster + SuperClaude 集成与任务回链
+
 ---
 
 ## 1. ADR（架构决策记录）
@@ -32,8 +45,8 @@
 说明: 以 `docs/adr/` 目录的实际文件为准（建议由 CI 自动统计并更新此节计数）。当前仓库计数: 15。
 
 ### 基础技术栈（ADR-0001 ~ 0010）
-- [ADR-0001-tech-stack.md](adr/ADR-0001-tech-stack.md) — 技术栈选型（React 19 / Electron / Phaser 3 / TS / Vite）
-- [ADR-0002-electron-security.md](adr/ADR-0002-electron-security.md) — Electron 安全基线（CSP、nodeIntegration=false、contextIsolation=true）
+- [ADR-0001-tech-stack.md](adr/ADR-0001-tech-stack.md) — 技术栈选型（旧前端框架 19 / 旧桌面壳 / 旧游戏引擎 3 / TS / 旧构建工具）
+- [ADR-0002-旧桌面壳-security.md](adr/ADR-0002-旧桌面壳-security.md) — 旧桌面壳 安全基线（CSP、nodeIntegration=false、contextIsolation=true）
 - [ADR-0003-observability-release-health.md](adr/ADR-0003-observability-release-health.md) — 可观测性与发布健康（Sentry 集成，崩溃率阈值 99.5%）
 - [ADR-0004-event-bus-and-contracts.md](adr/ADR-0004-event-bus-and-contracts.md) — 事件总线与契约（CloudEvents 1.0，4 段式模板 + Godot 事件命名/适配变体）
 - [ADR-0005-quality-gates.md](adr/ADR-0005-quality-gates.md) — 质量门禁（覆盖率、ESLint、性能、Bundle 大小）
@@ -47,7 +60,7 @@
 ### 平台与质量约束（ADR-0011 ~ 0017）
 - [ADR-0011-windows-only-platform-and-ci.md](adr/ADR-0011-windows-only-platform-and-ci.md) — Windows 平台策略
 - [ADR-0012-pr-template-conditional-rendering.md](adr/ADR-0012-pr-template-conditional-rendering.md) — PR 模板动态渲染
-- [ADR-0015-performance-budgets-and-gates.md](adr/ADR-0015-performance-budgets-and-gates.md) — 性能预算与门禁（P95 阈值、Bundle 限制、首屏优化）
+- [ADR-0015-performance-budgets-and-gates.md](adr/ADR-0015-performance-budgets-and-gates.md) — 性能预算与门禁（帧时间 P95、场景切换、内存预算）
 - [ADR-0016-api-contracts-openapi.md](adr/ADR-0016-api-contracts-openapi.md) — API 契约（OpenAPI）
 - [ADR-0017-quality-intelligence-dashboard-and-governance.md](adr/ADR-0017-quality-intelligence-dashboard-and-governance.md) — 质量智能看板
 
@@ -62,7 +75,7 @@
 
 核心章节:
 1. [01-introduction-and-goals-v2.md](architecture/base/01-introduction-and-goals-v2.md) — 项目目标、质量目标、利益相关方（引: ADR-0001/0002/0003）
-2. [02-security-baseline-electron-v2.md](architecture/base/02-security-baseline-electron-v2.md) — Electron 安全基线（引: ADR-0002）
+2. [02-security-baseline-旧桌面壳-v2.md](architecture/base/02-security-baseline-旧桌面壳-v2.md) — 旧桌面壳 安全基线（引: ADR-0002）
 3. [03-observability-sentry-logging-v2.md](architecture/base/03-observability-sentry-logging-v2.md) — Sentry、结构化日志、Release Health（引: ADR-0003）
 4. [04-system-context-c4-event-flows-v2.md](architecture/base/04-system-context-c4-event-flows-v2.md) — C4 上下文、事件流、CloudEvents（引: ADR-0004）
 5. [05-data-models-and-storage-ports-v2.md](architecture/base/05-data-models-and-storage-ports-v2.md) — 数据模型与存储端口（Godot+C#：ConfigFile + SQLite，见 ADR-0006/0007/0023）
@@ -115,8 +128,8 @@
   - 脚本: `scripts/ci/coverage-gate.cjs`
 - 性能预算（ADR-0015）
   - 指标: P95（FCP/场景切换）、Bundle 大小限制
-  - 本地: `node scripts/ci/bundle-budget-gate.mjs`、`node scripts/ci/compare-playwright-perf.mjs`
-- Electron 安全基线（ADR-0002）
+  - 本地: `node scripts/ci/bundle-budget-gate.mjs`、`node scripts/ci/compare-旧端到端测试工具-perf.mjs`
+- 旧桌面壳 安全基线（ADR-0002）
   - 基线: CSP、`nodeIntegration=false`、`contextIsolation=true`、预加载白名单
   - 本地: `node scripts/comprehensive-security-validation.mjs`
 - 契约/文档一致性（ADR-0004）
@@ -169,7 +182,7 @@ print(f'Created: {dst}')
 - 必选检查与顺序：`docs/implementation-plans/required-checks.md`（lint/typecheck/unit/e2e/coverage/bundle/release health）
 - 静态质量门禁：`docs/implementation-plans/static-quality-gates.md`（重复度 ≤2%、圈复杂度 CC≤10/均值≤5；影子 vs 硬门）
 - 发布健康与回滚：`docs/implementation-plans/Phase-6-Release-Health-and-Auto-Rollback.md`（Sentry Release Health + GitHub Deployments + 自动回滚）
-- 性能回归检测：`docs/implementation-plans/Phase-8-Performance-Regression-Implementation-Plan.md`（Lighthouse/Bundle/Playwright；阈值引自 ADR‑0015）
+- 性能回归检测：`docs/implementation-plans/Phase-8-Performance-Regression-Implementation-Plan.md`（Lighthouse/Bundle/旧端到端测试工具；阈值引自 ADR‑0015）
 - 依赖安全审计：`docs/implementation-plans/Phase-9-Dependency-Security-Implementation-Plan.md`（npm audit + license-checker；GPL/AGPL 禁止；阻塞合并）
 - AI 审查工作流：`docs/implementation-plans/Phase-7.2-AI-Developer-Review-Workflow.md`（规范实现；交互式深度审查）；`Phase-7-*.md` 为历史/已废弃说明
 - 任务反链与 Schema：`docs/implementation-plans/taskmaster-pr-backlinking.md`、`taskmaster-pr-schema.md`（PR ↔ Task 反链契约）
@@ -262,19 +275,18 @@ print(f'Created: {dst}')
 - [mcpsetup.md](../mcpsetup.md) — MCP 服务器配置
 
 ### 测试与调试
-- [playwright-config-analysis.md](playwright-config-analysis.md) — Playwright 配置分析
+- [旧端到端测试工具-config-analysis.md](旧端到端测试工具-config-analysis.md) — 旧端到端测试工具 配置分析
 - [e2e-test-failure-root-cause-analysis.md](e2e-test-failure-root-cause-analysis.md) — E2E 失败根因分析
 - [individual-test-results.md](individual-test-results.md) — 独立测试结果
 
 ### AI 助手索引（自动更新与校验）
-- 本地更新
-  - 手动执行：`py -3 scripts/python/update_ai_index.py --write`（推荐在修改 AGENTS/CLAUDE/.claude/commands/** 或 AI 工作流文档后运行）。
-  - 如需自动化，可将上述命令追加到本地 Git pre-commit 钩子或 Husky 脚本中，并保持“非阻断”（例如在脚本末尾追加 `|| exit 0`）。
+- 本地自动触发（Husky）
+  - 正常 `git commit` 时会执行 `.husky/pre-commit`，其中包含 `node scripts/ci/update-ai-index.mjs --write || true`（非阻断）。
+  - 如未生效，请先执行一次 `npm run prepare` 确保 Husky 安装。
 - CI 触发
-  - 推送到 PR 或 `main` 后，Windows CI 工作流会在构建阶段执行 “Update AI assistants index (non-blocking)” 步骤：
-    - 调用 `py -3 scripts/python/update_ai_index.py --write`，即使失败也不会阻断构建（continue-on-error）。
+  - 推送到 PR 或 `main` 后，Build & Test 工作流会在构建阶段执行 “Update AI assistants index (non-blocking)”。
 - 日志工件
-  - 工件名: `docs-encoding-and-ai-index-logs`（包含 `logs/**/encoding/**` 与 `logs/**/ai-index/**`）。
+  - 工件名: `docs-encoding-and-ai-index-logs`（包含 `logs/**/ai-index/**`）。
   - 结果文件随工作区产物可下载。
 - 校验方式
   - 本地: `git diff docs/ai-assistants.index.md docs/ai-assistants.state.json`。

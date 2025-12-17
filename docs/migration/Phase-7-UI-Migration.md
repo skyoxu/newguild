@@ -1,4 +1,4 @@
-# Phase 7: React → Godot Control UI 迁移
+# Phase 7: 旧前端框架 → Godot Control UI 迁移
 
 > 状态: 设计阶段
 > 预估工时: 15-20 天
@@ -9,29 +9,29 @@
 
 ## 目标
 
-将 vitegame 的 React 19 + Tailwind CSS UI 迁移到 newguild 的 Godot Control 节点系统，保持功能等价性与可测试性。
+将 旧项目 的 旧前端框架 19 + Tailwind CSS UI 迁移到 newguild 的 Godot Control 节点系统，保持功能等价性与可测试性。
 
 ---
 
 ## 技术栈对比
 
-| 层次 | vitegame (Web) | newguild (Godot) |
+| 层次 | 旧项目 (Web) | newguild (Godot) |
 |-----|---------------|------------------|
-| UI框架 | React 19 (JSX) | Godot Control 节点 (.tscn) |
+| UI框架 | 旧前端框架 19 (JSX) | Godot Control 节点 (.tscn) |
 | 布局系统 | Flexbox / CSS Grid | Container 节点 (VBoxContainer, HBoxContainer, GridContainer) |
 | 样式 | Tailwind CSS v4 | Godot Theme (.tres) + StyleBox |
-| 事件 | React onClick / onChange | Godot Signals (pressed, text_changed) |
+| 事件 | 旧前端框架 onClick / onChange | Godot Signals (pressed, text_changed) |
 | 状态管理 | useState / useReducer | C# Properties + Signals |
-| 组件复用 | React Components | 场景继承 + Composition |
+| 组件复用 | 旧前端框架 Components | 场景继承 + Composition |
 | 响应式 | CSS媒体查询 | Anchor/Margin + viewport信号 |
 
 ---
 
-## React 组件 → Godot Control 映射
+## 旧前端框架 组件 → Godot Control 映射
 
 ### 基础组件映射表
 
-| React 组件 | Godot Control | 说明 |
+| 旧前端框架 组件 | Godot Control | 说明 |
 |-----------|--------------|------|
 | `<div>` | `Control` / `Panel` | 通用容器 |
 | `<button>` | `Button` | 按钮 |
@@ -47,7 +47,7 @@
 
 ### 布局容器映射
 
-| React 布局 | Godot Container | 说明 |
+| 旧前端框架 布局 | Godot Container | 说明 |
 |-----------|----------------|------|
 | `display: flex; flex-direction: column` | `VBoxContainer` | 垂直布局 |
 | `display: flex; flex-direction: row` | `HBoxContainer` | 水平布局 |
@@ -59,9 +59,9 @@
 
 ## 1. 基础组件迁移示例
 
-### React Button → Godot Button
+### 旧前端框架 Button → Godot Button
 
-**React (vitegame)**:
+**旧前端框架 (旧项目)**:
 
 ```tsx
 // src/components/ui/PrimaryButton.tsx
@@ -211,9 +211,9 @@ public partial class PrimaryButton : Button
 }
 ```
 
-### React Form Input → Godot LineEdit
+### 旧前端框架 Form Input → Godot LineEdit
 
-**React (vitegame)**:
+**旧前端框架 (旧项目)**:
 
 ```tsx
 // src/components/ui/TextInput.tsx
@@ -448,7 +448,7 @@ public partial class TextInput : VBoxContainer
 
 ### Flexbox → VBoxContainer/HBoxContainer
 
-**React Flexbox (vitegame)**:
+**旧前端框架 Flexbox (旧项目)**:
 
 ```tsx
 // src/components/ui/UserCard.tsx
@@ -603,9 +603,9 @@ public partial class UserCard : PanelContainer
 
 ## 3. 状态管理迁移
 
-### React useState 鈫?Godot Properties + Signals
+### 旧前端框架 useState 鈫?Godot Properties + Signals
 
-**React State (vitegame)**:
+**旧前端框架 State (旧项目)**:
 
 ```tsx
 // src/components/game/HealthBar.tsx
@@ -950,9 +950,9 @@ public partial class ResponsivePanel : Panel
 
 ## 6. 表单处理与验证
 
-### React Form → Godot Form Container
+### 旧前端框架 Form → Godot Form Container
 
-**React Form (vitegame)**:
+**旧前端框架 Form (旧项目)**:
 
 ```tsx
 // src/components/forms/LoginForm.tsx
@@ -1132,9 +1132,9 @@ public partial class LoginForm : VBoxContainer
 
 ## 7. 列表与可滚动内容
 
-### React List → Godot ScrollContainer + VBoxContainer
+### 旧前端框架 List → Godot ScrollContainer + VBoxContainer
 
-**React List (vitegame)**:
+**旧前端框架 List (旧项目)**:
 
 ```tsx
 // src/components/ui/UserList.tsx
@@ -1509,7 +1509,7 @@ jobs:
 
 完成本阶段后，继续：
 
-➡️ [Phase-8-Scene-Design.md](Phase-8-Scene-Design.md) — Scene Tree 与 Node 设计
+ [Phase-8-Scene-Design.md](Phase-8-Scene-Design.md) — Scene Tree 与 Node 设计
 
 ## 最小迁移清单 / Minimal UI Checklist
 

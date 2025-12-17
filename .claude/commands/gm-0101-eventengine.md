@@ -28,9 +28,9 @@
 - 单元测试：
   - `Game.Core.Tests/Domain/EventEngineTests.cs`
 - 如确有需要调整契约（需遵守契约先行规范）：
-  - `Scripts/Core/Contracts/Guild/GuildMemberJoined.cs`
-  - `Scripts/Core/Contracts/Guild/GuildCreated.cs`（如不存在，可按模板新增）
-  - `Scripts/Core/Contracts/Guild/GuildMemberLeft.cs`（如不存在，可按模板新增）
+  - `Game.Core/Contracts/Guild/GuildMemberJoined.cs`
+  - `Game.Core/Contracts/Guild/GuildCreated.cs`（如不存在，可按模板新增）
+  - `Game.Core/Contracts/Guild/GuildMemberLeft.cs`（如不存在，可按模板新增）
 
 禁止修改（除非人工明确同意）：
 
@@ -49,7 +49,7 @@
 
 2. **契约约束**
 
-   - Guild 事件契约是 SSoT，位置：`Scripts/Core/Contracts/Guild/*.cs`。
+   - Guild 事件契约是 SSoT，位置：`Game.Core/Contracts/Guild/*.cs`。
    - 如需要新增或调整 Guild 事件契约，必须：
      - 使用统一模板（record + `EventType` 常量 + XML 注释），保持 **纯 C#**，不依赖 Godot。
      - EventType 常量必须等于 Overlay 中声明的类型字符串。
@@ -87,7 +87,7 @@
 
 - 使用 **Serena MCP**：
   - 检索当前仓库中 `EventEngine` 的定义与调用点。
-  - 检查 `Scripts/Core/Contracts/Guild/GuildMemberJoined.cs` 的现状（确认 EventType 名称和字段）。
+  - 检查 `Game.Core/Contracts/Guild/GuildMemberJoined.cs` 的现状（确认 EventType 名称和字段）。
   - 搜索是否已有 `GuildCreated`、`GuildMemberLeft` 相关类型或 TODO。
 - 使用 **Context7 MCP**：
   - 检索 ADR‑0004 和 Overlay 08 中关于 Guild 事件的约束。
@@ -104,7 +104,7 @@
 
 1. **契约层**
 
-   - `Scripts/Core/Contracts/Guild/GuildCreated.cs`（如存在）、`GuildMemberJoined.cs`、`GuildMemberLeft.cs` 三个契约文件的 `EventType` 常量符合 Overlay 与 ADR‑0004 的命名。
+   - `Game.Core/Contracts/Guild/GuildCreated.cs`（如存在）、`GuildMemberJoined.cs`、`GuildMemberLeft.cs` 三个契约文件的 `EventType` 常量符合 Overlay 与 ADR‑0004 的命名。
    - 至少一个专门的 xUnit 契约测试类验证这些常量与关键字段（可在本轮先不写，若该部分已规划到 NG‑0020，则按 NG‑0020 节奏执行）。
 
 2. **EventEngine 行为**

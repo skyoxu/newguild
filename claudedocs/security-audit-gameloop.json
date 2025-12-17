@@ -1,0 +1,320 @@
+{
+  "audit_metadata": {
+    "audit_date": "2025-12-05",
+    "auditor": "Claude Security Auditor Agent",
+    "scope": "GameLoop Implementation (GameTurnSystem, EventEngine, Contracts)",
+    "adr_reference": "ADR-0019 (Godot Security Baseline)",
+    "files_audited": [
+      "Game.Core/Engine/GameTurnSystem.cs",
+      "Game.Core/Domain/Turn/GameTurnState.cs",
+      "Game.Core/Engine/EventEngine.cs",
+      "Game.Core/Contracts/GameLoop/*.cs",
+      "Game.Core.Tests/Domain/GameLoopTests.cs",
+      "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
+      "Game.Core/Services/EventBus.cs",
+      "Game.Core/State/GameStateManager.cs"
+    ]
+  },
+  "executive_summary": {
+    "overall_score": 72,
+    "risk_level": "MEDIUM",
+    "ready_for_production": false,
+    "critical_issues": 1,
+    "high_issues": 3,
+    "medium_issues": 4,
+    "low_issues": 2,
+    "summary": "GameLoop 实现在架构设计上良好，但存在多个安全问题需修复才能投入生产。主要风险集中在输入验证缺失、审计日志缺失、错误处理不完整。所有代码均为纯 C# 领域层，不涉及文件系统/网络操作，降低了攻击面。"
+  },
+  "findings": [
+    {
+      "id": "CRIT-001",
+      "category": "输入验证",
+      "severity": "CRITICAL",
+      "title": "SaveId 无验证导致注入与路径遍历风险",
+      "description": "GameTurnSystem.StartNewWeek(string saveId) 与 GameStateManager.SaveGameAsync/LoadGameAsync 接受任意字符串作为 SaveId，未进行任何验证。攻击者可能注入特殊字符（路径分隔符、SQL 片段）或超长字符串导致存储层漏洞。",
+      "file": "Game.Core/Engine/GameTurnSystem.cs",
+      "line": 36,
+      "code_snippet": "public GameTurnState StartNewWeek(string saveId)\n{\n    return new GameTurnState(\n        Week: 1,\n        Phase: GameTurnPhase.Resolution,\n        SaveId: saveId,  // <- 无验证！\n        CurrentTime: System.DateTimeOffset.UtcNow\n    );\n}",
+      "attack_scenario": [
+        "1. 攻击者调用 StartNewWeek(\"../../../malicious/path\") 尝试路径遍历",
+        "2. 若底层 IDataStore 使用文件系统，可能写入任意目录",
+        "3. 若 SaveId 拼接到 SQL 查询，可能触发 SQL 注入",
+        "4. 超长 SaveId (10MB+) 可能导致 DoS 或内存耗尽"
+      ],
+      "impact": {
+        "data_breach_risk": "HIGH",
+        "dos_risk": "HIGH",
+        "compliance_violation": "ADR-0019 要求路径规范化与白名单验证",
+        "reputation_damage": "HIGH"
+      },
+      "recommendation": "在 GameTurnSystem 与 GameStateManager 构造函数/方法中添加 SaveId 验证",
+      "remediation_code": "// Game.Core/Domain/Turn/SaveIdValidator.cs\npublic static class SaveIdValidator\n{\n    private static readonly Regex ValidPattern = new Regex(@\"^[a-zA-Z0-9_-]{1,64}$\", RegexOptions.Compiled);\n    \n    public static string Validate(string saveId)\n    {\n        if (string.IsNullOrWhiteSpace(saveId))\n            throw new ArgumentException(\"SaveId 不能为空\", nameof(saveId));\n        \n        if (saveId.Length > 64)\n            throw new ArgumentOutOfRangeException(nameof(saveId), \"SaveId 长度不能超过 64 字符\");\n        \n        if (!ValidPattern.IsMatch(saveId))\n            throw new ArgumentException(\"SaveId 只能包含字母、数字、下划线和连字符\", nameof(saveId));\n        \n        return saveId;\n    }\n}\n\n// 在 GameTurnSystem.StartNewWeek 中使用：\npublic GameTurnState StartNewWeek(string saveId)\n{\n    var validatedId = SaveIdValidator.Validate(saveId); // <- 添加验证\n    return new GameTurnState(\n        Week: 1,\n        Phase: GameTurnPhase.Resolution,\n        SaveId: validatedId,\n        CurrentTime: System.DateTimeOffset.UtcNow\n    );\n}",
+      "verification": "添加单元测试验证边界条件：\n- SaveIdValidatorTests.cs: 测试空字符串、超长、特殊字符、路径遍历字符\n- GameTurnSystemTests.cs: 添加测试验证 StartNewWeek 拒绝无效 SaveId"
+    },
+    {
+      "id": "HIGH-001",
+      "category": "输入验证",
+      "severity": "HIGH",
+      "title": "Week 编号无边界检查可能导致整数溢出",
+      "description": "GameTurnState.Week 为 int 类型，GameTurnSystem.Advance 中直接 Week + 1 递增，无上限检查。长期运行游戏可能在 2^31-1 周后溢出变为负数，破坏业务逻辑。",
+      "file": "Game.Core/Engine/GameTurnSystem.cs",
+      "line": 74,
+      "code_snippet": "GameTurnPhase.AiSimulation => await _eventEngine.ExecuteAiPhaseAsync(state) with\n{\n    Phase = GameTurnPhase.Resolution,\n    Week = state.Week + 1  // <- 无溢出检查\n}",
+      "attack_scenario": [
+        "1. 游戏运行足够久（理论上 2^31-1 周 = ~41亿周）",
+        "2. Week 溢出变为负数或回绕到 0",
+        "3. 业务逻辑依赖 Week 单调递增的假设破坏",
+        "4. 可能触发意外行为（排行榜错乱、进度回退）"
+      ],
+      "impact": {
+        "data_integrity_risk": "MEDIUM",
+        "business_logic_bypass": "MEDIUM",
+        "dos_risk": "LOW"
+      },
+      "recommendation": "添加 Week 上限检查（实际值根据游戏设计调整，建议 100,000 周作为合理上限）",
+      "remediation_code": "private const int MaxWeek = 100_000; // ~1923 年游戏时间（假设每周 = 1 游戏年）\n\nGameTurnPhase.AiSimulation => await _eventEngine.ExecuteAiPhaseAsync(state) with\n{\n    Phase = GameTurnPhase.Resolution,\n    Week = state.Week >= MaxWeek \n        ? throw new InvalidOperationException($\"游戏已达到最大周数限制 {MaxWeek}\")\n        : state.Week + 1\n}",
+      "verification": "添加单元测试：GameTurnSystemTests.Advance_ThrowsException_WhenMaxWeekReached()"
+    },
+    {
+      "id": "HIGH-002",
+      "category": "审计日志",
+      "severity": "HIGH",
+      "title": "关键操作缺乏安全审计日志",
+      "description": "GameTurnSystem.Advance 执行周推进与阶段切换等关键操作，但未产生审计日志（仅发布领域事件）。ADR-0019 要求关键操作必须有审计日志（logs/ci/security-audit.jsonl）用于安全取证。",
+      "file": "Game.Core/Engine/GameTurnSystem.cs",
+      "line": "46-105",
+      "code_snippet": "public async Task<GameTurnState> Advance(GameTurnState state)\n{\n    // ... 无审计日志记录 ...\n    var nextState = state.Phase switch { ... };\n    // ... 仅发布领域事件，不写审计日志 ...\n}",
+      "attack_scenario": [
+        "1. 攻击者通过漏洞触发非法周推进或状态修改",
+        "2. 系统无法追溯何时、何人、何原因触发了操作",
+        "3. 安全事件响应与取证困难",
+        "4. 不符合 ADR-0019 与合规要求"
+      ],
+      "impact": {
+        "compliance_violation": "ADR-0019 要求统一审计（见 6.3 日志与工件）",
+        "incident_response_degradation": "HIGH",
+        "forensic_capability": "LOW"
+      },
+      "recommendation": "在 GameTurnSystem 中注入 IAuditLogger，记录周推进/阶段切换到 security-audit.jsonl",
+      "remediation_code": "// Game.Core/Ports/IAuditLogger.cs\npublic interface IAuditLogger\n{\n    void LogSecurityEvent(string action, string reason, string target, string caller);\n}\n\n// Game.Core/Engine/GameTurnSystem.cs - 添加依赖与日志调用\nprivate readonly IAuditLogger? _auditLogger;\n\npublic GameTurnSystem(\n    IEventEngine eventEngine,\n    IAICoordinator aiCoordinator,\n    IEventBus eventBus,\n    ITime time,\n    IAuditLogger? auditLogger = null)  // <- 添加可选参数\n{\n    // ...\n    _auditLogger = auditLogger;\n}\n\npublic async Task<GameTurnState> Advance(GameTurnState state)\n{\n    _auditLogger?.LogSecurityEvent(\n        action: \"game_turn.advance\",\n        reason: $\"Phase={state.Phase}, Week={state.Week}\",\n        target: state.SaveId,\n        caller: \"GameTurnSystem\"\n    );\n    \n    // ... 原有逻辑 ...\n    \n    if (nextState.Week > state.Week)\n    {\n        _auditLogger?.LogSecurityEvent(\n            action: \"game_turn.week_advanced\",\n            reason: $\"Week {state.Week} -> {nextState.Week}\",\n            target: state.SaveId,\n            caller: \"GameTurnSystem\"\n        );\n    }\n}",
+      "verification": "添加集成测试验证审计日志写入 logs/ci/security-audit.jsonl（GdUnit4 或 xUnit with filesystem mock）"
+    },
+    {
+      "id": "HIGH-003",
+      "category": "错误处理",
+      "severity": "HIGH",
+      "title": "异常传播可能泄露敏感信息",
+      "description": "GameTurnSystem 与 EventEngine 的异常直接向上传播，未进行脱敏处理。可能泄露内部路径、堆栈信息、数据库结构等敏感细节到 UI 层或日志。",
+      "file": "Game.Core/Engine/GameTurnSystem.cs",
+      "line": "46-105",
+      "code_snippet": "public async Task<GameTurnState> Advance(GameTurnState state)\n{\n    // 无 try-catch，异常直接传播\n    var nextState = state.Phase switch { ... };\n}",
+      "attack_scenario": [
+        "1. EventEngine 抛出详细异常（包含内部路径、数据库字段等）",
+        "2. 异常信息直接显示在 UI 或写入客户端日志",
+        "3. 攻击者通过异常信息推断系统内部结构",
+        "4. 用于下一步攻击的信息收集"
+      ],
+      "impact": {
+        "information_disclosure": "MEDIUM",
+        "attack_surface_expansion": "MEDIUM"
+      },
+      "recommendation": "在 GameTurnSystem.Advance 中添加异常处理与脱敏，向上层仅返回安全的错误信息",
+      "remediation_code": "public async Task<GameTurnState> Advance(GameTurnState state)\n{\n    try\n    {\n        _auditLogger?.LogSecurityEvent(\"game_turn.advance\", $\"Phase={state.Phase}\", state.SaveId, \"GameTurnSystem\");\n        \n        var nextState = state.Phase switch\n        {\n            // ... 原有逻辑 ...\n        };\n        \n        return nextState;\n    }\n    catch (Exception ex)\n    {\n        // 记录详细错误到服务端安全日志\n        _auditLogger?.LogSecurityEvent(\n            action: \"game_turn.advance.failed\",\n            reason: $\"Exception: {ex.GetType().Name}\",  // 仅记录类型，不记录消息\n            target: state.SaveId,\n            caller: \"GameTurnSystem\"\n        );\n        \n        // 向上层抛出脱敏后的异常\n        throw new InvalidOperationException(\n            \"游戏循环推进失败，请联系支持团队\",  // 用户友好的通用消息\n            ex  // 保留 InnerException 用于服务端日志\n        );\n    }\n}",
+      "verification": "添加测试验证异常脱敏：GameTurnSystemTests.Advance_SanitizesException_OnFailure()"
+    },
+    {
+      "id": "MED-001",
+      "category": "数据完整性",
+      "severity": "MEDIUM",
+      "title": "GameTurnState 缺少防篡改机制",
+      "description": "GameTurnState 为 public record，任何代码可通过 with 表达式创建修改版本。缺少签名或校验和，无法检测状态是否被恶意篡改。",
+      "file": "Game.Core/Domain/Turn/GameTurnState.cs",
+      "line": "5-10",
+      "code_snippet": "public sealed record GameTurnState(\n    int Week,\n    GameTurnPhase Phase,\n    string SaveId,\n    DateTimeOffset CurrentTime\n);  // <- 无完整性保护",
+      "attack_scenario": [
+        "1. 恶意代码通过反射或直接构造 GameTurnState",
+        "2. 伪造 Week=999999 或非法 Phase 值",
+        "3. 注入到系统中绕过正常游戏流程",
+        "4. 破坏游戏平衡或触发未预期行为"
+      ],
+      "impact": {
+        "game_integrity": "MEDIUM",
+        "cheating_risk": "MEDIUM"
+      },
+      "recommendation": "添加只读校验和字段 + 工厂方法控制构造",
+      "remediation_code": "// Game.Core/Domain/Turn/GameTurnState.cs\npublic sealed record GameTurnState(\n    int Week,\n    GameTurnPhase Phase,\n    string SaveId,\n    DateTimeOffset CurrentTime,\n    string Checksum  // <- 添加校验和\n)\n{\n    // 工厂方法：唯一合法构造方式\n    public static GameTurnState Create(int week, GameTurnPhase phase, string saveId)\n    {\n        var validatedId = SaveIdValidator.Validate(saveId);\n        var now = DateTimeOffset.UtcNow;\n        var checksum = ComputeChecksum(week, phase, validatedId, now);\n        return new GameTurnState(week, phase, validatedId, now, checksum);\n    }\n    \n    // with 表达式创建新实例时重新计算校验和\n    public GameTurnState WithWeek(int newWeek)\n    {\n        var checksum = ComputeChecksum(newWeek, Phase, SaveId, CurrentTime);\n        return this with { Week = newWeek, Checksum = checksum };\n    }\n    \n    // 验证完整性\n    public bool IsValid() =>\n        Checksum == ComputeChecksum(Week, Phase, SaveId, CurrentTime);\n    \n    private static string ComputeChecksum(int w, GameTurnPhase p, string sid, DateTimeOffset t)\n    {\n        var data = $\"{w}|{p}|{sid}|{t.ToUnixTimeMilliseconds()}\";\n        using var sha = System.Security.Cryptography.SHA256.Create();\n        var hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(data));\n        return Convert.ToBase64String(hash);\n    }\n}",
+      "verification": "添加测试：GameTurnStateTests.Checksum_DetectsTampering()"
+    },
+    {
+      "id": "MED-002",
+      "category": "事件契约",
+      "severity": "MEDIUM",
+      "title": "事件契约缺少版本化与向后兼容策略",
+      "description": "GameTurnStarted/PhaseChanged/WeekAdvanced 事件契约无版本字段。未来结构变更时可能破坏现有订阅者或历史数据重放。",
+      "file": "Game.Core/Contracts/GameLoop/GameTurnStarted.cs",
+      "line": "10-18",
+      "code_snippet": "public sealed record GameTurnStarted(\n    string SaveId,\n    int Week,\n    string Phase,\n    System.DateTimeOffset StartedAt\n)  // <- 无版本字段\n{\n    public const string EventType = \"core.game_turn.started\";\n}",
+      "attack_scenario": [
+        "1. 未来版本修改事件结构（添加/删除字段）",
+        "2. 旧版本订阅者反序列化失败或数据丢失",
+        "3. 历史事件日志无法正确解析",
+        "4. 审计链完整性破坏"
+      ],
+      "impact": {
+        "backward_compatibility": "MEDIUM",
+        "audit_trail_integrity": "MEDIUM"
+      },
+      "recommendation": "添加 SchemaVersion 字段到所有事件契约",
+      "remediation_code": "// Game.Core/Contracts/GameLoop/GameTurnStarted.cs\npublic sealed record GameTurnStarted(\n    string SaveId,\n    int Week,\n    string Phase,\n    System.DateTimeOffset StartedAt,\n    string SchemaVersion = \"1.0\"  // <- 添加版本\n)\n{\n    public const string EventType = \"core.game_turn.started\";\n}\n\n// 在订阅者中验证版本\npublic class GameTurnEventHandler\n{\n    public Task HandleAsync(DomainEvent evt)\n    {\n        if (evt.Data is GameTurnStarted gts)\n        {\n            if (gts.SchemaVersion != \"1.0\")\n            {\n                _logger.Warn($\"不支持的事件版本：{gts.SchemaVersion}\");\n                return Task.CompletedTask;  // 忽略或迁移\n            }\n            // 处理逻辑\n        }\n    }\n}",
+      "verification": "添加测试验证版本不兼容时的降级行为"
+    },
+    {
+      "id": "MED-003",
+      "category": "配置安全",
+      "severity": "MEDIUM",
+      "title": "GameStateManager 缺少敏感数据脱敏",
+      "description": "GameStateManager 在事件发布时可能包含敏感的 GameState/GameConfig 数据（如玩家邮箱、内部配置），未进行脱敏处理。",
+      "file": "Game.Core/State/GameStateManager.cs",
+      "line": "34-40",
+      "code_snippet": "Publish(new DomainEvent(\n    Type: \"game.state.manager.updated\",\n    Source: nameof(GameStateManager),\n    Data: new { state, config },  // <- 可能包含敏感信息\n    Timestamp: DateTime.UtcNow,\n    Id: $\"state-update-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}\"\n));",
+      "attack_scenario": [
+        "1. 订阅者恶意或无意记录完整事件数据",
+        "2. 敏感信息（邮箱、密码哈希、内部参数）泄露到日志",
+        "3. 日志文件被攻击者获取",
+        "4. 隐私泄露与合规风险"
+      ],
+      "impact": {
+        "privacy_violation": "MEDIUM",
+        "compliance_risk": "GDPR/数据保护法规"
+      },
+      "recommendation": "发布事件前对 GameState/GameConfig 进行脱敏",
+      "remediation_code": "// Game.Core/State/SensitiveDataSanitizer.cs\npublic static class SensitiveDataSanitizer\n{\n    public static object SanitizeState(GameState state)\n    {\n        return new\n        {\n            PlayerCount = state.Players?.Count ?? 0,\n            CurrentWeek = state.CurrentWeek,\n            // 省略敏感字段：PlayerEmail, InternalFlags 等\n        };\n    }\n    \n    public static object SanitizeConfig(GameConfig config)\n    {\n        return new\n        {\n            Difficulty = config.Difficulty,\n            // 省略敏感配置：DebugFlags, InternalKeys 等\n        };\n    }\n}\n\n// 在 GameStateManager 中使用\nPublish(new DomainEvent(\n    Type: \"game.state.manager.updated\",\n    Source: nameof(GameStateManager),\n    Data: new\n    {\n        state = SensitiveDataSanitizer.SanitizeState(state),\n        config = SensitiveDataSanitizer.SanitizeConfig(config)\n    },\n    Timestamp: DateTime.UtcNow,\n    Id: $\"state-update-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}\"\n));",
+      "verification": "添加测试验证敏感字段不出现在事件 Data 中"
+    },
+    {
+      "id": "MED-004",
+      "category": "并发安全",
+      "severity": "MEDIUM",
+      "title": "_firstTurnStarted 标志缺少线程安全保护",
+      "description": "GameTurnSystem._firstTurnStarted 是非线程安全的 bool 字段。在并发调用 Advance 时可能导致竞态条件，多次发布 GameTurnStarted 事件。",
+      "file": "Game.Core/Engine/GameTurnSystem.cs",
+      "line": "21, 49-59",
+      "code_snippet": "private bool _firstTurnStarted;  // <- 非线程安全\n\npublic async Task<GameTurnState> Advance(GameTurnState state)\n{\n    if (!_firstTurnStarted)  // <- 竞态条件窗口\n    {\n        _firstTurnStarted = true;\n        // ... 发布事件 ...\n    }\n}",
+      "attack_scenario": [
+        "1. 两个线程同时调用 Advance",
+        "2. 均检测到 _firstTurnStarted = false",
+        "3. 两者都设置为 true 并发布 GameTurnStarted 事件",
+        "4. 事件订阅者收到重复事件，可能导致双重初始化"
+      ],
+      "impact": {
+        "data_integrity": "LOW",
+        "business_logic_error": "MEDIUM"
+      },
+      "recommendation": "使用 Interlocked.CompareExchange 或锁保护标志",
+      "remediation_code": "private int _firstTurnStartedFlag = 0;  // 0=false, 1=true\n\npublic async Task<GameTurnState> Advance(GameTurnState state)\n{\n    // 原子性检查并设置（仅首次调用返回 true）\n    if (Interlocked.CompareExchange(ref _firstTurnStartedFlag, 1, 0) == 0)\n    {\n        var startedEvent = WrapEvent(new GameTurnStarted(\n            SaveId: state.SaveId,\n            Week: state.Week,\n            Phase: state.Phase.ToString(),\n            StartedAt: DateTimeOffset.UtcNow\n        ), GameTurnStarted.EventType);\n        await _eventBus.PublishAsync(startedEvent);\n    }\n    // ... 原有逻辑 ...\n}",
+      "verification": "添加并发测试：GameTurnSystemTests.Advance_PublishesStartedEventOnce_UnderConcurrency()"
+    },
+    {
+      "id": "LOW-001",
+      "category": "时间安全",
+      "severity": "LOW",
+      "title": "混用 DateTime.UtcNow 与 DateTimeOffset.UtcNow",
+      "description": "代码中混用 DateTime.UtcNow（EventEngine.cs:66, 87）与 DateTimeOffset.UtcNow（GameTurnSystem.cs:42, 56）。虽然当前无安全影响，但不一致可能导致未来时区相关漏洞。",
+      "file": "Game.Core/Engine/EventEngine.cs",
+      "line": "43, 65, 87",
+      "code_snippet": "Timestamp: DateTime.UtcNow,  // <- 应统一为 DateTimeOffset",
+      "impact": {
+        "time_integrity": "LOW",
+        "future_risk": "MEDIUM（多时区场景）"
+      },
+      "recommendation": "统一使用 DateTimeOffset.UtcNow，确保时区信息完整",
+      "remediation_code": "// 全局替换规则\n- DateTime.UtcNow → DateTimeOffset.UtcNow\n- DomainEvent 的 Timestamp 类型改为 DateTimeOffset\n\n// Game.Core/Contracts/DomainEvent.cs\npublic sealed record DomainEvent(\n    string Type,\n    string Source,\n    object? Data,\n    DateTimeOffset Timestamp,  // <- 改为 DateTimeOffset\n    string Id,\n    string SpecVersion = \"1.0\",\n    string DataContentType = \"application/json\"\n);",
+      "verification": "添加代码分析规则禁用 DateTime.UtcNow（Roslyn analyzer）"
+    },
+    {
+      "id": "LOW-002",
+      "category": "测试覆盖",
+      "severity": "LOW",
+      "title": "缺少安全边界测试用例",
+      "description": "现有测试主要验证正常流程（happy path），缺少安全边界测试：超长 SaveId、负数 Week、null 参数、异常处理路径。",
+      "file": "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
+      "line": "全文件",
+      "code_snippet": "// 现有测试：正常流程验证\n// 缺失：边界与安全测试",
+      "impact": {
+        "test_coverage": "安全相关代码路径未覆盖",
+        "regression_risk": "MEDIUM"
+      },
+      "recommendation": "添加安全边界测试套件",
+      "remediation_code": "// Game.Core.Tests/Domain/GameTurnSystemSecurityTests.cs\npublic class GameTurnSystemSecurityTests\n{\n    [Theory]\n    [InlineData(\"\")]  // 空字符串\n    [InlineData(\"   \")]  // 空白\n    [InlineData(\"../../../etc/passwd\")]  // 路径遍历\n    [InlineData(\"a\" + new string('b', 10000))]  // 超长\n    [InlineData(\"<script>alert(1)</script>\")]  // XSS 尝试\n    [InlineData(\"'; DROP TABLE saves;--\")]  // SQL 注入尝试\n    public void StartNewWeek_RejectsInvalidSaveId(string invalidId)\n    {\n        var system = CreateSystem();\n        Assert.Throws<ArgumentException>(() => system.StartNewWeek(invalidId));\n    }\n    \n    [Fact]\n    public async Task Advance_HandlesNullStateGracefully()\n    {\n        var system = CreateSystem();\n        await Assert.ThrowsAsync<ArgumentNullException>(\n            async () => await system.Advance(null!)\n        );\n    }\n    \n    [Fact]\n    public async Task Advance_RejectsWeekOverflow()\n    {\n        var system = CreateSystem();\n        var state = new GameTurnState(\n            Week: int.MaxValue - 1,\n            Phase: GameTurnPhase.AiSimulation,\n            SaveId: \"test\",\n            CurrentTime: DateTimeOffset.UtcNow\n        );\n        \n        await Assert.ThrowsAsync<InvalidOperationException>(\n            async () => await system.Advance(state)\n        );\n    }\n}",
+      "verification": "确保新增测试在 CI 中运行并达到 >=90% 覆盖率门禁"
+    }
+  ],
+  "compliance_check": {
+    "adr_0019_godot_security_baseline": {
+      "path_validation": {
+        "status": "N/A",
+        "reason": "GameLoop 为纯领域层，不涉及文件系统操作"
+      },
+      "network_security": {
+        "status": "N/A",
+        "reason": "GameLoop 为纯领域层，不涉及网络操作"
+      },
+      "input_validation": {
+        "status": "FAILED",
+        "issues": ["CRIT-001: SaveId 无验证", "HIGH-001: Week 无边界检查"]
+      },
+      "audit_logging": {
+        "status": "FAILED",
+        "issues": ["HIGH-002: 关键操作缺乏审计日志"]
+      },
+      "error_handling": {
+        "status": "FAILED",
+        "issues": ["HIGH-003: 异常传播可能泄露敏感信息"]
+      }
+    }
+  },
+  "recommendations": {
+    "immediate": [
+      "修复 CRIT-001：实现 SaveIdValidator 并在所有入口点验证",
+      "修复 HIGH-002：添加 IAuditLogger 接口与实现，记录关键操作到 logs/ci/security-audit.jsonl",
+      "修复 HIGH-003：添加异常处理与脱敏层"
+    ],
+    "short_term": [
+      "修复 HIGH-001：添加 Week 边界检查与溢出保护",
+      "修复 MED-001：实现 GameTurnState 完整性保护机制",
+      "修复 MED-004：使用 Interlocked 修复并发安全问题",
+      "添加 LOW-002 中列出的安全边界测试套件"
+    ],
+    "long_term": [
+      "修复 MED-002：为所有事件契约添加版本化策略",
+      "修复 MED-003：实现敏感数据脱敏框架",
+      "修复 LOW-001：统一时间类型为 DateTimeOffset",
+      "建立自动化安全扫描与门禁（SonarQube security rules, SAST）"
+    ]
+  },
+  "next_steps": [
+    "1. 创建 SaveIdValidator 与相应单元测试（CRIT-001）",
+    "2. 实现 IAuditLogger 接口并集成到 GameTurnSystem（HIGH-002）",
+    "3. 添加异常处理与脱敏层（HIGH-003）",
+    "4. 运行完整测试套件验证修复未破坏现有功能",
+    "5. 更新 ADR-0019 补充游戏循环层的安全要求",
+    "6. 建立 CI 中的安全门禁脚本（scripts/python/security_audit.py）",
+    "7. 在 PR 模板中添加安全检查清单"
+  ],
+  "positive_findings": [
+    "代码结构清晰，职责分离良好（GameTurnSystem、EventEngine、EventBus 解耦）",
+    "使用 record 类型保证不可变性，降低状态篡改风险",
+    "EventBus 实现了异常隔离（SafeInvoke），防止单个订阅者破坏总线",
+    "测试覆盖率较高（GameTurnSystemTests.cs 包含完整周期测试）",
+    "纯领域层设计，不涉及 Godot API，降低攻击面",
+    "GameStateManager 实现了 checksum 验证，提供基础防篡改能力"
+  ],
+  "risk_matrix": {
+    "attack_surface": "LOW（纯领域层，无外部 I/O）",
+    "privilege_escalation": "LOW（无权限管理逻辑）",
+    "data_exposure": "MEDIUM（事件可能包含敏感数据）",
+    "denial_of_service": "MEDIUM（无输入验证可能导致资源耗尽）",
+    "injection": "HIGH（SaveId 未验证，存在注入风险）",
+    "integrity": "MEDIUM（缺少完整性保护机制）"
+  }
+}

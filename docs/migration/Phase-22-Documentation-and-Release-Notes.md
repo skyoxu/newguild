@@ -10,7 +10,7 @@
 
 ## 1. 背景与动机
 
-### 原版(vitegame)文档管理
+### 原版(旧项目)文档管理
 
 **文档现状**:
 - 分散的 README 与 ADR 文档
@@ -181,42 +181,42 @@ newguild/
 │   │   ├── Phase-01-Prerequisites.md          # Phase 1-21 文档
 │   │   └── Phase-22-Documentation-and-Release-Notes.md  # 本文档
 │   │
-│   ├── release/                                ★ 发布文档
-│   │   ├── RELEASE_NOTES.md                   ★ 最终发布说明
-│   │   ├── CHANGELOG.md                       ★ 变更日志(自动生成)
-│   │   ├── MIGRATION_SUMMARY.md               ★ 迁移摘要
-│   │   └── KNOWN_ISSUES.md                    ★ 已知问题清单
+│   ├── release/                                 发布文档
+│   │   ├── RELEASE_NOTES.md                    最终发布说明
+│   │   ├── CHANGELOG.md                        变更日志(自动生成)
+│   │   ├── MIGRATION_SUMMARY.md                迁移摘要
+│   │   └── KNOWN_ISSUES.md                     已知问题清单
 │   │
-│   ├── user/                                   ★ 用户文档
-│   │   ├── USER_MANUAL.md                     ★ 用户手册
-│   │   ├── QUICK_START.md                     ★ 快速入门
-│   │   ├── FAQ.md                             ★ 常见问题
-│   │   └── TROUBLESHOOTING.md                 ★ 故障排除
+│   ├── user/                                    用户文档
+│   │   ├── USER_MANUAL.md                      用户手册
+│   │   ├── QUICK_START.md                      快速入门
+│   │   ├── FAQ.md                              常见问题
+│   │   └── TROUBLESHOOTING.md                  故障排除
 │   │
-│   ├── technical/                              ★ 技术文档
-│   │   ├── ARCHITECTURE.md                    ★ 架构文档(整合)
-│   │   ├── API_REFERENCE.md                   ★ API 参考(自动生成)
-│   │   ├── OPERATIONS_MANUAL.md               ★ 运维手册
-│   │   └── DEVELOPMENT_GUIDE.md               ★ 开发指南
+│   ├── technical/                               技术文档
+│   │   ├── ARCHITECTURE.md                     架构文档(整合)
+│   │   ├── API_REFERENCE.md                    API 参考(自动生成)
+│   │   ├── OPERATIONS_MANUAL.md                运维手册
+│   │   └── DEVELOPMENT_GUIDE.md                开发指南
 │   │
-│   ├── executive/                              ★ 高管文档
-│   │   ├── EXECUTIVE_SUMMARY.md               ★ 高管摘要
-│   │   ├── MIGRATION_REPORT.md                ★ 迁移完成报告
-│   │   └── ROI_ANALYSIS.md                    ★ ROI 分析
+│   ├── executive/                               高管文档
+│   │   ├── EXECUTIVE_SUMMARY.md                高管摘要
+│   │   ├── MIGRATION_REPORT.md                 迁移完成报告
+│   │   └── ROI_ANALYSIS.md                     ROI 分析
 │   │
-│   └── templates/                              ★ 文档模板
-│       ├── release-notes-template.md          ★ 发布说明模板
-│       └── changelog-template.md              ★ 变更日志模板
+│   └── templates/                               文档模板
+│       ├── release-notes-template.md           发布说明模板
+│       └── changelog-template.md               变更日志模板
 │
 ├── scripts/
-│   ├── generate_release_notes.py              ★ 发布说明生成器
-│   ├── generate_changelog.py                  ★ 变更日志生成器
-│   ├── generate_api_docs.py                   ★ API 文档生成器
-│   └── validate_documentation.py              ★ 文档完整性验证
+│   ├── generate_release_notes.py               发布说明生成器
+│   ├── generate_changelog.py                   变更日志生成器
+│   ├── generate_api_docs.py                    API 文档生成器
+│   └── validate_documentation.py               文档完整性验证
 │
 └── .taskmaster/
     └── tasks/
-        └── task-22.md                          ★ Phase 22 任务跟踪
+        └── task-22.md                           Phase 22 任务跟踪
 ```
 
 ---
@@ -474,10 +474,10 @@ class ReleaseNotesGenerator:
 ### 核心成果
 
 - [OK] **功能完整性**: {acceptance_data['passed']}/{acceptance_data['total_tests']} 功能测试通过({acceptance_data['passed']/max(acceptance_data['total_tests'],1)*100:.1f}%)
-- ⚡ **性能提升**: 启动时间↓{performance_data['startup_improvement']:.1f}%,帧时间↓{performance_data['frame_time_improvement']:.1f}%,内存↓{performance_data['memory_improvement']:.1f}%
-- 🏗️ **架构现代化**: 基于 Godot Scene Tree 与端口适配器模式
-- 🔒 **安全基线**: Godot 安全白名单 + Sentry 集成 + Release Health 门禁
-- 📊 **可观测性**: 结构化日志 + Crash-Free Sessions 监控 + 性能追踪
+-  **性能提升**: 启动时间↓{performance_data['startup_improvement']:.1f}%,帧时间↓{performance_data['frame_time_improvement']:.1f}%,内存↓{performance_data['memory_improvement']:.1f}%
+-  **架构现代化**: 基于 Godot Scene Tree 与端口适配器模式
+-  **安全基线**: Godot 安全白名单 + Sentry 集成 + Release Health 门禁
+-  **可观测性**: 结构化日志 + Crash-Free Sessions 监控 + 性能追踪
 
 ---
 
@@ -667,7 +667,7 @@ class ReleaseNotesGenerator:
 
 1. **数据导出**(可选):在 vitegame 中导出游戏进度与设置
    ```bash
-   # 在 vitegame 目录执行
+   # 在 旧项目 目录执行
    npm run export-data
    ```
 
@@ -1197,7 +1197,7 @@ class DocumentationValidator:
         print("文档完整性验证结果")
         print("="*60)
 
-        print(f"\n📊 文档覆盖率: {results['coverage_percent']:.1f}%")
+        print(f"\n 文档覆盖率: {results['coverage_percent']:.1f}%")
 
         if results["missing_docs"]:
             print(f"\nFAIL 缺失文档 ({len(results['missing_docs'])}个):")
@@ -1274,10 +1274,10 @@ if __name__ == "__main__":
 ### 核心成果
 
 - [OK] **功能完整性**: ${FEATURE_COMPLETENESS}
-- ⚡ **性能提升**: ${PERFORMANCE_IMPROVEMENTS}
-- 🏗️ **架构现代化**: ${ARCHITECTURE_UPDATES}
-- 🔒 **安全基线**: ${SECURITY_UPDATES}
-- 📊 **可观测性**: ${OBSERVABILITY_UPDATES}
+-  **性能提升**: ${PERFORMANCE_IMPROVEMENTS}
+-  **架构现代化**: ${ARCHITECTURE_UPDATES}
+-  **安全基线**: ${SECURITY_UPDATES}
+-  **可观测性**: ${OBSERVABILITY_UPDATES}
 
 ---
 

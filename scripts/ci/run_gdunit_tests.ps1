@@ -1,7 +1,10 @@
 param(
   [string]$GodotBin = $env:GODOT_BIN,
   [string]$ProjectPath = 'Tests.Godot',
-  [switch]$IgnoreHeadless = $true
+  [switch]$IgnoreHeadless = $true,
+  [string]$UserDir = $env:GODOT_USERDIR,
+  [string]$UserDirFlag = $env:GODOT_USERDIR_FLAG,
+  [switch]$NoUserDir = $false
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,12 +19,59 @@ if (Test-Path $dotnetPath) {
   $env:Path = "$dotnetPath;" + $env:Path
 }
 
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+if (-not [System.IO.Path]::IsPathRooted($ProjectPath)) {
+  $ProjectPath = (Join-Path $repoRoot $ProjectPath)
+}
+$resolvedProjectPath = (Resolve-Path $ProjectPath).Path
+
+function Validate-UserDirValue([string]$p) {
+  if ([string]::IsNullOrWhiteSpace($p)) { return $null }
+  $t = $p.Trim()
+  if ($t -match '^(?i)(user://|res://)') {
+    throw "UserDir must be a filesystem path, not a Godot virtual path (got: $t)"
+  }
+  if ($t -match ':' -and $t -notmatch '^[A-Za-z]:[\\/]') {
+    throw "UserDir contains ':' but is not an absolute drive path like C:\\path\\to\\dir (got: $t)"
+  }
+  if ($t -match '^[A-Za-z]:$' -or $t -match '^[A-Za-z]:[^\\/]') {
+    throw "UserDir must be absolute like C:\\path\\to\\dir (got: $t)"
+  }
+  return $t
+}
+
+# Redirect user:// away from %APPDATA% to keep local machines and CI runners clean.
+$origUserDir = $env:GODOT_USERDIR
+$origUserDir2 = $env:GODOT_USER_DIR
+$origUserDirFlag = $env:GODOT_USERDIR_FLAG
+$effectiveUserDir = $null
+try {
+  if (-not $NoUserDir) {
+    if ([string]::IsNullOrWhiteSpace($UserDir)) { $UserDir = $env:GODOT_USER_DIR }
+    if ([string]::IsNullOrWhiteSpace($UserDir)) {
+      $leaf = (Split-Path -Leaf $resolvedProjectPath)
+      $UserDir = (Join-Path $repoRoot (Join-Path "logs/_godot_userdir" (Join-Path $leaf "gdunit")))
+    } elseif (-not [System.IO.Path]::IsPathRooted($UserDir)) {
+      $UserDir = (Join-Path $repoRoot $UserDir)
+    }
+    $UserDir = Validate-UserDirValue -p $UserDir
+    New-Item -ItemType Directory -Force -Path $UserDir | Out-Null
+    $effectiveUserDir = (Resolve-Path $UserDir).Path
+    $env:GODOT_USERDIR = $effectiveUserDir
+    $env:GODOT_USER_DIR = $effectiveUserDir
+    if (-not [string]::IsNullOrWhiteSpace($UserDirFlag)) { $env:GODOT_USERDIR_FLAG = $UserDirFlag }
+    Write-Host "GODOT_USERDIR=$effectiveUserDir"
+  }
+} catch {
+  Write-Warning ("Failed to set GODOT_USERDIR: " + $_.Exception.Message)
+}
+
 $argsList = @('-a', 'res://tests')
 if ($IgnoreHeadless) { $argsList += '--ignoreHeadlessMode' }
 
-Write-Host "Running GdUnit4 tests at '$ProjectPath' with: $GodotBin $argsList"
+Write-Host "Running GdUnit4 tests at '$resolvedProjectPath' with: $GodotBin $argsList"
 # Backend detection (plugin vs managed)
-if (Test-Path "$PSScriptRoot/../../$ProjectPath/addons/godot-sqlite") {
+if (Test-Path (Join-Path $resolvedProjectPath 'addons/godot-sqlite')) {
   Write-Host "Detected addons/godot-sqlite plugin: tests will prefer plugin backend."
 } else {
   Write-Host "No addons/godot-sqlite found: tests will use Microsoft.Data.Sqlite managed fallback if available."
@@ -33,14 +83,17 @@ if ($env:TEMPLATE_DEMO -eq '1') {
 }
 
 # Ensure test project path exists; pass --path
-$runner = Join-Path $PSScriptRoot ("../../$ProjectPath/addons/gdUnit4/runtest.cmd")
+$runner = Join-Path $resolvedProjectPath 'addons/gdUnit4/runtest.cmd'
 if (-not (Test-Path $runner)) { Write-Error "GdUnit4 runner not found at $runner" }
-Push-Location $ProjectPath
+Push-Location $resolvedProjectPath
 try {
   & $runner --godot_binary "$GodotBin" @argsList
   $exitCode = $LASTEXITCODE
 } finally {
   Pop-Location
+  $env:GODOT_USERDIR = $origUserDir
+  $env:GODOT_USER_DIR = $origUserDir2
+  $env:GODOT_USERDIR_FLAG = $origUserDirFlag
 }
 $exitCode = $LASTEXITCODE
 Write-Host "GdUnit4 finished with exit code $exitCode"
@@ -48,7 +101,7 @@ Write-Host "GdUnit4 finished with exit code $exitCode"
 # Collect reports to logs/ci/<timestamp>/gdunit4-reports
 $ts = Get-Date -Format 'yyyyMMdd-HHmmss'
 $dest = Join-Path $PSScriptRoot ("../../logs/ci/$ts/gdunit4-reports")
-$reports = Join-Path $PSScriptRoot ("../../$ProjectPath/reports")
+$reports = Join-Path $resolvedProjectPath 'reports'
 if (Test-Path $reports) {
   New-Item -ItemType Directory -Force -Path $dest | Out-Null
   Copy-Item -Recurse -Force "$reports/*" $dest 2>$null

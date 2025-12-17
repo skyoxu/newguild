@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using Game.Core.Ports;
+using Game.Core.Services;
 using Godot;
 using Microsoft.Data.Sqlite;
 
@@ -14,6 +15,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
 {
     private enum Backend { Plugin, Managed }
 
+    private SecurityFileAdapter? _securityFileAdapter;
     private Backend _backend = Backend.Managed;
     private GodotObject? _pluginDb;
     private SqliteConnection? _conn;
@@ -21,27 +23,64 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     private string? _dbPath;
     public string? LastError { get; private set; }
 
+    public override void _Ready()
+    {
+        _ = GetSecurityFileAdapter();
+    }
+
+    private SecurityFileAdapter? GetSecurityFileAdapter()
+    {
+        if (_securityFileAdapter != null) return _securityFileAdapter;
+
+        // Autoload dependency: EventBus is initialized before SqlDb in project.godot.
+        var bus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
+        if (bus == null)
+        {
+            GD.PushWarning("[SqliteDataStore] EventBus not found at /root/EventBus; DB operations will be blocked.");
+            return null;
+        }
+
+        _securityFileAdapter = new SecurityFileAdapter(bus);
+        return _securityFileAdapter;
+    }
+
     public void Open(string dbPath)
     {
-        // Security: allow only user:// paths and forbid traversal
-        if (string.IsNullOrWhiteSpace(dbPath)) throw new ArgumentException("Empty database path");
-        var raw = dbPath.Replace('\\','/');
-        var lower = raw.ToLowerInvariant();
-        if (!lower.StartsWith("user://"))
-            throw new NotSupportedException("Only user:// paths are allowed for database files");
-        if (lower.Contains(".."))
-            throw new NotSupportedException("Path traversal is not allowed");
-        _dbPath = Globalize(dbPath);
+        // Validate database path using SecurityFileAdapter
+        if (string.IsNullOrWhiteSpace(dbPath))
+            throw new ArgumentException("Empty database path");
+
+        var sec = GetSecurityFileAdapter();
+        if (sec == null)
+        {
+            GD.PrintErr("[SqliteDataStore] SecurityFileAdapter not initialized");
+            throw new NotSupportedException("SecurityFileAdapter not initialized");
+        }
+
+        var validatedPath = sec.ValidateWritePath(dbPath);
+        if (validatedPath == null)
+        {
+            GD.PrintErr($"[SqliteDataStore] Database path validation failed: {dbPath}");
+            throw new NotSupportedException($"Database path not allowed: {dbPath}");
+        }
+
+        _dbPath = Globalize(validatedPath.Value);
         EnsureParentDir(_dbPath!);
         var isNew = !System.IO.File.Exists(_dbPath!);
-        var prefer = (System.Environment.GetEnvironmentVariable("GODOT_DB_BACKEND") ?? string.Empty).ToLowerInvariant(); var forcePlugin = prefer == "plugin"; var forceManaged = prefer == "managed"; if (!forceManaged && TryOpenPlugin(_dbPath!))
+
+        var prefer = (System.Environment.GetEnvironmentVariable("GODOT_DB_BACKEND") ?? string.Empty).ToLowerInvariant();
+        var forcePlugin = prefer == "plugin";
+        var forceManaged = prefer == "managed";
+
+        if (!forceManaged && TryOpenPlugin(_dbPath!))
         {
             _backend = Backend.Plugin;
             if (isNew) TryInitSchema();
             return;
         }
 
-        if (forcePlugin) throw new NotSupportedException("godot-sqlite plugin requested via GODOT_DB_BACKEND=plugin but not available.");
+        if (forcePlugin)
+            throw new NotSupportedException("godot-sqlite plugin requested via GODOT_DB_BACKEND=plugin but not available.");
 
         // Managed path
         var cs = new SqliteConnectionStringBuilder { DataSource = _dbPath!, Mode = SqliteOpenMode.ReadWriteCreate }.ToString();
@@ -267,7 +306,23 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         {
             // Load schema script from res://
             var schemaPath = "res://scripts/db/schema.sql";
-            using var f = FileAccess.Open(schemaPath, FileAccess.ModeFlags.Read);
+
+            // Validate schema path using SecurityFileAdapter
+            var sec = GetSecurityFileAdapter();
+            if (sec == null)
+            {
+                GD.PrintErr("[SqliteDataStore] SecurityFileAdapter not initialized");
+                return;
+            }
+
+            var validatedSchemaPath = sec.ValidateReadPath(schemaPath);
+            if (validatedSchemaPath == null)
+            {
+                GD.PrintErr($"[SqliteDataStore] Schema file access denied: {schemaPath}");
+                return;
+            }
+
+            using var f = FileAccess.Open(validatedSchemaPath.Value, FileAccess.ModeFlags.Read);
             if (f == null) return;
             var script = f.GetAsText();
             foreach (var stmt in SplitSql(script))
@@ -359,8 +414,6 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         return s.Length <= max ? s : s.Substring(0, max);
     }
 }
-
-
 
 
 

@@ -237,19 +237,19 @@ try {
   // 生成详细报告
   await generateRiskReport(result, stats, risks);
 
-  console.log(`🔍 Risk Gate Analysis: ${risks.length} risks evaluated`);
+  console.log(` Risk Gate Analysis: ${risks.length} risks evaluated`);
   console.log(
-    `📊 Stats: Critical=${stats.critical}, High=${stats.high}, Max Score=${stats.maxScore}`
+    ` Stats: Critical=${stats.critical}, High=${stats.high}, Max Score=${stats.maxScore}`
   );
 
   if (!result.passed) {
-    console.error('❌ Risk gate failed:', result.failures);
+    console.error('[FAIL] Risk gate failed:', result.failures);
     if (CONFIG.exitOnFailure) process.exit(1);
   } else {
-    console.log('✅ Risk gate passed - all thresholds met');
+    console.log('[PASS] Risk gate passed - all thresholds met');
   }
 } catch (error) {
-  console.error('💥 Risk gate error:', error.message);
+  console.error(' Risk gate error:', error.message);
   if (CONFIG.exitOnFailure) process.exit(1);
 }
 
@@ -440,10 +440,10 @@ export function generateTraceReport(result: ValidationResult): string {
 - ADR关联: ${coverage.tdrsWithADR}/${coverage.totalTdrs}
 
 ### 问题清单
-${result.issues.map(i => `- ❌ ${i}`).join('\n')}
+${result.issues.map(i => `- [FAIL] ${i}`).join('\n')}
 
 ### 警告清单  
-${result.warnings.map(w => `- ⚠️ ${w}`).join('\n')}
+${result.warnings.map(w => `- [WARN] ${w}`).join('\n')}
   `.trim();
 }
 ```
@@ -551,10 +551,10 @@ npm run critical:check
 
 **输出格式**：
 
-- ✅ PASS - 可安全发布
-- ⚠️ WARN - 谨慎继续
-- ❌ FAIL - 阻止发布
-- 🚨 CRITICAL - 立即回滚
+- [PASS] PASS - 可安全发布
+- [WARN] WARN - 谨慎继续
+- [FAIL] FAIL - 阻止发布
+-  CRITICAL - 立即回滚
 
 ## H) 验收清单（最小合规）
 

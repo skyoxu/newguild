@@ -1,6 +1,7 @@
 using System;
 using FluentAssertions;
 using Game.Core.Contracts.GameLoop;
+using Game.Core.Domain.Turn;
 using Xunit;
 
 namespace Game.Core.Tests.Domain;
@@ -19,7 +20,7 @@ public class GameLoopContractsTests
         var now = DateTimeOffset.UtcNow;
 
         var evt = new GameTurnStarted(
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             Week: 1,
             Phase: "Resolution",
             StartedAt: now
@@ -43,7 +44,7 @@ public class GameLoopContractsTests
         var now = DateTimeOffset.UtcNow;
 
         var evt = new GameTurnPhaseChanged(
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             Week: 1,
             PreviousPhase: "Resolution",
             CurrentPhase: "Player",
@@ -69,7 +70,7 @@ public class GameLoopContractsTests
         var now = DateTimeOffset.UtcNow;
 
         var evt = new GameWeekAdvanced(
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             PreviousWeek: 1,
             CurrentWeek: 2,
             AdvancedAt: now

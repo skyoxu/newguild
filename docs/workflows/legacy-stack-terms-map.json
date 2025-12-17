@@ -1,0 +1,16 @@
+{
+  "description": "Legacy stack term neutralization map used by scripts/python/sanitize_legacy_stack_terms.py and scripts/python/scan_doc_stack_terms.py. 文档正文替换用中文；脚本本体保持英文。",
+  "replacements": [
+    { "name": "旧桌面壳", "pattern": "\\bElectron\\b", "replacement": "旧桌面壳", "flags": "i" },
+    { "name": "旧渲染内核", "pattern": "\\bChromium\\b", "replacement": "旧渲染内核", "flags": "i" },
+    { "name": "旧窗口容器", "pattern": "\\bBrowserWindow\\b", "replacement": "旧窗口容器", "flags": "" },
+    { "name": "旧预加载脚本", "pattern": "\\bpreload\\b", "replacement": "旧预加载脚本", "flags": "i" },
+    { "name": "旧前端框架", "pattern": "\\bReact\\b", "replacement": "旧前端框架", "flags": "i" },
+    { "name": "旧游戏引擎", "pattern": "\\bPhaser\\b", "replacement": "旧游戏引擎", "flags": "i" },
+    { "name": "旧端到端测试工具", "pattern": "\\bPlaywright\\b", "replacement": "旧端到端测试工具", "flags": "i" },
+    { "name": "旧单元测试工具", "pattern": "\\bVitest\\b", "replacement": "旧单元测试工具", "flags": "i" },
+    { "name": "旧构建工具", "pattern": "\\bVite\\b", "replacement": "旧构建工具", "flags": "i" },
+    { "name": "旧项目", "pattern": "\\bvitegame\\b", "replacement": "旧项目", "flags": "i" }
+  ]
+}
+

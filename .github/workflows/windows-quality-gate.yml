@@ -154,6 +154,13 @@ jobs:
             --add tests/UI `
             --timeout-sec 480 --rd "logs/e2e/${{ github.run_id }}/gdunit-reports/quality"
 
+      - name: Validate security audit JSONL (hard gate)
+        shell: pwsh
+        run: |
+          $date = Get-Date -Format 'yyyy-MM-dd'
+          $logPattern = "logs/ci/$date/security-audit*.jsonl"
+          py -3 scripts/python/validate_audit_logs.py --log-path $logPattern --check-sensitive --strict --report "logs/ci/$date/audit-validation-report.json"
+
       - name: GdUnit4 a11y tests (Python, soft gate)
         shell: pwsh
         continue-on-error: true
@@ -180,6 +187,14 @@ jobs:
         with:
           name: gdunit-reports
           path: logs/e2e/**/gdunit-reports/**
+          if-no-files-found: ignore
+
+      - name: Upload audit validation report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-validation-report
+          path: logs/ci/**/audit-validation-report.json
           if-no-files-found: ignore
 
       - name: Schema dump (soft)

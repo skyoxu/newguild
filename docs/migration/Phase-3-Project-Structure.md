@@ -1,134 +1,134 @@
-﻿# Phase 3: Godot 椤圭洰缁撴瀯璁捐
+# Phase 3: Godot 项目结构设计
 
-> 鐘舵€? 璁捐闃舵
-> 棰勪及宸ユ椂: 1 澶?
-> 椋庨櫓绛夌骇: 浣?
-> 鍓嶇疆鏉′欢: Phase 1-2 瀹屾垚
-
----
-
-## 鐩爣
-
-寤虹珛 Godot 4.5 + C# 椤圭洰鐨勬爣鍑嗙洰褰曠粨鏋勶紝閬靛惊绔彛閫傞厤鍣ㄦā寮忥紝鏀寔 TDD 寮€鍙戙€?
+> 状态: 设计阶段
+> 预估工时: 1 天
+> 风险等级: 低
+> 前置条件: Phase 1-2 完成
 
 ---
 
-## 椤圭洰鏍圭洰褰曠粨鏋?
+## 目标
+
+建立 Godot 4.5 + C# 项目的标准目录结构，遵循端口适配器模式，支持 TDD 开发。
+
+---
+
+## 项目根目录结构
 
 ```
-newguild/                              # 鏂伴」鐩牴鐩綍
-鈹溾攢鈹€ .git/                               # Git 浠撳簱
-鈹溾攢鈹€ .gitignore                          # Git 蹇界暐瑙勫垯
-鈹溾攢鈹€ .gitattributes                      # Git 鏂囦欢灞炴€?
-鈹溾攢鈹€ project.godot                       # Godot 椤圭洰閰嶇疆鏂囦欢
-鈹溾攢鈹€ export_presets.cfg                  # 瀵煎嚭棰勮閰嶇疆
-鈹溾攢鈹€ icon.svg                            # 椤圭洰鍥炬爣
-鈹溾攢鈹€ Game.sln                            # Visual Studio 瑙ｅ喅鏂规
-鈹?
-鈹溾攢鈹€ Game.Core/                          # 绾?C# 棰嗗煙灞傦紙涓嶄緷璧?Godot锛?
-鈹?  鈹溾攢鈹€ Game.Core.csproj
-鈹?  鈹溾攢鈹€ Domain/
-鈹?  鈹?  鈹溾攢鈹€ Entities/
-鈹?  鈹?  鈹溾攢鈹€ ValueObjects/
-鈹?  鈹?  鈹斺攢鈹€ Services/
-鈹?  鈹溾攢鈹€ Ports/                          # 鎺ュ彛瀹氫箟
-鈹?  鈹斺攢鈹€ Utilities/
-鈹?
-鈹溾攢鈹€ Game.Core.Tests/                    # xUnit 鍗曞厓娴嬭瘯
-鈹?  鈹溾攢鈹€ Game.Core.Tests.csproj
-鈹?  鈹溾攢鈹€ Domain/
-鈹?  鈹溾攢鈹€ Fakes/                          # Fake 瀹炵幇锛堟祴璇曠敤锛?
-鈹?  鈹斺攢鈹€ TestHelpers/
-鈹?
-鈹溾攢鈹€ Game.Godot/                         # Godot 鍦烘櫙涓庤剼鏈?
-鈹?  鈹溾攢鈹€ .godot/                         # Godot 缂撳瓨锛圙it 蹇界暐锛?
-鈹?  鈹溾攢鈹€ Scenes/                         # 鍦烘櫙鏂囦欢 (.tscn)
-鈹?  鈹溾攢鈹€ Scripts/                        # C# 鑴氭湰锛堣杽灞傛帶鍒跺櫒锛?
-鈹?  鈹溾攢鈹€ Autoloads/                      # 鍏ㄥ眬鍗曚緥
-鈹?  鈹溾攢鈹€ Adapters/                       # Godot API 閫傞厤灞?
-鈹?  鈹溾攢鈹€ Resources/                      # 璧勬簮瀹氫箟 (.tres)
-鈹?  鈹溾攢鈹€ Themes/                         # UI 涓婚
-鈹?  鈹斺攢鈹€ Assets/                         # 缇庢湳璧勪骇
-鈹?      鈹溾攢鈹€ Textures/
-鈹?      鈹溾攢鈹€ Fonts/
-鈹?      鈹溾攢鈹€ Audio/
-鈹?      鈹斺攢鈹€ Models/
-鈹?
-鈹溾攢鈹€ Game.Godot.Tests/                   # GdUnit4 鍦烘櫙娴嬭瘯
-鈹?  鈹溾攢鈹€ Scenes/
-鈹?  鈹溾攢鈹€ Scripts/
-鈹?  鈹斺攢鈹€ E2E/
-鈹?
-鈹溾攢鈹€ docs/                               # 椤圭洰鏂囨。
-鈹?  鈹溾攢鈹€ adr/                            # ADR 璁板綍
-鈹?  鈹溾攢鈹€ architecture/                   # 鏋舵瀯鏂囨。
-鈹?  鈹溾攢鈹€ contracts/                      # 濂戠害鏂囨。
-鈹?  鈹?  鈹斺攢鈹€ signals/                    # Signal 濂戠害
-鈹?  鈹斺攢鈹€ migration/                      # 杩佺Щ鏂囨。锛堟湰绯诲垪锛?
-鈹?
-鈹溾攢鈹€ scripts/                            # 鏋勫缓涓庡伐鍏疯剼鏈?
-鈹?  鈹溾攢鈹€ ci/                             # CI/CD 鑴氭湰
-鈹?  鈹溾攢鈹€ python/                         # Python 宸ュ叿
-鈹?  鈹斺攢鈹€ godot/                          # Godot 杈呭姪鑴氭湰
-鈹?
-鈹溾攢鈹€ logs/                               # 鏃ュ織杈撳嚭鐩綍锛圙it 蹇界暐锛?
-鈹?  鈹溾攢鈹€ ci/
-鈹?  鈹溾攢鈹€ security/
-鈹?  鈹斺攢鈹€ performance/
-鈹?
-鈹斺攢鈹€ TestResults/                        # 娴嬭瘯缁撴灉锛圙it 蹇界暐锛?
-    鈹溾攢鈹€ coverage/
-    鈹斺攢鈹€ gdunit4/
+newguild/                              # 新项目根目录
+├── .git/                               # Git 仓库
+├── .gitignore                          # Git 忽略规则
+├── .gitattributes                      # Git 文件属性
+├── project.godot                       # Godot 项目配置文件
+├── export_presets.cfg                  # 导出预设配置
+├── icon.svg                            # 项目图标
+├── Game.sln                            # Visual Studio 解决方案
+│
+├── Game.Core/                          # 纯 C# 领域层（不依赖 Godot）
+│   ├── Game.Core.csproj
+│   ├── Domain/
+│   │   ├── Entities/
+│   │   ├── ValueObjects/
+│   │   └── Services/
+│   ├── Ports/                          # 接口定义
+│   └── Utilities/
+│
+├── Game.Core.Tests/                    # xUnit 单元测试
+│   ├── Game.Core.Tests.csproj
+│   ├── Domain/
+│   ├── Fakes/                          # Fake 实现（测试用）
+│   └── TestHelpers/
+│
+├── Game.Godot/                         # Godot 场景与脚本
+│   ├── .godot/                         # Godot 缓存（Git 忽略）
+│   ├── Scenes/                         # 场景文件 (.tscn)
+│   ├── Scripts/                        # C# 脚本（薄层控制器）
+│   ├── Autoloads/                      # 全局单例
+│   ├── Adapters/                       # Godot API 适配层
+│   ├── Resources/                      # 资源定义 (.tres)
+│   ├── Themes/                         # UI 主题
+│   └── Assets/                         # 美术资产
+│       ├── Textures/
+│       ├── Fonts/
+│       ├── Audio/
+│       └── Models/
+│
+├── Game.Godot.Tests/                   # GdUnit4 场景测试
+│   ├── Scenes/
+│   ├── Scripts/
+│   └── E2E/
+│
+├── docs/                               # 项目文档
+│   ├── adr/                            # ADR 记录
+│   ├── architecture/                   # 架构文档
+│   ├── contracts/                      # 契约文档
+│   │   └── signals/                    # Signal 契约
+│   └── migration/                      # 迁移文档（本系列）
+│
+├── scripts/                            # 构建与工具脚本
+│   ├── ci/                             # CI/CD 脚本
+│   ├── python/                         # Python 工具
+│   └── godot/                          # Godot 辅助脚本
+│
+├── logs/                               # 日志输出目录（Git 忽略）
+│   ├── ci/
+│   ├── security/
+│   └── performance/
+│
+└── TestResults/                        # 测试结果（Git 忽略）
+    ├── coverage/
+    └── gdunit4/
 ```
 
 ---
 
-## Game.Core 椤圭洰璇︾粏缁撴瀯
+## Game.Core 项目详细结构
 
 ```
 Game.Core/
-鈹溾攢鈹€ Game.Core.csproj
-鈹?
-鈹溾攢鈹€ Domain/
-鈹?  鈹溾攢鈹€ Entities/                       # 棰嗗煙瀹炰綋锛堟湁鏍囪瘑鐨勫彲鍙樺璞★級
-鈹?  鈹?  鈹溾攢鈹€ Player.cs
-鈹?  鈹?  鈹溾攢鈹€ Enemy.cs
-鈹?  鈹?  鈹溾攢鈹€ Item.cs
-鈹?  鈹?  鈹斺攢鈹€ GameSession.cs
-鈹?  鈹?
-鈹?  鈹溾攢鈹€ ValueObjects/                   # 鍊煎璞★紙涓嶅彲鍙橈級
-鈹?  鈹?  鈹溾攢鈹€ Position.cs
-鈹?  鈹?  鈹溾攢鈹€ Vector2D.cs
-鈹?  鈹?  鈹溾攢鈹€ Health.cs
-鈹?  鈹?  鈹溾攢鈹€ Damage.cs
-鈹?  鈹?  鈹溾攢鈹€ Score.cs
-鈹?  鈹?  鈹斺攢鈹€ ItemQuantity.cs
-鈹?  鈹?
-鈹?  鈹溾攢鈹€ Services/                       # 棰嗗煙鏈嶅姟锛堣法瀹炰綋閫昏緫锛?
-鈹?  鈹?  鈹溾攢鈹€ CombatService.cs
-鈹?  鈹?  鈹溾攢鈹€ InventoryService.cs
-鈹?  鈹?  鈹溾攢鈹€ ScoreService.cs
-鈹?  鈹?  鈹斺攢鈹€ CollisionService.cs
-鈹?  鈹?
-鈹?  鈹斺攢鈹€ Events/                         # 棰嗗煙浜嬩欢锛堝彲閫夛級
-鈹?      鈹溾攢鈹€ PlayerHealthChanged.cs
-鈹?      鈹斺攢鈹€ EnemyDefeated.cs
-鈹?
-鈹溾攢鈹€ Ports/                              # 绔彛鎺ュ彛锛堜緷璧栧€掔疆锛?
-鈹?  鈹溾攢鈹€ ITime.cs                        # 鏃堕棿鏈嶅姟
-鈹?  鈹溾攢鈹€ IInput.cs                       # 杈撳叆鏈嶅姟
-鈹?  鈹溾攢鈹€ IResourceLoader.cs              # 璧勬簮鍔犺浇
-鈹?  鈹溾攢鈹€ IDataStore.cs                   # 鏁版嵁瀛樺偍
-鈹?  鈹溾攢鈹€ IAudioPlayer.cs                 # 闊抽鎾斁
-鈹?  鈹斺攢鈹€ ILogger.cs                      # 鏃ュ織鏈嶅姟
-鈹?
-鈹斺攢鈹€ Utilities/                          # 宸ュ叿绫伙紙绾嚱鏁帮級
-    鈹溾攢鈹€ MathHelper.cs
-    鈹溾攢鈹€ RandomHelper.cs
-    鈹斺攢鈹€ StringHelper.cs
+├── Game.Core.csproj
+│
+├── Domain/
+│   ├── Entities/                       # 领域实体（有标识的可变对象）
+│   │   ├── Player.cs
+│   │   ├── Enemy.cs
+│   │   ├── Item.cs
+│   │   └── GameSession.cs
+│   │
+│   ├── ValueObjects/                   # 值对象（不可变）
+│   │   ├── Position.cs
+│   │   ├── Vector2D.cs
+│   │   ├── Health.cs
+│   │   ├── Damage.cs
+│   │   ├── Score.cs
+│   │   └── ItemQuantity.cs
+│   │
+│   ├── Services/                       # 领域服务（跨实体逻辑）
+│   │   ├── CombatService.cs
+│   │   ├── InventoryService.cs
+│   │   ├── ScoreService.cs
+│   │   └── CollisionService.cs
+│   │
+│   └── Events/                         # 领域事件（可选）
+│       ├── PlayerHealthChanged.cs
+│       └── EnemyDefeated.cs
+│
+├── Ports/                              # 端口接口（依赖倒置）
+│   ├── ITime.cs                        # 时间服务
+│   ├── IInput.cs                       # 输入服务
+│   ├── IResourceLoader.cs              # 资源加载
+│   ├── IDataStore.cs                   # 数据存储
+│   ├── IAudioPlayer.cs                 # 音频播放
+│   └── ILogger.cs                      # 日志服务
+│
+└── Utilities/                          # 工具类（纯函数）
+    ├── MathHelper.cs
+    ├── RandomHelper.cs
+    └── StringHelper.cs
 ```
 
-**Game.Core.csproj 绀轰緥**:
+**Game.Core.csproj 示例**:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -141,7 +141,7 @@ Game.Core/
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <!-- 绂佹寮曠敤 Godot 鐩稿叧鍖?-->
+  <!-- 禁止引用 Godot 相关包 -->
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="8.0.0" />
   </ItemGroup>
@@ -151,39 +151,39 @@ Game.Core/
 
 ---
 
-## Game.Core.Tests 椤圭洰缁撴瀯
+## Game.Core.Tests 项目结构
 
 ```
 Game.Core.Tests/
-鈹溾攢鈹€ Game.Core.Tests.csproj
-鈹?
-鈹溾攢鈹€ Domain/
-鈹?  鈹溾攢鈹€ Entities/
-鈹?  鈹?  鈹溾攢鈹€ PlayerTests.cs
-鈹?  鈹?  鈹溾攢鈹€ EnemyTests.cs
-鈹?  鈹?  鈹斺攢鈹€ ItemTests.cs
-鈹?  鈹?
-鈹?  鈹溾攢鈹€ Services/
-鈹?  鈹?  鈹溾攢鈹€ CombatServiceTests.cs
-鈹?  鈹?  鈹溾攢鈹€ InventoryServiceTests.cs
-鈹?  鈹?  鈹斺攢鈹€ ScoreServiceTests.cs
-鈹?  鈹?
-鈹?  鈹斺攢鈹€ ValueObjects/
-鈹?      鈹溾攢鈹€ HealthTests.cs
-鈹?      鈹斺攢鈹€ DamageTests.cs
-鈹?
-鈹溾攢鈹€ Fakes/                              # Fake 瀹炵幇锛堟祴璇曠敤锛?
-鈹?  鈹溾攢鈹€ FakeTime.cs
-鈹?  鈹溾攢鈹€ FakeInput.cs
-鈹?  鈹溾攢鈹€ FakeDataStore.cs
-鈹?  鈹斺攢鈹€ FakeLogger.cs
-鈹?
-鈹斺攢鈹€ TestHelpers/
-    鈹溾攢鈹€ TestDataBuilder.cs              # 娴嬭瘯鏁版嵁鏋勫缓鍣?
-    鈹斺攢鈹€ AssertionExtensions.cs          # 鑷畾涔夋柇瑷€
+├── Game.Core.Tests.csproj
+│
+├── Domain/
+│   ├── Entities/
+│   │   ├── PlayerTests.cs
+│   │   ├── EnemyTests.cs
+│   │   └── ItemTests.cs
+│   │
+│   ├── Services/
+│   │   ├── CombatServiceTests.cs
+│   │   ├── InventoryServiceTests.cs
+│   │   └── ScoreServiceTests.cs
+│   │
+│   └── ValueObjects/
+│       ├── HealthTests.cs
+│       └── DamageTests.cs
+│
+├── Fakes/                              # Fake 实现（测试用）
+│   ├── FakeTime.cs
+│   ├── FakeInput.cs
+│   ├── FakeDataStore.cs
+│   └── FakeLogger.cs
+│
+└── TestHelpers/
+    ├── TestDataBuilder.cs              # 测试数据构建器
+    └── AssertionExtensions.cs          # 自定义断言
 ```
 
-**Game.Core.Tests.csproj 绀轰緥**:
+**Game.Core.Tests.csproj 示例**:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -212,71 +212,71 @@ Game.Core.Tests/
 
 ---
 
-## Game.Godot 椤圭洰缁撴瀯
+## Game.Godot 项目结构
 
 ```
 Game.Godot/
-鈹溾攢鈹€ project.godot                       # Godot 椤圭洰閰嶇疆
-鈹溾攢鈹€ export_presets.cfg                  # 瀵煎嚭閰嶇疆
-鈹?
-鈹溾攢鈹€ Scenes/                             # 鍦烘櫙鏂囦欢
-鈹?  鈹溾攢鈹€ Main.tscn                       # 涓诲満鏅?
-鈹?  鈹溾攢鈹€ UI/
-鈹?  鈹?  鈹溾攢鈹€ MainMenu.tscn
-鈹?  鈹?  鈹溾攢鈹€ HUD.tscn
-鈹?  鈹?  鈹斺攢鈹€ SettingsMenu.tscn
-鈹?  鈹溾攢鈹€ Game/
-鈹?  鈹?  鈹溾攢鈹€ Player.tscn
-鈹?  鈹?  鈹溾攢鈹€ Enemy.tscn
-鈹?  鈹?  鈹斺攢鈹€ Item.tscn
-鈹?  鈹斺攢鈹€ Levels/
-鈹?      鈹溾攢鈹€ Level1.tscn
-鈹?      鈹斺攢鈹€ Level2.tscn
-鈹?
-鈹溾攢鈹€ Scripts/                            # C# 鑴氭湰锛堣杽灞傛帶鍒跺櫒锛?
-鈹?  鈹溾攢鈹€ PlayerController.cs             # Node 鐢熷懡鍛ㄦ湡 + Signal 杞彂
-鈹?  鈹溾攢鈹€ EnemyController.cs
-鈹?  鈹溾攢鈹€ UIController.cs
-鈹?  鈹斺攢鈹€ CameraController.cs
-鈹?
-鈹溾攢鈹€ Autoloads/                          # 鍏ㄥ眬鍗曚緥锛堣嚜鍔ㄥ姞杞斤級
-鈹?  鈹溾攢鈹€ ServiceLocator.cs               # DI 瀹瑰櫒
-鈹?  鈹溾攢鈹€ Security.cs                     # 瀹夊叏灏佽锛圙DScript锛?
-鈹?  鈹溾攢鈹€ Observability.cs                # Sentry + 鏃ュ織
-鈹?  鈹斺攢鈹€ EventBus.cs                     # 鍏ㄥ眬浜嬩欢鎬荤嚎
-鈹?
-鈹溾攢鈹€ Adapters/                           # Godot API 閫傞厤灞?
-鈹?  鈹溾攢鈹€ GodotTimeAdapter.cs
-鈹?  鈹溾攢鈹€ GodotInputAdapter.cs
-鈹?  鈹溾攢鈹€ GodotResourceLoader.cs
-鈹?  鈹溾攢鈹€ GodotAudioPlayer.cs
-鈹?  鈹溾攢鈹€ SqliteDataStore.cs
-鈹?  鈹斺攢鈹€ GodotLogger.cs
-鈹?
-鈹溾攢鈹€ Resources/                          # 璧勬簮瀹氫箟鏂囦欢
-鈹?  鈹溾攢鈹€ player_stats.tres
-鈹?  鈹斺攢鈹€ enemy_config.tres
-鈹?
-鈹溾攢鈹€ Themes/                             # UI 涓婚
-鈹?  鈹溾攢鈹€ default_theme.tres
-鈹?  鈹斺攢鈹€ button_styles.tres
-鈹?
-鈹斺攢鈹€ Assets/                             # 缇庢湳璧勪骇
-    鈹溾攢鈹€ Textures/
-    鈹?  鈹溾攢鈹€ player.png
-    鈹?  鈹斺攢鈹€ enemy.png
-    鈹溾攢鈹€ Fonts/
-    鈹?  鈹斺攢鈹€ main_font.ttf
-    鈹溾攢鈹€ Audio/
-    鈹?  鈹溾攢鈹€ bgm.ogg
-    鈹?  鈹斺攢鈹€ sfx_hit.wav
-    鈹斺攢鈹€ Shaders/
-        鈹斺攢鈹€ outline.gdshader
+├── project.godot                       # Godot 项目配置
+├── export_presets.cfg                  # 导出配置
+│
+├── Scenes/                             # 场景文件
+│   ├── Main.tscn                       # 主场景
+│   ├── UI/
+│   │   ├── MainMenu.tscn
+│   │   ├── HUD.tscn
+│   │   └── SettingsMenu.tscn
+│   ├── Game/
+│   │   ├── Player.tscn
+│   │   ├── Enemy.tscn
+│   │   └── Item.tscn
+│   └── Levels/
+│       ├── Level1.tscn
+│       └── Level2.tscn
+│
+├── Scripts/                            # C# 脚本（薄层控制器）
+│   ├── PlayerController.cs             # Node 生命周期 + Signal 转发
+│   ├── EnemyController.cs
+│   ├── UIController.cs
+│   └── CameraController.cs
+│
+├── Autoloads/                          # 全局单例（自动加载）
+│   ├── ServiceLocator.cs               # DI 容器
+│   ├── Security.cs                     # 安全封装（GDScript）
+│   ├── Observability.cs                # Sentry + 日志
+│   └── EventBus.cs                     # 全局事件总线
+│
+├── Adapters/                           # Godot API 适配层
+│   ├── GodotTimeAdapter.cs
+│   ├── GodotInputAdapter.cs
+│   ├── GodotResourceLoader.cs
+│   ├── GodotAudioPlayer.cs
+│   ├── SqliteDataStore.cs
+│   └── GodotLogger.cs
+│
+├── Resources/                          # 资源定义文件
+│   ├── player_stats.tres
+│   └── enemy_config.tres
+│
+├── Themes/                             # UI 主题
+│   ├── default_theme.tres
+│   └── button_styles.tres
+│
+└── Assets/                             # 美术资产
+    ├── Textures/
+    │   ├── player.png
+    │   └── enemy.png
+    ├── Fonts/
+    │   └── main_font.ttf
+    ├── Audio/
+    │   ├── bgm.ogg
+    │   └── sfx_hit.wav
+    └── Shaders/
+        └── outline.gdshader
 ```
 
 ---
 
-## Godot 椤圭洰閰嶇疆鏂囦欢
+## Godot 项目配置文件
 
 ### project.godot
 
@@ -401,31 +401,31 @@ Remove-Item -Recurse -Force '{temp_dir}'"
 
 ---
 
-## Game.Godot.Tests 椤圭洰缁撴瀯
+## Game.Godot.Tests 项目结构
 
 ```
 Game.Godot.Tests/
-鈹溾攢鈹€ addons/
-鈹?  鈹斺攢鈹€ gdUnit4/                        # GdUnit4 鎻掍欢
-鈹?
-鈹溾攢鈹€ Scenes/
-鈹?  鈹溾攢鈹€ MainSceneTest.cs
-鈹?  鈹溾攢鈹€ PlayerTest.cs
-鈹?  鈹斺攢鈹€ UITest.cs
-鈹?
-鈹溾攢鈹€ Scripts/
-鈹?  鈹溾攢鈹€ SignalTest.cs
-鈹?  鈹斺攢鈹€ AdapterTest.cs
-鈹?
-鈹斺攢鈹€ E2E/
-    鈹溾攢鈹€ E2ERunner.tscn                  # E2E 娴嬭瘯杩愯鍣ㄥ満鏅?
-    鈹溾攢鈹€ E2ERunner.cs                    # E2E 娴嬭瘯鑴氭湰
-    鈹斺攢鈹€ SmokeTests.cs                   # 鍐掔儫娴嬭瘯
+├── addons/
+│   └── gdUnit4/                        # GdUnit4 插件
+│
+├── Scenes/
+│   ├── MainSceneTest.cs
+│   ├── PlayerTest.cs
+│   └── UITest.cs
+│
+├── Scripts/
+│   ├── SignalTest.cs
+│   └── AdapterTest.cs
+│
+└── E2E/
+    ├── E2ERunner.tscn                  # E2E 测试运行器场景
+    ├── E2ERunner.cs                    # E2E 测试脚本
+    └── SmokeTests.cs                   # 冒烟测试
 ```
 
 ---
 
-## Visual Studio 瑙ｅ喅鏂规缁撴瀯
+## Visual Studio 解决方案结构
 
 **Game.sln**:
 
@@ -527,22 +527,22 @@ dist/
 
 ---
 
-## 鍒濆鍖栬剼鏈?
+## 初始化脚本
 
-鍒涘缓 PowerShell 鑴氭湰鑷姩鍖栭」鐩垵濮嬪寲锛?
+创建 PowerShell 脚本自动化项目初始化：
 
 **scripts/init-godot-project.ps1**:
 
 ```powershell
-# 椤圭洰鍒濆鍖栬剼鏈?
+# 项目初始化脚本
 
 param(
     [string]$ProjectRoot = "C:\buildgame\newguild"
 )
 
-Write-Host "寮€濮嬪垵濮嬪寲 Godot 椤圭洰..." -ForegroundColor Green
+Write-Host "开始初始化 Godot 项目..." -ForegroundColor Green
 
-# 鍒涘缓鐩綍缁撴瀯
+# 创建目录结构
 $directories = @(
     "Game.Core/Domain/Entities",
     "Game.Core/Domain/ValueObjects",
@@ -583,19 +583,19 @@ foreach ($dir in $directories) {
     $fullPath = Join-Path $ProjectRoot $dir
     if (-not (Test-Path $fullPath)) {
         New-Item -ItemType Directory -Path $fullPath -Force | Out-Null
-        Write-Host "鍒涘缓鐩綍: $dir" -ForegroundColor Gray
+        Write-Host "创建目录: $dir" -ForegroundColor Gray
     }
 }
 
-# 鍒涘缓 .NET 椤圭洰
-Write-Host "`n鍒涘缓 .NET 椤圭洰..." -ForegroundColor Green
+# 创建 .NET 项目
+Write-Host "`n创建 .NET 项目..." -ForegroundColor Green
 
 Push-Location $ProjectRoot
 
 # Game.Core
 if (-not (Test-Path "Game.Core/Game.Core.csproj")) {
     dotnet new classlib -n Game.Core -o Game.Core -f net8.0
-    Write-Host "鍒涘缓 Game.Core 椤圭洰" -ForegroundColor Gray
+    Write-Host "创建 Game.Core 项目" -ForegroundColor Gray
 }
 
 # Game.Core.Tests
@@ -605,27 +605,27 @@ if (-not (Test-Path "Game.Core.Tests/Game.Core.Tests.csproj")) {
     dotnet add Game.Core.Tests package FluentAssertions
     dotnet add Game.Core.Tests package NSubstitute
     dotnet add Game.Core.Tests package coverlet.collector
-    Write-Host "鍒涘缓 Game.Core.Tests 椤圭洰" -ForegroundColor Gray
+    Write-Host "创建 Game.Core.Tests 项目" -ForegroundColor Gray
 }
 
-# 鍒涘缓瑙ｅ喅鏂规
+# 创建解决方案
 if (-not (Test-Path "Game.sln")) {
     dotnet new sln -n Game
     dotnet sln add Game.Core/Game.Core.csproj
     dotnet sln add Game.Core.Tests/Game.Core.Tests.csproj
-    Write-Host "鍒涘缓 Visual Studio 瑙ｅ喅鏂规" -ForegroundColor Gray
+    Write-Host "创建 Visual Studio 解决方案" -ForegroundColor Gray
 }
 
 Pop-Location
 
-Write-Host "`nGodot 椤圭洰鍒濆鍖栧畬鎴? -ForegroundColor Green
-Write-Host "`n涓嬩竴姝ワ細" -ForegroundColor Yellow
-Write-Host "1. 浣跨敤 Godot Editor 鎵撳紑 $ProjectRoot" -ForegroundColor White
-Write-Host "2. 鍦?Godot 涓垱寤?C# 椤圭洰锛堜細鐢熸垚 Game.Godot.csproj锛? -ForegroundColor White
-Write-Host "3. 灏?Game.Godot.csproj 娣诲姞鍒?Game.sln" -ForegroundColor White
+Write-Host "`nGodot 项目初始化完成" -ForegroundColor Green
+Write-Host "`n下一步：" -ForegroundColor Yellow
+Write-Host "1. 使用 Godot Editor 打开 $ProjectRoot" -ForegroundColor White
+Write-Host "2. 在 Godot 中创建 C# 项目（会生成 Game.Godot.csproj）" -ForegroundColor White
+Write-Host "3. 将 Game.Godot.csproj 添加到 Game.sln" -ForegroundColor White
 ```
 
-**鎵ц鍒濆鍖?*:
+**执行初始化**:
 
 ```powershell
 pwsh scripts/init-godot-project.ps1 -ProjectRoot "C:\buildgame\newguild"
@@ -633,22 +633,22 @@ pwsh scripts/init-godot-project.ps1 -ProjectRoot "C:\buildgame\newguild"
 
 ---
 
-## 瀹屾垚鏍囧噯
+## 完成标准
 
-- [ ] 鐩綍缁撴瀯宸插垱寤?
-- [ ] Game.Core 椤圭洰宸插垵濮嬪寲
-- [ ] Game.Core.Tests 椤圭洰宸插垵濮嬪寲
-- [ ] Game.sln 瑙ｅ喅鏂规宸插垱寤?
-- [ ] .gitignore 鍜?.gitattributes 宸查厤缃?
-- [ ] Godot Editor 鍙墦寮€椤圭洰
-- [ ] Game.Godot.csproj 宸茬敓鎴愶紙Godot 鑷姩鍒涘缓锛?
-- [ ] `dotnet build` 缂栬瘧閫氳繃
-- [ ] `dotnet test` 杩愯閫氳繃锛堝垵濮嬫祴璇曚负绌猴級
+- [ ] 目录结构已创建
+- [ ] Game.Core 项目已初始化
+- [ ] Game.Core.Tests 项目已初始化
+- [ ] Game.sln 解决方案已创建
+- [ ] .gitignore 和 .gitattributes 已配置
+- [ ] Godot Editor 可打开项目
+- [ ] Game.Godot.csproj 已生成（Godot 自动创建）
+- [ ] `dotnet build` 编译通过
+- [ ] `dotnet test` 运行通过（初始测试为空）
 
 ---
 
-## 涓嬩竴姝?
+## 下一步
 
-瀹屾垚鏈樁娈靛悗锛岀户缁細
+完成本阶段后，继续：
 
-鉃★笍 [Phase-4-Domain-Layer.md](Phase-4-Domain-Layer.md) 鈥?绾?C# 棰嗗煙灞傝縼绉
+ [Phase-4-Domain-Layer.md](Phase-4-Domain-Layer.md) — 纯 C# 领域层迁移

@@ -85,10 +85,10 @@ public sealed record EventName(...)
 ### Forbidden Locations
 
 **MUST NOT** place contracts in:
-- ❌ `Scripts/Core/Contracts/` (legacy Godot script directory)
-- ❌ `scripts/Core/Contracts/` (lowercase variant)
-- ❌ `Game.Godot/` (adapter layer must not define contracts)
-- ❌ `Scenes/` (UI layer must not define contracts)
+- [FAIL] `Game.Core/Contracts/` (legacy Godot script directory)
+- [FAIL] `scripts/Core/Contracts/` (lowercase variant)
+- [FAIL] `Game.Godot/` (adapter layer must not define contracts)
+- [FAIL] `Scenes/` (UI layer must not define contracts)
 
 ### Migration Checklist (Completed 2025-12-02)
 

@@ -20,7 +20,7 @@ PR 模板系统面临以下核心问题:
    - 平均 PR 模板长度 500+ 行,填写率 <30%
 
 2. **质量门禁缺失精准触发**: 现有门禁无法根据变更类型动态调整检查项
-   - Electron 安全变更未强制 Electronegativity 扫描结果
+   - 旧桌面壳 安全变更未强制 Electronegativity 扫描结果
    - 数据模型变更未强制迁移脚本与回滚方案
    - Bundle 大小变更未强制 Lighthouse 性能分数
 
@@ -164,15 +164,15 @@ PR Event → file-change-analyzer.mjs → pr-template-renderer.mjs → GitHub Ac
    ```
 
 2. **9 个详细字段模板**:
-   - `screenshots_videos`: 📸 截图/视频证据 (UI 变更必填)
-   - `a11y_impact`: ♿ 可访问性影响评估
-   - `electronegativity_scan`: 🛡️ Electronegativity 扫描结果
-   - `csp_impact`: 🔒 CSP 影响评估
-   - `security_review`: 🔍 安全审查记录
-   - `bundle_size_check`: 📦 Bundle 大小检查
-   - `lighthouse_score`: 🚀 Lighthouse 性能分数
-   - `migration_script`: 🗄️ 数据迁移脚本
-   - `config_change_reason`: ⚙️ 配置变更原因
+   - `screenshots_videos`:  截图/视频证据 (UI 变更必填)
+   - `a11y_impact`:  可访问性影响评估
+   - `electronegativity_scan`:  Electronegativity 扫描结果
+   - `csp_impact`:  CSP 影响评估
+   - `security_review`:  安全审查记录
+   - `bundle_size_check`:  Bundle 大小检查
+   - `lighthouse_score`:  Lighthouse 性能分数
+   - `migration_script`:  数据迁移脚本
+   - `config_change_reason`:  配置变更原因
 
 3. **渐进式渲染策略**:
    ```javascript
@@ -187,7 +187,7 @@ PR Event → file-change-analyzer.mjs → pr-template-renderer.mjs → GitHub Ac
 
 ```json
 {
-  "template": "## 📝 变更概述\n...\n## 📸 截图/视频证据...",
+  "template": "##  变更概述\n...\n##  截图/视频证据...",
   "requiredFields": ["screenshots_videos", "a11y_impact"],
   "suggestedFields": ["visual_regression"],
   "metadata": {
@@ -213,10 +213,10 @@ PR Event → file-change-analyzer.mjs → pr-template-renderer.mjs → GitHub Ac
 
    ```javascript
    // 检测是否已有自动生成内容
-   if (existingBody.includes('🤖 自动生成说明')) {
+   if (existingBody.includes(' 自动生成说明')) {
      // 仅替换自动生成部分 (从 --- 分隔符到末尾)
      updatedBody = existingBody.replace(
-       /---\s*>\s*\*\*🤖[\s\S]*$/,
+       /---\s*>\s*\*\*[\s\S]*$/,
        newTemplate
      );
    } else {
@@ -449,17 +449,17 @@ it('should render template for UI changes', () => {
 
 **场景**：未来需要从外部文件读取模板片段
 
-**❌ 错误做法**：
+**[FAIL] 错误做法**：
 
 ```javascript
 // 直接在 renderer 中引入副作用
 import { readFileSync } from 'fs';
 export function renderPrTemplate(changeAnalysis) {
-  const template = readFileSync('./templates/base.md', 'utf-8'); // ❌ 破坏纯函数
+  const template = readFileSync('./templates/base.md', 'utf-8'); // [FAIL] 破坏纯函数
 }
 ```
 
-**✅ 正确做法**（适配器模式 - 已实施）：
+**[PASS] 正确做法**（适配器模式 - 已实施）：
 
 ```javascript
 // Step 1: 创建适配器模块 (scripts/ci/render-cli.mjs)
@@ -507,8 +507,8 @@ main();
 
 ### Positive Consequences
 
-1. **质量门禁精准触发** (✅ 符合 ADR-0005):
-   - Electron 安全变更自动要求 Electronegativity 扫描结果
+1. **质量门禁精准触发** ([PASS] 符合 ADR-0005):
+   - 旧桌面壳 安全变更自动要求 Electronegativity 扫描结果
    - 数据模型变更自动要求迁移脚本与回滚方案
    - 性能变更自动要求 Bundle 大小与 Lighthouse 分数
 
@@ -523,7 +523,7 @@ main();
    - 渐进式渲染策略可根据反馈调整
 
 4. **遵循现有 ADR**:
-   - **ADR-0002 (Security Baseline)**: 强制 Electron 安全字段 (Electronegativity/CSP)
+   - **ADR-0002 (Security Baseline)**: 强制 旧桌面壳 安全字段 (Electronegativity/CSP)
    - **ADR-0005 (Quality Gates)**: 自动触发性能/覆盖率字段
    - **ADR-0011 (Windows-only)**: PowerShell 脚本 + `windows-latest` runner
 
@@ -545,7 +545,7 @@ main();
 
 4. **测试覆盖不足** (待改进):
    - Phase 4.2 当前缺少单元测试
-   - 需补充 Vitest 单元测试 (file-change-analyzer, pr-template-renderer)
+   - 需补充 旧单元测试工具 单元测试 (file-change-analyzer, pr-template-renderer)
    - 需补充 E2E 测试 (GitHub Actions workflow 集成测试)
 
 ---
@@ -584,15 +584,15 @@ vitegame/
 - [x] Component 3: GitHub Actions workflow 实现用户内容保护与渐进式更新
 - [x] Windows 兼容性 (PowerShell 脚本 + `windows-latest` runner)
 - [x] 文档完善 (Phase 4 计划 + Phase 4.2 完成总结 + ADR-0012)
-- [ ] 单元测试 (Vitest - 待补充)
-- [ ] E2E 测试 (Playwright - 待补充)
+- [ ] 单元测试 (旧单元测试工具 - 待补充)
+- [ ] E2E 测试 (旧端到端测试工具 - 待补充)
 
 ---
 
 ## References
 
 - **Related ADRs**:
-  - [ADR-0002: Electron Security Baseline](./ADR-0002-electron-security-baseline-v2.md)
+  - [ADR-0002: 旧桌面壳 Security Baseline](./ADR-0002-旧桌面壳-security-baseline-v2.md)
   - [ADR-0005: Quality Gates](./ADR-0005-quality-gates.md)
   - [ADR-0011: Windows-only Platform and CI](./ADR-0011-windows-only-platform-and-ci.md)
 
@@ -613,4 +613,4 @@ vitegame/
 
 **Decision Date**: 2025-10-26
 **Last Updated**: 2025-10-26
-**Status**: ✅ Accepted & Implemented
+**Status**: [PASS] Accepted & Implemented

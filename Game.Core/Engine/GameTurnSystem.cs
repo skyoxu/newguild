@@ -35,10 +35,18 @@ public sealed class GameTurnSystem : IGameTurnSystem
 
     public GameTurnState StartNewWeek(string saveId)
     {
+        // Validate SaveId using whitelist pattern [a-zA-Z0-9_-]{1,64}
+        if (!SaveIdValue.TryCreate(saveId, out var validatedSaveId))
+        {
+            throw new ArgumentException(
+                $"Invalid SaveId '{saveId}'. Must match [a-zA-Z0-9_-]{{1,64}}",
+                nameof(saveId));
+        }
+
         return new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: saveId,
+            SaveId: validatedSaveId!,
             CurrentTime: System.DateTimeOffset.UtcNow
         );
     }

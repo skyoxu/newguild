@@ -12,7 +12,7 @@ verification:
     assert: Reject events missing required CloudEvents attributes
   - path: tests/unit/contracts/naming.spec.ts
     assert: Event type naming follows project convention
-impact-scope: [src/shared/contracts/events.ts, src/core/events/, electron/ipc/]
+impact-scope: [src/shared/contracts/events.ts, src/core/events/, 旧桌面壳/ipc/]
 tech-tags: [cloudevents, ipc, eventbus, contracts, communication]
 depends-on: [ADR-0002]
 depended-by: [ADR-0005, ADR-0007]
@@ -29,13 +29,13 @@ supersedes: []
 
 ## Context
 
-主进程、渲染进程、Worker 与 Phaser 场景之间需要稳定、类型安全的事件通信契约；需支持请求/响应与发布/订阅，同时保证可追踪、版本兼容与安全（IPC 白名单）。采用 CloudEvents 1.0 作为统一事件格式。
+主进程、渲染进程、Worker 与 旧游戏引擎 场景之间需要稳定、类型安全的事件通信契约；需支持请求/响应与发布/订阅，同时保证可追踪、版本兼容与安全（IPC 白名单）。采用 CloudEvents 1.0 作为统一事件格式。
 
 ## Decision
 
 - 使用 CloudEvents 1.0 作为事件规范；必填字段涵盖 `id/source/type/specversion`。
 - 事件命名遵循 `<boundedContext>.<entity>.<action>`，并提供类型化 DTO。
-- 在 `src/shared/contracts/**` 统一管理事件类型；IPC 白名单与参数校验在 preload 层执行。
+- 在 `src/shared/contracts/**` 统一管理事件类型；IPC 白名单与参数校验在 旧预加载脚本 层执行。
 
 ## Base 示例占位规范（Windows-only 仓库同样适用）
 

@@ -22,19 +22,19 @@
 
 
 
-### 原版（vitegame）构建流程
+### 原版（旧项目）构建流程
 
 
 
-**Electron + Vite 工具链**：
+**旧桌面壳 + 旧构建工具 工具链**：
 
-- Vite 开发服务器（HMR、快速刷新）
+- 旧构建工具 开发服务器（HMR、快速刷新）
 
-- `npm run build` → 预构建 React/Tailwind/Phaser（~2.5s）
+- `npm run build` → 预构建 旧前端框架/Tailwind/旧游戏引擎（~2.5s）
 
-- `electron-builder` 自动化打包（签名、代码注入、资源优化）
+- `旧桌面壳-builder` 自动化打包（签名、代码注入、资源优化）
 
-- 产出：vitegame-1.0.0.exe（~150MB，包含 Node.js runtime）
+- 产出：旧项目-1.0.0.exe（~150MB，包含 Node.js runtime）
 
 - CI：GitHub Actions 自动构建与发布 (.exe 上传到 Release）
 
@@ -210,7 +210,7 @@ newguild/
 
 │   │   ├── project.godot                     # Godot 项目配置
 
-│   │   └── export_presets.cfg                ★ Export 配置（Windows）
+│   │   └── export_presets.cfg                 Export 配置（Windows）
 
 │   │
 
@@ -218,17 +218,17 @@ newguild/
 
 │       └── Version/
 
-│           └── VersionInfo.cs                ★ 版本信息 (git hash, build time)
+│           └── VersionInfo.cs                 版本信息 (git hash, build time)
 
 │
 
 ├── scripts/
 
-│   ├── build_windows.py                      ★ Python 构建驱动脚本
+│   ├── build_windows.py                       Python 构建驱动脚本
 
-│   ├── generate_build_metadata.py            ★ 版本元数据生成
+│   ├── generate_build_metadata.py             版本元数据生成
 
-│   └── sign_executable.ps1                   ★ PowerShell 代码签名脚本
+│   └── sign_executable.ps1                    PowerShell 代码签名脚本
 
 │
 
@@ -236,11 +236,11 @@ newguild/
 
 │   └── workflows/
 
-│       └── build-windows.yml                 ★ GitHub Actions 构建工作流
+│       └── build-windows.yml                  GitHub Actions 构建工作流
 
 │
 
-├── dist/                                     ★ 本地构建输出目录
+├── dist/                                      本地构建输出目录
 
 │   ├── newguild-1.0.0.exe
 
@@ -254,11 +254,11 @@ newguild/
 
 └── package.json
 
-    ├── "build:exe"                           ★ 本地构建命令
+    ├── "build:exe"                            本地构建命令
 
-    ├── "build:exe:debug"                     ★ 调试构建
+    ├── "build:exe:debug"                      调试构建
 
-    └── "release:create"                      ★ 版本发布流程
+    └── "release:create"                       版本发布流程
 
 ```
 

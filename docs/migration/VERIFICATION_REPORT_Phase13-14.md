@@ -21,7 +21,7 @@ Phase 13-14 架构设计完整、可行、生产就绪
 - **Phase 14 (安全基线)**: 5 个防御域 + Security.cs Autoload + 20+ GdUnit4 测试
   - 代码完整性: 100% (Security.cs 200+ 行 + HTTPSecurityWrapper 80+ 行)
   - 测试覆盖: 4 个 GdUnit4 测试文件，20+ 测试用例
-  - 合规等价性: 通过 (与 Electron ADR-0002 功能等价)
+  - 合规等价性: 通过 (与 旧桌面壳 ADR-0002 功能等价)
 
 ### 关键指标
 
@@ -122,10 +122,10 @@ Security.cs (中央守卫, Autoload)
 **验证结论**: 完善
 - 等价性验证:
 
-| Electron (ADR-0002) | Godot (Phase 14) | 等价 |
+| 旧桌面壳 (ADR-0002) | Godot (Phase 14) | 等价 |
 |-------------------|-----------------|------|
 | CSP 头策略 | URL 白名单 + HTTPSecurityWrapper | 功能等价 |
-| preload 沙箱 | 文件系统保护 + user:// 约束 | 功能等价 |
+| 旧预加载脚本 沙箱 | 文件系统保护 + user:// 约束 | 功能等价 |
 | 加载策略白名单 | open_file_secure() + res:// 只读 | 功能等价 |
 | 可观测性 | JSONL 审计日志 + structured | 超越 |
 | 合规追溯 | 时间戳 + 决策记录 + 原因字段 | 超越 |

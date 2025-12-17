@@ -23,6 +23,8 @@ additional gates (GdUnit4 sets, smoke, perf, etc.).
 """
 
 import argparse
+import datetime as dt
+import os
 import subprocess
 import sys
 
@@ -48,11 +50,11 @@ def run_ci_pipeline(solution: str, configuration: str, godot_bin: str, build_sol
 
 
 def run_gdunit_hard(godot_bin: str) -> int:
-    """Run 硬门禁 GdUnit4 小集（Adapters/Config + Security）。
+    """Run hard-gate GdUnit4 set (Adapters/Config + Security).
 
-    设计目标：
-    - 与 ci-windows.yml 中的硬门禁集合保持一致；
-    - 报告输出到 logs/e2e/quality-gates/gdunit-hard。
+    Goals:
+    - Keep aligned with the hard-gate set in CI workflow.
+    - Write reports under logs/e2e/quality-gates/gdunit-hard.
     """
 
     args = [
@@ -78,10 +80,10 @@ def run_gdunit_hard(godot_bin: str) -> int:
 
 
 def run_smoke_headless(godot_bin: str) -> int:
-    """调用 Python 版 headless smoke，严格模式判定。
+    """Run the Python headless smoke in strict mode.
 
-    - 使用 Main 场景作为入口；
-    - mode=strict：至少需要 marker 或 [DB] opened 才视为通过。
+    - Uses Main scene as the entry.
+    - mode=strict requires a marker or "[DB] opened" to pass.
     """
 
     args = [
@@ -103,6 +105,35 @@ def run_smoke_headless(godot_bin: str) -> int:
     return proc.returncode
 
 
+def validate_security_audit_logs() -> int:
+    """Validate security-audit JSONL format and required fields.
+
+    Goals:
+    - Ensure logs are valid JSONL.
+    - Ensure required fields {ts, action, reason, target, caller} exist.
+    - Designed to be used by CI quality gates.
+    """
+
+    date = dt.date.today().strftime("%Y-%m-%d")
+    audit_root = os.environ.get("AUDIT_LOG_ROOT") or os.path.join("logs", "ci", date)
+    log_pattern = os.path.join(audit_root, "security-audit*.jsonl")
+    report_path = os.path.join(audit_root, "audit-validation-report.json")
+
+    args = [
+        "py",
+        "-3",
+        "scripts/python/validate_audit_logs.py",
+        "--log-path",
+        log_pattern,
+        "--check-sensitive",
+        "--strict",
+        "--report",
+        report_path,
+    ]
+    proc = subprocess.run(args, text=True)
+    return proc.returncode
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -114,25 +145,34 @@ def main() -> int:
     p_all.add_argument("--build-solutions", action="store_true")
     p_all.add_argument("--gdunit-hard", action="store_true", help="run hard GdUnit set (Adapters/Config + Security)")
     p_all.add_argument("--smoke", action="store_true", help="run headless smoke (strict marker/DB check)")
+    p_all.add_argument("--validate-audit", action="store_true", help="validate security-audit.jsonl format")
 
     args = parser.parse_args()
 
     if args.cmd == "all":
-        # 1) 基础门禁：dotnet + self-check + 编码扫描
+        # 1) Base gates: dotnet + self-check + encoding scan
         rc = run_ci_pipeline(args.solution, args.configuration, args.godot_bin, args.build_solutions)
         hard_failed = rc != 0
 
-        # 2) 可选硬门禁：GdUnit4 小集
+        # 2) Optional hard gate: GdUnit4 set
         if args.gdunit_hard:
             gd_rc = run_gdunit_hard(args.godot_bin)
             if gd_rc != 0:
                 hard_failed = True
 
-        # 3) 可选硬门禁：headless smoke（严格模式）
+        # 3) Optional hard gate: headless smoke (strict mode)
         if args.smoke:
             sm_rc = run_smoke_headless(args.godot_bin)
             if sm_rc != 0:
                 hard_failed = True
+
+        # 4) Optional gate: security-audit.jsonl format validation
+        if args.validate_audit:
+            audit_rc = validate_security_audit_logs()
+            if audit_rc != 0:
+                print("[WARNING] Security audit log validation failed (non-blocking)", file=sys.stderr)
+                # Soft gate for now (non-blocking).
+                # hard_failed = True  # Can be promoted to hard gate later.
 
         return 0 if not hard_failed else 1
 

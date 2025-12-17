@@ -123,7 +123,7 @@ public class EventEngineTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -143,7 +143,7 @@ public class EventEngineTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Player,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -163,7 +163,7 @@ public class EventEngineTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.AiSimulation,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -183,7 +183,7 @@ public class EventEngineTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -205,7 +205,7 @@ public class EventEngineTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Player,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -227,7 +227,7 @@ public class EventEngineTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.AiSimulation,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -252,7 +252,7 @@ public class EventEngineTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -274,7 +274,7 @@ public class EventEngineTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Player,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 
@@ -296,7 +296,7 @@ public class EventEngineTests
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.AiSimulation,
-            SaveId: "save-1",
+            SaveId: new SaveIdValue("save-1"),
             CurrentTime: DateTimeOffset.UtcNow
         );
 

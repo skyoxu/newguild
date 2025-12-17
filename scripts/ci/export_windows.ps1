@@ -1,7 +1,10 @@
 ﻿param(
   [string]$GodotBin = $env:GODOT_BIN,
   [string]$Preset = 'Windows Desktop',
-  [string]$Output = 'build/Game.exe'
+  [string]$Output = 'build/Game.exe',
+  [string]$UserDir = $env:GODOT_USERDIR,
+  [string]$UserDirFlag = $env:GODOT_USERDIR_FLAG,
+  [switch]$NoUserDir = $false
 )
 
  $ErrorActionPreference = 'Stop'
@@ -74,11 +77,77 @@ function Quote-Arg([string]$a) {
   return $q
 }
 
+function Resolve-FullPath([string]$base, [string]$p) {
+  if ([string]::IsNullOrWhiteSpace($p)) { return $null }
+  if ([System.IO.Path]::IsPathRooted($p)) { return $p }
+  return (Join-Path $base $p)
+}
+
+function Validate-UserDirValue([string]$p) {
+  if ([string]::IsNullOrWhiteSpace($p)) { return $null }
+  $t = $p.Trim()
+  if ($t -match '^(?i)(user://|res://)') {
+    throw "UserDir must be a filesystem path, not a Godot virtual path (got: $t)"
+  }
+  if ($t -match ':' -and $t -notmatch '^[A-Za-z]:[\\/]') {
+    throw "UserDir contains ':' but is not an absolute drive path like C:\\path\\to\\dir (got: $t)"
+  }
+  if ($t -match '^[A-Za-z]:$' -or $t -match '^[A-Za-z]:[^\\/]') {
+    throw "UserDir must be absolute like C:\\path\\to\\dir (got: $t)"
+  }
+  return $t
+}
+
+function Detect-UserDirFlag([string]$bin, [string]$requested) {
+  if (-not [string]::IsNullOrWhiteSpace($requested) -and $requested -ne 'auto') { return $requested }
+  try {
+    $help = (& $bin --help 2>&1 | Out-String)
+  } catch {
+    return $null
+  }
+  $candidates = @('--user-dir','--user-data-dir','--userdir')
+  foreach ($c in $candidates) {
+    if ($help -match [regex]::Escape($c)) { return $c }
+  }
+  return $null
+}
+
+# Redirect user:// away from %APPDATA% to keep local machines and CI runners clean.
+$script:UserDirArgs = @()
+$script:EffectiveUserDir = $null
+$script:UserDirFlagUsed = $null
+if (-not $NoUserDir) {
+  if ([string]::IsNullOrWhiteSpace($UserDir)) { $UserDir = $env:GODOT_USER_DIR }
+  if ([string]::IsNullOrWhiteSpace($UserDir)) {
+    $leaf = (Split-Path -Leaf $ProjectDir)
+    $UserDir = (Join-Path $ProjectDir (Join-Path "logs/_godot_userdir" (Join-Path $leaf "export")))
+  } else {
+    $UserDir = Resolve-FullPath -base $ProjectDir -p $UserDir
+  }
+  $UserDir = Validate-UserDirValue -p $UserDir
+  try { New-Item -ItemType Directory -Force -Path $UserDir | Out-Null; $script:EffectiveUserDir = $UserDir } catch {}
+  $flag = Detect-UserDirFlag -bin $GodotBin -requested $UserDirFlag
+  if ($flag -and $script:EffectiveUserDir) {
+    $script:UserDirArgs = @($flag, $script:EffectiveUserDir)
+    $script:UserDirFlagUsed = $flag
+  }
+}
+try {
+  $ud = ''
+  if ($script:EffectiveUserDir) { $ud = $script:EffectiveUserDir }
+  $uf = ''
+  if ($script:UserDirFlagUsed) { $uf = $script:UserDirFlagUsed }
+  Add-Content -Encoding UTF8 -Path $glog -Value ("UserDir: " + $ud)
+  Add-Content -Encoding UTF8 -Path $glog -Value ("UserDirFlag: " + $uf)
+} catch {}
+
 function Invoke-BuildSolutions() {
   Write-Host "Pre-building C# solutions via Godot (--build-solutions)"
   $out = Join-Path $dest ("godot_build_solutions.out.log")
   $err = Join-Path $dest ("godot_build_solutions.err.log")
-  $args = @('--headless','--verbose','--path', $ProjectDir, '--build-solutions', '--quit')
+  $args = @()
+  $args += $script:UserDirArgs
+  $args += @('--headless','--verbose','--path', $ProjectDir, '--build-solutions', '--quit')
   $argStr = ($args | ForEach-Object { Quote-Arg $_ }) -join ' '
   try {
     $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -WorkingDirectory $ProjectDir -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
@@ -100,10 +169,16 @@ function Invoke-BuildSolutions() {
     } else {
       Add-Content -Encoding UTF8 -Path $glog -Value 'Warning: .godot/mono/temp/bin not found after build-solutions.'
     }
-    # Try to capture MSBuild detailed log Godot writes under Roaming\Godot\mono\build_logs
-    $blRoot = Join-Path $env:APPDATA 'Godot/mono/build_logs'
-    if (Test-Path $blRoot) {
-      $latest = Get-ChildItem -Directory $blRoot | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    # Try to capture MSBuild detailed log Godot writes under mono/build_logs (location may vary with user-dir).
+    $blRoots = @()
+    $blRoots += (Join-Path $env:APPDATA 'Godot/mono/build_logs')
+    if ($script:EffectiveUserDir) {
+      $blRoots += (Join-Path $script:EffectiveUserDir 'mono/build_logs')
+      $blRoots += (Join-Path $script:EffectiveUserDir 'Godot/mono/build_logs')
+    }
+    $blRoot = $blRoots | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+    if ($blRoot) {
+      $latest = Get-ChildItem -Directory $blRoot -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
       if ($latest) {
         $logPath = Join-Path $latest.FullName 'msbuild_log.txt'
         if (Test-Path $logPath) {
@@ -137,7 +212,9 @@ function Invoke-Export([string]$mode) {
   $resolved = Resolve-Preset $Preset
   Add-Content -Encoding UTF8 -Path $glog -Value ("Using preset: '" + $resolved + "' output: '" + $Output + "'")
   if ($resolved -ne $Preset) { Add-Content -Encoding UTF8 -Path $glog -Value ("Requested preset '" + $Preset + "' resolved to '" + $resolved + "'") }
-  $args = @('--headless','--verbose','--path', $ProjectDir, "--export-$mode", $resolved, $Output)
+  $args = @()
+  $args += $script:UserDirArgs
+  $args += @('--headless','--verbose','--path', $ProjectDir, "--export-$mode", $resolved, $Output)
   $argStr = ($args | ForEach-Object { Quote-Arg $_ }) -join ' '
   try {
     $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -WorkingDirectory $ProjectDir -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
@@ -219,7 +296,9 @@ if ($exitCode -ne 0) {
     $err = Join-Path $dest ("godot_export.pack.err.log")
     $resolved = Resolve-Preset $Preset
     Add-Content -Encoding UTF8 -Path $glog -Value ("Using preset (pack): '" + $resolved + "' output: '" + $pck + "'")
-    $args = @('--headless','--verbose','--path', $ProjectDir, '--export-pack', $resolved, $pck)
+    $args = @()
+    $args += $script:UserDirArgs
+    $args += @('--headless','--verbose','--path', $ProjectDir, '--export-pack', $resolved, $pck)
     $argStr = ($args | ForEach-Object { Quote-Arg $_ }) -join ' '
     $p = Start-Process -FilePath $GodotBin -ArgumentList $argStr -PassThru -WorkingDirectory $ProjectDir -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden
     $ok = $p.WaitForExit(1200000)
@@ -292,4 +371,3 @@ try {
 }
 
 exit $exitCode
-

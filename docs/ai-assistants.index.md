@@ -6,7 +6,7 @@
 | ---- | ---- | ---- |
 | architecture | Repository Guidelines | `AGENTS.md` |
 | assistant | CLAUDE.md | `CLAUDE.md` |
-| mcp | 🛠️ 工具使用指南 | `mcpuse.md` |
+| mcp |  工具使用指南 | `mcpuse.md` |
 | workflow | Task Master + SuperClaude 联合使用最佳实践 | `docs/workflows/task-master-superclaude-integration.md` |
 | index | 项目完整文档索引 | `docs/PROJECT_DOCUMENTATION_INDEX.md` |
 | command | Tests/Scenes/test_{{组件名称}}.gd | `.claude/commands/godot-component.md` |

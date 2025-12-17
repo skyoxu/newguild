@@ -7,7 +7,7 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Compile C# scripts from linked runtime directory -->
+    <!-- Compile C# scripts from Game.Godot directory -->
     <Compile Include="Game.Godot/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
