@@ -1,0 +1,49 @@
+{
+  "generated": "2025-12-18",
+  "mapping": {
+    "tasks.json.master.tasks[].id": "10",
+    "tasks_back[].taskmaster_id": 10,
+    "tasks_gameplay[].taskmaster_id": null
+  },
+  "master": {
+    "id": "10",
+    "title": "GameLoop SaveIdValue 值对象与白名单校验",
+    "status": "in-progress",
+    "priority": "high",
+    "dependencies": [
+      "9"
+    ],
+    "adrRefs": null,
+    "archRefs": null,
+    "overlay": null,
+    "details": "Story: PH16-GAMELOOP-SAVEID-VALUE\nADR Refs: ADR-0019; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH02; CH04; CH06; CH07\nTest Refs: Game.Core/Domain/Turn/SaveIdValue.cs; Game.Core.Tests/Domain/SaveIdValueTests.cs; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Game.Core.Tests/Domain/GameLoopTests.cs\nAcceptance: Game.Core/Domain/Turn 下新增 SaveIdValue（或等价类型），实现 [a-zA-Z0-9_-]{1,64} 的白名单校验，非法输入抛出 ArgumentException。; GameTurnState / GameTurnSystem 在内部使用 SaveIdValue 作为 SaveId 的入口类型，确保后续事件与存储只接受经过校验的值。; Game.Core.Tests 中新增 SaveIdValueTests 与针对无效 SaveId 的 GameTurnSystem / GameLoop 测试，覆盖空字符串、超长、SQL 片段、路径遍历等典型攻击向量。; dotnet test Game.Core.Tests 在本地与 CI 均可通过，且与 PRD 3.0.3 T2 可玩性场景流描述一致。\nTest Strategy: 单元测试：在 SaveIdValueTests 中穷举典型非法/合法输入，验证构造/工厂方法的行为与异常信息。; 集成测试：在 GameTurnSystemTests 与 GameLoopTests 中增加使用非法 SaveId 的路径，验证系统拒绝不符合白名单的存档槽 ID。\nLabels: security; gameloop; core; t2\nOwner: architecture\nLayer: core",
+    "testStrategy": "单元测试：在 SaveIdValueTests 中穷举典型非法/合法输入，验证构造/工厂方法的行为与异常信息。\n集成测试：在 GameTurnSystemTests 与 GameLoopTests 中增加使用非法 SaveId 的路径，验证系统拒绝不符合白名单的存档槽 ID。"
+  },
+  "back": {
+    "id": "NG-0040",
+    "taskmaster_id": 10,
+    "status": "pending",
+    "adr_refs": [
+      "ADR-0019",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "test_refs": [
+      "Game.Core/Domain/Turn/SaveIdValue.cs",
+      "Game.Core.Tests/Domain/SaveIdValueTests.cs",
+      "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
+      "Game.Core.Tests/Domain/GameLoopTests.cs"
+    ],
+    "notes": null
+  },
+  "gameplay": null
+}
