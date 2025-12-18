@@ -1,0 +1,1 @@
+锘縶"Game.Core\\Repositories\\ISaveGameRepository.cs": ["...   5:namespace Game.Core.Repositories;\n...   6:\n  >   7:public interface ISaveGameRepository\n...   8:{\n...   9:    Task UpsertAsync(SaveGame save);\n...  10:    Task<SaveGame?> GetAsync(string userId, int slot);\n...  11:    Task<List<SaveGame>> ListByUserAsync(string userId);\n...  12:}"]}
