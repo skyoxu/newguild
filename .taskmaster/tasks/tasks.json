@@ -133,6 +133,26 @@
         ]
       },
       {
+        "id": "7",
+        "title": "扩展 quality_gates.py 覆盖率阈值与 GdUnit4 集成",
+        "description": "承接 Phase-13-Quality-Gates-Script.md 与 Backlog：将 xUnit 覆盖率门禁提升到蓝图标准（行≥90%、分支≥85%，可由环境变量覆盖），并把关键 GdUnit4 集合（Adapters+Security 小集）通过 quality_gates.py 聚合输出到统一 summary，以便在 CI 中统一判定。",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "5"
+        ],
+        "details": "Story: PH13-BACKLOG-B1-B2-B5\nADR Refs: ADR-0005; ADR-0015; ADR-0018; ADR-0024\nChapters: CH01; CH06; CH07; CH09\nTest Refs: logs/ci/<date>/unit/coverage.json; logs/e2e/<date>/gdunit-hard/run-summary.json; logs/ci/<date>/quality-gates-summary.json\nAcceptance: scripts/python/run_dotnet.py 读取覆盖率结果并在 summary.json 中写入 lines/branches 与阈值配置（默认 90/85，可由环境变量覆盖）。; 当覆盖率低于阈值时，quality_gates.py 在 summary 中标记为 failed，并可配置为软/硬门禁（至少支持硬门禁）。; quality_gates.py 能调用 run_gdunit.py 或等价封装，执行 Adapters+Security 硬门禁集合，并在 quality-gates-summary.json 中汇总结果。; Windows Quality Gate 工作流调用 quality_gates.py all 时，能在 Step Summary 中清晰展示 dotnet 覆盖率与 GdUnit4 集合结果。\nTest Strategy: 本地模拟：手工降低测试覆盖率，验证 quality_gates.py 将其标记为 failed，并按配置返回非零 exit code。; CI 验证：在 PR 上运行 windows-quality-gate 工作流，观察 coverage 与 GdUnit4 结果是否在 Step Summary 与 artifacts 中正确展示。\nLabels: ci; quality-gates; coverage; gdunit\nOwner: architecture\nLayer: ci",
+        "testStrategy": "本地模拟：手工降低测试覆盖率，验证 quality_gates.py 将其标记为 failed，并按配置返回非零 exit code。\nCI 验证：在 PR 上运行 windows-quality-gate 工作流，观察 coverage 与 GdUnit4 结果是否在 Step Summary 与 artifacts 中正确展示。",
+        "subtasks": [],
+        "updatedAt": "2025-12-18T12:40:00.000Z",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0015",
+          "ADR-0018",
+          "ADR-0024"
+        ]
+      },
+      {
         "id": "8",
         "title": "Godot 安全适配层增强：外链白名单、文件访问与 OS.execute 守卫",
         "description": "按照 Phase-14-Godot-Security-Baseline.md 与 Backlog，对当前 Godot+C# 模板补齐安全适配层：统一外链白名单配置（ALLOWED_EXTERNAL_HOSTS）、文件访问适配（仅 res:// 与 user://，拒绝 .. 和绝对路径）、显式封装 OS.execute，并为安全审计 JSONL 增加格式校验与最小测试集。",
@@ -334,7 +354,7 @@
     "metadata": {
       "version": "1.0.0",
       "lastModified": "2025-12-13T10:43:18.954Z",
-      "taskCount": 11,
+      "taskCount": 12,
       "completedCount": 7,
       "tags": [
         "master"

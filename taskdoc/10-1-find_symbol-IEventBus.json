@@ -1,0 +1,1 @@
+锘縖{"name_path": "IEventBus", "kind": "Interface", "body_location": {"start_line": 5, "end_line": 9}, "body": "public interface IEventBus\n{\n    Task PublishAsync(DomainEvent evt);\n    IDisposable Subscribe(Func<DomainEvent, Task> handler);\n}", "relative_path": "Game.Core\\Services\\EventBus.cs"}]
