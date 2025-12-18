@@ -8,13 +8,13 @@ namespace Game.Core.Tests.Domain;
 public class GuildContractsTests
 {
     [Fact]
-    public void GuildCreated_EventType_should_match_expected()
+    public void GuildCreated_EventType_Should_Match_Expected()
     {
         GuildCreated.EventType.Should().Be("core.guild.created");
     }
 
     [Fact]
-    public void GuildCreated_should_accept_valid_fields()
+    public void GuildCreated_Should_Accept_Valid_Fields()
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -32,13 +32,13 @@ public class GuildContractsTests
     }
 
     [Fact]
-    public void GuildMemberJoined_EventType_should_match_expected()
+    public void GuildMemberJoined_EventType_Should_Match_Expected()
     {
         GuildMemberJoined.EventType.Should().Be("core.guild.member.joined");
     }
 
     [Fact]
-    public void GuildMemberJoined_should_accept_valid_fields()
+    public void GuildMemberJoined_Should_Accept_Valid_Fields()
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -56,13 +56,13 @@ public class GuildContractsTests
     }
 
     [Fact]
-    public void GuildMemberLeft_EventType_should_match_expected()
+    public void GuildMemberLeft_EventType_Should_Match_Expected()
     {
         GuildMemberLeft.EventType.Should().Be("core.guild.member.left");
     }
 
     [Fact]
-    public void GuildMemberLeft_should_accept_valid_fields()
+    public void GuildMemberLeft_Should_Accept_Valid_Fields()
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -80,13 +80,13 @@ public class GuildContractsTests
     }
 
     [Fact]
-    public void GuildDisbanded_EventType_should_match_expected()
+    public void GuildDisbanded_EventType_Should_Match_Expected()
     {
         GuildDisbanded.EventType.Should().Be("core.guild.disbanded");
     }
 
     [Fact]
-    public void GuildDisbanded_should_accept_valid_fields()
+    public void GuildDisbanded_Should_Accept_Valid_Fields()
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -104,13 +104,13 @@ public class GuildContractsTests
     }
 
     [Fact]
-    public void GuildMemberRoleChanged_EventType_should_match_expected()
+    public void GuildMemberRoleChanged_EventType_Should_Match_Expected()
     {
         GuildMemberRoleChanged.EventType.Should().Be("core.guild.member.role_changed");
     }
 
     [Fact]
-    public void GuildMemberRoleChanged_should_accept_valid_fields()
+    public void GuildMemberRoleChanged_Should_Accept_Valid_Fields()
     {
         var now = DateTimeOffset.UtcNow;
 

@@ -1,0 +1,42 @@
+﻿# Task 9 - Serena MCP event contracts outputs
+
+## 0) Global search note
+Attempting serena.search_for_pattern with relative_path="." or with relative_path omitted triggered an internal error:
+- ValueError: path is on mount "\\\\.\\nul", start on mount "C:"
+Workaround used: run searches scoped to specific directories (Game.Core, Game.Godot, Tests.Godot).
+
+## 1) Event type strings (scoped search in Game.Core)
+Tool: serena.search_for_pattern
+Params:
+- substring_pattern: \\b(core\\.game_turn\\.(started|phase_changed|week_advanced)|security\\.(file_access|process|url_access)\\.denied)\\b
+- relative_path: Game.Core
+- restrict_search_to_code_files: false
+Result:
+{"Game.Core\\Contracts\\GameLoop\\GameTurnPhaseChanged.cs": ["  >   4:/// Domain event: core.game_turn.phase_changed", "  >  18:    public const string EventType = \"core.game_turn.phase_changed\";"], "Game.Core\\Contracts\\GameLoop\\GameTurnStarted.cs": ["  >   4:/// Domain event: core.game_turn.started", "  >  17:    public const string EventType = \"core.game_turn.started\";"], "Game.Core\\Contracts\\GameLoop\\GameWeekAdvanced.cs": ["  >   4:/// Domain event: core.game_turn.week_advanced", "  >  17:    public const string EventType = \"core.game_turn.week_advanced\";"], "Game.Core\\Services\\SecurityFileAdapter.cs": ["  >  57:            Type: \"security.file_access.denied\","], "Game.Core\\Services\\SecurityProcessAdapter.cs": ["  >  98:            Type: \"security.process.denied\","], "Game.Core\\Services\\SecurityUrlAdapter.cs": ["  >  11:/// Publishes security.url_access.denied events when validation fails.", "  >  41:    /// Publishes security.url_access.denied event on rejection.", "  >  92:            Type: \"security.url_access.denied\", "]}
+
+## 2) Strongly-typed GameLoop contracts (find_symbol)
+Tool: serena.find_symbol
+Params: name_path_pattern=GameTurnStarted; relative_path=Game.Core; substring_matching=true
+Result:
+[{"name_path": "Game.Core/Contracts/GameLoop/GameTurnStarted", "kind": "File", "body_location": {"start_line": 0, "end_line": 20}, "relative_path": "Game.Core\\Contracts\\GameLoop\\GameTurnStarted.cs"}, {"name_path": "GameTurnStarted", "kind": "Class", "body_location": {"start_line": 9, "end_line": 17}, "relative_path": "Game.Core\\Contracts\\GameLoop\\GameTurnStarted.cs"}, {"name_path": "GameTurnStarted/GameTurnStarted", "kind": "Method", "body_location": {"start_line": 9, "end_line": 17}, "relative_path": "Game.Core\\Contracts\\GameLoop\\GameTurnStarted.cs"}]
+
+Tool: serena.find_symbol
+Params: name_path_pattern=GameTurnPhaseChanged; relative_path=Game.Core; substring_matching=true
+Result:
+[{"name_path": "Game.Core/Contracts/GameLoop/GameTurnPhaseChanged", "kind": "File", "body_location": {"start_line": 0, "end_line": 21}, "relative_path": "Game.Core\\Contracts\\GameLoop\\GameTurnPhaseChanged.cs"}, {"name_path": "GameTurnPhaseChanged", "kind": "Class", "body_location": {"start_line": 9, "end_line": 18}, "relative_path": "Game.Core\\Contracts\\GameLoop\\GameTurnPhaseChanged.cs"}, {"name_path": "GameTurnPhaseChanged/GameTurnPhaseChanged", "kind": "Method", "body_location": {"start_line": 9, "end_line": 18}, "relative_path": "Game.Core\\Contracts\\GameLoop\\GameTurnPhaseChanged.cs"}]
+
+Tool: serena.find_symbol
+Params: name_path_pattern=GameWeekAdvanced; relative_path=Game.Core; substring_matching=true
+Result:
+[{"name_path": "Game.Core/Contracts/GameLoop/GameWeekAdvanced", "kind": "File", "body_location": {"start_line": 0, "end_line": 20}, "relative_path": "Game.Core\\Contracts\\GameLoop\\GameWeekAdvanced.cs"}, {"name_path": "GameWeekAdvanced", "kind": "Class", "body_location": {"start_line": 9, "end_line": 17}, "relative_path": "Game.Core\\Contracts\\GameLoop\\GameWeekAdvanced.cs"}, {"name_path": "GameWeekAdvanced/GameWeekAdvanced", "kind": "Method", "body_location": {"start_line": 9, "end_line": 17}, "relative_path": "Game.Core\\Contracts\\GameLoop\\GameWeekAdvanced.cs"}]
+
+## 3) Security denied events as contracts (Contracts folder search)
+Tool: serena.search_for_pattern
+Params:
+- substring_pattern: EventType\\s*=\\s*\"security\\.
+- relative_path: Game.Core
+- restrict_search_to_code_files: true
+- paths_include_glob: **/Contracts/**/*.cs
+Result:
+{}
+Interpretation: `security.*.denied` currently appears as string Type in adapters, not as strongly-typed contracts under Contracts.

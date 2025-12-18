@@ -9,13 +9,13 @@ namespace Game.Core.Tests.Domain;
 public class GameLoopContractsTests
 {
     [Fact]
-    public void GameTurnStarted_EventType_should_match_expected()
+    public void GameTurnStarted_EventType_Should_Match_Expected()
     {
         GameTurnStarted.EventType.Should().Be("core.game_turn.started");
     }
 
     [Fact]
-    public void GameTurnStarted_should_accept_valid_fields()
+    public void GameTurnStarted_Should_Accept_Valid_Fields()
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -33,13 +33,13 @@ public class GameLoopContractsTests
     }
 
     [Fact]
-    public void GameTurnPhaseChanged_EventType_should_match_expected()
+    public void GameTurnPhaseChanged_EventType_Should_Match_Expected()
     {
         GameTurnPhaseChanged.EventType.Should().Be("core.game_turn.phase_changed");
     }
 
     [Fact]
-    public void GameTurnPhaseChanged_should_accept_valid_fields()
+    public void GameTurnPhaseChanged_Should_Accept_Valid_Fields()
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -59,13 +59,13 @@ public class GameLoopContractsTests
     }
 
     [Fact]
-    public void GameWeekAdvanced_EventType_should_match_expected()
+    public void GameWeekAdvanced_EventType_Should_Match_Expected()
     {
         GameWeekAdvanced.EventType.Should().Be("core.game_turn.week_advanced");
     }
 
     [Fact]
-    public void GameWeekAdvanced_should_accept_valid_fields()
+    public void GameWeekAdvanced_Should_Accept_Valid_Fields()
     {
         var now = DateTimeOffset.UtcNow;
 

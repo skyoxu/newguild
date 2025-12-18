@@ -1,0 +1,20 @@
+﻿# Task 9 - Serena MCP search_for_pattern (interfaces) outputs
+
+## 1) public interface I* (restricted to Game.Core)
+Tool: serena.search_for_pattern
+Params:
+- substring_pattern: \\bpublic\\s+interface\\s+I[A-Za-z0-9_]+\\b
+- relative_path: Game.Core
+- restrict_search_to_code_files: true
+- paths_include_glob: **/*.cs
+Result:
+{"Game.Core\\Engine\\AICoordinator.cs": ["  >   5:public interface IAICoordinator"], "Game.Core\\Engine\\EventEngine.cs": ["  >  11:public interface IEventEngine"], "Game.Core\\Engine\\GameTurnSystem.cs": ["  >   9:public interface IGameTurnSystem"], "Game.Core\\Interfaces\\ISecurityFileValidator.cs": ["  >  29:public interface ISecurityFileValidator"], "Game.Core\\Interfaces\\ISecurityProcessValidator.cs": ["  >   7:public interface ISecurityProcessValidator"], "Game.Core\\Interfaces\\ISecurityUrlValidator.cs": ["  >  18:public interface ISecurityUrlValidator"], "Game.Core\\Ports\\IAudioPlayer.cs": ["  >   3:public interface IAudioPlayer"], "Game.Core\\Ports\\IDataStore.cs": ["  >   5:public interface IDataStore"], "Game.Core\\Ports\\IEventCatalog.cs": ["  >   3:public interface IEventCatalog"], "Game.Core\\Ports\\IInput.cs": ["  >   3:public interface IInput"], "Game.Core\\Ports\\ILogger.cs": ["  >   3:public interface ILogger"], "Game.Core\\Ports\\IResourceLoader.cs": ["  >   9:public interface IResourceLoader"], "Game.Core\\Ports\\ISqlDatabase.cs": ["  >   7:public interface ISqlDatabase"], "Game.Core\\Ports\\ISQLiteDatabase.cs": ["  >  11:public interface ISQLiteDatabase"], "Game.Core\\Ports\\ITime.cs": ["  >   3:public interface ITime"], "Game.Core\\Repositories\\IAchievementRepository.cs": ["  >   7:public interface IAchievementRepository"], "Game.Core\\Repositories\\IGuildRepository.cs": ["  >  12:public interface IGuildRepository"], "Game.Core\\Repositories\\IInventoryRepository.cs": ["  >   5:public interface IInventoryRepository"], "Game.Core\\Repositories\\ISaveGameRepository.cs": ["  >   7:public interface ISaveGameRepository"], "Game.Core\\Repositories\\IUserRepository.cs": ["  >   6:public interface IUserRepository"], "Game.Core\\Services\\EventBus.cs": ["  >   6:public interface IEventBus"]}
+
+## 2) ISecurity* interfaces (entire repo)
+Tool: serena.search_for_pattern
+Params:
+- substring_pattern: \\binterface\\s+ISecurity[A-Za-z0-9_]+\\b
+- relative_path: . (note: this call succeeded)
+- restrict_search_to_code_files: true
+Result:
+{"Game.Core\\Interfaces\\ISecurityFileValidator.cs": ["  >  29:public interface ISecurityFileValidator"], "Game.Core\\Interfaces\\ISecurityProcessValidator.cs": ["  >   7:public interface ISecurityProcessValidator"], "Game.Core\\Interfaces\\ISecurityUrlValidator.cs": ["  >  18:public interface ISecurityUrlValidator"]}

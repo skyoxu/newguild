@@ -9,7 +9,7 @@ namespace Game.Core.Tests.Services;
 public class CombatServiceTests
 {
     [Fact]
-    public void CalculateDamage_applies_resistance_and_critical()
+    public void CalculateDamage_Applies_Resistance_And_Critical()
     {
         var cfg = new CombatConfig { CritMultiplier = 2.0 };
         cfg.Resistances[DamageType.Fire] = 0.5; // 50% resist
@@ -25,7 +25,7 @@ public class CombatServiceTests
     }
 
     [Fact]
-    public void CalculateDamage_with_armor_mitigates_linearly()
+    public void CalculateDamage_With_Armor_Mitigates_Linearly()
     {
         var cfg = new CombatConfig();
         var svc = new CombatService();
@@ -35,7 +35,7 @@ public class CombatServiceTests
     }
 
     [Fact]
-    public void ApplyDamage_reduces_player_health()
+    public void ApplyDamage_Reduces_Player_Health()
     {
         var p = new Player(maxHealth: 100);
         var svc = new CombatService();
@@ -44,7 +44,7 @@ public class CombatServiceTests
     }
 
     [Fact]
-    public void ApplyDamage_with_int_amount_reduces_player_health()
+    public void ApplyDamage_With_Int_Amount_Reduces_Player_Health()
     {
         var p = new Player(maxHealth: 100);
         var svc = new CombatService();
@@ -53,7 +53,7 @@ public class CombatServiceTests
     }
 
     [Fact]
-    public void ApplyDamage_with_config_applies_damage_correctly()
+    public void ApplyDamage_With_Config_Applies_Damage_Correctly()
     {
         var p = new Player(maxHealth: 100);
         var cfg = new CombatConfig();
@@ -66,7 +66,7 @@ public class CombatServiceTests
     }
 
     [Fact]
-    public void CalculateDamage_with_default_config_uses_fallback()
+    public void CalculateDamage_With_Default_Config_Uses_Fallback()
     {
         var svc = new CombatService();
         var dmg = new Damage(50, DamageType.Physical);

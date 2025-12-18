@@ -89,7 +89,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public void StartNewWeek_initializes_week_and_phase()
+    public void StartNewWeek_Initializes_Week_And_Phase()
     {
         // Arrange
         var system = CreateSystem();
@@ -106,7 +106,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_moves_from_resolution_to_player_phase()
+    public async Task Advance_Moves_From_Resolution_To_Player_Phase()
     {
         // Arrange
         var system = CreateSystem();
@@ -126,7 +126,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_moves_from_player_to_ai_phase()
+    public async Task Advance_Moves_From_Player_To_Ai_Phase()
     {
         // Arrange
         var system = CreateSystem();
@@ -146,7 +146,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_moves_from_ai_phase_to_next_week_resolution()
+    public async Task Advance_Moves_From_Ai_Phase_To_Next_Week_Resolution()
     {
         // Arrange
         var system = CreateSystem();
@@ -166,7 +166,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Full_week_cycle_from_start_new_week_advances_to_week_two_resolution()
+    public async Task Full_Week_Cycle_From_Start_New_Week_Advances_To_Week_Two_Resolution()
     {
         // Arrange
         var system = CreateSystem();
@@ -266,7 +266,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_publishes_GameTurnStarted_event_at_start_of_first_turn()
+    public async Task Advance_Publishes_GameTurnStarted_Event_At_Start_Of_First_Turn()
     {
         // Arrange
         var eventBus = new CapturingEventBus();
@@ -289,7 +289,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_publishes_GameTurnPhaseChanged_when_transitioning_resolution_to_player()
+    public async Task Advance_Publishes_GameTurnPhaseChanged_When_Transitioning_Resolution_To_Player()
     {
         // Arrange
         var eventBus = new CapturingEventBus();
@@ -317,7 +317,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_publishes_GameWeekAdvanced_when_completing_full_turn_cycle()
+    public async Task Advance_Publishes_GameWeekAdvanced_When_Completing_Full_Turn_Cycle()
     {
         // Arrange
         var eventBus = new CapturingEventBus();
@@ -345,7 +345,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Full_turn_cycle_publishes_correct_event_sequence()
+    public async Task Full_Turn_Cycle_Publishes_Correct_Event_Sequence()
     {
         // Arrange
         var eventBus = new CapturingEventBus();

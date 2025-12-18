@@ -6,7 +6,7 @@ namespace Game.Core.Tests.Domain.ValueObjects;
 public class PositionTests
 {
     [Fact]
-    public void Add_returns_new_position_and_keeps_immutable()
+    public void Add_Returns_New_Position_And_Keeps_Immutable()
     {
         var p = new Position(1, 2);
         var p2 = p.Add(3, 4);
