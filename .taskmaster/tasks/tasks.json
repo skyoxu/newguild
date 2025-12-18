@@ -291,7 +291,7 @@
         "id": "10",
         "title": "GameLoop SaveIdValue 值对象与白名单校验",
         "description": "在 Game.Core 中为 GameLoop 引入 SaveIdValue 值对象（或等价验证器），实现基于 ADR-0019 的白名单规则（仅允许 [a-zA-Z0-9_-] 且长度 1-64），并在 GameTurnState/GameTurnSystem 与 GameLoop 相关合约中统一使用该类型；同时新增 SaveId 安全向单元测试，覆盖非法输入与边界值。",
-        "status": "in-progress",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "9"
@@ -310,7 +310,7 @@
         "id": "11",
         "title": "SqliteDataStore 路径校验与插件后端安全收紧",
         "description": "在 Game.Godot/Adapters/SqliteDataStore 中增强路径与扩展名校验：对 user:// 路径进行规范化后再做前缀与 .. 检查，增加 .db/.sqlite/.sqlite3 等扩展名白名单，并为已有 ValidatePath 逻辑补充文件大小上限检查；同时通过环境变量限制 plugin backend 的启用范围（如仅在开发环境允许），将 plugin backend 风险收敛为受控技术债。",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "medium",
         "dependencies": [
           "8"
