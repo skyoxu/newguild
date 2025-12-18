@@ -1,3 +1,5 @@
+using Game.Core.Domain.Turn;
+
 namespace Game.Core.Contracts.GameLoop;
 
 /// <summary>
@@ -8,7 +10,7 @@ namespace Game.Core.Contracts.GameLoop;
 /// See ADR-0004 (event contracts) and ADR-0015 (performance budgets) for naming and usage guidelines.
 /// </remarks>
 public sealed record GameTurnStarted(
-    string SaveId,
+    SaveIdValue SaveId,
     int Week,
     string Phase,
     System.DateTimeOffset StartedAt
@@ -16,4 +18,3 @@ public sealed record GameTurnStarted(
 {
     public const string EventType = "core.game_turn.started";
 }
-
