@@ -26,7 +26,7 @@ public class GameLoopContractsTests
             StartedAt: now
         );
 
-        evt.SaveId.Should().Be("save-1");
+        evt.SaveId.Value.Should().Be("save-1");
         evt.Week.Should().Be(1);
         evt.Phase.Should().Be("Resolution");
         evt.StartedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
@@ -51,7 +51,7 @@ public class GameLoopContractsTests
             ChangedAt: now
         );
 
-        evt.SaveId.Should().Be("save-1");
+        evt.SaveId.Value.Should().Be("save-1");
         evt.Week.Should().Be(1);
         evt.PreviousPhase.Should().Be("Resolution");
         evt.CurrentPhase.Should().Be("Player");
@@ -76,10 +76,9 @@ public class GameLoopContractsTests
             AdvancedAt: now
         );
 
-        evt.SaveId.Should().Be("save-1");
+        evt.SaveId.Value.Should().Be("save-1");
         evt.PreviousWeek.Should().Be(1);
         evt.CurrentWeek.Should().Be(2);
         evt.AdvancedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
     }
 }
-
