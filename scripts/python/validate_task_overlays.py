@@ -40,8 +40,10 @@ def extract_front_matter(content: str) -> Optional[dict]:
         'Test-Refs': []
     }
 
-    # 解析简单的 YAML 字段（支持单行和列表）
-    current_key = None
+    # Parse a minimal YAML front-matter subset (single-line values and "- " lists).
+    # Ignore unknown keys so they don't corrupt the parsing state.
+    list_keys = {"ADR-Refs", "Test-Refs"}
+    current_key: Optional[str] = None
     for line in fm_text.split('\n'):
         line = line.strip()
 
@@ -55,17 +57,22 @@ def extract_front_matter(content: str) -> Optional[dict]:
             key = key.strip()
             value = value.strip()
 
-            if key in result:
+            # Only track keys we care about; reset current_key otherwise.
+            if key not in result:
+                current_key = None
+                continue
+
+            if key in list_keys:
                 current_key = key
                 if value:
-                    # 单行值
-                    if key in ['ADR-Refs', 'Test-Refs']:
-                        result[key] = [value]
-                    else:
-                        result[key] = value
+                    # Inline list item: "ADR-Refs: ADR-0001"
+                    result[key] = [value]
                 else:
-                    # 多行列表
                     result[key] = []
+            else:
+                # Scalar fields should not accept list items.
+                result[key] = value if value else None
+                current_key = None
         # 处理列表项
         elif line.startswith('-') and current_key:
             value = line[1:].strip()
@@ -73,7 +80,9 @@ def extract_front_matter(content: str) -> Optional[dict]:
             if '#' in value:
                 value = value.split('#')[0].strip()
             if value:
-                result[current_key].append(value)
+                # Defensive: only append if this key is a list.
+                if isinstance(result.get(current_key), list):
+                    result[current_key].append(value)
 
     return result
 

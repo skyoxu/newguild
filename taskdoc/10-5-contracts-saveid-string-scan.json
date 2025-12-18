@@ -1,0 +1,29 @@
+{
+  "ts": "2025-12-18T04:05:01Z",
+  "scope": "Game.Core/Contracts/**/*.cs",
+  "queries": [
+    {
+      "tool": "serena.search_for_pattern",
+      "pattern": "\\b(string\\?|string|System\\.String)\\s+SaveId\\b",
+      "result": {},
+      "note": "Exact type+identifier match"
+    },
+    {
+      "tool": "serena.search_for_pattern",
+      "pattern": "\\bSaveId\\b",
+      "result": {
+        "Game.Core/Contracts/GameLoop/GameTurnPhaseChanged.cs": "SaveIdValue SaveId",
+        "Game.Core/Contracts/GameLoop/GameTurnStarted.cs": "SaveIdValue SaveId",
+        "Game.Core/Contracts/GameLoop/GameWeekAdvanced.cs": "SaveIdValue SaveId"
+      },
+      "note": "Files containing SaveId"
+    },
+    {
+      "tool": "serena.search_for_pattern",
+      "pattern": "\\bstring\\b[\\s\\S]{0,80}\\bSaveId\\b",
+      "result": {},
+      "note": "Loose match to catch unusual formatting"
+    }
+  ],
+  "conclusion": "No residual 'string SaveId' found in Game.Core/Contracts."
+}

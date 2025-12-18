@@ -54,7 +54,7 @@ public class GameLoopTests
         var system = CreateMinimalSystem();
 
         // Act
-        var state = system.StartNewWeek("smoke-test-save");
+        var state = system.StartNewWeek(new SaveIdValue("smoke-test-save"));
 
         // Assert
         state.Should().NotBeNull();
@@ -68,7 +68,7 @@ public class GameLoopTests
     {
         // Arrange
         var system = CreateMinimalSystem();
-        var initialState = system.StartNewWeek("smoke-test");
+        var initialState = system.StartNewWeek(new SaveIdValue("smoke-test"));
 
         // Act
         var resultState = await system.Advance(initialState);
@@ -89,7 +89,7 @@ public class GameLoopTests
             eventBus,
             new FakeTime()
         );
-        var state = system.StartNewWeek("cycle-test");
+        var state = system.StartNewWeek(new SaveIdValue("cycle-test"));
 
         // Act - Execute full cycle: Resolution -> Player -> AI Simulation -> Next Week
         state = await system.Advance(state); // Resolution -> Player

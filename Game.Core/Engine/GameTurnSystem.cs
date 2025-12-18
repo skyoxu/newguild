@@ -8,7 +8,7 @@ namespace Game.Core.Engine;
 
 public interface IGameTurnSystem
 {
-    GameTurnState StartNewWeek(string saveId);
+    GameTurnState StartNewWeek(SaveIdValue saveId);
     Task<GameTurnState> Advance(GameTurnState state);
 }
 
@@ -33,20 +33,14 @@ public sealed class GameTurnSystem : IGameTurnSystem
         _firstTurnStarted = false;
     }
 
-    public GameTurnState StartNewWeek(string saveId)
+    public GameTurnState StartNewWeek(SaveIdValue saveId)
     {
-        // Validate SaveId using whitelist pattern [a-zA-Z0-9_-]{1,64}
-        if (!SaveIdValue.TryCreate(saveId, out var validatedSaveId))
-        {
-            throw new ArgumentException(
-                $"Invalid SaveId '{saveId}'. Must match [a-zA-Z0-9_-]{{1,64}}",
-                nameof(saveId));
-        }
+        System.ArgumentNullException.ThrowIfNull(saveId);
 
         return new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
-            SaveId: validatedSaveId!,
+            SaveId: saveId,
             CurrentTime: System.DateTimeOffset.UtcNow
         );
     }

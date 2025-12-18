@@ -63,7 +63,7 @@ public partial class HUD : Control
         IEventCatalog catalog = new EmptyEventCatalog();
         IAICoordinator aiCoordinator = new NoopAICoordinator();
         _turnSystem = new GameTurnSystem(new EventEngine(catalog, eventBus), aiCoordinator, eventBus, timePort);
-        _currentTurn = _turnSystem.StartNewWeek("t2-demo");
+        _currentTurn = _turnSystem.StartNewWeek(new SaveIdValue("t2-demo"));
         UpdateTurnLabels();
     }
 

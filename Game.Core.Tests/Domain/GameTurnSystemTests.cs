@@ -93,7 +93,7 @@ public class GameTurnSystemTests
     {
         // Arrange
         var system = CreateSystem();
-        var saveId = "save-1";
+        var saveId = new SaveIdValue("save-1");
 
         // Act
         var state = system.StartNewWeek(saveId);
@@ -101,8 +101,19 @@ public class GameTurnSystemTests
         // Assert
         state.Week.Should().Be(1);
         state.Phase.Should().Be(GameTurnPhase.Resolution);
-        state.SaveId.ToString().Should().Be(saveId);
+        state.SaveId.Should().Be(saveId);
         state.CurrentTime.Should().BeOnOrAfter(DateTimeOffset.UtcNow.AddMinutes(-1));
+    }
+
+    [Fact]
+    public void StartNewWeek_Should_Require_SaveIdValue_As_Input_Type()
+    {
+        var m = typeof(GameTurnSystem).GetMethod(nameof(GameTurnSystem.StartNewWeek));
+        m.Should().NotBeNull();
+
+        var p = m!.GetParameters();
+        p.Should().HaveCount(1);
+        p[0].ParameterType.Should().Be(typeof(SaveIdValue));
     }
 
     [Fact]
@@ -170,7 +181,7 @@ public class GameTurnSystemTests
     {
         // Arrange
         var system = CreateSystem();
-        var saveId = "save-t2";
+        var saveId = new SaveIdValue("save-t2");
 
         // Act
         var startState = system.StartNewWeek(saveId);
@@ -190,7 +201,7 @@ public class GameTurnSystemTests
 
         afterAi.Week.Should().Be(2);
         afterAi.Phase.Should().Be(GameTurnPhase.Resolution);
-        afterAi.SaveId.ToString().Should().Be(saveId);
+        afterAi.SaveId.Should().Be(saveId);
     }
 
     [Fact]
@@ -353,7 +364,7 @@ public class GameTurnSystemTests
         var ai = new DummyAICoordinator();
         var time = new FakeTime();
         var system = new GameTurnSystem(engine, ai, eventBus, time);
-        var startState = system.StartNewWeek("save-t2");
+        var startState = system.StartNewWeek(new SaveIdValue("save-t2"));
 
         // Act - execute complete Resolution → Player → AiSimulation cycle
         var afterResolution = await system.Advance(startState);
@@ -396,12 +407,10 @@ public class GameTurnSystemTests
     [InlineData(null)]  // Null
     public void StartNewWeek_RejectsNullOrEmptySaveId(string? invalidSaveId)
     {
-        // Arrange
-        var system = CreateSystem();
+        // Arrange & Act
+        var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(invalidSaveId!));
 
-        // Act & Assert - RED: This will fail because StartNewWeek currently accepts string without validation
-        // Expected: Should throw ArgumentException for invalid SaveId
-        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(invalidSaveId!));
+        // Assert
         exception.Message.Should().Contain("SaveId");
     }
 
@@ -414,13 +423,13 @@ public class GameTurnSystemTests
     {
         // Arrange
         var system = CreateSystem();
+        var saveId = new SaveIdValue(validSaveId);
 
-        // Act - RED: This will fail because StartNewWeek signature needs to change
-        var state = system.StartNewWeek(validSaveId);
+        // Act
+        var state = system.StartNewWeek(saveId);
 
         // Assert
-        state.SaveId.Should().NotBeNull();
-        state.SaveId.ToString().Should().Be(validSaveId);  // SaveIdValue should have meaningful ToString()
+        state.SaveId.Should().Be(saveId);
     }
 
     [Theory]
@@ -428,12 +437,11 @@ public class GameTurnSystemTests
     [InlineData("this-is-a-very-long-save-id-that-exceeds-the-maximum-allowed-length-of-64-characters")]  // Way too long
     public void StartNewWeek_RejectsOverlongSaveId(string overlongSaveId)
     {
-        // Arrange
-        var system = CreateSystem();
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(overlongSaveId));
 
-        // Act & Assert - RED: Should reject SaveIds longer than 64 characters
-        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(overlongSaveId));
-        exception.Message.Should().Contain("Must match [a-zA-Z0-9_-]{1,64}");
+        // Assert
+        exception.Message.Should().Contain("[a-zA-Z0-9_-]{1,64}");
     }
 
     [Theory]
@@ -442,12 +450,11 @@ public class GameTurnSystemTests
     [InlineData("admin'--")]  // SQL comment injection
     public void StartNewWeek_RejectsSqlInjectionPatterns(string sqlInjectionPattern)
     {
-        // Arrange
-        var system = CreateSystem();
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(sqlInjectionPattern));
 
-        // Act & Assert - RED: Should reject SaveIds with SQL special characters
-        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(sqlInjectionPattern));
-        exception.Message.Should().Contain("SaveId");
+        // Assert
+        exception.Message.Should().Contain("[a-zA-Z0-9_-]{1,64}");
     }
 
     [Theory]
@@ -456,12 +463,11 @@ public class GameTurnSystemTests
     [InlineData("../../../secrets")]  // Relative path traversal
     public void StartNewWeek_RejectsPathTraversalPatterns(string pathTraversalPattern)
     {
-        // Arrange
-        var system = CreateSystem();
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(pathTraversalPattern));
 
-        // Act & Assert - RED: Should reject SaveIds with path traversal patterns
-        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(pathTraversalPattern));
-        exception.Message.Should().Contain("SaveId");
+        // Assert
+        exception.Message.Should().Contain("[a-zA-Z0-9_-]{1,64}");
     }
 
     [Theory]
@@ -472,12 +478,11 @@ public class GameTurnSystemTests
     [InlineData("save|id&cmd")]  // Shell metacharacters
     public void StartNewWeek_RejectsInvalidCharacters(string invalidCharsPattern)
     {
-        // Arrange
-        var system = CreateSystem();
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(invalidCharsPattern));
 
-        // Act & Assert - RED: Should only accept [a-zA-Z0-9_-]{1,64}
-        var exception = Assert.Throws<ArgumentException>(() => system.StartNewWeek(invalidCharsPattern));
-        exception.Message.Should().Contain("SaveId");
+        // Assert
+        exception.Message.Should().Contain("[a-zA-Z0-9_-]{1,64}");
     }
 
     [Fact]
