@@ -11,7 +11,14 @@
         "details": "Story: PRD-NEWGUILD-VS-0001\nADR Refs: ADR-0018; ADR-0004; ADR-0005; ADR-0023; ADR-0011\nChapters: CH01; CH04; CH05; CH06; CH07; CH10\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nAcceptance: 存在一份针对 newguild 的最小 PRD 片段（含输入/输出/状态/存储与非功能约束），并显式引用 ADR-0018/0004/0005/0023/0011。; 在 overlays/PRD-*/08 下新增或调整功能纵切文档，严格遵守 08 章只引用 01/02/03 口径的规则（不复制阈值）。; 每个 Story 至少关联一条 Test-Ref（xUnit 或 GdUnit4），并在文档脚注中列出。\nTest Strategy: 文档审阅：由架构负责人确认 PRD 与 ADR/Phase 一致性。; 链接校验：任务/回链校验脚本通过（task-links-validate）。\nLabels: prd; vertical-slice; docs; architecture\nOwner: architecture\nLayer: docs",
         "testStrategy": "文档审阅：由架构负责人确认 PRD 与 ADR/Phase 一致性。\n链接校验：任务/回链校验脚本通过（task-links-validate）。",
         "updatedAt": "2025-11-30T17:00:56.080Z",
-        "subtasks": []
+        "subtasks": [],
+        "adrRefs": [
+          "ADR-0018",
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0023",
+          "ADR-0011"
+        ]
       },
       {
         "id": "2",
@@ -25,7 +32,16 @@
         "details": "Story: PRD-GUILD-MANAGER-VS-CORE-LOOP\nADR Refs: ADR-0018; ADR-0004; ADR-0006; ADR-0007; ADR-0005; ADR-0020\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GuildCoreTests.cs; Game.Core.Tests/Domain/EventEngineTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Tests.Godot/tests/Integration/test_guild_workflow.gd\nAcceptance: Game.Core 中存在 Guild、GuildMember、Raid、Event 等核心域模型与服务，且不依赖 Godot API。; Game.Godot 中存在与 08-功能纵切-公会管理器.md 一致的主场景与公会管理 UI 节点结构，并通过 Adapters 调用 Game.Core 服务。; Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。; Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。; 上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。; 完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。\nTest Strategy: 单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。; 场景测试：在 Tests.Godot 中编写主场景与公会管理 UI 的 GdUnit4 用例，验证节点结构与关键 Signals。; 集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。\nLabels: core; guild; vertical-slice; architecture\nOwner: architecture\nLayer: core",
         "testStrategy": "单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。\n场景测试：在 Tests.Godot 中编写主场景与公会管理 UI 的 GdUnit4 用例，验证节点结构与关键 Signals。\n集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。",
         "subtasks": [],
-        "updatedAt": "2025-12-01T07:06:50.934Z"
+        "updatedAt": "2025-12-01T07:06:50.934Z",
+        "adrRefs": [
+          "ADR-0018",
+          "ADR-0004",
+          "ADR-0006",
+          "ADR-0007",
+          "ADR-0005",
+          "ADR-0024",
+          "ADR-0020"
+        ]
       },
       {
         "id": "3",
@@ -39,7 +55,16 @@
         "details": "Story: PRD-GUILD-MANAGER-CORE-EVENT-ENGINE\nADR Refs: ADR-0018; ADR-0004; ADR-0006; ADR-0007; ADR-0005; ADR-0020\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/EventEngineTests.cs\nAcceptance: Game.Core 中存在 EventEngine 类（或等价聚合根），负责驱动回合/周循环并对外暴露明确的 API（如 ExecuteResolutionPhase/ExecutePlayerPhase/ExecuteAiPhase）。; 事件引擎能够接受一组领域事件定义（来自 Contracts 或 Domain 类型），根据当前游戏状态评估触发条件，并执行对应效果。; 事件冲突解决规则在 EventEngine 中有清晰实现（如优先级、排他性、合并策略），并在 xUnit 测试中覆盖。; Game.Core.Tests/Domain/EventEngineTests.cs 中存在针对回合循环、条件评估、事件执行、冲突解决的单元测试，全部通过。; EventEngine 不直接依赖 Godot API；与 Godot 的集成通过适配层/Signals 完成（见 NG-0020/NG-0014）。; EventEngine 至少支持上述三类 Guild 领域事件的基本调度：在 Resolution/Player/AI Simulation 周期内能够消费和发布 GuildCreated、GuildMemberJoined、GuildMemberLeft 等事件，对应的行为由 Game.Core.Tests/Domain/EventEngineTests.cs 及相关用例覆盖。\nTest Strategy: 按 PRD 中定义的核心循环（Resolution/Player/AI Simulation）为 EventEngine 设计一组最小测试场景，用 xUnit 验证每个阶段的状态变更是否符合预期。; 为常见事件类型（如成员加入、资源变化、活动结算）设计条件/效果组合，在测试中模拟不同初始状态并验证 EventEngine 输出。; 为冲突场景（多个事件作用于同一实体或互斥条件）编写专门测试，确认 EventEngine 能按预期顺序/规则处理。\nLabels: core; event-engine; guild; simulation\nOwner: architecture\nLayer: core",
         "testStrategy": "按 PRD 中定义的核心循环（Resolution/Player/AI Simulation）为 EventEngine 设计一组最小测试场景，用 xUnit 验证每个阶段的状态变更是否符合预期。\n为常见事件类型（如成员加入、资源变化、活动结算）设计条件/效果组合，在测试中模拟不同初始状态并验证 EventEngine 输出。\n为冲突场景（多个事件作用于同一实体或互斥条件）编写专门测试，确认 EventEngine 能按预期顺序/规则处理。",
         "subtasks": [],
-        "updatedAt": "2025-12-02T07:03:53.577Z"
+        "updatedAt": "2025-12-02T07:03:53.577Z",
+        "adrRefs": [
+          "ADR-0018",
+          "ADR-0004",
+          "ADR-0006",
+          "ADR-0007",
+          "ADR-0005",
+          "ADR-0024",
+          "ADR-0020"
+        ]
       },
       {
         "id": "4",
@@ -54,7 +79,14 @@
         "details": "Story: PRD-GUILD-MANAGER-CORE-GAME-LOOP\nADR Refs: ADR-0018; ADR-0004; ADR-0006; ADR-0020\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GameLoopTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Tests.Godot/tests/Scenes/test_main_scene_smoke.gd; Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd\nAcceptance: Game.Core 中存在表示游戏周次/阶段/时间的核心类型与服务（例如 GameTurnSystem 或等价接口），并实现 PRD 中定义的三阶段回合循环。; 游戏时间推进逻辑能够驱动 EventEngine 与 AICoordinator，在至少一个简单场景中完成从 Resolution → Player → AI Simulation 的完整一周循环。; Godot 主场景 UI 能够显示当前周次/阶段/时间状态，并在回合推进时实时更新。; Game.Core.Tests 中存在 GameLoopTests（或等价），覆盖时间推进、阶段切换以及回合边界条件；Tests.Godot 中有用例验证 UI 与 Core 状态同步。; Game.Core 与 Godot 场景的组合至少能够完成 PRD 3.0.3 T2 可玩性场景流中描述的一次完整循环：从启动主场景进入首周公会管理界面，执行一次完整的 Resolution→Player→AI Simulation 一周循环，并安全返回主菜单或结束会话；对应的 xUnit 和 GdUnit4/headless 用例挂接在 NG-0021 的 test_refs 中并在 CI 中保持绿灯。; GM-0103 所需的 T2 流程最小测试入口已经落在 Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd；后续扩展测试应在此基础上补充，而不是新建平行入口文件。\nTest Strategy: 在 xUnit 中为 GameLoop 设计一组“单周循环”用例，验证每个阶段的调用顺序与状态变化是否符合 PRD 描述。; 在 GdUnit4 中为主场景编写测试，通过模拟回合推进（调用 public 方法或连接信号）检查 UI 显示是否与 Core 状态一致。; 结合 GM-0101/GM-0102，用一个最小的“公会一周生活”场景验证事件触发、AI 行为与 UI 反馈闭环。\nLabels: core; game-loop; time; guild\nOwner: architecture\nLayer: core",
         "testStrategy": "在 xUnit 中为 GameLoop 设计一组“单周循环”用例，验证每个阶段的调用顺序与状态变化是否符合 PRD 描述。\n在 GdUnit4 中为主场景编写测试，通过模拟回合推进（调用 public 方法或连接信号）检查 UI 显示是否与 Core 状态一致。\n结合 GM-0101/GM-0102，用一个最小的“公会一周生活”场景验证事件触发、AI 行为与 UI 反馈闭环。",
         "subtasks": [],
-        "updatedAt": "2025-12-02T09:24:59.747Z"
+        "updatedAt": "2025-12-02T09:24:59.747Z",
+        "adrRefs": [
+          "ADR-0018",
+          "ADR-0004",
+          "ADR-0006",
+          "ADR-0024",
+          "ADR-0020"
+        ]
       },
       {
         "id": "5",
@@ -68,7 +100,14 @@
         "details": "Story: PH12-BACKLOG-B1-B2\nADR Refs: ADR-0005; ADR-0011; ADR-0018; ADR-0020\nChapters: CH01; CH06; CH07; CH10\nTest Refs: logs/ci/<date>/smoke/headless.log; logs/ci/<date>/smoke/selfcheck-summary.json\nAcceptance: 新增 scripts/python/smoke_headless.py（或等价脚本），支持 --godot-bin/--scene/--timeout-sec/--project-path 参数，并在 Windows 上可直接运行。; 非 strict 模式下，脚本行为与现有 PowerShell 版本等价，输出写入 logs/ci/<date>/smoke/**，并保留宽松判定。; strict 模式下，仅当日志包含 [TEMPLATE_SMOKE_READY] 或 [DB] opened 时返回 0，否则返回非零并在日志中标记为 strict-failed。; ci-windows.yml 或 windows-quality-gate.yml 至少提供一条注释示例，展示如何在受保护分支启用 strict 模式。\nTest Strategy: 本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。; CI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。\nLabels: ci; smoke; godot; python; headless\nOwner: architecture\nLayer: ci",
         "testStrategy": "本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。\nCI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。",
         "subtasks": [],
-        "updatedAt": "2025-12-02T17:44:19.673Z"
+        "updatedAt": "2025-12-02T17:44:19.673Z",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0011",
+          "ADR-0018",
+          "ADR-0024",
+          "ADR-0020"
+        ]
       },
       {
         "id": "6",
@@ -84,7 +123,14 @@
         "details": "Story: PRD-GUILD-MANAGER-VS-TEST-CI\nADR Refs: ADR-0005; ADR-0011; ADR-0018; ADR-0020\nChapters: CH01; CH06; CH07; CH10\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GuildCoreTests.cs; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Tests.Godot/tests/Scenes/test_main_scene_smoke.gd; logs/ci/<date>/ci-pipeline-summary.json; logs/e2e/<date>/smoke/selfcheck-summary.json; Game.Core.Tests/Domain/GameLoopTests.cs; Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd\nAcceptance: dev_cli.py run-ci-basic 在本地 Windows 环境下能成功运行，并至少执行一次 dotnet test 与一次 headless smoke。; Windows CI 工作流（ci-windows.yml 或 windows-quality-gate.yml）中包含对 Game.Core.Tests 与 Tests.Godot 的执行步骤，且在首个垂直切片落地后仍然全部通过。; headless smoke 用例能够在不依赖交互的情况下启动游戏主场景，并输出 [TEMPLATE_SMOKE_READY] 或 [DB] opened 标记。; 至少存在一条覆盖 PRD 3.0.3 T2 可玩性场景流的端到端测试路径：Game.Core.Tests/Domain/GameTurnSystemTests.cs（或等价用例）验证三阶段一周循环的状态推进，Tests.Godot/tests/Scenes/test_main_scene_smoke.gd（或等价用例）验证从启动主场景进入首周公会管理界面并完成一次“推进一周”的 UI 流程。; 失败的测试或 smoke 能在 logs/ci 与 logs/e2e 目录下生成可用于排查的 JSON/文本日志，与 AGENTS.md 中的日志规范一致。; Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd 已作为 PRD 3.0.3 T2 可玩性场景流的最小测试入口，分别覆盖 Core 回合状态与场景可玩闭环，并挂接在 NG-0021 与 GM-0103 的 Test-Refs 中。\nTest Strategy: 本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。; CI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。\nLabels: ci; testing; smoke; xunit; gdunit\nOwner: architecture\nLayer: ci",
         "testStrategy": "本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。\nCI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。",
         "subtasks": [],
-        "updatedAt": "2025-12-04T14:19:40.651Z"
+        "updatedAt": "2025-12-04T14:19:40.651Z",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0011",
+          "ADR-0018",
+          "ADR-0024",
+          "ADR-0020"
+        ]
       },
       {
         "id": "8",
@@ -189,6 +235,16 @@
             "updatedAt": "2025-12-10T08:00:00.000Z",
             "implementationNotes": "完整文件清单（已实现）：\n\n核心层（Game.Core）：\n- Game.Core/Interfaces/ISecurityUrlValidator.cs（接口定义）\n  Lines 30-48: 接口契约（AllowedHosts, IsUrlAllowed, ValidateAndAudit）\n\n适配层（Tests.Godot/Game.Godot/Adapters/Security）：\n- SecurityUrlAdapter.cs（主适配器实现）\n  Lines 62-89: AllowedHosts 显式接口实现 + Godot.Collections.Array 公共属性\n  Lines 92-96: IsUrlAllowed 简单验证\n  Lines 101-126: ValidateAndAudit 验证 + 审计\n  Lines 134-190: ValidateCore 核心验证逻辑\n  Lines 198-224: WriteAuditLog 审计日志写入\n\n- SecurityUrlAdapterFactory.cs（工厂类）\n  Lines 31-34: CreateWithWhitelist 白名单配置\n  Lines 42-45: CreateWithSsrfProtection SSRF 防护\n  Lines 54-57: CreateForTesting 测试配置\n  Lines 65-86: CreateFromGodotArray Godot 数组转换\n\n- UrlValidationResult.cs（结果类）\n  Lines 34-38: 构造函数\n  Lines 47-58: 索引器实现\n  Lines 67-70: Get(int index) 显式方法\n\n- security_url_adapter_factory.gd（GDScript 包装器）\n  Lines 5-35: 工厂方法 GDScript 绑定\n\n测试层（Tests.Godot/tests/Security/Hard）：\n- test_url_security_adapter.gd（GdUnit4 测试套件）\n  Lines 22-32: test_allows_whitelisted_https_url\n  Lines 35-46: test_rejects_http_scheme\n  Lines 49-67: test_rejects_dangerous_schemes\n  Lines 70-85: test_rejects_non_whitelisted_domain\n  Lines 88-99: test_rejects_all_urls_when_whitelist_null\n  Lines 102-111: test_rejects_all_urls_when_whitelist_empty\n  Lines 114-128: test_rejects_invalid_uri_format\n  Lines 131-146: test_rejects_null_or_empty_url\n  Lines 149-156: test_exposes_allowed_hosts_property\n  Lines 159-164: test_null_whitelist_exposes_null_property\n  Lines 169-184: test_audit_log_written_on_rejection\n\n审计日志输出（logs/e2e/2025-12-10）：\n- gdunit-console.txt（测试执行日志）\n  Line 56: Statistics: 11 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans | PASSED 537ms\n  Line 65: Exit code: 0\n\n关键代码片段：\n\n1. 显式接口实现（SecurityUrlAdapter.cs:62-89）：\n```csharp\n/// <summary>\n/// Explicit interface implementation - returns IReadOnlyList to satisfy interface contract.\n/// GDScript code should access the public AllowedHosts property instead.\n/// </summary>\nIReadOnlyList<string>? ISecurityUrlValidator.AllowedHosts => _allowedHosts;\n\n/// <summary>\n/// Public property for GDScript access - returns Godot.Collections.Array.\n/// </summary>\npublic global::Godot.Collections.Array? AllowedHosts\n{\n    get\n    {\n        if (_allowedHosts == null)\n            return null;\n\n        var result = new global::Godot.Collections.Array();\n        foreach (var host in _allowedHosts)\n        {\n            result.Add(host);\n        }\n        return result;\n    }\n}\n```\n\n2. GDScript 包装器（security_url_adapter_factory.gd:14-22）：\n```gdscript\nstatic func create_with_whitelist(allowed_hosts: Array, audit_log_path: String = \"\") -> RefCounted:\n\tvar factory_class = load(\"res://Game.Godot/Adapters/Security/SecurityUrlAdapterFactory.cs\")\n\tvar factory = factory_class.new()\n\tif audit_log_path == \"\":\n\t\treturn factory.CreateWithWhitelist(allowed_hosts, null)\n\telse:\n\t\treturn factory.CreateWithWhitelist(allowed_hosts, audit_log_path)\n```\n\n3. 测试示例（test_url_security_adapter.gd:149-156）：\n```gdscript\nfunc test_exposes_allowed_hosts_property() -> void:\n\tvar allowed_hosts := [\"example.com\", \"api.example.com\"]\n\tvar adapter = SecurityUrlAdapterFactory.create_with_whitelist(allowed_hosts, null)\n\t\n\tvar exposed_hosts = adapter.AllowedHosts\n\tassert_object(exposed_hosts).is_not_null()\n\tassert_int(exposed_hosts.size()).is_equal(2)  # 使用 size() 而非 Count\n```"
           }
+        ],
+        "adrRefs": [
+          "ADR-0019",
+          "ADR-0006",
+          "ADR-0005",
+          "ADR-0011",
+          "ADR-0019 (Security Baseline)",
+          "ADR-0007 (Ports and Adapters)",
+          "ADR-0004 (Event Bus)",
+          "ADR-0011 (Windows-only)"
         ]
       },
       {
@@ -201,7 +257,7 @@
         ],
         "title": "GameLoop 安全审计基线与任务映射收口",
         "description": "根据最新的 GameLoop 安全审计报告（logs/security-audit-gameloop.*）和 cifix.txt，对照 ADR-0019/0004/0005/0018 重新梳理 F001–F007，区分 T2 阶段必须完成与 NG 安全 backlog 的工作，并在 tasks_back.json / tasks_gameplay.json 中补齐 adr_refs/chapter_refs/overlay_refs/test_refs，使后续审计与 task_links_validate 以统一口径运行。",
-        "status": "in-progress",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "1"
@@ -215,14 +271,20 @@
         "id": "10",
         "title": "GameLoop SaveIdValue 值对象与白名单校验",
         "description": "在 Game.Core 中为 GameLoop 引入 SaveIdValue 值对象（或等价验证器），实现基于 ADR-0019 的白名单规则（仅允许 [a-zA-Z0-9_-] 且长度 1-64），并在 GameTurnState/GameTurnSystem 与 GameLoop 相关合约中统一使用该类型；同时新增 SaveId 安全向单元测试，覆盖非法输入与边界值。",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "high",
         "dependencies": [
           "9"
         ],
         "details": "Story: PH16-GAMELOOP-SAVEID-VALUE\nADR Refs: ADR-0019; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH02; CH04; CH06; CH07\nTest Refs: Game.Core/Domain/Turn/SaveIdValue.cs; Game.Core.Tests/Domain/SaveIdValueTests.cs; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Game.Core.Tests/Domain/GameLoopTests.cs\nAcceptance: Game.Core/Domain/Turn 下新增 SaveIdValue（或等价类型），实现 [a-zA-Z0-9_-]{1,64} 的白名单校验，非法输入抛出 ArgumentException。; GameTurnState / GameTurnSystem 在内部使用 SaveIdValue 作为 SaveId 的入口类型，确保后续事件与存储只接受经过校验的值。; Game.Core.Tests 中新增 SaveIdValueTests 与针对无效 SaveId 的 GameTurnSystem / GameLoop 测试，覆盖空字符串、超长、SQL 片段、路径遍历等典型攻击向量。; dotnet test Game.Core.Tests 在本地与 CI 均可通过，且与 PRD 3.0.3 T2 可玩性场景流描述一致。\nTest Strategy: 单元测试：在 SaveIdValueTests 中穷举典型非法/合法输入，验证构造/工厂方法的行为与异常信息。; 集成测试：在 GameTurnSystemTests 与 GameLoopTests 中增加使用非法 SaveId 的路径，验证系统拒绝不符合白名单的存档槽 ID。\nLabels: security; gameloop; core; t2\nOwner: architecture\nLayer: core",
         "testStrategy": "单元测试：在 SaveIdValueTests 中穷举典型非法/合法输入，验证构造/工厂方法的行为与异常信息。\n集成测试：在 GameTurnSystemTests 与 GameLoopTests 中增加使用非法 SaveId 的路径，验证系统拒绝不符合白名单的存档槽 ID。",
-        "subtasks": []
+        "subtasks": [],
+        "adrRefs": [
+          "ADR-0019",
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0018"
+        ]
       },
       {
         "id": "11",
@@ -238,7 +300,13 @@
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on setup core game loop.",
-        "subtasks": []
+        "subtasks": [],
+        "adrRefs": [
+          "ADR-0019",
+          "ADR-0006",
+          "ADR-0005",
+          "ADR-0011"
+        ]
       },
       {
         "id": "12",
@@ -254,7 +322,13 @@
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on develop event system.",
-        "subtasks": []
+        "subtasks": [],
+        "adrRefs": [
+          "ADR-0019",
+          "ADR-0006",
+          "ADR-0005",
+          "ADR-0011"
+        ]
       }
     ],
     "metadata": {
