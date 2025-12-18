@@ -31,6 +31,30 @@ public class SafeResourcePathTests
     }
 
     [Fact]
+    public void FromString_WithUserDbExtension_ReturnsReadWritePath()
+    {
+        // Act
+        var path = SafeResourcePath.FromString("user://db/game.db");
+
+        // Assert
+        path.Should().NotBeNull();
+        path!.Value.Should().Be("user://db/game.db");
+        path.Type.Should().Be(PathType.ReadWrite);
+    }
+
+    [Fact]
+    public void FromString_WithUserSqliteExtensions_ReturnsReadWritePath()
+    {
+        // Act
+        var sqlite = SafeResourcePath.FromString("user://db/game.sqlite");
+        var sqlite3 = SafeResourcePath.FromString("user://db/game.sqlite3");
+
+        // Assert
+        sqlite.Should().NotBeNull();
+        sqlite3.Should().NotBeNull();
+    }
+
+    [Fact]
     public void FromString_WithPathTraversal_ReturnsNull()
     {
         // Act

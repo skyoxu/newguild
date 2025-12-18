@@ -27,6 +27,9 @@ public sealed record SafeResourcePath
         ".dat",    // Binary data files
         ".save",   // Save game files
         ".cfg",    // Configuration files
+        ".db",     // SQLite database file
+        ".sqlite", // SQLite database file
+        ".sqlite3",// SQLite database file
         ".xml",    // Structured data
         ".ini"     // Legacy configuration
     };
