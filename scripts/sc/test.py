@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import os
 import shutil
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
@@ -46,6 +47,66 @@ def run_unit(out_dir: Path, solution: str, configuration: str) -> dict[str, Any]
     return {"name": "unit", "cmd": cmd, "rc": rc, "log": str(log_path), "artifacts_dir": str(unit_artifacts_dir)}
 
 
+def normalize_cobertura_paths(cobertura: Path, normalized: Path) -> dict[str, Any]:
+    """
+    Cobertura files sometimes contain "logical" source paths that no longer exist after repo refactors,
+    e.g. 'Scripts/Core/Contracts/**' while sources live under 'Game.Core/Contracts/**'.
+
+    reportgenerator will try to resolve these paths literally and emit noisy warnings.
+    This function rewrites only those filenames that do not exist on disk.
+    """
+
+    root = repo_root()
+    tree = ET.parse(cobertura)
+    doc = tree.getroot()
+
+    replacements = [
+        ("Scripts\\Core\\Contracts\\", "Game.Core\\Contracts\\"),
+        ("Scripts/Core/Contracts/", "Game.Core/Contracts/"),
+    ]
+
+    changed: list[dict[str, str]] = []
+    missing: list[str] = []
+
+    for elem in doc.iter():
+        filename = elem.attrib.get("filename")
+        if not filename:
+            continue
+
+        src = root / filename
+        if src.exists():
+            continue
+
+        new_name = filename
+        for old, new in replacements:
+            if old in new_name:
+                new_name = new_name.replace(old, new)
+
+        # If the simple prefix map didn't help, try a best-effort resolve by basename (deterministic when unique).
+        if new_name == filename or not (root / new_name).exists():
+            matches = [p for p in root.rglob(Path(filename).name) if "logs" not in p.parts]
+            if len(matches) == 1:
+                new_name = str(matches[0].relative_to(root))
+
+        if (root / new_name).exists():
+            elem.set("filename", new_name)
+            changed.append({"from": filename, "to": new_name})
+        else:
+            missing.append(filename)
+
+    normalized.parent.mkdir(parents=True, exist_ok=True)
+    tree.write(normalized, encoding="utf-8", xml_declaration=True)
+
+    return {
+        "input": str(cobertura),
+        "output": str(normalized),
+        "changed_count": len(changed),
+        "missing_count": len(missing),
+        "changed": changed,
+        "missing": missing,
+    }
+
+
 def run_coverage_report(out_dir: Path, unit_artifacts_dir: Path) -> dict[str, Any]:
     reportgenerator = shutil.which("reportgenerator")
     if not reportgenerator:
@@ -64,10 +125,19 @@ def run_coverage_report(out_dir: Path, unit_artifacts_dir: Path) -> dict[str, An
         }
 
     target_dir = unit_artifacts_dir / "coverage-report"
+    # Some coverage generators embed stale/previous source paths (e.g. after file moves).
+    # Provide repo root as a source directory so reportgenerator can resolve sources reliably.
+    src_dirs = str(repo_root())
+
+    normalized = unit_artifacts_dir / "coverage.cobertura.normalized.xml"
+    norm = normalize_cobertura_paths(cobertura, normalized)
+    write_json(out_dir / "coverage-pathmap.json", norm)
+
     cmd = [
         "reportgenerator",
-        f"-reports:{cobertura}",
+        f"-reports:{normalized}",
         f"-targetdir:{target_dir}",
+        f"-sourcedirs:{src_dirs}",
         "-reporttypes:Html",
     ]
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=300)
