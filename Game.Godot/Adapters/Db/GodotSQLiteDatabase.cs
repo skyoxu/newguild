@@ -244,19 +244,13 @@ public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
 
     private static bool IncludeSensitiveDetails()
     {
-        var isSecureMode = System.Environment.GetEnvironmentVariable("GD_SECURE_MODE") == "1";
-        var isCi = !string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("CI"));
-
 #if DEBUG
         var isDebugBuild = true;
 #else
         var isDebugBuild = false;
 #endif
 
-        if (!isDebugBuild)
-            return false;
-
-        return !isSecureMode && !isCi;
+        return SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild);
     }
 
     private string ResolveAuditLogPath()

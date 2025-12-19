@@ -95,6 +95,34 @@ public class SafeResourcePathTests
     }
 
     [Fact]
+    public void FromString_WithWindowsSeparators_NormalizesToForwardSlashes()
+    {
+        var path = SafeResourcePath.FromString(@"user:\db\game.db");
+
+        path.Should().NotBeNull();
+        path!.Value.Should().Be("user://db/game.db");
+        path.Type.Should().Be(PathType.ReadWrite);
+    }
+
+    [Fact]
+    public void FromString_WithSingleSlashScheme_NormalizesToDoubleSlash()
+    {
+        var path = SafeResourcePath.FromString("res:/scenes/Main.tscn");
+
+        path.Should().NotBeNull();
+        path!.Value.Should().Be("res://scenes/Main.tscn");
+        path.Type.Should().Be(PathType.ReadOnly);
+    }
+
+    [Fact]
+    public void FromString_WithWindowsTraversalUsingBackslashes_ReturnsNull()
+    {
+        var path = SafeResourcePath.FromString(@"user:\..\evil.db");
+
+        path.Should().BeNull();
+    }
+
+    [Fact]
     public void FromString_WithEmptyString_ReturnsNull()
     {
         // Act

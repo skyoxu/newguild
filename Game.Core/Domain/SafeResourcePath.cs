@@ -62,6 +62,13 @@ public sealed record SafeResourcePath
             return null;
 
         var trimmed = path.Trim();
+        trimmed = trimmed.Replace('\\', '/');
+
+        // Normalize common Windows-typed variants ("user:\", "user:/") to Godot style ("user://").
+        if (trimmed.StartsWith("user:/", StringComparison.OrdinalIgnoreCase) && !trimmed.StartsWith("user://", StringComparison.OrdinalIgnoreCase))
+            trimmed = "user://" + trimmed.Substring("user:/".Length);
+        if (trimmed.StartsWith("res:/", StringComparison.OrdinalIgnoreCase) && !trimmed.StartsWith("res://", StringComparison.OrdinalIgnoreCase))
+            trimmed = "res://" + trimmed.Substring("res:/".Length);
 
         // Reject excessively long paths (Windows MAX_PATH compatibility)
         if (trimmed.Length > MaxPathLength)
