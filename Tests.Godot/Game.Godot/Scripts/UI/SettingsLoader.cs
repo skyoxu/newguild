@@ -1,5 +1,6 @@
 ﻿using Godot;
 using System;
+using Game.Core.Ports;
 using Game.Godot.Adapters;
 
 namespace Game.Godot.Scripts.UI;
@@ -14,7 +15,9 @@ public partial class SettingsLoader : Node
         if (db == null) return;
         try
         {
-            var rows = db.Query("SELECT audio_volume, graphics_quality, language FROM settings WHERE user_id=@0;", UserId);
+            var rows = db.Query(SqlStatement.Positional(
+                "SELECT audio_volume, graphics_quality, language FROM settings WHERE user_id=@0;",
+                UserId));
             if (rows.Count == 0) return;
             var r = rows[0];
             if (r.TryGetValue("audio_volume", out var v) && v != null)

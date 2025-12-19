@@ -332,7 +332,7 @@
         "id": "12",
         "title": "GodotSQLiteDatabase 错误脱敏与审计挂钩",
         "description": "在 Game.Godot/Adapters/Db/GodotSQLiteDatabase 中按 ADR-0019 要求改造错误处理：开发环境保留详细异常信息方便排查；生产环境仅抛出脱敏后的通用错误消息，并将包含路径/SQL 明细的诊断信息写入安全审计日志或内部日志文件；同时为 OpenAsync/Execute* 等路径补充最小测试或 smoke 验证。",
-        "status": "pending",
+        "status": "done",
         "priority": "low",
         "dependencies": [
           "11"

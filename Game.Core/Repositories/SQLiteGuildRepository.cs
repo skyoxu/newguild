@@ -31,17 +31,17 @@ public class SQLiteGuildRepository : IGuildRepository
         await _db.OpenAsync();
 
         // Create Guilds table
-        await _db.ExecuteNonQueryAsync(@"
+        await _db.ExecuteNonQueryAsync(SqlStatement.NoParameters(@"
             CREATE TABLE IF NOT EXISTS Guilds (
                 GuildId TEXT PRIMARY KEY,
                 CreatorId TEXT NOT NULL,
                 Name TEXT NOT NULL,
                 CreatedAt TEXT NOT NULL
             )
-        ");
+        "));
 
         // Create GuildMembers table
-        await _db.ExecuteNonQueryAsync(@"
+        await _db.ExecuteNonQueryAsync(SqlStatement.NoParameters(@"
             CREATE TABLE IF NOT EXISTS GuildMembers (
                 GuildId TEXT NOT NULL,
                 UserId TEXT NOT NULL,
@@ -49,7 +49,7 @@ public class SQLiteGuildRepository : IGuildRepository
                 PRIMARY KEY (GuildId, UserId),
                 FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE
             )
-        ");
+        "));
 
         _initialized = true;
     }
@@ -59,29 +59,27 @@ public class SQLiteGuildRepository : IGuildRepository
         await EnsureInitializedAsync();
 
         // Insert guild
-        await _db.ExecuteNonQueryAsync(
+        await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
             "INSERT INTO Guilds (GuildId, CreatorId, Name, CreatedAt) VALUES (@GuildId, @CreatorId, @Name, @CreatedAt)",
-            new Dictionary<string, object>
+            new Dictionary<string, object?>
             {
                 ["@GuildId"] = guild.GuildId,
                 ["@CreatorId"] = guild.CreatorId,
                 ["@Name"] = guild.Name,
                 ["@CreatedAt"] = guild.CreatedAt.ToString("O") // ISO 8601 format
-            }
-        );
+            }));
 
         // Insert members
         foreach (var member in guild.Members)
         {
-            await _db.ExecuteNonQueryAsync(
+            await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
                 "INSERT INTO GuildMembers (GuildId, UserId, Role) VALUES (@GuildId, @UserId, @Role)",
-                new Dictionary<string, object>
+                new Dictionary<string, object?>
                 {
                     ["@GuildId"] = guild.GuildId,
                     ["@UserId"] = member.UserId,
                     ["@Role"] = (int)member.Role
-                }
-            );
+                }));
         }
 
         return guild;
@@ -91,10 +89,9 @@ public class SQLiteGuildRepository : IGuildRepository
     {
         await EnsureInitializedAsync();
 
-        var rows = await _db.QueryAsync(
+        var rows = await _db.QueryAsync(SqlStatement.WithParameters(
             "SELECT GuildId, CreatorId, Name, CreatedAt FROM Guilds WHERE GuildId = @GuildId",
-            new Dictionary<string, object> { ["@GuildId"] = guildId }
-        );
+            new Dictionary<string, object?> { ["@GuildId"] = guildId }));
 
         if (rows.Count == 0)
             return null;
@@ -107,33 +104,30 @@ public class SQLiteGuildRepository : IGuildRepository
         await EnsureInitializedAsync();
 
         // Update guild
-        await _db.ExecuteNonQueryAsync(
+        await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
             "UPDATE Guilds SET Name = @Name WHERE GuildId = @GuildId",
-            new Dictionary<string, object>
+            new Dictionary<string, object?>
             {
                 ["@GuildId"] = guild.GuildId,
                 ["@Name"] = guild.Name
-            }
-        );
+            }));
 
         // Delete existing members
-        await _db.ExecuteNonQueryAsync(
+        await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
             "DELETE FROM GuildMembers WHERE GuildId = @GuildId",
-            new Dictionary<string, object> { ["@GuildId"] = guild.GuildId }
-        );
+            new Dictionary<string, object?> { ["@GuildId"] = guild.GuildId }));
 
         // Insert updated members
         foreach (var member in guild.Members)
         {
-            await _db.ExecuteNonQueryAsync(
+            await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
                 "INSERT INTO GuildMembers (GuildId, UserId, Role) VALUES (@GuildId, @UserId, @Role)",
-                new Dictionary<string, object>
+                new Dictionary<string, object?>
                 {
                     ["@GuildId"] = guild.GuildId,
                     ["@UserId"] = member.UserId,
                     ["@Role"] = (int)member.Role
-                }
-            );
+                }));
         }
 
         return guild;
@@ -143,10 +137,9 @@ public class SQLiteGuildRepository : IGuildRepository
     {
         await EnsureInitializedAsync();
 
-        var affected = await _db.ExecuteNonQueryAsync(
+        var affected = await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
             "DELETE FROM Guilds WHERE GuildId = @GuildId",
-            new Dictionary<string, object> { ["@GuildId"] = guildId }
-        );
+            new Dictionary<string, object?> { ["@GuildId"] = guildId }));
 
         // CASCADE will delete members automatically
         return affected > 0;
@@ -156,7 +149,7 @@ public class SQLiteGuildRepository : IGuildRepository
     {
         await EnsureInitializedAsync();
 
-        var rows = await _db.QueryAsync("SELECT GuildId, CreatorId, Name, CreatedAt FROM Guilds");
+        var rows = await _db.QueryAsync(SqlStatement.NoParameters("SELECT GuildId, CreatorId, Name, CreatedAt FROM Guilds"));
 
         var guilds = new List<Guild>();
         foreach (var row in rows)
@@ -172,12 +165,12 @@ public class SQLiteGuildRepository : IGuildRepository
     {
         await EnsureInitializedAsync();
 
-        var rows = await _db.QueryAsync(@"
+        var rows = await _db.QueryAsync(SqlStatement.WithParameters(@"
             SELECT DISTINCT g.GuildId, g.CreatorId, g.Name, g.CreatedAt
             FROM Guilds g
             INNER JOIN GuildMembers gm ON g.GuildId = gm.GuildId
             WHERE gm.UserId = @UserId
-        ", new Dictionary<string, object> { ["@UserId"] = userId });
+        ", new Dictionary<string, object?> { ["@UserId"] = userId }));
 
         var guilds = new List<Guild>();
         foreach (var row in rows)
@@ -198,10 +191,9 @@ public class SQLiteGuildRepository : IGuildRepository
         var createdAt = DateTimeOffset.Parse(createdAtStr);
 
         // Fetch members from database
-        var memberRows = await _db.QueryAsync(
+        var memberRows = await _db.QueryAsync(SqlStatement.WithParameters(
             "SELECT UserId, Role FROM GuildMembers WHERE GuildId = @GuildId",
-            new Dictionary<string, object> { ["@GuildId"] = guildId }
-        );
+            new Dictionary<string, object?> { ["@GuildId"] = guildId }));
 
         // Build member list from database
         var members = new List<GuildMember>();

@@ -10,14 +10,13 @@ public interface ISqlDatabase
     void Close();
 
     // Returns affected rows if applicable
-    int Execute(string sql, params object[] parameters);
+    int Execute(SqlStatement stmt);
 
     // Returns raw rows as dictionary (column -> value). Mapping to DTOs is caller's job.
-    List<Dictionary<string, object?>> Query(string sql, params object[] parameters);
+    List<Dictionary<string, object?>> Query(SqlStatement stmt);
 
     // Optional transaction helpers
     void BeginTransaction();
     void CommitTransaction();
     void RollbackTransaction();
 }
-

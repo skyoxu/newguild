@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Game.Core.Domain;
 using Game.Core.Ports;
+using Game.Core.Services;
 using Godot;
 using Microsoft.Data.Sqlite;
 
@@ -15,24 +20,28 @@ namespace Game.Godot.Adapters.Db;
 /// </summary>
 public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
 {
+    private const string AuditLogFile = "security-audit.jsonl";
+    private const string AuditSource = "GodotSQLiteDatabase";
+
     private SqliteConnection? _connection;
     private bool _isOpen;
-    private readonly string _dbPath;
+    private readonly string _dbPathVirtual;
+    private readonly string _dbPathAbsolute;
+    private readonly string _auditLogPath;
 
     public GodotSQLiteDatabase(string dbPath = "user://game.db")
     {
-        // Security: only allow user:// paths (ADR-0002)
+        // Security: enforce SafeResourcePath for user:// only (ADR-0019)
         if (string.IsNullOrWhiteSpace(dbPath))
             throw new ArgumentException("Database path cannot be empty", nameof(dbPath));
 
-        var normalized = dbPath.Replace('\\', '/').ToLowerInvariant();
-        if (!normalized.StartsWith("user://"))
-            throw new NotSupportedException("Only user:// paths are allowed for database files (ADR-0002)");
+        var safePath = SafeResourcePath.FromString(dbPath);
+        if (safePath == null || safePath.Type != PathType.ReadWrite)
+            throw new NotSupportedException("Only user:// paths are allowed for database files (ADR-0019)");
 
-        if (normalized.Contains(".."))
-            throw new NotSupportedException("Path traversal is not allowed (ADR-0002)");
-
-        _dbPath = ProjectSettings.GlobalizePath(dbPath);
+        _dbPathVirtual = dbPath;
+        _dbPathAbsolute = ProjectSettings.GlobalizePath(dbPath);
+        _auditLogPath = ResolveAuditLogPath();
     }
 
     public Task OpenAsync()
@@ -42,7 +51,7 @@ public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
         try
         {
             // Ensure parent directory exists
-            var dir = System.IO.Path.GetDirectoryName(_dbPath);
+            var dir = System.IO.Path.GetDirectoryName(_dbPathAbsolute);
             if (!string.IsNullOrEmpty(dir) && !System.IO.Directory.Exists(dir))
             {
                 System.IO.Directory.CreateDirectory(dir);
@@ -50,7 +59,7 @@ public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
 
             var connectionString = new SqliteConnectionStringBuilder
             {
-                DataSource = _dbPath,
+                DataSource = _dbPathAbsolute,
                 Mode = SqliteOpenMode.ReadWriteCreate
             }.ToString();
 
@@ -62,7 +71,17 @@ public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to open database at {_dbPath}", ex);
+            var includeSensitiveDetails = IncludeSensitiveDetails();
+            if (!includeSensitiveDetails)
+            {
+                TryWriteAuditLog(
+                    action: "db.sqlite.open_failed",
+                    reason: BuildAuditReason(ex),
+                    target: _dbPathVirtual,
+                    caller: AuditSource);
+            }
+
+            throw DatabaseErrorHandling.CreateOperationException("open", _dbPathVirtual, null, ex, includeSensitiveDetails);
         }
     }
 
@@ -81,25 +100,35 @@ public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException("Failed to close database", ex);
+            var includeSensitiveDetails = IncludeSensitiveDetails();
+            if (!includeSensitiveDetails)
+            {
+                TryWriteAuditLog(
+                    action: "db.sqlite.close_failed",
+                    reason: BuildAuditReason(ex),
+                    target: _dbPathVirtual,
+                    caller: AuditSource);
+            }
+
+            throw DatabaseErrorHandling.CreateOperationException("close", _dbPathVirtual, null, ex, includeSensitiveDetails);
         }
     }
 
-    public Task<int> ExecuteNonQueryAsync(string sql, Dictionary<string, object>? parameters = null)
+    public Task<int> ExecuteNonQueryAsync(SqlStatement stmt)
     {
         EnsureOpen();
+
+        var sql = stmt.Text;
+        var parameters = stmt.Parameters;
 
         try
         {
             using var command = _connection!.CreateCommand();
             command.CommandText = sql;
 
-            if (parameters != null)
+            foreach (var param in parameters)
             {
-                foreach (var param in parameters)
-                {
-                    command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
-                }
+                command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
             }
 
             int result = command.ExecuteNonQuery();
@@ -107,13 +136,26 @@ public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to execute non-query: {sql}", ex);
+            var includeSensitiveDetails = IncludeSensitiveDetails();
+            if (!includeSensitiveDetails)
+            {
+                TryWriteAuditLog(
+                    action: "db.sqlite.nonquery_failed",
+                    reason: BuildAuditReason(ex),
+                    target: _dbPathVirtual,
+                    caller: AuditSource);
+            }
+
+            throw DatabaseErrorHandling.CreateOperationException("nonquery", _dbPathVirtual, sql, ex, includeSensitiveDetails);
         }
     }
 
-    public Task<object?> ExecuteScalarAsync(string sql, Dictionary<string, object>? parameters = null)
+    public Task<object?> ExecuteScalarAsync(SqlStatement stmt)
     {
         EnsureOpen();
+
+        var sql = stmt.Text;
+        var parameters = stmt.Parameters;
 
         try
         {
@@ -133,13 +175,26 @@ public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to execute scalar: {sql}", ex);
+            var includeSensitiveDetails = IncludeSensitiveDetails();
+            if (!includeSensitiveDetails)
+            {
+                TryWriteAuditLog(
+                    action: "db.sqlite.scalar_failed",
+                    reason: BuildAuditReason(ex),
+                    target: _dbPathVirtual,
+                    caller: AuditSource);
+            }
+
+            throw DatabaseErrorHandling.CreateOperationException("scalar", _dbPathVirtual, sql, ex, includeSensitiveDetails);
         }
     }
 
-    public Task<IReadOnlyList<Dictionary<string, object>>> QueryAsync(string sql, Dictionary<string, object>? parameters = null)
+    public Task<IReadOnlyList<Dictionary<string, object>>> QueryAsync(SqlStatement stmt)
     {
         EnsureOpen();
+
+        var sql = stmt.Text;
+        var parameters = stmt.Parameters;
 
         try
         {
@@ -173,8 +228,96 @@ public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to execute query: {sql}", ex);
+            var includeSensitiveDetails = IncludeSensitiveDetails();
+            if (!includeSensitiveDetails)
+            {
+                TryWriteAuditLog(
+                    action: "db.sqlite.query_failed",
+                    reason: BuildAuditReason(ex),
+                    target: _dbPathVirtual,
+                    caller: AuditSource);
+            }
+
+            throw DatabaseErrorHandling.CreateOperationException("query", _dbPathVirtual, sql, ex, includeSensitiveDetails);
         }
+    }
+
+    private static bool IncludeSensitiveDetails()
+    {
+        var isSecureMode = System.Environment.GetEnvironmentVariable("GD_SECURE_MODE") == "1";
+        var isCi = !string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("CI"));
+
+#if DEBUG
+        var isDebugBuild = true;
+#else
+        var isDebugBuild = false;
+#endif
+
+        if (!isDebugBuild)
+            return false;
+
+        return !isSecureMode && !isCi;
+    }
+
+    private string ResolveAuditLogPath()
+    {
+        var root = System.Environment.GetEnvironmentVariable("AUDIT_LOG_ROOT");
+        if (!string.IsNullOrWhiteSpace(root))
+            return Path.Combine(root, AuditLogFile);
+
+        var isCi = !string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("CI"));
+        if (isCi)
+        {
+            var baseDir = ProjectSettings.GlobalizePath("res://");
+            var rel = Path.Combine("logs", "ci", System.DateTime.UtcNow.ToString("yyyy-MM-dd"), AuditLogFile);
+            return Path.GetFullPath(rel, baseDir);
+        }
+
+        return ProjectSettings.GlobalizePath(Path.Combine("user://logs/security", AuditLogFile));
+    }
+
+    private void TryWriteAuditLog(string action, string reason, string target, string caller)
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(_auditLogPath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            var entry = new
+            {
+                ts = System.DateTime.UtcNow.ToString("o"),
+                action,
+                reason = Truncate(reason, max: 500),
+                target = Truncate(target, max: 1000),
+                caller,
+            };
+
+            var jsonLine = JsonSerializer.Serialize(entry) + System.Environment.NewLine;
+            File.AppendAllText(_auditLogPath, jsonLine, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        }
+        catch
+        {
+            // Never throw from audit logging; keep primary error path deterministic.
+        }
+    }
+
+    private static string BuildAuditReason(System.Exception ex)
+    {
+        if (ex is SqliteException sqliteEx)
+        {
+            return $"SqliteException code={sqliteEx.SqliteErrorCode}";
+        }
+
+        return ex.GetType().Name;
+    }
+
+    private static string Truncate(string value, int max)
+    {
+        if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
+        return value.Length <= max ? value : value.Substring(0, max);
     }
 
     private void EnsureOpen()

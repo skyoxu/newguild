@@ -25,15 +25,24 @@ public class SaveGameRepository : ISaveGameRepository
         if ((System.Environment.GetEnvironmentVariable("DB_SIMULATE_SAVE_UPSERT_ERROR") ?? "0") == "1")
             throw new InvalidOperationException("Simulated SaveGame upsert error");
 
-        _db.Execute("INSERT INTO saves(id,user_id,slot_number,data,created_at,updated_at) VALUES(@0,@1,@2,@3,@4,@5) " +
-                    "ON CONFLICT(id) DO UPDATE SET user_id=@1, slot_number=@2, data=@3, updated_at=@5;",
-            save.Id, save.UserId, save.SlotNumber, save.Data, save.CreatedAt, save.UpdatedAt);
+        _db.Execute(SqlStatement.Positional(
+            "INSERT INTO saves(id,user_id,slot_number,data,created_at,updated_at) VALUES(@0,@1,@2,@3,@4,@5) " +
+            "ON CONFLICT(id) DO UPDATE SET user_id=@1, slot_number=@2, data=@3, updated_at=@5;",
+            save.Id,
+            save.UserId,
+            save.SlotNumber,
+            save.Data,
+            save.CreatedAt,
+            save.UpdatedAt));
         return Task.CompletedTask;
     }
 
     public Task<SaveGame?> GetAsync(string userId, int slot)
     {
-        var rows = _db.Query("SELECT id,user_id,slot_number,data,created_at,updated_at FROM saves WHERE user_id=@0 AND slot_number=@1 LIMIT 1;", userId, slot);
+        var rows = _db.Query(SqlStatement.Positional(
+            "SELECT id,user_id,slot_number,data,created_at,updated_at FROM saves WHERE user_id=@0 AND slot_number=@1 LIMIT 1;",
+            userId,
+            slot));
         if (rows.Count == 0) return Task.FromResult<SaveGame?>(null);
         var r = rows[0];
         var s = new SaveGame
@@ -50,7 +59,9 @@ public class SaveGameRepository : ISaveGameRepository
 
     public Task<List<SaveGame>> ListByUserAsync(string userId)
     {
-        var rows = _db.Query("SELECT id,user_id,slot_number,data,created_at,updated_at FROM saves WHERE user_id=@0 ORDER BY slot_number;", userId);
+        var rows = _db.Query(SqlStatement.Positional(
+            "SELECT id,user_id,slot_number,data,created_at,updated_at FROM saves WHERE user_id=@0 ORDER BY slot_number;",
+            userId));
         var list = new List<SaveGame>(rows.Count);
         foreach (var r in rows)
         {

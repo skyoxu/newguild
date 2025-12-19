@@ -16,20 +16,30 @@ public class AchievementRepository : IAchievementRepository
     {
         if (string.IsNullOrEmpty(achievement.Id)) achievement.Id = Guid.NewGuid().ToString();
         if (achievement.UnlockedAt == 0) achievement.UnlockedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        _db.Execute("INSERT INTO achievements(id,user_id,achievement_key,unlocked_at,progress) VALUES(@0,@1,@2,@3,@4) ON CONFLICT(id) DO UPDATE SET progress=@4;",
-            achievement.Id, achievement.UserId, achievement.AchievementKey, achievement.UnlockedAt, achievement.Progress);
+        _db.Execute(SqlStatement.Positional(
+            "INSERT INTO achievements(id,user_id,achievement_key,unlocked_at,progress) VALUES(@0,@1,@2,@3,@4) ON CONFLICT(id) DO UPDATE SET progress=@4;",
+            achievement.Id,
+            achievement.UserId,
+            achievement.AchievementKey,
+            achievement.UnlockedAt,
+            achievement.Progress));
         return Task.CompletedTask;
     }
 
     public Task<bool> HasAsync(string userId, string key)
     {
-        var rows = _db.Query("SELECT 1 FROM achievements WHERE user_id=@0 AND achievement_key=@1 LIMIT 1;", userId, key);
+        var rows = _db.Query(SqlStatement.Positional(
+            "SELECT 1 FROM achievements WHERE user_id=@0 AND achievement_key=@1 LIMIT 1;",
+            userId,
+            key));
         return Task.FromResult(rows.Count > 0);
     }
 
     public Task<List<Achievement>> ListByUserAsync(string userId)
     {
-        var rows = _db.Query("SELECT id,user_id,achievement_key,unlocked_at,progress FROM achievements WHERE user_id=@0 ORDER BY unlocked_at DESC;", userId);
+        var rows = _db.Query(SqlStatement.Positional(
+            "SELECT id,user_id,achievement_key,unlocked_at,progress FROM achievements WHERE user_id=@0 ORDER BY unlocked_at DESC;",
+            userId));
         var list = new List<Achievement>(rows.Count);
         foreach (var r in rows)
         {
@@ -45,4 +55,3 @@ public class AchievementRepository : IAchievementRepository
         return Task.FromResult(list);
     }
 }
-

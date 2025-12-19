@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Text;
+using Game.Core.Domain;
 using Game.Core.Ports;
+using Game.Core.Services;
 using Godot;
 using Microsoft.Data.Sqlite;
 
@@ -19,19 +23,19 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     private SqliteConnection? _conn;
     private SqliteTransaction? _tx;
     private string? _dbPath;
+    private string? _dbPathVirtual;
     public string? LastError { get; private set; }
 
     public void Open(string dbPath)
     {
-        // Security: allow only user:// paths and forbid traversal
         if (string.IsNullOrWhiteSpace(dbPath)) throw new ArgumentException("Empty database path");
-        var raw = dbPath.Replace('\\','/');
-        var lower = raw.ToLowerInvariant();
-        if (!lower.StartsWith("user://"))
+
+        var safe = SafeResourcePath.FromString(dbPath);
+        if (safe == null || safe.Type != PathType.ReadWrite)
             throw new NotSupportedException("Only user:// paths are allowed for database files");
-        if (lower.Contains(".."))
-            throw new NotSupportedException("Path traversal is not allowed");
-        _dbPath = Globalize(dbPath);
+
+        _dbPathVirtual = safe.Value;
+        _dbPath = Globalize(_dbPathVirtual);
         EnsureParentDir(_dbPath!);
         var isNew = !System.IO.File.Exists(_dbPath!);
         var prefer = (System.Environment.GetEnvironmentVariable("GODOT_DB_BACKEND") ?? string.Empty).ToLowerInvariant(); var forcePlugin = prefer == "plugin"; var forceManaged = prefer == "managed"; if (!forceManaged && TryOpenPlugin(_dbPath!))
@@ -83,23 +87,56 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     public bool TryOpen(string dbPath)
     {
         try { Open(dbPath); LastError = null; return true; }
-        catch (Exception ex) { LastError = ex.Message; Audit("db.open.fail", ex.Message, dbPath); return false; }
+        catch (Exception ex)
+        {
+            var includeSensitiveDetails = IncludeSensitiveDetails();
+            LastError = includeSensitiveDetails ? ex.Message : "Database open failed.";
+            if (!includeSensitiveDetails)
+            {
+                Audit("db.sqlite.open_failed", BuildAuditReason(ex), dbPath, caller: nameof(SqliteDataStore));
+            }
+            return false;
+        }
     }
 
     public bool TableExists(string name)
     {
-        var rows = Query("SELECT name FROM sqlite_master WHERE type='table' AND name=@0;", name);
+        var rows = Query(SqlStatement.Positional(
+            "SELECT name FROM sqlite_master WHERE type=@0 AND name=@1;",
+            "table",
+            name));
         return rows.Count > 0;
     }
 
-    public int Execute(string sql, params object[] parameters)
+    public int Execute(SqlStatement stmt)
     {
+        var (sql, parameters) = ToPositional(stmt);
+        var includeSensitiveDetails = IncludeSensitiveDetails();
         if (_backend == Backend.Plugin)
         {
-            var s = FormatSqlWithParameters(sql, parameters);
-            var ok = _pluginDb!.Call("Query", s).AsBool();
-            if (!ok) { Audit("db.exec.fail", "plugin_query_failed", Truncate(sql, 120)); throw new InvalidOperationException("SQL execution failed (plugin)"); }
-            return 0;
+            try
+            {
+                var s = FormatSqlWithParameters(sql, parameters);
+                var ok = _pluginDb!.Call("Query", s).AsBool();
+                if (!ok)
+                    throw new InvalidOperationException("SQL execution failed (plugin)");
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                if (!includeSensitiveDetails)
+                {
+                    Audit("db.sqlite.nonquery_failed", BuildAuditReason(ex), _dbPathVirtual ?? "unknown", caller: nameof(SqliteDataStore));
+                }
+
+                throw DatabaseErrorHandling.CreateOperationException(
+                    operation: "nonquery",
+                    dbPath: _dbPathVirtual ?? "unknown",
+                    sql: includeSensitiveDetails ? Truncate(sql, 120) : null,
+                    ex: ex,
+                    includeSensitiveDetails: includeSensitiveDetails);
+            }
         }
         else
         {
@@ -110,34 +147,64 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             }
             catch (Exception ex)
             {
-                Audit("db.exec.fail", ex.Message, Truncate(sql, 120));
-                throw;
+                if (!includeSensitiveDetails)
+                {
+                    Audit("db.sqlite.nonquery_failed", BuildAuditReason(ex), _dbPathVirtual ?? "unknown", caller: nameof(SqliteDataStore));
+                }
+
+                throw DatabaseErrorHandling.CreateOperationException(
+                    operation: "nonquery",
+                    dbPath: _dbPathVirtual ?? "unknown",
+                    sql: includeSensitiveDetails ? Truncate(sql, 120) : null,
+                    ex: ex,
+                    includeSensitiveDetails: includeSensitiveDetails);
             }
         }
     }
 
-    public System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, object?>> Query(string sql, params object[] parameters)
+    public System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, object?>> Query(SqlStatement stmt)
     {
+        var (sql, parameters) = ToPositional(stmt);
+        var includeSensitiveDetails = IncludeSensitiveDetails();
         if (_backend == Backend.Plugin)
         {
-            var s = FormatSqlWithParameters(sql, parameters);
-            var ok = _pluginDb!.Call("Query", s).AsBool();
-            if (!ok) { Audit("db.query.fail", "plugin_query_failed", Truncate(sql, 120)); throw new InvalidOperationException("SQL query failed (plugin)"); }
-            var resultObj = _pluginDb.Get("QueryResult");
-            var arr = resultObj.As<global::Godot.Collections.Array>();
-            var list = new System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, object?>>();
-            foreach (var item in arr)
+            try
             {
-                var row = item.As<global::Godot.Collections.Dictionary>();
-                var dict = new System.Collections.Generic.Dictionary<string, object?>();
-                foreach (var key in row.Keys)
+                var s = FormatSqlWithParameters(sql, parameters);
+                var ok = _pluginDb!.Call("Query", s).AsBool();
+                if (!ok)
+                    throw new InvalidOperationException("SQL query failed (plugin)");
+
+                var resultObj = _pluginDb.Get("QueryResult");
+                var arr = resultObj.As<global::Godot.Collections.Array>();
+                var list = new System.Collections.Generic.List<System.Collections.Generic.Dictionary<string, object?>>();
+                foreach (var item in arr)
                 {
-                    var k = key.AsStringName();
-                    dict[k] = row[key];
+                    var row = item.As<global::Godot.Collections.Dictionary>();
+                    var dict = new System.Collections.Generic.Dictionary<string, object?>();
+                    foreach (var key in row.Keys)
+                    {
+                        var k = key.AsStringName();
+                        dict[k] = row[key];
+                    }
+                    list.Add(dict);
                 }
-                list.Add(dict);
+                return list;
             }
-            return list;
+            catch (Exception ex)
+            {
+                if (!includeSensitiveDetails)
+                {
+                    Audit("db.sqlite.query_failed", BuildAuditReason(ex), _dbPathVirtual ?? "unknown", caller: nameof(SqliteDataStore));
+                }
+
+                throw DatabaseErrorHandling.CreateOperationException(
+                    operation: "query",
+                    dbPath: _dbPathVirtual ?? "unknown",
+                    sql: includeSensitiveDetails ? Truncate(sql, 120) : null,
+                    ex: ex,
+                    includeSensitiveDetails: includeSensitiveDetails);
+            }
         }
         else
         {
@@ -161,10 +228,47 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             }
             catch (Exception ex)
             {
-                Audit("db.query.fail", ex.Message, Truncate(sql, 120));
-                throw;
+                if (!includeSensitiveDetails)
+                {
+                    Audit("db.sqlite.query_failed", BuildAuditReason(ex), _dbPathVirtual ?? "unknown", caller: nameof(SqliteDataStore));
+                }
+
+                throw DatabaseErrorHandling.CreateOperationException(
+                    operation: "query",
+                    dbPath: _dbPathVirtual ?? "unknown",
+                    sql: includeSensitiveDetails ? Truncate(sql, 120) : null,
+                    ex: ex,
+                    includeSensitiveDetails: includeSensitiveDetails);
             }
         }
+    }
+
+    private static (string Sql, object[] Parameters) ToPositional(SqlStatement stmt)
+    {
+        if (stmt.Parameters.Count == 0)
+            return (stmt.Text, Array.Empty<object>());
+
+        var indexed = new List<(int Index, object? Value)>();
+        foreach (var kv in stmt.Parameters)
+        {
+            var key = kv.Key;
+            if (!key.StartsWith("@", StringComparison.Ordinal))
+                throw new ArgumentException($"Invalid parameter name: {key}", nameof(stmt));
+
+            if (!int.TryParse(key.AsSpan(1), out var idx) || idx < 0)
+                throw new ArgumentException($"Expected positional parameter like '@0', got: {key}", nameof(stmt));
+
+            indexed.Add((idx, kv.Value));
+        }
+
+        indexed.Sort((a, b) => a.Index.CompareTo(b.Index));
+        for (var i = 0; i < indexed.Count; i++)
+        {
+            if (indexed[i].Index != i)
+                throw new ArgumentException("Positional parameters must be contiguous: @0..@N", nameof(stmt));
+        }
+
+        return (stmt.Text, indexed.Select(x => (object)(x.Value ?? DBNull.Value)).ToArray());
     }
 
     public void BeginTransaction()
@@ -293,9 +397,11 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     private static string FormatSqlWithParameters(string sql, object[] parameters)
     {
         if (parameters == null || parameters.Length == 0) return sql;
-        for (int i = 0; i < parameters.Length; i++)
+        // Replace in reverse order to avoid replacing "@1" inside "@10".
+        for (int i = parameters.Length - 1; i >= 0; i--)
         {
             var v = parameters[i];
+            if (v is DBNull) v = null;
             var s = v switch
             {
                 null => "NULL",
@@ -307,6 +413,13 @@ public partial class SqliteDataStore : Node, ISqlDatabase
                 _ => $"'{v.ToString()?.Replace("'", "''")}'"
             };
             sql = sql.Replace($"@{i}", s);
+        }
+        // Ensure no unresolved positional placeholders remain.
+        for (var i = 0; i < sql.Length; i++)
+        {
+            if (sql[i] != '@') continue;
+            if (i + 1 >= sql.Length || !char.IsDigit(sql[i + 1])) continue;
+            throw new ArgumentException("Unresolved positional parameter placeholders remain after formatting.", nameof(sql));
         }
         return sql;
     }
@@ -329,26 +442,74 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         return cmd;
     }
 
-    private static void Audit(string action, string reason, string target)
+    private static bool IncludeSensitiveDetails()
+    {
+        var isSecureMode = System.Environment.GetEnvironmentVariable("GD_SECURE_MODE") == "1";
+        var isCi = !string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("CI"));
+
+#if DEBUG
+        var isDebugBuild = true;
+#else
+        var isDebugBuild = false;
+#endif
+
+        if (!isDebugBuild)
+            return false;
+
+        return !isSecureMode && !isCi;
+    }
+
+    private static string BuildAuditReason(Exception ex)
+    {
+        if (ex is SqliteException sqliteEx)
+        {
+            return $"SqliteException code={sqliteEx.SqliteErrorCode}";
+        }
+
+        return ex.GetType().Name;
+    }
+
+    private static void Audit(string action, string reason, string target, string caller)
     {
         try
         {
             var date = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
             var root = System.Environment.GetEnvironmentVariable("AUDIT_LOG_ROOT");
-            if (string.IsNullOrEmpty(root)) root = System.IO.Path.Combine("logs", "ci", date);
-            System.IO.Directory.CreateDirectory(root);
-            var path = System.IO.Path.Combine(root, "security-audit.jsonl");
-            var caller = System.Environment.UserName;
+            string path;
+            if (!string.IsNullOrWhiteSpace(root))
+            {
+                System.IO.Directory.CreateDirectory(root);
+                path = System.IO.Path.Combine(root, "security-audit.jsonl");
+            }
+            else
+            {
+                var isCi = !string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("CI"));
+                if (isCi)
+                {
+                    var baseDir = ProjectSettings.GlobalizePath("res://");
+                    var rel = System.IO.Path.Combine("logs", "ci", date, "security-audit.jsonl");
+                    path = System.IO.Path.GetFullPath(rel, baseDir);
+                    var dir = System.IO.Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(dir)) System.IO.Directory.CreateDirectory(dir);
+                }
+                else
+                {
+                    var dir = ProjectSettings.GlobalizePath("user://logs/security");
+                    System.IO.Directory.CreateDirectory(dir);
+                    path = System.IO.Path.Combine(dir, "security-audit.jsonl");
+                }
+            }
+
             var obj = new System.Collections.Generic.Dictionary<string, object?>
             {
                 ["ts"] = System.DateTime.UtcNow.ToString("o"),
                 ["action"] = action,
-                ["reason"] = reason,
-                ["target"] = target,
+                ["reason"] = Truncate(reason ?? string.Empty, 500),
+                ["target"] = Truncate(target ?? string.Empty, 1000),
                 ["caller"] = caller
             };
             var json = System.Text.Json.JsonSerializer.Serialize(obj);
-            System.IO.File.AppendAllText(path, json + System.Environment.NewLine);
+            System.IO.File.AppendAllText(path, json + System.Environment.NewLine, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         }
         catch { }
     }
@@ -359,8 +520,3 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         return s.Length <= max ? s : s.Substring(0, max);
     }
 }
-
-
-
-
-

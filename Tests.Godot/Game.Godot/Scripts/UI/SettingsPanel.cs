@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using Game.Core.Ports;
 using Game.Godot.Adapters;
 
 namespace Game.Godot.Scripts.UI;
@@ -106,7 +107,9 @@ public partial class SettingsPanel : Control
         var db = Db();
         if (db == null)
             return;
-        var rows = db.Query("SELECT audio_volume, graphics_quality, language FROM settings WHERE user_id=@0;", UserId);
+        var rows = db.Query(SqlStatement.Positional(
+            "SELECT audio_volume, graphics_quality, language FROM settings WHERE user_id=@0;",
+            UserId));
         if (rows.Count == 0) return;
         var r = rows[0];
         float vol = 0.5f; string gfx = "medium"; string lang = "en";

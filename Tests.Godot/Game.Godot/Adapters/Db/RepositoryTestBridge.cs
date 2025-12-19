@@ -34,7 +34,9 @@ public partial class RepositoryTestBridge : Node
 
     public string? FindUserId(string username)
     {
-        var rows = GetDb().Query("SELECT id FROM users WHERE username=@0 LIMIT 1;", username);
+        var rows = GetDb().Query(SqlStatement.Positional(
+            "SELECT id FROM users WHERE username=@0 LIMIT 1;",
+            username));
         if (rows.Count == 0) return null;
         return rows[0]["id"]?.ToString();
     }

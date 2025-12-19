@@ -15,14 +15,20 @@ public class UserRepository : IUserRepository
     {
         if (string.IsNullOrEmpty(user.Id)) user.Id = Guid.NewGuid().ToString();
         if (user.CreatedAt == 0) user.CreatedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        _db.Execute("INSERT INTO users(id, username, created_at, last_login) VALUES(@0,@1,@2,@3) ON CONFLICT(id) DO UPDATE SET username=@1, last_login=@3;",
-            user.Id, user.Username, user.CreatedAt, user.LastLogin ?? (object)DBNull.Value);
+        _db.Execute(SqlStatement.Positional(
+            "INSERT INTO users(id, username, created_at, last_login) VALUES(@0,@1,@2,@3) ON CONFLICT(id) DO UPDATE SET username=@1, last_login=@3;",
+            user.Id,
+            user.Username,
+            user.CreatedAt,
+            user.LastLogin ?? DBNull.Value));
         return Task.CompletedTask;
     }
 
     public Task<User?> FindByUsernameAsync(string username)
     {
-        var rows = _db.Query("SELECT id, username, created_at, last_login FROM users WHERE username=@0 LIMIT 1;", username);
+        var rows = _db.Query(SqlStatement.Positional(
+            "SELECT id, username, created_at, last_login FROM users WHERE username=@0 LIMIT 1;",
+            username));
         if (rows.Count == 0) return Task.FromResult<User?>(null);
         var r = rows[0];
         var u = new User
@@ -35,5 +41,4 @@ public class UserRepository : IUserRepository
         return Task.FromResult<User?>(u);
     }
 }
-
 

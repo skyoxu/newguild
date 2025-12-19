@@ -9,6 +9,8 @@
   <ItemGroup>
     <!-- Compile C# scripts from Game.Godot directory -->
     <Compile Include="Game.Godot/**/*.cs" />
+    <!-- Compile specific adapter under test from main project -->
+    <Compile Include="..\Game.Godot\Adapters\Db\GodotSQLiteDatabase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Game.Core\Game.Core.csproj" />
@@ -19,4 +21,3 @@
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.7" />
   </ItemGroup>
 </Project>
-
