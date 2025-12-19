@@ -106,6 +106,106 @@ func test_debug_mode_keeps_details_for_query_error_and_does_not_write_audit_log(
 	assert_bool(FileAccess.file_exists(_audit_path_res())).is_false()
 
 
+func test_DebugMode_IncludesSensitiveDetails() -> void:
+	_remove_audit_file()
+
+	var probe = await _load_probe()
+	if probe == null:
+		return
+
+	var sql := "SELECT * FROM NonExistingTable WHERE password = @P0"
+	var result = probe.RunExecuteNonQueryAsyncAndCapture(
+		"user://sanitization_ok.db",
+		sql,
+		false,
+		false,
+		_audit_root_abs()
+	)
+
+	assert_bool(bool(result.get("threw", false))).is_true()
+	assert_bool(bool(result.get("has_inner", false))).is_true()
+
+	var msg := str(result.get("message", ""))
+	assert_str(msg).contains("db=user://sanitization_ok.db")
+	assert_str(msg).contains("sql=")
+	assert_str(msg).contains("SELECT * FROM NonExistingTable")
+	assert_str(msg).contains("@P0")
+
+	assert_bool(FileAccess.file_exists(_audit_path_res())).is_false()
+
+
+func test_ReleaseMode_SanitizesErrorMessages() -> void:
+	_remove_audit_file()
+
+	var probe = await _load_probe()
+	if probe == null:
+		return
+
+	# We cannot switch compilation to Release inside a running Godot test process.
+	# Instead, simulate "no sensitive details" mode using CI=1, which forces sanitization in our policy.
+	var sql := "SELECT * FROM NonExistingTable WHERE password = @P0"
+	var result = probe.RunExecuteNonQueryAsyncAndCapture(
+		"user://sanitization_ok.db",
+		sql,
+		false,
+		true,
+		_audit_root_abs()
+	)
+
+	assert_bool(bool(result.get("threw", false))).is_true()
+	assert_bool(bool(result.get("has_inner", true))).is_false()
+
+	var msg := str(result.get("message", ""))
+	assert_str(msg).is_equal("Database operation failed.")
+	assert_str(msg).does_not_contain("user://")
+	assert_str(msg).does_not_contain("SELECT")
+	assert_str(msg).does_not_contain("C:\\")
+
+	assert_bool(FileAccess.file_exists(_audit_path_res())).is_true()
+	var txt: String = FileAccess.get_file_as_string(_audit_path_res())
+	assert_str(txt).is_not_empty()
+
+	var found := false
+	for raw in txt.split("\n", false):
+		var line := str(raw).strip_edges()
+		if line == "":
+			continue
+		_assert_audit_line_has_required_fields(line)
+		var parsed = JSON.parse_string(line)
+		var action = str(parsed.get("action", ""))
+		if action == "db.sqlite.nonquery_failed":
+			found = true
+			break
+
+	assert_bool(found).is_true()
+
+
+func test_SecureMode_NeverLeaksPaths() -> void:
+	_remove_audit_file()
+
+	var probe = await _load_probe()
+	if probe == null:
+		return
+
+	var result = probe.RunOpenAsyncAndCapture(
+		"user://bad:db.db",
+		true,
+		false,
+		_audit_root_abs()
+	)
+
+	assert_bool(bool(result.get("threw", false))).is_true()
+	assert_bool(bool(result.get("has_inner", true))).is_false()
+
+	var msg := str(result.get("message", ""))
+	assert_str(msg).is_equal("Database operation failed.")
+	assert_str(msg).does_not_contain("user://")
+	assert_str(msg).does_not_contain("res://")
+	assert_str(msg).does_not_contain("C:\\")
+
+	assert_bool(FileAccess.file_exists(_audit_path_res())).is_true()
+
+
 func test_encoded_path_traversal_is_rejected() -> void:
 	var probe = await _load_probe()
 	if probe == null:
