@@ -72,14 +72,11 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         catch (Exception ex)
         {
             var includeSensitiveDetails = IncludeSensitiveDetails();
-            if (!includeSensitiveDetails)
-            {
-                TryWriteAuditLog(
-                    action: "db.sqlite.open_failed",
-                    reason: BuildAuditReason(ex),
-                    target: _dbPathVirtual,
-                    caller: AuditSource);
-            }
+            TryWriteAuditLog(
+                action: "db.sqlite.open_failed",
+                reason: BuildAuditReason(ex),
+                target: _dbPathVirtual,
+                caller: AuditSource);
 
             throw DatabaseErrorHandling.CreateOperationException("open", _dbPathVirtual, null, ex, includeSensitiveDetails);
         }
@@ -101,14 +98,11 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         catch (Exception ex)
         {
             var includeSensitiveDetails = IncludeSensitiveDetails();
-            if (!includeSensitiveDetails)
-            {
-                TryWriteAuditLog(
-                    action: "db.sqlite.close_failed",
-                    reason: BuildAuditReason(ex),
-                    target: _dbPathVirtual,
-                    caller: AuditSource);
-            }
+            TryWriteAuditLog(
+                action: "db.sqlite.close_failed",
+                reason: BuildAuditReason(ex),
+                target: _dbPathVirtual,
+                caller: AuditSource);
 
             throw DatabaseErrorHandling.CreateOperationException("close", _dbPathVirtual, null, ex, includeSensitiveDetails);
         }
@@ -137,14 +131,11 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         catch (Exception ex)
         {
             var includeSensitiveDetails = IncludeSensitiveDetails();
-            if (!includeSensitiveDetails)
-            {
-                TryWriteAuditLog(
-                    action: "db.sqlite.nonquery_failed",
-                    reason: BuildAuditReason(ex),
-                    target: _dbPathVirtual,
-                    caller: AuditSource);
-            }
+            TryWriteAuditLog(
+                action: "db.sqlite.nonquery_failed",
+                reason: BuildAuditReason(ex),
+                target: _dbPathVirtual,
+                caller: AuditSource);
 
             throw DatabaseErrorHandling.CreateOperationException("nonquery", _dbPathVirtual, sql, ex, includeSensitiveDetails);
         }
@@ -176,14 +167,11 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         catch (Exception ex)
         {
             var includeSensitiveDetails = IncludeSensitiveDetails();
-            if (!includeSensitiveDetails)
-            {
-                TryWriteAuditLog(
-                    action: "db.sqlite.scalar_failed",
-                    reason: BuildAuditReason(ex),
-                    target: _dbPathVirtual,
-                    caller: AuditSource);
-            }
+            TryWriteAuditLog(
+                action: "db.sqlite.scalar_failed",
+                reason: BuildAuditReason(ex),
+                target: _dbPathVirtual,
+                caller: AuditSource);
 
             throw DatabaseErrorHandling.CreateOperationException("scalar", _dbPathVirtual, sql, ex, includeSensitiveDetails);
         }
@@ -229,14 +217,11 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         catch (Exception ex)
         {
             var includeSensitiveDetails = IncludeSensitiveDetails();
-            if (!includeSensitiveDetails)
-            {
-                TryWriteAuditLog(
-                    action: "db.sqlite.query_failed",
-                    reason: BuildAuditReason(ex),
-                    target: _dbPathVirtual,
-                    caller: AuditSource);
-            }
+            TryWriteAuditLog(
+                action: "db.sqlite.query_failed",
+                reason: BuildAuditReason(ex),
+                target: _dbPathVirtual,
+                caller: AuditSource);
 
             throw DatabaseErrorHandling.CreateOperationException("query", _dbPathVirtual, sql, ex, includeSensitiveDetails);
         }

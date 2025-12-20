@@ -78,7 +78,7 @@ func test_secure_mode_sanitizes_open_error_and_writes_audit_log() -> void:
 	assert_bool(found).is_true()
 
 
-func test_debug_mode_keeps_details_for_query_error_and_does_not_write_audit_log() -> void:
+func test_debug_mode_keeps_details_for_query_error_and_writes_audit_log() -> void:
 	_remove_audit_file()
 
 	var probe = await _load_probe()
@@ -103,7 +103,23 @@ func test_debug_mode_keeps_details_for_query_error_and_does_not_write_audit_log(
 	assert_str(msg).contains("SELECT * FROM NonExistingTable")
 	assert_str(msg).contains("@P0")
 
-	assert_bool(FileAccess.file_exists(_audit_path_res())).is_false()
+	assert_bool(FileAccess.file_exists(_audit_path_res())).is_true()
+	var txt: String = FileAccess.get_file_as_string(_audit_path_res())
+	assert_str(txt).is_not_empty()
+
+	var found := false
+	for raw in txt.split("\n", false):
+		var line := str(raw).strip_edges()
+		if line == "":
+			continue
+		_assert_audit_line_has_required_fields(line)
+		var parsed = JSON.parse_string(line)
+		var action = str(parsed.get("action", ""))
+		if action == "db.sqlite.nonquery_failed":
+			found = true
+			break
+
+	assert_bool(found).is_true()
 
 
 func test_DebugMode_IncludesSensitiveDetails() -> void:
@@ -131,7 +147,15 @@ func test_DebugMode_IncludesSensitiveDetails() -> void:
 	assert_str(msg).contains("SELECT * FROM NonExistingTable")
 	assert_str(msg).contains("@P0")
 
-	assert_bool(FileAccess.file_exists(_audit_path_res())).is_false()
+	assert_bool(FileAccess.file_exists(_audit_path_res())).is_true()
+	var txt: String = FileAccess.get_file_as_string(_audit_path_res())
+	assert_str(txt).is_not_empty()
+
+	for raw in txt.split("\n", false):
+		var line := str(raw).strip_edges()
+		if line == "":
+			continue
+		_assert_audit_line_has_required_fields(line)
 
 
 func test_ReleaseMode_SanitizesErrorMessages() -> void:
