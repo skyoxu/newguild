@@ -165,6 +165,7 @@ func test_ReleaseMode_SanitizesErrorMessages() -> void:
 	var txt: String = FileAccess.get_file_as_string(_audit_path_res())
 	assert_str(txt).is_not_empty()
 
+	var found_open_ok := false
 	var found := false
 	for raw in txt.split("\n", false):
 		var line := str(raw).strip_edges()
@@ -173,10 +174,13 @@ func test_ReleaseMode_SanitizesErrorMessages() -> void:
 		_assert_audit_line_has_required_fields(line)
 		var parsed = JSON.parse_string(line)
 		var action = str(parsed.get("action", ""))
+		if action == "db.sqlite.open_ok":
+			found_open_ok = true
 		if action == "db.sqlite.nonquery_failed":
 			found = true
 			break
 
+	assert_bool(found_open_ok).is_true()
 	assert_bool(found).is_true()
 
 

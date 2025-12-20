@@ -501,6 +501,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     {
         var cmd = _conn!.CreateCommand();
         cmd.CommandText = sql;
+        ApplyCommandTimeout(cmd);
         if (_tx != null) cmd.Transaction = _tx;
         if (parameters != null)
         {
@@ -513,6 +514,21 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             }
         }
         return cmd;
+    }
+
+    private static void ApplyCommandTimeout(SqliteCommand cmd)
+    {
+        var timeoutEnv = System.Environment.GetEnvironmentVariable("GD_DB_COMMAND_TIMEOUT_SEC");
+        if (!string.IsNullOrWhiteSpace(timeoutEnv) && int.TryParse(timeoutEnv, out var v) && v >= 0)
+        {
+            cmd.CommandTimeout = v;
+            return;
+        }
+
+        // Default: enforce a finite timeout only when sensitive details are disabled (CI/secure).
+        // In local debug we keep dev ergonomics (infinite by default) unless overridden via env var.
+        if (!IncludeSensitiveDetails())
+            cmd.CommandTimeout = 30;
     }
 
     private static bool IncludeSensitiveDetails()

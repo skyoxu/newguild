@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Game.Core.Domain;
 using Game.Core.Ports;
@@ -28,6 +29,10 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
     private readonly string _dbPathVirtual;
     private readonly string _dbPathAbsolute;
     private readonly string _auditLogPath;
+    private long? _openedAtTicks;
+    private int _queryCount;
+    private int _scalarCount;
+    private int _nonQueryCount;
 
     public GodotSQLiteDatabase(SafeResourcePath dbPath)
     {
@@ -51,6 +56,7 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
             sql: null,
             action: () =>
             {
+                var openStart = Stopwatch.GetTimestamp();
                 // Ensure parent directory exists
                 var dir = System.IO.Path.GetDirectoryName(_dbPathAbsolute);
                 if (!string.IsNullOrEmpty(dir) && !System.IO.Directory.Exists(dir))
@@ -67,6 +73,24 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
                 _connection = new SqliteConnection(connectionString);
                 _connection.Open();
                 _isOpen = true;
+                _openedAtTicks = Stopwatch.GetTimestamp();
+                _queryCount = 0;
+                _scalarCount = 0;
+                _nonQueryCount = 0;
+
+                if (ShouldAuditSuccess())
+                {
+                    var elapsedMs = ElapsedMs(openStart);
+                    TryWriteAuditLog(
+                        action: "db.sqlite.open_ok",
+                        reason: "success",
+                        target: _dbPathVirtual,
+                        caller: AuditSource,
+                        extra: new Dictionary<string, object?>
+                        {
+                            ["open_ms"] = elapsedMs,
+                        });
+                }
             });
 
         return Task.CompletedTask;
@@ -82,10 +106,28 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
             sql: null,
             action: () =>
             {
+                var durationMs = _openedAtTicks.HasValue ? ElapsedMs(_openedAtTicks.Value) : (double?)null;
                 _connection.Close();
                 _connection.Dispose();
                 _connection = null;
                 _isOpen = false;
+
+                if (ShouldAuditSuccess())
+                {
+                    var extra = new Dictionary<string, object?>
+                    {
+                        ["duration_ms"] = durationMs,
+                        ["query_count"] = _queryCount,
+                        ["scalar_count"] = _scalarCount,
+                        ["nonquery_count"] = _nonQueryCount,
+                    };
+                    TryWriteAuditLog(
+                        action: "db.sqlite.close_ok",
+                        reason: "success",
+                        target: _dbPathVirtual,
+                        caller: AuditSource,
+                        extra: extra);
+                }
             });
 
         return Task.CompletedTask;
@@ -106,13 +148,16 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
             {
                 using var command = _connection!.CreateCommand();
                 command.CommandText = sql;
+                ApplyCommandLimits(command);
 
                 foreach (var param in parameters)
                 {
                     command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
                 }
 
-                return command.ExecuteNonQuery();
+                var rows = command.ExecuteNonQuery();
+                _nonQueryCount++;
+                return rows;
             });
 
         return Task.FromResult(result);
@@ -133,6 +178,7 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
             {
                 using var command = _connection!.CreateCommand();
                 command.CommandText = sql;
+                ApplyCommandLimits(command);
 
                 if (parameters != null)
                 {
@@ -142,7 +188,9 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
                     }
                 }
 
-                return command.ExecuteScalar();
+                var v = command.ExecuteScalar();
+                _scalarCount++;
+                return v;
             });
 
         return Task.FromResult(result == DBNull.Value ? null : result);
@@ -163,6 +211,7 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
             {
                 using var command = _connection!.CreateCommand();
                 command.CommandText = sql;
+                ApplyCommandLimits(command);
 
                 if (parameters != null)
                 {
@@ -187,6 +236,7 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
                     results.Add(row);
                 }
 
+                _queryCount++;
                 return (IReadOnlyList<Dictionary<string, object>>)results;
             });
 
@@ -221,7 +271,7 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         return ProjectSettings.GlobalizePath(Path.Combine("user://logs/security", AuditLogFile));
     }
 
-    private void TryWriteAuditLog(string action, string reason, string target, string caller)
+    private void TryWriteAuditLog(string action, string reason, string target, string caller, IReadOnlyDictionary<string, object?>? extra = null)
     {
         try
         {
@@ -231,14 +281,23 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
                 Directory.CreateDirectory(directory);
             }
 
-            var entry = new
+            var entry = new Dictionary<string, object?>
             {
-                ts = System.DateTime.UtcNow.ToString("o"),
-                action,
-                reason = Truncate(reason, max: 500),
-                target = Truncate(target, max: 1000),
-                caller,
+                ["ts"] = System.DateTime.UtcNow.ToString("o"),
+                ["action"] = action,
+                ["reason"] = Truncate(reason, max: 500),
+                ["target"] = Truncate(target, max: 1000),
+                ["caller"] = caller,
             };
+            if (extra != null)
+            {
+                foreach (var kv in extra)
+                {
+                    if (kv.Key == "ts" || kv.Key == "action" || kv.Key == "reason" || kv.Key == "target" || kv.Key == "caller")
+                        continue;
+                    entry[kv.Key] = kv.Value;
+                }
+            }
 
             var jsonLine = JsonSerializer.Serialize(entry) + System.Environment.NewLine;
             File.AppendAllText(_auditLogPath, jsonLine, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
@@ -263,6 +322,38 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
     {
         if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
         return value.Length <= max ? value : value.Substring(0, max);
+    }
+
+    private static double ElapsedMs(long startTimestamp)
+    {
+        var elapsed = Stopwatch.GetTimestamp() - startTimestamp;
+        return elapsed * 1000.0 / Stopwatch.Frequency;
+    }
+
+    private static bool ShouldAuditSuccess()
+    {
+#if DEBUG
+        var isDebugBuild = true;
+#else
+        var isDebugBuild = false;
+#endif
+        // Only emit success audit when sensitive details are disabled (CI/secure/release).
+        return !SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild);
+    }
+
+    private static void ApplyCommandLimits(SqliteCommand command)
+    {
+        // Configurable command timeout (seconds). Default: 30s in sanitized mode; unlimited in debug.
+        // Note: Microsoft.Data.Sqlite uses CommandTimeout for ADO.NET timeouts.
+        var timeoutEnv = System.Environment.GetEnvironmentVariable("GD_DB_COMMAND_TIMEOUT_SEC");
+        if (!string.IsNullOrWhiteSpace(timeoutEnv) && int.TryParse(timeoutEnv, out var v))
+        {
+            if (v >= 0) command.CommandTimeout = v;
+            return;
+        }
+
+        if (ShouldAuditSuccess())
+            command.CommandTimeout = 30;
     }
 
     private void ExecuteWithAudit(string operation, string auditAction, string? sql, Action action)
