@@ -134,6 +134,7 @@ def main() -> int:
         "py",
         "-3",
         "scripts/python/run_gdunit.py",
+        "--prewarm",
         "--godot-bin",
         args.godot_bin,
         "--project",

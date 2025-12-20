@@ -157,10 +157,14 @@ def main():
     try:
         perf_dir = os.path.join('logs', 'perf', date, 'db')
         ci_dir2 = os.path.join('logs', 'ci', date)
-        for name in ('run.json', 'db-perf-summary.json'):
+        for name in ('run.json', 'db-perf-summary.json', 'dotnet-build.log', 'gdunit.log'):
             src = os.path.join(perf_dir, name)
             if os.path.isfile(src):
                 shutil.copy2(src, os.path.join(ci_dir2, f'perf-db-{name}'))
+        # Copy the most useful GdUnit console log if present.
+        gdunit_console = os.path.join(perf_dir, 'gdunit-reports', 'gdunit-console.txt')
+        if os.path.isfile(gdunit_console):
+            shutil.copy2(gdunit_console, os.path.join(ci_dir2, 'perf-db-gdunit-console.txt'))
     except Exception:
         pass
     summary['perf_db'] = {
@@ -180,7 +184,14 @@ def main():
     with io.open(os.path.join(ci_dir, 'ci-pipeline-summary.json'), 'w', encoding='utf-8') as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
 
-    print(f"CI_PIPELINE status={summary['status']} dotnet={summary['dotnet'].get('status')} selfcheck={summary['selfcheck'].get('status')} encoding_bad={summary['encoding'].get('bad', 'n/a')}")
+    print(
+        f"CI_PIPELINE status={summary['status']} "
+        f"dotnet={summary['dotnet'].get('status')} "
+        f"selfcheck={summary['selfcheck'].get('status')} "
+        f"sql_scan={summary['sql_scan'].get('status')} "
+        f"perf_db={summary['perf_db'].get('status')} "
+        f"encoding_bad={summary['encoding'].get('bad', 'n/a')}"
+    )
     return 0 if not hard_fail else 1
 
 

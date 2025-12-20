@@ -1,14 +1,14 @@
 {
   "taskmaster_id": 5,
-  "title": "Python °æ headless smoke ·â×°Óë strict Ä£Ê½¿ª¹Ø",
-  "description": "¸ù¾İ Phase-12-Headless-Smoke-Backlog.md B1/B2£¬ÔÚµ±Ç° Godot + C# Ä£°åÖĞÊµÏÖ Python °æ headless smoke ·â×°½Å±¾£¨Ìæ´ú/²¹³ä PowerShell °æ±¾£©£¬²¢Ôö¼Ó strict Ä£Ê½£ºÑÏ¸ñÒÀÀµ [TEMPLATE_SMOKE_READY]/[DB] opened marker ¾ö¶¨Í¨¹ıÓë·ñ¡£",
+  "title": "Python ç‰ˆ headless smoke å°è£…ä¸ strict æ¨¡å¼å¼€å…³",
+  "description": "æ ¹æ® Phase-12-Headless-Smoke-Backlog.md B1/B2ï¼Œåœ¨å½“å‰ Godot + C# æ¨¡æ¿ä¸­å®ç° Python ç‰ˆ headless smoke å°è£…è„šæœ¬ï¼ˆæ›¿ä»£/è¡¥å…… PowerShell ç‰ˆæœ¬ï¼‰ï¼Œå¹¶å¢åŠ  strict æ¨¡å¼ï¼šä¸¥æ ¼ä¾èµ– [TEMPLATE_SMOKE_READY]/[DB] opened marker å†³å®šé€šè¿‡ä¸å¦ã€‚",
   "status": "pending",
   "priority": "high",
   "dependencies": [
     1
   ],
-  "testStrategy": "±¾µØÔËĞĞ£ºÔÚ Windows »·¾³ÏÂÍ¨¹ı dev_cli.py µ÷ÓÃ Python °æ smoke£¬ÑéÖ¤ÈÕÖ¾ÓëÍË³öÂë¡£\nCI ÑİÁ·£ºÔÚ·ÇÊÜ±£»¤·ÖÖ§ÉÏ´ò¿ª strict Ä£Ê½£¬¹Û²ì smoke Ê§°ÜÊ±µÄÃÅ½ûĞĞÎªÓëÈÕÖ¾Êä³ö¡£",
-  "details": "Story: PH12-BACKLOG-B1-B2\nADR Refs: ADR-0005; ADR-0011; ADR-0018; ADR-0020\nChapters: CH01; CH06; CH07; CH10\nTest Refs: logs/ci/<date>/smoke/headless.log; logs/ci/<date>/smoke/selfcheck-summary.json\nAcceptance: ĞÂÔö scripts/python/smoke_headless.py£¨»òµÈ¼Û½Å±¾£©£¬Ö§³Ö --godot-bin/--scene/--timeout-sec/--project-path ²ÎÊı£¬²¢ÔÚ Windows ÉÏ¿ÉÖ±½ÓÔËĞĞ¡£; ·Ç strict Ä£Ê½ÏÂ£¬½Å±¾ĞĞÎªÓëÏÖÓĞ PowerShell °æ±¾µÈ¼Û£¬Êä³öĞ´Èë logs/ci/<date>/smoke/**£¬²¢±£Áô¿íËÉÅĞ¶¨¡£; strict Ä£Ê½ÏÂ£¬½öµ±ÈÕÖ¾°üº¬ [TEMPLATE_SMOKE_READY] »ò [DB] opened Ê±·µ»Ø 0£¬·ñÔò·µ»Ø·ÇÁã²¢ÔÚÈÕÖ¾ÖĞ±ê¼ÇÎª strict-failed¡£; ci-windows.yml »ò windows-quality-gate.yml ÖÁÉÙÌá¹©Ò»Ìõ×¢ÊÍÊ¾Àı£¬Õ¹Ê¾ÈçºÎÔÚÊÜ±£»¤·ÖÖ§ÆôÓÃ strict Ä£Ê½¡£\nTest Strategy: ±¾µØÔËĞĞ£ºÔÚ Windows »·¾³ÏÂÍ¨¹ı dev_cli.py µ÷ÓÃ Python °æ smoke£¬ÑéÖ¤ÈÕÖ¾ÓëÍË³öÂë¡£; CI ÑİÁ·£ºÔÚ·ÇÊÜ±£»¤·ÖÖ§ÉÏ´ò¿ª strict Ä£Ê½£¬¹Û²ì smoke Ê§°ÜÊ±µÄÃÅ½ûĞĞÎªÓëÈÕÖ¾Êä³ö¡£\nLabels: ci; smoke; godot; python; headless\nOwner: architecture\nLayer: ci",
+  "testStrategy": "æœ¬åœ°è¿è¡Œï¼šåœ¨ Windows ç¯å¢ƒä¸‹é€šè¿‡ dev_cli.py è°ƒç”¨ Python ç‰ˆ smokeï¼ŒéªŒè¯æ—¥å¿—ä¸é€€å‡ºç ã€‚\nCI æ¼”ç»ƒï¼šåœ¨éå—ä¿æŠ¤åˆ†æ”¯ä¸Šæ‰“å¼€ strict æ¨¡å¼ï¼Œè§‚å¯Ÿ smoke å¤±è´¥æ—¶çš„é—¨ç¦è¡Œä¸ºä¸æ—¥å¿—è¾“å‡ºã€‚",
+  "details": "Story: PH12-BACKLOG-B1-B2\nADR Refs: ADR-0005; ADR-0011; ADR-0018; ADR-0020\nChapters: CH01; CH06; CH07; CH10\nTest Refs: logs/ci/<date>/smoke/headless.log; logs/ci/<date>/smoke/selfcheck-summary.json\nAcceptance: æ–°å¢ scripts/python/smoke_headless.pyï¼ˆæˆ–ç­‰ä»·è„šæœ¬ï¼‰ï¼Œæ”¯æŒ --godot-bin/--scene/--timeout-sec/--project-path å‚æ•°ï¼Œå¹¶åœ¨ Windows ä¸Šå¯ç›´æ¥è¿è¡Œã€‚; é strict æ¨¡å¼ä¸‹ï¼Œè„šæœ¬è¡Œä¸ºä¸ç°æœ‰ PowerShell ç‰ˆæœ¬ç­‰ä»·ï¼Œè¾“å‡ºå†™å…¥ logs/ci/<date>/smoke/**ï¼Œå¹¶ä¿ç•™å®½æ¾åˆ¤å®šã€‚; strict æ¨¡å¼ä¸‹ï¼Œä»…å½“æ—¥å¿—åŒ…å« [TEMPLATE_SMOKE_READY] æˆ– [DB] opened æ—¶è¿”å› 0ï¼Œå¦åˆ™è¿”å›éé›¶å¹¶åœ¨æ—¥å¿—ä¸­æ ‡è®°ä¸º strict-failedã€‚; ci-windows.yml æˆ– windows-quality-gate.yml è‡³å°‘æä¾›ä¸€æ¡æ³¨é‡Šç¤ºä¾‹ï¼Œå±•ç¤ºå¦‚ä½•åœ¨å—ä¿æŠ¤åˆ†æ”¯å¯ç”¨ strict æ¨¡å¼ã€‚\nTest Strategy: æœ¬åœ°è¿è¡Œï¼šåœ¨ Windows ç¯å¢ƒä¸‹é€šè¿‡ dev_cli.py è°ƒç”¨ Python ç‰ˆ smokeï¼ŒéªŒè¯æ—¥å¿—ä¸é€€å‡ºç ã€‚; CI æ¼”ç»ƒï¼šåœ¨éå—ä¿æŠ¤åˆ†æ”¯ä¸Šæ‰“å¼€ strict æ¨¡å¼ï¼Œè§‚å¯Ÿ smoke å¤±è´¥æ—¶çš„é—¨ç¦è¡Œä¸ºä¸æ—¥å¿—è¾“å‡ºã€‚\nLabels: ci; smoke; godot; python; headless\nOwner: architecture\nLayer: ci",
   "subtasks": [],
   "_source": {
     "tasks_json": ".taskmaster/tasks/tasks.json",
@@ -36,10 +36,10 @@
     "logs/ci/<date>/smoke/selfcheck-summary.json"
   ],
   "acceptance": [
-    "ĞÂÔö scripts/python/smoke_headless.py£¨»òµÈ¼Û½Å±¾£©£¬Ö§³Ö --godot-bin/--scene/--timeout-sec/--project-path ²ÎÊı£¬²¢ÔÚ Windows ÉÏ¿ÉÖ±½ÓÔËĞĞ¡£",
-    "·Ç strict Ä£Ê½ÏÂ£¬½Å±¾ĞĞÎªÓëÏÖÓĞ PowerShell °æ±¾µÈ¼Û£¬Êä³öĞ´Èë logs/ci/<date>/smoke/**£¬²¢±£Áô¿íËÉÅĞ¶¨¡£",
-    "strict Ä£Ê½ÏÂ£¬½öµ±ÈÕÖ¾°üº¬ [TEMPLATE_SMOKE_READY] »ò [DB] opened Ê±·µ»Ø 0£¬·ñÔò·µ»Ø·ÇÁã²¢ÔÚÈÕÖ¾ÖĞ±ê¼ÇÎª strict-failed¡£",
-    "ci-windows.yml »ò windows-quality-gate.yml ÖÁÉÙÌá¹©Ò»Ìõ×¢ÊÍÊ¾Àı£¬Õ¹Ê¾ÈçºÎÔÚÊÜ±£»¤·ÖÖ§ÆôÓÃ strict Ä£Ê½¡£"
+    "æ–°å¢ scripts/python/smoke_headless.pyï¼ˆæˆ–ç­‰ä»·è„šæœ¬ï¼‰ï¼Œæ”¯æŒ --godot-bin/--scene/--timeout-sec/--project-path å‚æ•°ï¼Œå¹¶åœ¨ Windows ä¸Šå¯ç›´æ¥è¿è¡Œã€‚",
+    "é strict æ¨¡å¼ä¸‹ï¼Œè„šæœ¬è¡Œä¸ºä¸ç°æœ‰ PowerShell ç‰ˆæœ¬ç­‰ä»·ï¼Œè¾“å‡ºå†™å…¥ logs/ci/<date>/smoke/**ï¼Œå¹¶ä¿ç•™å®½æ¾åˆ¤å®šã€‚",
+    "strict æ¨¡å¼ä¸‹ï¼Œä»…å½“æ—¥å¿—åŒ…å« [TEMPLATE_SMOKE_READY] æˆ– [DB] opened æ—¶è¿”å› 0ï¼Œå¦åˆ™è¿”å›éé›¶å¹¶åœ¨æ—¥å¿—ä¸­æ ‡è®°ä¸º strict-failedã€‚",
+    "ci-windows.yml æˆ– windows-quality-gate.yml è‡³å°‘æä¾›ä¸€æ¡æ³¨é‡Šç¤ºä¾‹ï¼Œå±•ç¤ºå¦‚ä½•åœ¨å—ä¿æŠ¤åˆ†æ”¯å¯ç”¨ strict æ¨¡å¼ã€‚"
   ],
   "labels": [
     "ci",
@@ -51,8 +51,8 @@
   "owner": "architecture",
   "layer": "ci",
   "test_strategy": [
-    "±¾µØÔËĞĞ£ºÔÚ Windows »·¾³ÏÂÍ¨¹ı dev_cli.py µ÷ÓÃ Python °æ smoke£¬ÑéÖ¤ÈÕÖ¾ÓëÍË³öÂë¡£",
-    "CI ÑİÁ·£ºÔÚ·ÇÊÜ±£»¤·ÖÖ§ÉÏ´ò¿ª strict Ä£Ê½£¬¹Û²ì smoke Ê§°ÜÊ±µÄÃÅ½ûĞĞÎªÓëÈÕÖ¾Êä³ö¡£"
+    "æœ¬åœ°è¿è¡Œï¼šåœ¨ Windows ç¯å¢ƒä¸‹é€šè¿‡ dev_cli.py è°ƒç”¨ Python ç‰ˆ smokeï¼ŒéªŒè¯æ—¥å¿—ä¸é€€å‡ºç ã€‚",
+    "CI æ¼”ç»ƒï¼šåœ¨éå—ä¿æŠ¤åˆ†æ”¯ä¸Šæ‰“å¼€ strict æ¨¡å¼ï¼Œè§‚å¯Ÿ smoke å¤±è´¥æ—¶çš„é—¨ç¦è¡Œä¸ºä¸æ—¥å¿—è¾“å‡ºã€‚"
   ],
   "depends_on": [
     "NG-0001"
