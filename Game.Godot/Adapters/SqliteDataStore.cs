@@ -16,6 +16,10 @@ namespace Game.Godot.Adapters;
 // - Otherwise, fallback to Microsoft.Data.Sqlite managed provider.
 public partial class SqliteDataStore : Node, ISqlDatabase
 {
+    private const string AuditWrittenDataKey = "SqliteDataStore.AuditWritten";
+    private const string AllowPluginBackendEnv = "GD_DB_ALLOW_PLUGIN_BACKEND";
+    private const string MaxDbBytesEnv = "GD_DB_MAX_BYTES";
+    private const long DefaultMaxDbBytes = 100L * 1024L * 1024L; // 100 MB
     private enum Backend { Plugin, Managed }
 
     private SecurityFileAdapter? _securityFileAdapter;
@@ -68,23 +72,87 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             throw new NotSupportedException($"Database path not allowed: {dbPath}");
         }
 
+        var extension = System.IO.Path.GetExtension(validatedPath.Value);
+        var isAllowedDbExtension =
+            extension.Equals(".db", StringComparison.OrdinalIgnoreCase) ||
+            extension.Equals(".sqlite", StringComparison.OrdinalIgnoreCase) ||
+            extension.Equals(".sqlite3", StringComparison.OrdinalIgnoreCase);
+        if (!isAllowedDbExtension)
+        {
+            var reason = string.IsNullOrWhiteSpace(extension) ? "(none)" : extension;
+            var audited = false;
+            if (!IncludeSensitiveDetails())
+            {
+                Audit("db.sqlite.invalid_extension", reason, validatedPath.Value, caller: nameof(SqliteDataStore));
+                audited = true;
+            }
+
+            var ex = new NotSupportedException($"Database extension not allowed: {reason}");
+            if (audited) ex.Data[AuditWrittenDataKey] = true;
+            throw ex;
+        }
+
         _dbPathVirtual = validatedPath.Value;
         _dbPath = Globalize(_dbPathVirtual);
         EnsureParentDir(_dbPath!);
-        var isNew = !System.IO.File.Exists(_dbPath!);
+        var exists = System.IO.File.Exists(_dbPath!);
+        if (exists)
+        {
+            var maxBytes = GetMaxDbBytes();
+            var sizeBytes = new System.IO.FileInfo(_dbPath!).Length;
+            if (sizeBytes > maxBytes)
+            {
+                var reason = $"size_bytes={sizeBytes} max_bytes={maxBytes}";
+                var audited = false;
+                if (!IncludeSensitiveDetails())
+                {
+                    Audit("db.sqlite.size_limit_exceeded", reason, _dbPathVirtual, caller: nameof(SqliteDataStore));
+                    audited = true;
+                }
 
-        var prefer = (System.Environment.GetEnvironmentVariable("GODOT_DB_BACKEND") ?? string.Empty).ToLowerInvariant();
-        var forcePlugin = prefer == "plugin";
-        var forceManaged = prefer == "managed";
+                var ex = new System.Security.SecurityException($"Database file too large: {reason}");
+                if (audited) ex.Data[AuditWrittenDataKey] = true;
+                throw ex;
+            }
+        }
 
-        if (!forceManaged && TryOpenPlugin(_dbPath!))
+        var isNew = !exists;
+
+        var prefer = (System.Environment.GetEnvironmentVariable("GODOT_DB_BACKEND") ?? string.Empty).Trim().ToLowerInvariant();
+        var wantsPlugin = prefer == "plugin";
+        var wantsManaged = string.IsNullOrWhiteSpace(prefer) || prefer == "managed";
+
+        if (!wantsManaged && !wantsPlugin)
+            wantsManaged = true;
+
+        var allowPlugin = wantsPlugin && IsPluginBackendAllowed();
+        if (wantsPlugin && !allowPlugin)
+        {
+            var allowFlag = (System.Environment.GetEnvironmentVariable(AllowPluginBackendEnv) ?? string.Empty).Trim();
+            var isSecureMode = System.Environment.GetEnvironmentVariable("GD_SECURE_MODE") == "1";
+            var isCi = !string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("CI"));
+            var reason = $"blocked_by_policy {AllowPluginBackendEnv}={allowFlag} gd_secure_mode={(isSecureMode ? "1" : "0")} ci={(isCi ? "1" : "0")}";
+
+            var audited = false;
+            if (!IncludeSensitiveDetails())
+            {
+                Audit("db.sqlite.plugin_backend_denied", reason, _dbPathVirtual, caller: nameof(SqliteDataStore));
+                audited = true;
+            }
+
+            var ex = new NotSupportedException("Plugin backend is restricted to development/experimental environments.");
+            if (audited) ex.Data[AuditWrittenDataKey] = true;
+            throw ex;
+        }
+
+        if (allowPlugin && TryOpenPlugin(_dbPath!))
         {
             _backend = Backend.Plugin;
             if (isNew) TryInitSchema();
             return;
         }
 
-        if (forcePlugin)
+        if (wantsPlugin)
             throw new NotSupportedException("godot-sqlite plugin requested via GODOT_DB_BACKEND=plugin but not available.");
 
         // Managed path
@@ -134,7 +202,9 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             LastError = includeSensitiveDetails ? ex.Message : "Database open failed.";
             if (!includeSensitiveDetails)
             {
-                Audit("db.sqlite.open_failed", BuildAuditReason(ex), dbPath, caller: nameof(SqliteDataStore));
+                var alreadyAudited = ex.Data.Contains(AuditWrittenDataKey) && ex.Data[AuditWrittenDataKey] as bool? == true;
+                if (!alreadyAudited)
+                    Audit("db.sqlite.open_failed", BuildAuditReason(ex), dbPath, caller: nameof(SqliteDataStore));
             }
             return false;
         }
@@ -651,6 +721,30 @@ public partial class SqliteDataStore : Node, ISqlDatabase
 #endif
 
         return SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild);
+    }
+
+    private static long GetMaxDbBytes()
+    {
+        var raw = System.Environment.GetEnvironmentVariable(MaxDbBytesEnv);
+        if (string.IsNullOrWhiteSpace(raw))
+            return DefaultMaxDbBytes;
+
+        if (long.TryParse(raw, out var parsed) && parsed > 0)
+            return parsed;
+
+        return DefaultMaxDbBytes;
+    }
+
+    private static bool IsPluginBackendAllowed()
+    {
+        var allow = (System.Environment.GetEnvironmentVariable(AllowPluginBackendEnv) ?? string.Empty).Trim() == "1";
+        if (!allow)
+            return false;
+
+        // Restrict plugin backend to development/experimental environment only.
+        // - Requires DEBUG build
+        // - Blocked in GD_SECURE_MODE=1 and in CI
+        return IncludeSensitiveDetails();
     }
 
     private static string BuildAuditReason(Exception ex)

@@ -59,7 +59,11 @@ supersedes: []
 - SQLite：
   - 承担**领域数据**与**复杂状态**：用户档、存档槽、库存、统计等；
   - 通过 `SqliteDataStore` 适配器封装 C# 访问；
-  - 统一使用 managed provider（`Microsoft.Data.Sqlite`）作为默认实现，godot-sqlite 仅作为可选插件。
+  - 统一使用 managed provider（`Microsoft.Data.Sqlite`）作为默认实现，godot-sqlite 仅作为可选插件；
+  - **后端选择策略（环境变量）**：
+    - 默认：`managed`（不设置 `GODOT_DB_BACKEND` 时即为 managed）；
+    - 插件后端：仅限开发/实验环境，需同时满足 `GODOT_DB_BACKEND=plugin` 与 `GD_DB_ALLOW_PLUGIN_BACKEND=1`；
+    - 约束：在 `CI` 或 `GD_SECURE_MODE=1` 下，即使显式允许也会拒绝插件后端（防止生产误用不稳定插件）。
 
 2. **路径与安全约束（Godot 变体）**
 

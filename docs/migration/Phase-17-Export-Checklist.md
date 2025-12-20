@@ -34,7 +34,7 @@
 
 ## 环境变量 / Env
 - `GODOT_BIN`：指向 Godot .NET（mono）可执行文件。
-- `GODOT_DB_BACKEND=plugin|managed`：可控 DB 后端（默认插件优先）。
+- `GODOT_DB_BACKEND=plugin|managed`：可控 DB 后端（默认 managed；插件后端仅限开发/实验环境，需 `GD_DB_ALLOW_PLUGIN_BACKEND=1`，且 CI/`GD_SECURE_MODE=1` 下会被拒绝）。
 - `TEMPLATE_DEMO=1`：启用示例 UI 测试/场景（默认关闭）。
 
 ## 日志路径 / Logs

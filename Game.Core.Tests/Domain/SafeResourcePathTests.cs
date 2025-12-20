@@ -64,6 +64,21 @@ public class SafeResourcePathTests
         path.Should().BeNull();
     }
 
+    [Theory]
+    [InlineData("user://%2e%2e/evil.db")]          // ../ via encoded dots
+    [InlineData("user://..%2fevil.db")]           // ../ via encoded slash
+    [InlineData("user://%2e%2e%2fevil.db")]       // ../ via encoded dots + slash
+    [InlineData("user://..%5cevil.db")]           // ..\\ via encoded backslash
+    [InlineData("user://%252e%252e%252fevil.db")] // ../ via double-encoding
+    public void FromString_WithUrlEncodedTraversal_ReturnsNull(string input)
+    {
+        // Act
+        var path = SafeResourcePath.FromString(input);
+
+        // Assert
+        path.Should().BeNull();
+    }
+
     [Fact]
     public void FromString_WithAbsolutePath_ReturnsNull()
     {
