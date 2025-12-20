@@ -236,7 +236,7 @@ def main() -> int:
     ap.add_argument(
         "--claude-agents-root",
         default=None,
-        help="Claude agents root (default: %CLAUDE_AGENTS_ROOT% or %USERPROFILE%\\.claude\\agents). Used to load lst97 agent prompts.",
+        help="Claude agents root (default: env CLAUDE_AGENTS_ROOT or $env:USERPROFILE\\.claude\\agents). Used to load lst97 agent prompts.",
     )
     args = ap.parse_args()
 

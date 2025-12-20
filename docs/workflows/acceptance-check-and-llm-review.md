@@ -203,8 +203,6 @@ py -3 scripts/sc/llm_review.py --task-id 10 --base main --strict
 - 新增：`scripts/sc/acceptance_check.py`
 - 更新：`scripts/sc/README.md`（补充用法与产物说明）
 - 更新：`.github/workflows/windows-quality-gate.yml`（在 Quality Gate 中运行 acceptance-check）
-  - CI 默认只跑硬门禁子集：`--only adr,links,overlay,contracts,arch,build`
-  - 原因：避免在 CI 中重复跑 `tests/perf`（这些由 `scripts/python/ci_pipeline.py` 与 GdUnit4 步骤继续负责）
 
 后续为了补齐“LLM 口头审查”等价体验，又新增/更新：
 
@@ -212,3 +210,4 @@ py -3 scripts/sc/llm_review.py --task-id 10 --base main --strict
 - 更新：`scripts/sc/README.md`（补充 llm_review 与 Claude agents 读取口径）
 
 > 说明：以上文件均属于“工具链/工作流层”，不应与游戏业务逻辑耦合。
+

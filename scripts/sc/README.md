@@ -82,9 +82,6 @@ py -3 scripts/sc/test.py --type all --godot-bin "$env:GODOT_BIN"
 # 验收门禁（等价 /acceptance-check）
 py -3 scripts/sc/acceptance_check.py --task-id 10 --godot-bin "$env:GODOT_BIN"
 
-# CI（Windows Quality Gate）默认只跑硬门禁子集，避免重复跑 tests/perf：
-py -3 scripts/sc/acceptance_check.py --only adr,links,overlay,contracts,arch,build
-
 # 可选：LLM 口头审查（本地，软门禁；不建议作为 CI 硬门）
 py -3 scripts/sc/llm_review.py --task-id 10 --base main
 

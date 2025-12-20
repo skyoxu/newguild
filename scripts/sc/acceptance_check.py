@@ -155,13 +155,22 @@ def step_task_links_validate(out_dir: Path) -> StepResult:
     )
 
 
-def step_overlay_validate(out_dir: Path) -> StepResult:
-    return run_and_capture(
+def step_overlay_validate(out_dir: Path, triplet: TaskmasterTriplet) -> StepResult:
+    primary = run_and_capture(
         out_dir,
         name="validate-task-overlays",
         cmd=["py", "-3", "scripts/python/validate_task_overlays.py"],
         timeout_sec=300,
     )
+    overlay = triplet.overlay()
+    test_refs = None
+    if overlay:
+        test_refs = run_and_capture(out_dir, name="validate-test-refs", cmd=["py", "-3", "scripts/python/validate_overlay_test_refs.py", "--overlay", overlay, "--out", str(out_dir / "validate-test-refs.json")], timeout_sec=60)
+
+    ok = primary.status == "ok" and (test_refs is None or test_refs.status == "ok")
+    details = {"primary": primary.__dict__, "test_refs": test_refs.__dict__ if test_refs else None, "overlay": overlay}
+    write_json(out_dir / "overlay-validate.json", details)
+    return StepResult(name="validate-task-overlays", status="ok" if ok else "fail", rc=0 if ok else 1, cmd=primary.cmd, log=primary.log, details=details)
 
 
 def step_contracts_validate(out_dir: Path) -> StepResult:
@@ -174,26 +183,7 @@ def step_contracts_validate(out_dir: Path) -> StepResult:
 
 
 def step_architecture_boundary(out_dir: Path) -> StepResult:
-    root = repo_root()
-    violations: list[str] = []
-    core_dir = root / "Game.Core"
-    if not core_dir.exists():
-        return StepResult(name="architecture-boundary", status="skipped", details={"reason": "Game.Core not found"})
-
-    for p in core_dir.rglob("*.cs"):
-        if any(seg in {"bin", "obj"} for seg in p.parts):
-            continue
-        text = p.read_text(encoding="utf-8", errors="ignore")
-        if "using Godot" in text or "Godot." in text:
-            violations.append(str(p.relative_to(root)).replace("\\", "/"))
-
-    details = {"violations": violations}
-    write_json(out_dir / "architecture-boundary.json", details)
-    return StepResult(
-        name="architecture-boundary",
-        status="ok" if not violations else "fail",
-        details=details,
-    )
+    return run_and_capture(out_dir, name="architecture-boundary", cmd=["py", "-3", "scripts/python/check_architecture_boundary.py", "--out", str(out_dir / "architecture-boundary.json")], timeout_sec=60)
 
 
 def step_build_warnaserror(out_dir: Path) -> StepResult:
@@ -209,7 +199,8 @@ def step_security_soft(out_dir: Path) -> StepResult:
     # Soft checks: do not block, but record output.
     steps = []
     steps.append(run_and_capture(out_dir, "check-sentry-secrets", ["py", "-3", "scripts/python/check_sentry_secrets.py"], 60))
-    steps.append(run_and_capture(out_dir, "check-gameloop-contracts", ["py", "-3", "scripts/python/check_gameloop_contracts.py"], 60))
+    steps.append(run_and_capture(out_dir, "check-sanguo-gameloop-contracts", ["py", "-3", "scripts/python/check_sanguo_gameloop_contracts.py"], 60))
+    steps.append(run_and_capture(out_dir, "security-soft-scan", ["py", "-3", "scripts/python/security_soft_scan.py", "--out", str(out_dir / "security-soft-scan.json")], 120))
     # Optional: encoding scan (soft)
     steps.append(run_and_capture(out_dir, "check-encoding-since-today", ["py", "-3", "scripts/python/check_encoding.py", "--since-today"], 300))
 
@@ -330,7 +321,7 @@ def main() -> int:
 
     # 3) Overlay schema (hard)
     if enabled("overlay"):
-        steps.append(step_overlay_validate(out_dir))
+        steps.append(step_overlay_validate(out_dir, triplet))
 
     # 4) Contracts <-> overlay refs (hard)
     if enabled("contracts"):
