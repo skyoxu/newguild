@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Game.Core.Domain;
 using Game.Core.Ports;
 
 namespace Game.Godot.Adapters.Db;
@@ -206,7 +207,8 @@ public partial class DbPerfProbe : Node
 
     private static DbHolder OpenDb(string dbPath)
     {
-        var db = new GodotSQLiteDatabase(dbPath);
+        var safe = SafeResourcePath.FromString(dbPath) ?? throw new NotSupportedException("Invalid database path (ADR-0019)");
+        var db = new GodotSQLiteDatabase(safe);
         db.OpenAsync().Wait();
         return new DbHolder(db);
     }

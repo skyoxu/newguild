@@ -29,18 +29,15 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
     private readonly string _dbPathAbsolute;
     private readonly string _auditLogPath;
 
-    public GodotSQLiteDatabase(string dbPath = "user://game.db")
+    public GodotSQLiteDatabase(SafeResourcePath dbPath)
     {
-        // Security: enforce SafeResourcePath for user:// only (ADR-0019)
-        if (string.IsNullOrWhiteSpace(dbPath))
-            throw new ArgumentException("Database path cannot be empty", nameof(dbPath));
-
-        var safePath = SafeResourcePath.FromString(dbPath);
-        if (safePath == null || safePath.Type != PathType.ReadWrite)
+        if (dbPath is null)
+            throw new ArgumentNullException(nameof(dbPath));
+        if (dbPath.Type != PathType.ReadWrite)
             throw new NotSupportedException("Only user:// paths are allowed for database files (ADR-0019)");
 
-        _dbPathVirtual = dbPath;
-        _dbPathAbsolute = ProjectSettings.GlobalizePath(dbPath);
+        _dbPathVirtual = dbPath.Value;
+        _dbPathAbsolute = ProjectSettings.GlobalizePath(dbPath.Value);
         _auditLogPath = ResolveAuditLogPath();
     }
 

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using Game.Core.Domain;
 using Game.Core.Ports;
 using Environment = System.Environment;
 
@@ -18,7 +19,8 @@ public partial class GodotSQLiteDatabaseErrorProbe : Node
 
         try
         {
-            var db = new GodotSQLiteDatabase(dbPath);
+            var safe = SafeResourcePath.FromString(dbPath) ?? throw new NotSupportedException("Invalid database path (ADR-0019)");
+            var db = new GodotSQLiteDatabase(safe);
             db.OpenAsync();
             return Result(threw: false, message: string.Empty, hasInner: false);
         }
@@ -40,7 +42,8 @@ public partial class GodotSQLiteDatabaseErrorProbe : Node
         GodotSQLiteDatabase? db = null;
         try
         {
-            db = new GodotSQLiteDatabase(dbPath);
+            var safe = SafeResourcePath.FromString(dbPath) ?? throw new NotSupportedException("Invalid database path (ADR-0019)");
+            db = new GodotSQLiteDatabase(safe);
             db.OpenAsync();
             var stmt = SqlStatement.WithParameters(
                 sql,
