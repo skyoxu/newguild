@@ -8,40 +8,42 @@ namespace Game.Core.Tests.Services;
 
 public class SensitiveDetailsPolicyTests
 {
-    [Fact]
-    public void IncludeSensitiveDetails_WhenNotDebugBuild_ReturnsFalse()
-    {
-        SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild: false, _ => null).Should().BeFalse();
-    }
-
-    [Fact]
-    public void IncludeSensitiveDetails_WhenDebugBuildAndNoEnvFlags_ReturnsTrue()
-    {
-        SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild: true, _ => null).Should().BeTrue();
-    }
-
-    [Fact]
-    public void IncludeSensitiveDetails_WhenSecureModeEnabled_ReturnsFalse()
-    {
-        var env = new Dictionary<string, string?> { ["GD_SECURE_MODE"] = "1" };
-        SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild: true, k => env.GetValueOrDefault(k)).Should().BeFalse();
-    }
+    private static Func<string, string?> EnvFrom(Dictionary<string, string?> map)
+        => key => map.TryGetValue(key, out var v) ? v : null;
 
     [Theory]
-    [InlineData("1")]
-    [InlineData("true")]
-    [InlineData("YES")]
-    public void IncludeSensitiveDetails_WhenCiEnvVarIsSet_ReturnsFalse(string ciValue)
+    [InlineData(false, null, null, false)]
+    [InlineData(false, "0", "1", false)]
+    [InlineData(true, null, null, true)]
+    [InlineData(true, "1", null, false)]
+    [InlineData(true, "0", "1", false)]
+    [InlineData(true, "1", "1", false)]
+    [InlineData(true, "0", " ", true)]
+    [InlineData(true, null, " ", true)]
+    public void IncludeSensitiveDetails_RespectsEnvironment(
+        bool isDebugBuild,
+        string? gdSecureMode,
+        string? ci,
+        bool expected)
     {
-        var env = new Dictionary<string, string?> { ["CI"] = ciValue };
-        SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild: true, k => env.GetValueOrDefault(k)).Should().BeFalse();
+        var env = new Dictionary<string, string?>
+        {
+            ["GD_SECURE_MODE"] = gdSecureMode,
+            ["CI"] = ci,
+        };
+
+        var actual = SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild, getEnv: EnvFrom(env));
+        actual.Should().Be(expected);
     }
 
     [Fact]
-    public void IncludeSensitiveDetails_WhenCiEnvVarIsWhitespace_ReturnsTrue()
+    public void IncludeSensitiveDetails_WhenGetEnvNotProvided_ShouldMatchSystemEnvironment()
     {
-        var env = new Dictionary<string, string?> { ["CI"] = "   " };
-        SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild: true, k => env.GetValueOrDefault(k)).Should().BeTrue();
+        var expected =
+            System.Environment.GetEnvironmentVariable("GD_SECURE_MODE") != "1"
+            && string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("CI"));
+
+        var actual = SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild: true);
+        actual.Should().Be(expected);
     }
 }
-
