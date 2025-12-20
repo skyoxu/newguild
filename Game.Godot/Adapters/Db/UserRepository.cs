@@ -20,7 +20,7 @@ public class UserRepository : IUserRepository
             user.Id,
             user.Username,
             user.CreatedAt,
-            user.LastLogin ?? DBNull.Value));
+            user.LastLogin.HasValue ? (object)user.LastLogin.Value : DBNull.Value));
         return Task.CompletedTask;
     }
 
@@ -41,4 +41,3 @@ public class UserRepository : IUserRepository
         return Task.FromResult<User?>(u);
     }
 }
-

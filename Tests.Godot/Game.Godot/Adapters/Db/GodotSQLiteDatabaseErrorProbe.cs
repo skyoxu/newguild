@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using Game.Core.Ports;
+using Environment = System.Environment;
 
 namespace Game.Godot.Adapters.Db;
 

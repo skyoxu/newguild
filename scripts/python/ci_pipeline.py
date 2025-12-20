@@ -17,6 +17,7 @@ import datetime as dt
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 
@@ -64,6 +65,7 @@ def main():
     summary = {
         'dotnet': {},
         'selfcheck': {},
+        'perf_db': {},
         'encoding': {},
         'status': 'ok'
     }
@@ -128,7 +130,34 @@ def main():
     if not sc_ok:
         hard_fail = True
 
-    # 3) Encoding scan (soft gate)
+    # 3) DB perf smoke (hard gate: prevents "missing perf data" regressions)
+    rc_perf, out_perf = run_cmd(
+        ['py', '-3', 'scripts/python/perf_smoke_db.py', '--godot-bin', args.godot_bin],
+        cwd=root,
+        timeout=900_000,
+    )
+    with io.open(os.path.join('logs', 'ci', date, 'perf-db-stdout.txt'), 'w', encoding='utf-8') as f:
+        f.write(out_perf)
+    perf_sum = read_json(os.path.join('logs', 'perf', date, 'db', 'run.json')) or {}
+    # Copy perf artifacts into logs/ci for easier artifact upload/debugging.
+    try:
+        perf_dir = os.path.join('logs', 'perf', date, 'db')
+        ci_dir2 = os.path.join('logs', 'ci', date)
+        for name in ('run.json', 'db-perf-summary.json'):
+            src = os.path.join(perf_dir, name)
+            if os.path.isfile(src):
+                shutil.copy2(src, os.path.join(ci_dir2, f'perf-db-{name}'))
+    except Exception:
+        pass
+    summary['perf_db'] = {
+        'rc': rc_perf,
+        'status': perf_sum.get('status') or ('ok' if rc_perf == 0 else 'fail'),
+        'out': perf_sum.get('summary_json') or os.path.join('logs', 'perf', date, 'db'),
+    }
+    if rc_perf != 0:
+        hard_fail = True
+
+    # 4) Encoding scan (soft gate)
     rc3, out3 = run_cmd(['py', '-3', 'scripts/python/check_encoding.py', '--since-today'], cwd=root)
     enc_sum = read_json(os.path.join('logs', 'ci', date, 'encoding', 'session-summary.json')) or {}
     summary['encoding'] = enc_sum

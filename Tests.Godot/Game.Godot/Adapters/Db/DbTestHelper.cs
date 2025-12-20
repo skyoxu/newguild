@@ -85,19 +85,19 @@ public partial class DbTestHelper : Node
     public void ExecSql(string sql)
     {
         var db = GetDb();
-        db.Execute(sql);
+        db.Execute(SqlStatement.NoParameters(sql));
     }
 
     public void ExecSql2(string sql, object p0, object p1)
     {
         var db = GetDb();
-        db.Execute(sql, p0, p1);
+        db.Execute(SqlStatement.Positional(sql, p0, p1));
     }
 
     public int QueryScalarInt(string sql)
     {
         var db = GetDb();
-        var rows = db.Query(sql);
+        var rows = db.Query(SqlStatement.NoParameters(sql));
         if (rows.Count == 0) return 0;
         var row = rows[0];
         foreach (var kv in row)
@@ -113,14 +113,14 @@ public partial class DbTestHelper : Node
     {
         var db = GetNodeOrNull<SqliteDataStore>("/root/" + nodeName);
         if (db == null) throw new InvalidOperationException($"SqliteDataStore not found at /root/{nodeName}");
-        db.Execute(sql);
+        db.Execute(SqlStatement.NoParameters(sql));
     }
 
     public void ExecOnNode2(string nodeName, string sql, object p0, object p1)
     {
         var db = GetNodeOrNull<SqliteDataStore>("/root/" + nodeName);
         if (db == null) throw new InvalidOperationException($"SqliteDataStore not found at /root/{nodeName}");
-        db.Execute(sql, p0, p1);
+        db.Execute(SqlStatement.Positional(sql, p0, p1));
     }
 
     public int QueryOnNode2(string nodeName, string sql, global::Godot.Variant p0)
@@ -129,7 +129,7 @@ public partial class DbTestHelper : Node
         if (db == null) throw new InvalidOperationException($"SqliteDataStore not found at /root/{nodeName}");
 
         var key = (string)p0;
-        var rows = db.Query(sql, key);
+        var rows = db.Query(SqlStatement.Positional(sql, key));
         if (rows.Count == 0) return 0;
         var row = rows[0];
         foreach (var kv in row)

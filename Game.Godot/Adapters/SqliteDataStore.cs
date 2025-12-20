@@ -431,15 +431,33 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             var script = f.GetAsText();
             foreach (var stmt in SplitSql(script))
             {
-                var s = stmt.Trim();
+                var s = StripSqlComments(stmt).Trim();
                 if (string.IsNullOrWhiteSpace(s)) continue;
-                Execute(s);
+                Execute(SqlStatement.NoParameters(s));
             }
         }
         catch (Exception ex)
         {
             GD.PushError($"Schema init failed: {ex.Message}");
         }
+    }
+
+    private static string StripSqlComments(string sql)
+    {
+        if (string.IsNullOrWhiteSpace(sql)) return string.Empty;
+        var lines = sql.Split('\n');
+        var sb = new StringBuilder();
+        foreach (var raw in lines)
+        {
+            var line = raw.Replace("\r", string.Empty);
+            var trimmed = line.TrimStart();
+            if (trimmed.StartsWith("--", StringComparison.Ordinal)) continue;
+            var idx = line.IndexOf("--", StringComparison.Ordinal);
+            if (idx >= 0) line = line.Substring(0, idx);
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            sb.AppendLine(line);
+        }
+        return sb.ToString();
     }
 
     private static IEnumerable<string> SplitSql(string sql)
