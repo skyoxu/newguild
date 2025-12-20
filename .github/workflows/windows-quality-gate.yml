@@ -62,6 +62,11 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Acceptance check (hard gate)
+        shell: pwsh
+        run: |
+          py -3 scripts/sc/acceptance_check.py --only adr,links,overlay,contracts,arch,build
+
       - name: Ensure GdUnit4 plugin
         shell: pwsh
         run: |
@@ -129,12 +134,6 @@ jobs:
         shell: pwsh
         run: |
           py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debug --godot-bin "$env:GODOT_BIN" --build-solutions
-
-      - name: Contracts vs overlays validation (soft gate)
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          py -3 scripts/python/validate_contracts.py
 
       - name: Upload CI logs (always)
         if: always()
