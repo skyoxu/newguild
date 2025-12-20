@@ -12,6 +12,7 @@ jobs:
     runs-on: windows-latest
     env:
       GODOT_VERSION: '4.5.1'
+      GD_DB_COMMAND_TIMEOUT_SEC: '30'
       PYTHONIOENCODING: 'utf-8'
       PYTHONUTF8: '1'
     steps:

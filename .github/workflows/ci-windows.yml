@@ -12,6 +12,7 @@ jobs:
     env:
       GODOT_VERSION: '4.5.1'
       EXPORT_SIZE_MAX_MB: '150'
+      GD_DB_COMMAND_TIMEOUT_SEC: '30'
       PYTHONIOENCODING: 'utf-8'
       PYTHONUTF8: '1'
     steps:
@@ -223,4 +224,3 @@ jobs:
           #
           # Current configuration: loose mode (non-blocking)
           py -3 scripts/python/smoke_headless.py --godot-bin "$env:GODOT_BIN" --project "." --scene "res://Game.Godot/Scenes/Main.tscn" --timeout-sec 5 --mode loose
-

@@ -9,6 +9,7 @@ jobs:
     env:
       GODOT_VERSION: '4.5.1'
       EXPORT_SIZE_MAX_MB: '150'
+      GD_DB_COMMAND_TIMEOUT_SEC: '30'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -140,5 +141,4 @@ jobs:
           path: |
             build/Game.exe
             logs/ci/**
-
 
