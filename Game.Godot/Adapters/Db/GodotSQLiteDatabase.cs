@@ -273,12 +273,16 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         }
         catch (Exception ex)
         {
-            TryWriteAuditLog(
-                action: auditAction,
-                reason: BuildAuditReason(ex),
-                target: _dbPathVirtual,
-                caller: AuditSource);
-            throw DatabaseErrorHandling.CreateOperationException(operation, _dbPathVirtual, sql, ex, IncludeSensitiveDetails());
+            var includeSensitiveDetails = IncludeSensitiveDetails();
+            if (!includeSensitiveDetails)
+            {
+                TryWriteAuditLog(
+                    action: auditAction,
+                    reason: BuildAuditReason(ex),
+                    target: _dbPathVirtual,
+                    caller: AuditSource);
+            }
+            throw DatabaseErrorHandling.CreateOperationException(operation, _dbPathVirtual, sql, ex, includeSensitiveDetails);
         }
     }
 
@@ -290,12 +294,16 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         }
         catch (Exception ex)
         {
-            TryWriteAuditLog(
-                action: auditAction,
-                reason: BuildAuditReason(ex),
-                target: _dbPathVirtual,
-                caller: AuditSource);
-            throw DatabaseErrorHandling.CreateOperationException(operation, _dbPathVirtual, sql, ex, IncludeSensitiveDetails());
+            var includeSensitiveDetails = IncludeSensitiveDetails();
+            if (!includeSensitiveDetails)
+            {
+                TryWriteAuditLog(
+                    action: auditAction,
+                    reason: BuildAuditReason(ex),
+                    target: _dbPathVirtual,
+                    caller: AuditSource);
+            }
+            throw DatabaseErrorHandling.CreateOperationException(operation, _dbPathVirtual, sql, ex, includeSensitiveDetails);
         }
     }
 
