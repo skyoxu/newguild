@@ -18,7 +18,7 @@ namespace Game.Godot.Adapters.Db;
 /// Uses Microsoft.Data.Sqlite for Windows-only implementation (ADR-0011).
 /// Follows ADR-0018 (adapter layer for Godot integration).
 /// </summary>
-public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
+public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
 {
     private const string AuditLogFile = "security-audit.jsonl";
     private const string AuditSource = "GodotSQLiteDatabase";
@@ -320,13 +320,21 @@ public partial class GodotSQLiteDatabase : Node, ISQLiteDatabase
             throw new InvalidOperationException("Database is not open. Call OpenAsync() first.");
     }
 
-    public override void _ExitTree()
+    public void Dispose()
     {
-        // Cleanup on node removal
-        if (_isOpen)
+        try
         {
-            _ = CloseAsync();
+            _connection?.Close();
+            _connection?.Dispose();
         }
-        base._ExitTree();
+        catch
+        {
+            // Best-effort: Dispose must never throw.
+        }
+        finally
+        {
+            _connection = null;
+            _isOpen = false;
+        }
     }
 }
