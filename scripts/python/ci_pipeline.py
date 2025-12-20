@@ -66,6 +66,7 @@ def main():
         'dotnet': {},
         'selfcheck': {},
         'perf_db': {},
+        'sql_scan': {},
         'encoding': {},
         'status': 'ok'
     }
@@ -130,7 +131,20 @@ def main():
     if not sc_ok:
         hard_fail = True
 
-    # 3) DB perf smoke (hard gate: prevents "missing perf data" regressions)
+    # 3) SQL static scan (hard gate)
+    rc_sql, out_sql = run_cmd(['py', '-3', 'scripts/python/scan_sql_misuse.py', '--fail-on-findings'], cwd=root)
+    with io.open(os.path.join('logs', 'ci', date, 'sql-scan-stdout.txt'), 'w', encoding='utf-8') as f:
+        f.write(out_sql)
+    sql_report = read_json(os.path.join('logs', 'ci', date, 'sql-scan', 'report.json')) or {}
+    summary['sql_scan'] = {
+        'rc': rc_sql,
+        'status': sql_report.get('status') or ('ok' if rc_sql == 0 else 'fail'),
+        'findings': sql_report.get('findings_count'),
+    }
+    if rc_sql != 0:
+        hard_fail = True
+
+    # 4) DB perf smoke (hard gate: prevents "missing perf data" regressions)
     rc_perf, out_perf = run_cmd(
         ['py', '-3', 'scripts/python/perf_smoke_db.py', '--godot-bin', args.godot_bin],
         cwd=root,
@@ -157,7 +171,7 @@ def main():
     if rc_perf != 0:
         hard_fail = True
 
-    # 4) Encoding scan (soft gate)
+    # 5) Encoding scan (soft gate)
     rc3, out3 = run_cmd(['py', '-3', 'scripts/python/check_encoding.py', '--since-today'], cwd=root)
     enc_sum = read_json(os.path.join('logs', 'ci', date, 'encoding', 'session-summary.json')) or {}
     summary['encoding'] = enc_sum

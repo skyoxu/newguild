@@ -44,7 +44,7 @@ public partial class DbTestHelper : Node
         var db = GetDb();
         try
         {
-            var rows = db.Query(SqlStatement.NoParameters("SELECT version FROM schema_version WHERE id=1;"));
+            var rows = db.Query(SqlStatement.Positional("SELECT version FROM schema_version WHERE id=@0;", 1));
             if (rows.Count == 0) return -1;
             var v = rows[0]["version"];
             if (v == null) return -1;
@@ -69,7 +69,7 @@ public partial class DbTestHelper : Node
         db.Execute(SqlStatement.NoParameters("INSERT OR IGNORE INTO schema_version(id,version) VALUES(1,1);"));
         try
         {
-            var rows = db.Query(SqlStatement.NoParameters("SELECT version FROM schema_version WHERE id=1;"));
+            var rows = db.Query(SqlStatement.Positional("SELECT version FROM schema_version WHERE id=@0;", 1));
             var cur = 0;
             if (rows.Count > 0 && rows[0].ContainsKey("version") && rows[0]["version"] != null)
                 cur = Convert.ToInt32(rows[0]["version"]);
