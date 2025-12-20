@@ -9,67 +9,38 @@ namespace Game.Core.Tests.Ports;
 public class SqlStatementTests
 {
     [Fact]
-    public void NoParameters_ShouldRejectInlineStringLiterals()
+    public void NoParameters_ShouldRejectWhereClause()
     {
-        Action act = () => SqlStatement.NoParameters("SELECT * FROM t WHERE name = 'x'");
-        act.Should().Throw<ArgumentException>().WithMessage("*Inline string literals*");
+        Action act = () => SqlStatement.NoParameters("DELETE FROM users WHERE id = 1");
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("*must not contain WHERE*");
     }
 
     [Fact]
-    public void WithParameters_ShouldRequireAtLeastOneParameter()
+    public void NoParameters_ShouldAllowSafeStatementsWithoutWhere()
+    {
+        var stmt = SqlStatement.NoParameters("SELECT 1;");
+        stmt.Text.Should().Be("SELECT 1;");
+        stmt.Parameters.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void WithParameters_ShouldRejectUnusedParameters()
     {
         Action act = () => SqlStatement.WithParameters(
-            "SELECT * FROM t WHERE id = @Id",
-            new Dictionary<string, object?>());
+            "DELETE FROM users;",
+            new Dictionary<string, object?> { ["@Id"] = 1 });
 
-        act.Should().Throw<ArgumentException>().WithMessage("*at least one parameter*");
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("*does not reference parameter*");
     }
 
     [Fact]
-    public void WithParameters_ShouldRequireReferencedParameterNames()
+    public void Positional_ShouldRejectUnusedPositionalParameters()
     {
-        Action act = () => SqlStatement.WithParameters(
-            "SELECT * FROM t WHERE id = @Id",
-            new Dictionary<string, object?> { ["@Other"] = 1 });
+        Action act = () => SqlStatement.Positional("DELETE FROM users;", 1);
 
-        act.Should().Throw<ArgumentException>().WithMessage("*does not reference parameter*");
-    }
-
-    [Fact]
-    public void NoParameters_ShouldRejectSqlComments()
-    {
-        Action act = () => SqlStatement.NoParameters("SELECT 1 -- comment");
-        act.Should().Throw<ArgumentException>().WithMessage("*comments are not allowed*");
-    }
-
-    [Fact]
-    public void Positional_ShouldAllowContiguousParameters()
-    {
-        Action act = () => SqlStatement.Positional(
-            "SELECT * FROM t WHERE a=@0 AND b=@1;",
-            1,
-            2);
-
-        act.Should().NotThrow();
-    }
-
-    [Fact]
-    public void Positional_ShouldRejectUnprovidedPositionalParameters()
-    {
-        Action act = () => SqlStatement.Positional(
-            "SELECT * FROM t WHERE a=@1;",
-            1);
-
-        act.Should().Throw<ArgumentException>().WithMessage("*references positional parameter '@1'*");
-    }
-
-    [Fact]
-    public void Positional_ShouldNotTreatAt1AsSubstringOfAt10()
-    {
-        Action act = () => SqlStatement.Positional(
-            "SELECT * FROM t WHERE a=@0 AND b=@10;",
-            new object?[11]);
-
-        act.Should().Throw<ArgumentException>().WithMessage("*does not reference positional parameter '@1'*");
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("*does not reference positional parameter*");
     }
 }

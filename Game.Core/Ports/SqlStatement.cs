@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 namespace Game.Core.Ports;
 
 public sealed record SqlStatement
@@ -23,6 +22,7 @@ public sealed record SqlStatement
         var trimmed = sql.Trim();
         EnsureNoCommentsOrMultipleStatements(trimmed);
         EnsureNoStringLiterals(trimmed);
+        EnsureNoWhereClause(trimmed);
 
         return new SqlStatement(trimmed, EmptyParameters.Instance);
     }
@@ -129,6 +129,48 @@ public sealed record SqlStatement
         if (sql.Contains('\"'))
             throw new ArgumentException("Inline quoted identifiers are not allowed; use unquoted identifiers.", nameof(sql));
     }
+
+    private static void EnsureNoWhereClause(string sql)
+    {
+        // Defense-in-depth: unparameterized statements must not filter on dynamic values.
+        // This blocks common SQL injection misuses like: "DELETE ... WHERE id = {userId}"
+        if (ContainsWord(sql, "where"))
+            throw new ArgumentException("Unparameterized SQL must not contain WHERE; use parameters instead.", nameof(sql));
+    }
+
+    private static bool ContainsWord(string text, string word)
+    {
+        if (text.Length < word.Length) return false;
+
+        for (var i = 0; i <= text.Length - word.Length; i++)
+        {
+            if (!MatchesWordAt(text, i, word))
+                continue;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool MatchesWordAt(string text, int index, string word)
+    {
+        for (var j = 0; j < word.Length; j++)
+        {
+            var a = char.ToLowerInvariant(text[index + j]);
+            var b = char.ToLowerInvariant(word[j]);
+            if (a != b) return false;
+        }
+
+        var before = index - 1;
+        if (before >= 0 && IsWordChar(text[before])) return false;
+        var after = index + word.Length;
+        if (after < text.Length && IsWordChar(text[after])) return false;
+
+        return true;
+    }
+
+    private static bool IsWordChar(char c)
+        => char.IsLetterOrDigit(c) || c == '_';
 
     private sealed class EmptyParameters : IReadOnlyDictionary<string, object?>
     {
