@@ -11,6 +11,7 @@ using Game.Core.Ports;
 using Game.Core.Services;
 using Godot;
 using Microsoft.Data.Sqlite;
+using System.Security.Principal;
 
 namespace Game.Godot.Adapters.Db;
 
@@ -77,6 +78,8 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
                 _queryCount = 0;
                 _scalarCount = 0;
                 _nonQueryCount = 0;
+
+                TryHardenDbAclBestEffort();
 
                 if (ShouldAuditSuccess())
                 {
@@ -354,6 +357,138 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
 
         if (ShouldAuditSuccess())
             command.CommandTimeout = 30;
+    }
+
+    private void TryHardenDbAclBestEffort()
+    {
+        // Optional hardening (Windows only): tighten ACL on the DB file itself.
+        // Default OFF to avoid surprising local dev behavior; enable explicitly via env var.
+        var harden = System.Environment.GetEnvironmentVariable("GD_DB_HARDEN_ACL") == "1";
+        if (!harden) return;
+        if (!OperatingSystem.IsWindows()) return;
+        // Only harden in sanitized mode (CI/secure/release) to avoid dev ergonomics surprises.
+        if (!ShouldAuditSuccess()) return;
+
+        var files = new List<string> { _dbPathAbsolute };
+        // SQLite may create sidecar files (WAL/SHM) depending on journal mode; harden if present.
+        files.Add(_dbPathAbsolute + "-wal");
+        files.Add(_dbPathAbsolute + "-shm");
+
+        var hardened = 0;
+        foreach (var abs in files)
+        {
+            try
+            {
+                if (!File.Exists(abs))
+                    continue;
+
+                if (!TryHardenWithIcacls(abs, out var failureReason))
+                {
+                    TryWriteAuditLog(
+                        action: "db.sqlite.acl_harden_failed",
+                        reason: failureReason,
+                        target: _dbPathVirtual,
+                        caller: AuditSource);
+                    continue;
+                }
+
+                hardened++;
+            }
+            catch (Exception ex)
+            {
+                // Do not block DB operations if hardening fails; just audit.
+                TryWriteAuditLog(
+                    action: "db.sqlite.acl_harden_failed",
+                    reason: BuildAuditReason(ex),
+                    target: _dbPathVirtual,
+                    caller: AuditSource);
+            }
+        }
+
+        if (hardened > 0)
+        {
+            TryWriteAuditLog(
+                action: "db.sqlite.acl_harden_ok",
+                reason: "success",
+                target: _dbPathVirtual,
+                caller: AuditSource,
+                extra: new Dictionary<string, object?>
+                {
+                    ["files_hardened"] = hardened,
+                });
+        }
+    }
+
+    private static bool TryHardenWithIcacls(string absoluteFilePath, out string failureReason)
+    {
+        failureReason = "unknown";
+
+        try
+        {
+            if (!System.IO.Path.IsPathFullyQualified(absoluteFilePath))
+            {
+                failureReason = "not_absolute_path";
+                return false;
+            }
+
+            var userSid = WindowsIdentity.GetCurrent().User?.Value;
+            if (string.IsNullOrWhiteSpace(userSid))
+            {
+                failureReason = "no_current_user_sid";
+                return false;
+            }
+
+            var icaclsExe = System.IO.Path.Combine(System.Environment.SystemDirectory, "icacls.exe");
+            if (!System.IO.File.Exists(icaclsExe))
+            {
+                failureReason = "icacls_not_found";
+                return false;
+            }
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = icaclsExe,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            // Use SID-based identities to avoid localized group-name issues.
+            psi.ArgumentList.Add(absoluteFilePath);
+            psi.ArgumentList.Add("/inheritance:r");
+            psi.ArgumentList.Add("/grant:r");
+            psi.ArgumentList.Add($"*{userSid}:(F)");
+            psi.ArgumentList.Add("/grant:r");
+            psi.ArgumentList.Add("*S-1-5-18:(F)"); // LocalSystem
+            psi.ArgumentList.Add("/grant:r");
+            psi.ArgumentList.Add("*S-1-5-32-544:(F)"); // Builtin Administrators
+
+            using var proc = Process.Start(psi);
+            if (proc == null)
+            {
+                failureReason = "process_start_failed";
+                return false;
+            }
+
+            if (!proc.WaitForExit(5000))
+            {
+                try { proc.Kill(entireProcessTree: true); } catch { /* best-effort */ }
+                failureReason = "timeout";
+                return false;
+            }
+
+            if (proc.ExitCode != 0)
+            {
+                failureReason = $"icacls_exit_code={proc.ExitCode}";
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            failureReason = ex.GetType().Name;
+            return false;
+        }
     }
 
     private void ExecuteWithAudit(string operation, string auditAction, string? sql, Action action)

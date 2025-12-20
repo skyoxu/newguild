@@ -8,6 +8,7 @@ using Game.Core.Ports;
 using Game.Core.Services;
 using Godot;
 using Microsoft.Data.Sqlite;
+using System.Security.Principal;
 
 namespace Game.Godot.Adapters;
 
@@ -52,6 +53,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         _conn = new SqliteConnection(cs);
         _conn.Open();
         _backend = Backend.Managed;
+        TryHardenDbAclBestEffort();
         // Enable FK + configurable journal mode (default WAL; override via GD_DB_JOURNAL=DELETE|WAL|TRUNCATE|MEMORY|PERSIST)
         using var cmd = _conn.CreateCommand();
         var journal = (System.Environment.GetEnvironmentVariable("GD_DB_JOURNAL") ?? "WAL").ToUpperInvariant();
@@ -472,6 +474,115 @@ public partial class SqliteDataStore : Node, ISqlDatabase
 
         if (!IncludeSensitiveDetails())
             cmd.CommandTimeout = 30;
+    }
+
+    private void TryHardenDbAclBestEffort()
+    {
+        var harden = System.Environment.GetEnvironmentVariable("GD_DB_HARDEN_ACL") == "1";
+        if (!harden) return;
+        if (!OperatingSystem.IsWindows()) return;
+        if (IncludeSensitiveDetails()) return;
+        if (string.IsNullOrWhiteSpace(_dbPath)) return;
+
+        var files = new List<string> { _dbPath! };
+        files.Add(_dbPath! + "-wal");
+        files.Add(_dbPath! + "-shm");
+
+        var hardened = 0;
+        foreach (var abs in files)
+        {
+            try
+            {
+                if (!System.IO.File.Exists(abs))
+                    continue;
+
+                if (!TryHardenWithIcacls(abs, out var failureReason))
+                {
+                    Audit("db.sqlite.acl_harden_failed", failureReason, _dbPathVirtual ?? "unknown", caller: nameof(SqliteDataStore));
+                    continue;
+                }
+
+                hardened++;
+            }
+            catch (Exception ex)
+            {
+                Audit("db.sqlite.acl_harden_failed", BuildAuditReason(ex), _dbPathVirtual ?? "unknown", caller: nameof(SqliteDataStore));
+            }
+        }
+
+        if (hardened > 0)
+            Audit("db.sqlite.acl_harden_ok", "success", _dbPathVirtual ?? "unknown", caller: nameof(SqliteDataStore));
+    }
+
+    private static bool TryHardenWithIcacls(string absoluteFilePath, out string failureReason)
+    {
+        failureReason = "unknown";
+
+        try
+        {
+            if (!System.IO.Path.IsPathFullyQualified(absoluteFilePath))
+            {
+                failureReason = "not_absolute_path";
+                return false;
+            }
+
+            var userSid = WindowsIdentity.GetCurrent().User?.Value;
+            if (string.IsNullOrWhiteSpace(userSid))
+            {
+                failureReason = "no_current_user_sid";
+                return false;
+            }
+
+            var icaclsExe = System.IO.Path.Combine(System.Environment.SystemDirectory, "icacls.exe");
+            if (!System.IO.File.Exists(icaclsExe))
+            {
+                failureReason = "icacls_not_found";
+                return false;
+            }
+
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = icaclsExe,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            psi.ArgumentList.Add(absoluteFilePath);
+            psi.ArgumentList.Add("/inheritance:r");
+            psi.ArgumentList.Add("/grant:r");
+            psi.ArgumentList.Add($"*{userSid}:(F)");
+            psi.ArgumentList.Add("/grant:r");
+            psi.ArgumentList.Add("*S-1-5-18:(F)"); // LocalSystem
+            psi.ArgumentList.Add("/grant:r");
+            psi.ArgumentList.Add("*S-1-5-32-544:(F)"); // Builtin Administrators
+
+            using var proc = System.Diagnostics.Process.Start(psi);
+            if (proc == null)
+            {
+                failureReason = "process_start_failed";
+                return false;
+            }
+
+            if (!proc.WaitForExit(5000))
+            {
+                try { proc.Kill(entireProcessTree: true); } catch { /* best-effort */ }
+                failureReason = "timeout";
+                return false;
+            }
+
+            if (proc.ExitCode != 0)
+            {
+                failureReason = $"icacls_exit_code={proc.ExitCode}";
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            failureReason = ex.GetType().Name;
+            return false;
+        }
     }
 
     private static bool IncludeSensitiveDetails()
