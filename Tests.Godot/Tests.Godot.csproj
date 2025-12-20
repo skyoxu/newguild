@@ -1,6 +1,6 @@
 <Project Sdk="Godot.NET.Sdk/4.5.1">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -9,6 +9,8 @@
   <ItemGroup>
     <!-- Compile C# scripts from Game.Godot directory -->
     <Compile Include="Game.Godot/**/*.cs" />
+    <!-- Compile specific adapter under test from main project -->
+    <Compile Include="..\Game.Godot\Adapters\Db\GodotSQLiteDatabase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Game.Core\Game.Core.csproj" />
@@ -19,4 +21,3 @@
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.7" />
   </ItemGroup>
 </Project>
-

@@ -8,6 +8,7 @@ jobs:
     runs-on: windows-latest
     env:
       GODOT_VERSION: '4.5.1'
+      GD_DB_COMMAND_TIMEOUT_SEC: '30'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -143,6 +144,5 @@ jobs:
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         run: |
           py -3 scripts/python/check_sentry_secrets.py
-
 
 

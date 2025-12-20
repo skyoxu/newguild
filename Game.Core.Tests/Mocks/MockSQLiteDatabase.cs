@@ -28,11 +28,12 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         return Task.CompletedTask;
     }
 
-    public Task<int> ExecuteNonQueryAsync(string sql, Dictionary<string, object>? parameters = null)
+    public Task<int> ExecuteNonQueryAsync(SqlStatement stmt)
     {
         EnsureOpen();
 
-        sql = sql.Trim();
+        var sql = stmt.Text;
+        var parameters = stmt.Parameters as IDictionary<string, object?>;
 
         if (sql.StartsWith("CREATE TABLE IF NOT EXISTS", StringComparison.OrdinalIgnoreCase))
         {
@@ -62,10 +63,12 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         return Task.FromResult(0);
     }
 
-    public Task<object?> ExecuteScalarAsync(string sql, Dictionary<string, object>? parameters = null)
+    public Task<object?> ExecuteScalarAsync(SqlStatement stmt)
     {
         EnsureOpen();
 
+        var sql = stmt.Text;
+        var parameters = stmt.Parameters as IDictionary<string, object?>;
         var rows = ExecuteQuery(sql, parameters);
         if (rows.Count == 0 || rows[0].Count == 0)
             return Task.FromResult<object?>(null);
@@ -73,10 +76,12 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         return Task.FromResult<object?>(rows[0].Values.First());
     }
 
-    public Task<IReadOnlyList<Dictionary<string, object>>> QueryAsync(string sql, Dictionary<string, object>? parameters = null)
+    public Task<IReadOnlyList<Dictionary<string, object>>> QueryAsync(SqlStatement stmt)
     {
         EnsureOpen();
 
+        var sql = stmt.Text;
+        var parameters = stmt.Parameters as IDictionary<string, object?>;
         var rows = ExecuteQuery(sql, parameters);
         return Task.FromResult<IReadOnlyList<Dictionary<string, object>>>(rows);
     }
@@ -95,7 +100,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         return index >= 0 && index + 1 < parts.Length ? parts[index + 1] : parts[2];
     }
 
-    private int ExecuteInsert(string sql, Dictionary<string, object>? parameters)
+    private int ExecuteInsert(string sql, IDictionary<string, object?>? parameters)
     {
         // Extract table name: "INSERT INTO TableName (...) VALUES (...)"
         var tableName = sql.Substring(sql.IndexOf("INTO") + 4).Split('(')[0].Trim();
@@ -109,7 +114,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
             foreach (var kvp in parameters)
             {
                 var key = kvp.Key.TrimStart('@');
-                row[key] = kvp.Value;
+                row[key] = kvp.Value!;
             }
         }
 
@@ -117,7 +122,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         return 1;
     }
 
-    private int ExecuteUpdate(string sql, Dictionary<string, object>? parameters)
+    private int ExecuteUpdate(string sql, IDictionary<string, object?>? parameters)
     {
         // Extract table name: "UPDATE TableName SET ..."
         var tableName = sql.Substring(sql.IndexOf("UPDATE") + 6).Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0].Trim();
@@ -144,7 +149,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         return matchingRows.Count;
     }
 
-    private int ExecuteDelete(string sql, Dictionary<string, object>? parameters)
+    private int ExecuteDelete(string sql, IDictionary<string, object?>? parameters)
     {
         // Extract table name: "DELETE FROM TableName WHERE ..."
         var tableName = sql.Substring(sql.IndexOf("FROM") + 4).Split(new[] { ' ', 'W' }, StringSplitOptions.RemoveEmptyEntries)[0].Trim();
@@ -163,7 +168,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         return matchingRows.Count;
     }
 
-    private List<Dictionary<string, object>> ExecuteQuery(string sql, Dictionary<string, object>? parameters)
+    private List<Dictionary<string, object>> ExecuteQuery(string sql, IDictionary<string, object?>? parameters)
     {
         // Extract table name from SELECT query
         string tableName;
@@ -209,12 +214,12 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         return rows;
     }
 
-    private List<Dictionary<string, object>> ExecuteJoinQuery(string sql, Dictionary<string, object>? parameters)
+    private List<Dictionary<string, object>> ExecuteJoinQuery(string sql, IDictionary<string, object?>? parameters)
     {
         // Simplified JOIN handling for GuildMembers query
         if (sql.Contains("GuildMembers") && parameters != null && parameters.ContainsKey("@UserId"))
         {
-            var userId = (string)parameters["@UserId"];
+            var userId = (string)parameters["@UserId"]!;
             var guildMembers = _tables.GetValueOrDefault("GuildMembers") ?? new List<Dictionary<string, object>>();
             var guilds = _tables.GetValueOrDefault("Guilds") ?? new List<Dictionary<string, object>>();
 
@@ -229,7 +234,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         return new List<Dictionary<string, object>>();
     }
 
-    private Dictionary<string, object> ExtractWhereClause(string sql, Dictionary<string, object>? parameters)
+    private Dictionary<string, object> ExtractWhereClause(string sql, IDictionary<string, object?>? parameters)
     {
         var result = new Dictionary<string, object>();
 
@@ -238,7 +243,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
 
         foreach (var kvp in parameters)
         {
-            result[kvp.Key.TrimStart('@')] = kvp.Value;
+            result[kvp.Key.TrimStart('@')] = kvp.Value!;
         }
 
         return result;

@@ -41,7 +41,7 @@ One‑liner（已在 Editor 安装 Export Templates 后）：
  - 手动发布指引：`docs/release/WINDOWS_MANUAL_RELEASE.md`
 
 ## Notes
-- DB 后端：默认插件优先；`GODOT_DB_BACKEND=plugin|managed` 可控。
+- DB 后端：默认使用 managed（`Microsoft.Data.Sqlite`）；插件后端仅限开发/实验环境，需同时设置 `GODOT_DB_BACKEND=plugin` 与 `GD_DB_ALLOW_PLUGIN_BACKEND=1`（CI/GD_SECURE_MODE 下会被强制拒绝）。
 - 示例 UI/测试：默认关闭；设置 `TEMPLATE_DEMO=1` 启用（Examples/**）。
 
 ## 仓库名与内部项目名对应关系

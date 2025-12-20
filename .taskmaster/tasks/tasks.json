@@ -315,7 +315,7 @@
         "dependencies": [
           "8"
         ],
-        "details": "Story: PH06-GAMELOOP-SQLITE-PATH-HARDENING\nADR Refs: ADR-0019; ADR-0006; ADR-0005; ADR-0011\nChapters: CH02; CH05; CH07; CH10\nTest Refs: Game.Godot/Adapters/SqliteDataStore.cs; logs/ci/<date>/security-audit.jsonl\nAcceptance: SqliteDataStore 对传入路径在检查前统一规范化分隔符，严格限制为 user:// 前缀并拒绝任何包含 .. 的路径。; SqliteDataStore 增加数据库文件扩展名白名单（如 .db/.sqlite/.sqlite3），非法扩展名会被拒绝并记录审计日志。; 针对已有数据库文件增加简单的大小上限检查（防 DoS），超限时抛出安全异常并写入 security-audit.jsonl。; 通过环境变量（例如 ALLOW_PLUGIN_BACKEND）或等价方案，将 plugin backend 限定在开发/实验环境，生产默认使用 managed backend，并在文档中明确记录。\nTest Strategy: 单元/集成测试：为 SqliteDataStore 增加路径与扩展名相关的测试用例，覆盖非法前缀、..、非法扩展名、超大文件等场景。; 安全审计：在启用/禁用 plugin backend 的不同配置下运行最小数据库操作，验证 security-audit.jsonl 中有预期的审计条目。\nLabels: security; sqlite; godot; adapter\nOwner: architecture\nLayer: adapter",
+        "details": "Story: PH06-GAMELOOP-SQLITE-PATH-HARDENING\nADR Refs: ADR-0019; ADR-0006; ADR-0005; ADR-0011\nChapters: CH02; CH05; CH07; CH10\nTest Refs: Game.Godot/Adapters/SqliteDataStore.cs; Game.Core.Tests/Domain/SafeResourcePathTests.cs; Tests.Godot/tests/Security/Hard/test_db_extension_whitelist.gd; Tests.Godot/tests/Security/Hard/test_db_size_limit.gd; Tests.Godot/tests/Security/Hard/test_db_backend_plugin_policy.gd; logs/ci/<date>/security-audit.jsonl\nAcceptance: SqliteDataStore 对传入路径在检查前统一规范化分隔符，严格限制为 user:// 前缀并拒绝任何包含 .. 的路径。; SqliteDataStore 增加数据库文件扩展名白名单（如 .db/.sqlite/.sqlite3），非法扩展名会被拒绝并记录审计日志。; 针对已有数据库文件增加简单的大小上限检查（防 DoS），超限时抛出安全异常并写入 security-audit.jsonl。; 通过环境变量（例如 ALLOW_PLUGIN_BACKEND）或等价方案，将 plugin backend 限定在开发/实验环境，生产默认使用 managed backend，并在文档中明确记录。\nTest Strategy: 单元/集成测试：为 SqliteDataStore 增加路径与扩展名相关的测试用例，覆盖非法前缀、..、非法扩展名、超大文件等场景。; 安全审计：在启用/禁用 plugin backend 的不同配置下运行最小数据库操作，验证 security-audit.jsonl 中有预期的审计条目。\nLabels: security; sqlite; godot; adapter\nOwner: architecture\nLayer: adapter",
         "testStrategy": "单元/集成测试：为 SqliteDataStore 增加路径与扩展名相关的测试用例，覆盖非法前缀、..、非法扩展名、超大文件等场景。\n安全审计：在启用/禁用 plugin backend 的不同配置下运行最小数据库操作，验证 security-audit.jsonl 中有预期的审计条目。",
         "complexity": 5,
         "recommendedSubtasks": 3,
@@ -332,13 +332,13 @@
         "id": "12",
         "title": "GodotSQLiteDatabase 错误脱敏与审计挂钩",
         "description": "在 Game.Godot/Adapters/Db/GodotSQLiteDatabase 中按 ADR-0019 要求改造错误处理：开发环境保留详细异常信息方便排查；生产环境仅抛出脱敏后的通用错误消息，并将包含路径/SQL 明细的诊断信息写入安全审计日志或内部日志文件；同时为 OpenAsync/Execute* 等路径补充最小测试或 smoke 验证。",
-        "status": "pending",
+        "status": "done",
         "priority": "low",
         "dependencies": [
           "11"
         ],
-        "details": "Story: PH06-GAMELOOP-DB-ERROR-AND-AUDIT\nADR Refs: ADR-0019; ADR-0006; ADR-0005; ADR-0011\nChapters: CH02; CH05; CH07; CH10\nTest Refs: Game.Godot/Adapters/Db/GodotSQLiteDatabase.cs; logs/ci/<date>/security-audit.jsonl\nAcceptance: GodotSQLiteDatabase 在 DEBUG 构建下仍然抛出包含路径/SQL 的详细异常，方便开发调试。; 在 Release/CI 环境下，同一代码路径仅向调用方暴露脱敏后的通用错误消息，详细路径与 SQL 片段被写入受控的审计/诊断日志。; 新增或扩展现有 smoke/集成测试，验证在数据库打开失败、SQL 执行失败等典型失败场景下，错误信息不会直接泄露敏感实现细节。\nTest Strategy: 环境对比测试：在 DEBUG 与 Release 配置下分别触发数据库异常，验证对调用方的异常消息差异以及 security-audit.jsonl 中的记录行为。; CI 验证：在 windows-quality-gate 或等价工作流中加入一次最小化的 GodotSQLiteDatabase smoke 调用，确保改造后不会破坏现有管线。\nLabels: security; sqlite; godot; error-handling\nOwner: architecture\nLayer: adapter",
-        "testStrategy": "环境对比测试：在 DEBUG 与 Release 配置下分别触发数据库异常，验证对调用方的异常消息差异以及 security-audit.jsonl 中的记录行为。\nCI 验证：在 windows-quality-gate 或等价工作流中加入一次最小化的 GodotSQLiteDatabase smoke 调用，确保改造后不会破坏现有管线。",
+        "details": "Story: PH06-GAMELOOP-DB-ERROR-AND-AUDIT\nADR Refs: ADR-0019; ADR-0006; ADR-0005; ADR-0011\nChapters: CH02; CH05; CH07; CH10\nTest Refs: Game.Core.Tests/Services/DatabaseErrorHandlingTests.cs; Tests.Godot/tests/Security/Hard/test_godot_sqlite_database_error_sanitization.gd; logs/ci/<date>/security-audit.jsonl\nAcceptance: GodotSQLiteDatabase 在 DEBUG 构建下仍然抛出包含路径/SQL 的详细异常，方便开发调试。; 在 Release/CI 环境下，同一代码路径仅向调用方暴露脱敏后的通用错误消息，详细路径与 SQL 片段被写入受控的审计/诊断日志。; 新增或扩展现有 smoke/集成测试，验证在数据库打开失败、SQL 执行失败等典型失败场景下，错误信息不会直接泄露敏感实现细节。\nTest Strategy: 环境对比测试：在 DEBUG 与 Release 配置下分别触发数据库异常，验证对调用方的异常消息差异以及 security-audit.jsonl 中的记录行为。; CI 验证：在 windows-quality-gate 或等价工作流中加入一次最小化的 GodotSQLiteDatabase smoke 调用，确保改造后不会破坏现有管线。\nLabels: security; sqlite; godot; error-handling\nOwner: architecture\nLayer: adapter",
+        "testStrategy": "环境对比测试：在 DEBUG 与 Release 配置下分别触发数据库异常，验证对调用方的异常消息差异以及 security-audit.jsonl 中的记录行为。\nCI 验证：在 windows-quality-gate 或等价工作流中加入一次最小化的 GodotSQLiteDatabase smoke 调用，确保改造后不会破坏现有管线。\nTest Files: Game.Core.Tests/Services/DatabaseErrorHandlingTests.cs; Tests.Godot/tests/Security/Hard/test_godot_sqlite_database_error_sanitization.gd",
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on develop event system.",

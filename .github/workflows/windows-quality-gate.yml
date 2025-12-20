@@ -12,6 +12,7 @@ jobs:
     runs-on: windows-latest
     env:
       GODOT_VERSION: '4.5.1'
+      GD_DB_COMMAND_TIMEOUT_SEC: '30'
       PYTHONIOENCODING: 'utf-8'
       PYTHONUTF8: '1'
     steps:
@@ -60,6 +61,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+
+      - name: Acceptance check (hard gate)
+        shell: pwsh
+        run: |
+          py -3 scripts/sc/acceptance_check.py --only adr,links,overlay,contracts,arch,build
 
       - name: Ensure GdUnit4 plugin
         shell: pwsh
@@ -128,12 +134,6 @@ jobs:
         shell: pwsh
         run: |
           py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debug --godot-bin "$env:GODOT_BIN" --build-solutions
-
-      - name: Contracts vs overlays validation (soft gate)
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          py -3 scripts/python/validate_contracts.py
 
       - name: Upload CI logs (always)
         if: always()

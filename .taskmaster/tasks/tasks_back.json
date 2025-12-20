@@ -1688,5 +1688,55 @@
       "security.process.denied",
       "security.url_access.denied"
     ]
+  },
+  {
+    "id": "NG-0045",
+    "story_id": "PH06-GAMELOOP-AUDIT-WEEK-ADVANCED",
+    "title": "GameLoop 周推进审计日志（F004）",
+    "description": "对应安全审计发现 F004：GameTurnSystem.Advance() 发布 core.game_turn.week_advanced 等事件，但当前 SecurityAuditLogger 未将该关键节点写入 ADR-0019 规定的 security-audit.jsonl。该项为审计可追溯性/合规业务需求（不阻塞 T2），纳入 NG backlog。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0039"
+    ],
+    "adr_refs": [
+      "ADR-0019",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [],
+    "labels": [
+      "security",
+      "audit",
+      "gameloop",
+      "ng"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Godot/Adapters/SecurityAuditLogger.cs",
+      "logs/ci/<date>/security-audit.jsonl"
+    ],
+    "acceptance": [
+      "在 CI/Release/secure 模式下，当产生周推进事件时，security-audit.jsonl 追加一条 ADR-0019 五字段 JSONL 记录（{ts, action, reason, target, caller}）。",
+      "action 使用 core.game_turn.week_advanced（符合 ADR-0004 命名与 validate_audit_logs.py 的 domain.entity.verb 校验）。",
+      "新增至少 1 条集成测试验证：推进一周后审计文件包含 action=core.game_turn.week_advanced 的条目，且不泄露绝对路径等敏感信息。"
+    ],
+    "test_strategy": [
+      "集成测试：在 headless Godot 测试或等价 Runner 中触发 week advance，并校验 logs/ci/<date>/security-audit.jsonl 的条目。",
+      "脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。"
+    ],
+    "taskmaster_exported": false,
+    "contract_refs": [
+      "core.game_turn.week_advanced"
+    ]
   }
 ]

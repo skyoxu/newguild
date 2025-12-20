@@ -17,6 +17,7 @@ import datetime as dt
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 
@@ -64,6 +65,8 @@ def main():
     summary = {
         'dotnet': {},
         'selfcheck': {},
+        'perf_db': {},
+        'sql_scan': {},
         'encoding': {},
         'status': 'ok'
     }
@@ -128,7 +131,51 @@ def main():
     if not sc_ok:
         hard_fail = True
 
-    # 3) Encoding scan (soft gate)
+    # 3) SQL static scan (hard gate)
+    rc_sql, out_sql = run_cmd(['py', '-3', 'scripts/python/scan_sql_misuse.py', '--fail-on-findings'], cwd=root)
+    with io.open(os.path.join('logs', 'ci', date, 'sql-scan-stdout.txt'), 'w', encoding='utf-8') as f:
+        f.write(out_sql)
+    sql_report = read_json(os.path.join('logs', 'ci', date, 'sql-scan', 'report.json')) or {}
+    summary['sql_scan'] = {
+        'rc': rc_sql,
+        'status': sql_report.get('status') or ('ok' if rc_sql == 0 else 'fail'),
+        'findings': sql_report.get('findings_count'),
+    }
+    if rc_sql != 0:
+        hard_fail = True
+
+    # 4) DB perf smoke (hard gate: prevents "missing perf data" regressions)
+    rc_perf, out_perf = run_cmd(
+        ['py', '-3', 'scripts/python/perf_smoke_db.py', '--godot-bin', args.godot_bin],
+        cwd=root,
+        timeout=900_000,
+    )
+    with io.open(os.path.join('logs', 'ci', date, 'perf-db-stdout.txt'), 'w', encoding='utf-8') as f:
+        f.write(out_perf)
+    perf_sum = read_json(os.path.join('logs', 'perf', date, 'db', 'run.json')) or {}
+    # Copy perf artifacts into logs/ci for easier artifact upload/debugging.
+    try:
+        perf_dir = os.path.join('logs', 'perf', date, 'db')
+        ci_dir2 = os.path.join('logs', 'ci', date)
+        for name in ('run.json', 'db-perf-summary.json', 'dotnet-build.log', 'gdunit.log'):
+            src = os.path.join(perf_dir, name)
+            if os.path.isfile(src):
+                shutil.copy2(src, os.path.join(ci_dir2, f'perf-db-{name}'))
+        # Copy the most useful GdUnit console log if present.
+        gdunit_console = os.path.join(perf_dir, 'gdunit-reports', 'gdunit-console.txt')
+        if os.path.isfile(gdunit_console):
+            shutil.copy2(gdunit_console, os.path.join(ci_dir2, 'perf-db-gdunit-console.txt'))
+    except Exception:
+        pass
+    summary['perf_db'] = {
+        'rc': rc_perf,
+        'status': perf_sum.get('status') or ('ok' if rc_perf == 0 else 'fail'),
+        'out': perf_sum.get('summary_json') or os.path.join('logs', 'perf', date, 'db'),
+    }
+    if rc_perf != 0:
+        hard_fail = True
+
+    # 5) Encoding scan (soft gate)
     rc3, out3 = run_cmd(['py', '-3', 'scripts/python/check_encoding.py', '--since-today'], cwd=root)
     enc_sum = read_json(os.path.join('logs', 'ci', date, 'encoding', 'session-summary.json')) or {}
     summary['encoding'] = enc_sum
@@ -137,7 +184,14 @@ def main():
     with io.open(os.path.join(ci_dir, 'ci-pipeline-summary.json'), 'w', encoding='utf-8') as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
 
-    print(f"CI_PIPELINE status={summary['status']} dotnet={summary['dotnet'].get('status')} selfcheck={summary['selfcheck'].get('status')} encoding_bad={summary['encoding'].get('bad', 'n/a')}")
+    print(
+        f"CI_PIPELINE status={summary['status']} "
+        f"dotnet={summary['dotnet'].get('status')} "
+        f"selfcheck={summary['selfcheck'].get('status')} "
+        f"sql_scan={summary['sql_scan'].get('status')} "
+        f"perf_db={summary['perf_db'].get('status')} "
+        f"encoding_bad={summary['encoding'].get('bad', 'n/a')}"
+    )
     return 0 if not hard_fail else 1
 
 

@@ -26,4 +26,4 @@
 ## 提示 / Tips
 
 - 更严格校验：Main 场景 `_ready()` 已打印 `[TEMPLATE_SMOKE_READY]` 探针标记，脚本已内置识别。
-- `GODOT_DB_BACKEND=plugin|managed` 可控制 DB 后端；未设置默认为插件优先。
+- `GODOT_DB_BACKEND=plugin|managed` 可控制 DB 后端；未设置默认为 managed。插件后端仅限开发/实验环境（需 `GD_DB_ALLOW_PLUGIN_BACKEND=1`，且 CI/`GD_SECURE_MODE=1` 下会被拒绝）。

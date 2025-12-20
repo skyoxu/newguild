@@ -64,6 +64,21 @@ public class SafeResourcePathTests
         path.Should().BeNull();
     }
 
+    [Theory]
+    [InlineData("user://%2e%2e/evil.db")]          // ../ via encoded dots
+    [InlineData("user://..%2fevil.db")]           // ../ via encoded slash
+    [InlineData("user://%2e%2e%2fevil.db")]       // ../ via encoded dots + slash
+    [InlineData("user://..%5cevil.db")]           // ..\\ via encoded backslash
+    [InlineData("user://%252e%252e%252fevil.db")] // ../ via double-encoding
+    public void FromString_WithUrlEncodedTraversal_ReturnsNull(string input)
+    {
+        // Act
+        var path = SafeResourcePath.FromString(input);
+
+        // Assert
+        path.Should().BeNull();
+    }
+
     [Fact]
     public void FromString_WithAbsolutePath_ReturnsNull()
     {
@@ -91,6 +106,34 @@ public class SafeResourcePathTests
         var path = SafeResourcePath.FromString("http://evil.com/malware");
 
         // Assert
+        path.Should().BeNull();
+    }
+
+    [Fact]
+    public void FromString_WithWindowsSeparators_NormalizesToForwardSlashes()
+    {
+        var path = SafeResourcePath.FromString(@"user:\db\game.db");
+
+        path.Should().NotBeNull();
+        path!.Value.Should().Be("user://db/game.db");
+        path.Type.Should().Be(PathType.ReadWrite);
+    }
+
+    [Fact]
+    public void FromString_WithSingleSlashScheme_NormalizesToDoubleSlash()
+    {
+        var path = SafeResourcePath.FromString("res:/scenes/Main.tscn");
+
+        path.Should().NotBeNull();
+        path!.Value.Should().Be("res://scenes/Main.tscn");
+        path.Type.Should().Be(PathType.ReadOnly);
+    }
+
+    [Fact]
+    public void FromString_WithWindowsTraversalUsingBackslashes_ReturnsNull()
+    {
+        var path = SafeResourcePath.FromString(@"user:\..\evil.db");
+
         path.Should().BeNull();
     }
 

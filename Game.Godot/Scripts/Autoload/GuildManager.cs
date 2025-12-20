@@ -23,7 +23,8 @@ public partial class GuildManager : Node
     public override void _Ready()
     {
         // Initialize database adapter
-        var db = new GodotSQLiteDatabase("user://game.db");
+        var dbPath = SafeResourcePath.UserPath("game.db") ?? throw new InvalidOperationException("Invalid database path (ADR-0019)");
+        var db = new GodotSQLiteDatabase(dbPath);
         _repository = new SQLiteGuildRepository(db);
 
         // Get EventBus reference

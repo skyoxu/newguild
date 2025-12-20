@@ -20,7 +20,8 @@
 
 ## 导出注意事项 / Export Notes
 
-- 插件优先：存在 `addons/godot-sqlite` 且启用时，运行/导出使用插件后端；控制台日志含 `[DB] backend=plugin`。
+- 默认使用 managed：运行/导出默认走 `Microsoft.Data.Sqlite`（控制台日志含 `[DB] backend=managed`）。
+- 插件后端（实验）：仅在开发/实验环境下显式启用（需 `GODOT_DB_BACKEND=plugin` + `GD_DB_ALLOW_PLUGIN_BACKEND=1`），CI 或 `GD_SECURE_MODE=1` 下会被强制拒绝。
 - 托管后备：无插件时，使用 Microsoft.Data.Sqlite；控制台日志含 `[DB] backend=managed`。
 - e_sqlite3：托管后备导出 EXE 需包含本机库，工程已添加 `SQLitePCLRaw.bundle_e_sqlite3`，通常无需额外操作。
 - 导出脚本：`scripts/ci/export_windows.ps1` 会提示所用后端；若导出失败，请先在 Editor 安装 Export Templates。
@@ -32,7 +33,6 @@
 
 ## Backend 选择 / Backend Override
 
-- 环境变量 `GODOT_DB_BACKEND` 可覆盖后端选择：`plugin`（仅插件）/ `managed`（仅托管）/ 未设置（插件优先）。
+- 环境变量 `GODOT_DB_BACKEND` 可覆盖后端选择：`plugin`（仅插件，且受 `GD_DB_ALLOW_PLUGIN_BACKEND=1` 与环境限制）/ `managed`（仅托管）/ 未设置（默认 managed）。
 - 仅插件模式：若未安装 `addons/godot-sqlite`，将抛出错误（便于在 CI 中强制校验）。
 - 默认（推荐）：插件优先，未安装插件时自动回退到 Microsoft.Data.Sqlite。
-
