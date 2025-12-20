@@ -15,6 +15,7 @@ public interface ISQLiteDatabase
     /// </summary>
     /// <param name="stmt">SQL statement with explicit parameters</param>
     /// <returns>Number of rows affected</returns>
+    /// <exception cref="InvalidOperationException">The operation fails. Implementations should sanitize messages when sensitive details are disabled (ADR-0019).</exception>
     Task<int> ExecuteNonQueryAsync(SqlStatement stmt);
 
     /// <summary>
@@ -22,6 +23,7 @@ public interface ISQLiteDatabase
     /// </summary>
     /// <param name="stmt">SQL statement with explicit parameters</param>
     /// <returns>First column of first row, or null if no results</returns>
+    /// <exception cref="InvalidOperationException">The operation fails. Implementations should sanitize messages when sensitive details are disabled (ADR-0019).</exception>
     Task<object?> ExecuteScalarAsync(SqlStatement stmt);
 
     /// <summary>
@@ -29,15 +31,18 @@ public interface ISQLiteDatabase
     /// </summary>
     /// <param name="stmt">SQL statement with explicit parameters</param>
     /// <returns>List of rows, where each row is a dictionary of column values</returns>
+    /// <exception cref="InvalidOperationException">The operation fails. Implementations should sanitize messages when sensitive details are disabled (ADR-0019).</exception>
     Task<IReadOnlyList<Dictionary<string, object>>> QueryAsync(SqlStatement stmt);
 
     /// <summary>
     /// Opens a database connection if not already open.
     /// </summary>
+    /// <exception cref="InvalidOperationException">The connection cannot be opened. Implementations should emit an ADR-0019 compliant audit entry on failure.</exception>
     Task OpenAsync();
 
     /// <summary>
     /// Closes the database connection.
     /// </summary>
+    /// <exception cref="InvalidOperationException">The connection cannot be closed. Implementations should emit an ADR-0019 compliant audit entry on failure.</exception>
     Task CloseAsync();
 }

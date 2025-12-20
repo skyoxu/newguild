@@ -45,64 +45,50 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
     {
         if (_isOpen) return Task.CompletedTask;
 
-        try
-        {
-            // Ensure parent directory exists
-            var dir = System.IO.Path.GetDirectoryName(_dbPathAbsolute);
-            if (!string.IsNullOrEmpty(dir) && !System.IO.Directory.Exists(dir))
+        ExecuteWithAudit(
+            operation: "open",
+            auditAction: "db.sqlite.open_failed",
+            sql: null,
+            action: () =>
             {
-                System.IO.Directory.CreateDirectory(dir);
-            }
+                // Ensure parent directory exists
+                var dir = System.IO.Path.GetDirectoryName(_dbPathAbsolute);
+                if (!string.IsNullOrEmpty(dir) && !System.IO.Directory.Exists(dir))
+                {
+                    System.IO.Directory.CreateDirectory(dir);
+                }
 
-            var connectionString = new SqliteConnectionStringBuilder
-            {
-                DataSource = _dbPathAbsolute,
-                Mode = SqliteOpenMode.ReadWriteCreate
-            }.ToString();
+                var connectionString = new SqliteConnectionStringBuilder
+                {
+                    DataSource = _dbPathAbsolute,
+                    Mode = SqliteOpenMode.ReadWriteCreate
+                }.ToString();
 
-            _connection = new SqliteConnection(connectionString);
-            _connection.Open();
-            _isOpen = true;
+                _connection = new SqliteConnection(connectionString);
+                _connection.Open();
+                _isOpen = true;
+            });
 
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            var includeSensitiveDetails = IncludeSensitiveDetails();
-            TryWriteAuditLog(
-                action: "db.sqlite.open_failed",
-                reason: BuildAuditReason(ex),
-                target: _dbPathVirtual,
-                caller: AuditSource);
-
-            throw DatabaseErrorHandling.CreateOperationException("open", _dbPathVirtual, null, ex, includeSensitiveDetails);
-        }
+        return Task.CompletedTask;
     }
 
     public Task CloseAsync()
     {
         if (!_isOpen || _connection == null) return Task.CompletedTask;
 
-        try
-        {
-            _connection.Close();
-            _connection.Dispose();
-            _connection = null;
-            _isOpen = false;
+        ExecuteWithAudit(
+            operation: "close",
+            auditAction: "db.sqlite.close_failed",
+            sql: null,
+            action: () =>
+            {
+                _connection.Close();
+                _connection.Dispose();
+                _connection = null;
+                _isOpen = false;
+            });
 
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            var includeSensitiveDetails = IncludeSensitiveDetails();
-            TryWriteAuditLog(
-                action: "db.sqlite.close_failed",
-                reason: BuildAuditReason(ex),
-                target: _dbPathVirtual,
-                caller: AuditSource);
-
-            throw DatabaseErrorHandling.CreateOperationException("close", _dbPathVirtual, null, ex, includeSensitiveDetails);
-        }
+        return Task.CompletedTask;
     }
 
     public Task<int> ExecuteNonQueryAsync(SqlStatement stmt)
@@ -112,30 +98,24 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         var sql = stmt.Text;
         var parameters = stmt.Parameters;
 
-        try
-        {
-            using var command = _connection!.CreateCommand();
-            command.CommandText = sql;
-
-            foreach (var param in parameters)
+        var result = ExecuteWithAudit(
+            operation: "nonquery",
+            auditAction: "db.sqlite.nonquery_failed",
+            sql: sql,
+            func: () =>
             {
-                command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
-            }
+                using var command = _connection!.CreateCommand();
+                command.CommandText = sql;
 
-            int result = command.ExecuteNonQuery();
-            return Task.FromResult(result);
-        }
-        catch (Exception ex)
-        {
-            var includeSensitiveDetails = IncludeSensitiveDetails();
-            TryWriteAuditLog(
-                action: "db.sqlite.nonquery_failed",
-                reason: BuildAuditReason(ex),
-                target: _dbPathVirtual,
-                caller: AuditSource);
+                foreach (var param in parameters)
+                {
+                    command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+                }
 
-            throw DatabaseErrorHandling.CreateOperationException("nonquery", _dbPathVirtual, sql, ex, includeSensitiveDetails);
-        }
+                return command.ExecuteNonQuery();
+            });
+
+        return Task.FromResult(result);
     }
 
     public Task<object?> ExecuteScalarAsync(SqlStatement stmt)
@@ -145,33 +125,27 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         var sql = stmt.Text;
         var parameters = stmt.Parameters;
 
-        try
-        {
-            using var command = _connection!.CreateCommand();
-            command.CommandText = sql;
-
-            if (parameters != null)
+        var result = ExecuteWithAudit(
+            operation: "scalar",
+            auditAction: "db.sqlite.scalar_failed",
+            sql: sql,
+            func: () =>
             {
-                foreach (var param in parameters)
+                using var command = _connection!.CreateCommand();
+                command.CommandText = sql;
+
+                if (parameters != null)
                 {
-                    command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+                    foreach (var param in parameters)
+                    {
+                        command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+                    }
                 }
-            }
 
-            object? result = command.ExecuteScalar();
-            return Task.FromResult(result == DBNull.Value ? null : result);
-        }
-        catch (Exception ex)
-        {
-            var includeSensitiveDetails = IncludeSensitiveDetails();
-            TryWriteAuditLog(
-                action: "db.sqlite.scalar_failed",
-                reason: BuildAuditReason(ex),
-                target: _dbPathVirtual,
-                caller: AuditSource);
+                return command.ExecuteScalar();
+            });
 
-            throw DatabaseErrorHandling.CreateOperationException("scalar", _dbPathVirtual, sql, ex, includeSensitiveDetails);
-        }
+        return Task.FromResult(result == DBNull.Value ? null : result);
     }
 
     public Task<IReadOnlyList<Dictionary<string, object>>> QueryAsync(SqlStatement stmt)
@@ -181,47 +155,42 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         var sql = stmt.Text;
         var parameters = stmt.Parameters;
 
-        try
-        {
-            using var command = _connection!.CreateCommand();
-            command.CommandText = sql;
-
-            if (parameters != null)
+        var result = ExecuteWithAudit(
+            operation: "query",
+            auditAction: "db.sqlite.query_failed",
+            sql: sql,
+            func: () =>
             {
-                foreach (var param in parameters)
+                using var command = _connection!.CreateCommand();
+                command.CommandText = sql;
+
+                if (parameters != null)
                 {
-                    command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+                    foreach (var param in parameters)
+                    {
+                        command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+                    }
                 }
-            }
 
-            var results = new List<Dictionary<string, object>>();
+                var results = new List<Dictionary<string, object>>();
 
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                var row = new Dictionary<string, object>();
-                for (int i = 0; i < reader.FieldCount; i++)
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
                 {
-                    string columnName = reader.GetName(i);
-                    object value = reader.GetValue(i);
-                    row[columnName] = value == DBNull.Value ? null! : value;
+                    var row = new Dictionary<string, object>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        string columnName = reader.GetName(i);
+                        object value = reader.GetValue(i);
+                        row[columnName] = value == DBNull.Value ? null! : value;
+                    }
+                    results.Add(row);
                 }
-                results.Add(row);
-            }
 
-            return Task.FromResult<IReadOnlyList<Dictionary<string, object>>>(results);
-        }
-        catch (Exception ex)
-        {
-            var includeSensitiveDetails = IncludeSensitiveDetails();
-            TryWriteAuditLog(
-                action: "db.sqlite.query_failed",
-                reason: BuildAuditReason(ex),
-                target: _dbPathVirtual,
-                caller: AuditSource);
+                return (IReadOnlyList<Dictionary<string, object>>)results;
+            });
 
-            throw DatabaseErrorHandling.CreateOperationException("query", _dbPathVirtual, sql, ex, includeSensitiveDetails);
-        }
+        return Task.FromResult(result);
     }
 
     private static bool IncludeSensitiveDetails()
@@ -294,6 +263,40 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
     {
         if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
         return value.Length <= max ? value : value.Substring(0, max);
+    }
+
+    private void ExecuteWithAudit(string operation, string auditAction, string? sql, Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception ex)
+        {
+            TryWriteAuditLog(
+                action: auditAction,
+                reason: BuildAuditReason(ex),
+                target: _dbPathVirtual,
+                caller: AuditSource);
+            throw DatabaseErrorHandling.CreateOperationException(operation, _dbPathVirtual, sql, ex, IncludeSensitiveDetails());
+        }
+    }
+
+    private T ExecuteWithAudit<T>(string operation, string auditAction, string? sql, Func<T> func)
+    {
+        try
+        {
+            return func();
+        }
+        catch (Exception ex)
+        {
+            TryWriteAuditLog(
+                action: auditAction,
+                reason: BuildAuditReason(ex),
+                target: _dbPathVirtual,
+                caller: AuditSource);
+            throw DatabaseErrorHandling.CreateOperationException(operation, _dbPathVirtual, sql, ex, IncludeSensitiveDetails());
+        }
     }
 
     private void EnsureOpen()
