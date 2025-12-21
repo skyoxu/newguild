@@ -3,14 +3,17 @@
 sc-llm-review: Optional LLM review runner (local only).
 
 This script approximates the "6 subagents" style review used in Claude Code by
-invoking `codex exec` with role-specific prompts and saving outputs to
-logs/ci/<YYYY-MM-DD>/sc-llm-review/.
+invoking `codex exec` with role-specific prompts and saving outputs to:
+  logs/ci/<YYYY-MM-DD>/sc-llm-review/
 
-It does NOT modify the repository. It only writes logs.
+Stop-loss design:
+  - Default is soft: failures/empty outputs become "skipped" (summary=warn).
+  - Use --strict to fail the run when an agent cannot produce output.
 
-Usage (Windows):
-  py -3 scripts/sc/llm_review.py --task-id 10 --base main
-  py -3 scripts/sc/llm_review.py --uncommitted
+Deterministic mapping:
+  Two agents are mapped to sc-acceptance-check artifacts (no LLM call):
+    - adr-compliance-checker
+    - performance-slo-validator
 """
 
 from __future__ import annotations
@@ -23,6 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from _deterministic_review import DETERMINISTIC_AGENTS, build_deterministic_review
 from _taskmaster import TaskmasterTriplet, resolve_triplet
 from _util import ci_dir, repo_root, run_cmd, split_csv, today_str, write_json, write_text
 
@@ -140,20 +144,17 @@ def _agent_prompt(agent: str, *, claude_agents_root: Path) -> tuple[str, dict[st
     base = _default_agent_prompt(agent)
     extra, source = _load_agent_prompt_blob(agent, claude_agents_root=claude_agents_root)
     if not extra or not source:
-        # Backward compatible: prefer repo-local .claude/agents/<agent>.md if defined above.
         extra = _load_optional_agent_prompt(project_specific.get(agent, ""))
         if not extra:
             return base, {"agent_prompt_source": None}
         extra_trim = _truncate(extra, max_chars=6_000)
         return "\n\n".join([base, "Project agent prompt (truncated):", extra_trim]), {"agent_prompt_source": project_specific.get(agent)}
 
-    rel = None
     try:
         rel = str(source.relative_to(repo_root())).replace("\\", "/")
     except Exception:
         rel = str(source)
 
-    # Keep prompt size bounded; codex already has access to repo/diff context.
     extra_trim = _truncate(extra, max_chars=6_000)
     header = f"Agent prompt source: {rel}"
     return "\n\n".join([base, header, extra_trim]), {"agent_prompt_source": rel}
@@ -170,7 +171,7 @@ def _build_diff_context(args: argparse.Namespace) -> str:
         rc3, untracked = _git_capture(["git", "ls-files", "--others", "--exclude-standard"], timeout_sec=30)
         if rc1 != 0 or rc2 != 0 or rc3 != 0:
             return _truncate("\n".join([unstaged, staged, untracked]), max_chars=40_000)
-        blocks = []
+        blocks: list[str] = []
         if staged.strip():
             blocks.append("## Staged diff\n```diff\n" + staged.strip() + "\n```")
         if unstaged.strip():
@@ -180,12 +181,11 @@ def _build_diff_context(args: argparse.Namespace) -> str:
         return "\n\n".join(blocks) if blocks else "## Diff\n(no changes detected)\n"
 
     if args.commit:
-        rc, out = _git_capture(["git", "show", "--no-color", args.commit], timeout_sec=60)
+        _rc, out = _git_capture(["git", "show", "--no-color", args.commit], timeout_sec=60)
         return "## Commit diff\n```diff\n" + _truncate(out.strip(), max_chars=60_000) + "\n```"
 
-    # Base branch mode (default)
     base = args.base
-    rc, out = _git_capture(["git", "diff", "--no-color", f"{base}...HEAD"], timeout_sec=60)
+    _rc, out = _git_capture(["git", "diff", "--no-color", f"{base}...HEAD"], timeout_sec=60)
     return f"## Diff vs {base}\n```diff\n" + _truncate(out.strip(), max_chars=60_000) + "\n```"
 
 
@@ -232,11 +232,11 @@ def main() -> int:
     ap.add_argument("--uncommitted", action="store_true", help="Review staged/unstaged/untracked changes")
     ap.add_argument("--commit", default=None, help="Review a single commit SHA")
     ap.add_argument("--timeout-sec", type=int, default=900, help="Timeout per agent (seconds)")
-    ap.add_argument("--strict", action="store_true", help="Fail if any agent execution fails (default: soft)")
+    ap.add_argument("--strict", action="store_true", help="Fail if any agent cannot produce output (default: soft)")
     ap.add_argument(
         "--claude-agents-root",
         default=None,
-        help="Claude agents root (default: %CLAUDE_AGENTS_ROOT% or %USERPROFILE%\\.claude\\agents). Used to load lst97 agent prompts.",
+        help="Claude agents root (default: env CLAUDE_AGENTS_ROOT or $env:USERPROFILE\\.claude\\agents). Used to load lst97 agent prompts.",
     )
     args = ap.parse_args()
 
@@ -264,12 +264,38 @@ def main() -> int:
     ]
 
     ctx = _build_task_context(triplet)
+    diff_ctx = _build_diff_context(args)
+
     results: list[ReviewResult] = []
     hard_fail = False
     had_warnings = False
-    diff_ctx = _build_diff_context(args)
 
     for agent in agents:
+        if agent in DETERMINISTIC_AGENTS:
+            det = build_deterministic_review(agent=agent, out_dir=out_dir, task_id=triplet.task_id if triplet else None)
+            verdict = (det.get("details") or {}).get("verdict")
+            if det.get("status") != "ok" or verdict not in {None, "OK"}:
+                had_warnings = True
+            if det.get("status") == "fail":
+                hard_fail = True
+            results.append(
+                ReviewResult(
+                    agent=agent,
+                    status=str(det.get("status")),
+                    rc=det.get("rc"),
+                    cmd=det.get("cmd"),
+                    prompt_path=det.get("prompt_path"),
+                    output_path=det.get("output_path"),
+                    details={
+                        "claude_agents_root": str(claude_agents_root),
+                        "agent_prompt_source": _agent_prompt(agent, claude_agents_root=claude_agents_root)[1].get("agent_prompt_source"),
+                        **(det.get("details") or {}),
+                        "note": "Deterministic mapping: generated from sc-acceptance-check artifacts.",
+                    },
+                )
+            )
+            continue
+
         agent_prompt, prompt_meta = _agent_prompt(agent, claude_agents_root=claude_agents_root)
         prompt = "\n\n".join([agent_prompt, ctx, diff_ctx]).strip() + "\n"
         prompt_path = out_dir / f"prompt-{agent}.md"
@@ -326,3 +352,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
