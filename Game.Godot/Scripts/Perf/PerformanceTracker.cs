@@ -14,29 +14,33 @@ public partial class PerformanceTracker : Node
     [Export] public float FlushIntervalSec { get; set; } = 1.0f;
 
     private readonly List<double> _frameMs = new();
-    private Timer _timer = default!;
+    private double _elapsedSinceFlushSec = 0;
 
     public override void _Ready()
     {
         if (!Enabled) return;
         SetProcess(true);
-        _timer = new Timer { WaitTime = FlushIntervalSec, OneShot = false, Autostart = true };
-        AddChild(_timer);
-        _timer.Timeout += OnFlush;
     }
 
     public override void _Process(double delta)
     {
         if (!Enabled) return;
+        _elapsedSinceFlushSec += Math.Max(0, delta);
         var ms = Math.Max(0, delta * 1000.0);
         _frameMs.Add(ms);
         if (_frameMs.Count > WindowFrames)
             _frameMs.RemoveRange(0, _frameMs.Count - WindowFrames);
+
+        if (_elapsedSinceFlushSec >= FlushIntervalSec)
+        {
+            _elapsedSinceFlushSec = 0;
+            OnFlush();
+        }
     }
 
     private void OnFlush()
     {
-        if (!Enabled || _frameMs.Count < 5) return;
+        if (!Enabled || _frameMs.Count < 2) return;
         var metrics = Compute();
         // Console marker for smoke parser
         GD.Print($"[PERF] frames={metrics.frames} avg_ms={metrics.avg_ms:F2} p50_ms={metrics.p50_ms:F2} p95_ms={metrics.p95_ms:F2} p99_ms={metrics.p99_ms:F2}");
@@ -69,4 +73,3 @@ public partial class PerformanceTracker : Node
         return (frames, avg, P(0.5), P(0.95), P(0.99));
     }
 }
-

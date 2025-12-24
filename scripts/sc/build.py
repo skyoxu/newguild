@@ -74,7 +74,9 @@ def main() -> int:
             print(f"SC_BUILD status=fail out={out_dir}")
             return rc
 
-    cmd = ["dotnet", "build", str(target), "-c", config, "-warnaserror"]
+    # MSB3101 ("failed to write state file ...AssemblyReference.cache") can be triggered by filesystem
+    # restrictions/locks on Windows. It is not a code correctness issue and should not fail -warnaserror gates.
+    cmd = ["dotnet", "build", str(target), "-c", config, "-warnaserror", "-p:WarningsNotAsErrors=MSB3101"]
     if args.verbose:
         cmd += ["-v", "normal"]
 
