@@ -25,8 +25,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
     "labels": [
       "prd",
@@ -71,7 +71,10 @@
       "CH07",
       "CH10"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "ci",
       "smoke",
@@ -120,7 +123,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "ci",
       "quality-gates",
@@ -169,7 +175,10 @@
       "CH07",
       "CH10"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "security",
       "godot",
@@ -225,7 +234,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "performance",
       "core",
@@ -275,7 +287,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "observability",
       "sentry",
@@ -323,7 +338,10 @@
       "CH09",
       "CH10"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "build",
       "export",
@@ -371,7 +389,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "release",
       "canary",
@@ -416,7 +437,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "acceptance",
       "docs",
@@ -464,8 +488,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
     "labels": [
       "core",
@@ -522,8 +546,9 @@
       "CH10"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
     "labels": [
       "ci",
@@ -584,8 +609,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
     "labels": [
       "docs",
@@ -637,9 +662,10 @@
       "CH07"
     ],
     "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
     "labels": [
       "signal",
@@ -688,7 +714,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "observability",
       "logging",
@@ -735,7 +764,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "docs",
       "privacy",
@@ -784,7 +816,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "docs",
       "logging",
@@ -829,7 +864,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "ci",
       "quality-gates",
@@ -878,7 +916,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "ci",
       "performance",
@@ -927,7 +968,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "security",
       "signal",
@@ -974,7 +1018,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "performance",
       "reports",
@@ -1025,7 +1072,10 @@
       "CH09",
       "CH10"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "ci",
       "performance",
@@ -1073,7 +1123,10 @@
       "CH07",
       "CH10"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "build",
       "signing",
@@ -1120,7 +1173,10 @@
       "CH07",
       "CH10"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "godot",
       "export",
@@ -1164,7 +1220,10 @@
       "CH07",
       "CH10"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "refactor",
       "quality-gates",
@@ -1209,7 +1268,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "refactor",
       "analyzers",
@@ -1252,7 +1314,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "docs",
       "refactor",
@@ -1299,7 +1364,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "taskmaster",
       "sentry",
@@ -1347,7 +1415,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "ci",
       "architecture",
@@ -1395,7 +1466,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "security",
       "gameloop",
@@ -1452,7 +1526,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "security",
       "gameloop",
@@ -1506,7 +1583,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "architecture",
       "gameloop",
@@ -1555,7 +1635,10 @@
       "CH07",
       "CH10"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "security",
       "sqlite",
@@ -1606,7 +1689,10 @@
       "CH07",
       "CH10"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "security",
       "sqlite",
@@ -1658,7 +1744,10 @@
       "CH07",
       "CH09"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "quality-gates",
       "gameloop",
@@ -1713,7 +1802,10 @@
       "CH06",
       "CH07"
     ],
-    "overlay_refs": [],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
     "labels": [
       "security",
       "audit",

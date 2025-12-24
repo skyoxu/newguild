@@ -12,7 +12,7 @@
   - `Game.Core` 逻辑不得依赖 Godot 类型；与引擎交互通过 Adapter/Ports 隔离，以便毫秒级测试循环与稳定覆盖率门禁。
   - GdUnit4 测试只覆盖 Scene/Node 生命周期、信号连通、资源路径与关键装配；领域算法仍应由 xUnit 覆盖。
   - CI 默认按“单元测试 -> Godot self-check -> GdUnit4 冒烟/安全/性能子集 -> 审计日志验证”顺序执行，并将报告作为工件上传归档。
-- Supersedes: None
+- Supersedes: ADR-0025
 - References:
   - ADR-0005-quality-gates.md
   - ADR-0019-godot-security-baseline.md
