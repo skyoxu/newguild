@@ -1,5 +1,5 @@
 using Game.Core.Contracts;
-using Game.Core.Contracts.GameLoop;
+using Game.Contracts.GameLoop;
 using Game.Core.Domain.Turn;
 using Game.Core.Ports;
 using Game.Core.Services;

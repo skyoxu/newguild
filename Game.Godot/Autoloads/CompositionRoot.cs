@@ -45,7 +45,7 @@ public partial class CompositionRoot : Node
         if (bus == null)
         {
             bus = new Adapters.EventBusAdapter { Name = "EventBus" };
-            root.AddChild(bus);
+            root.CallDeferred(Node.MethodName.AddChild, bus);
         }
         EventBus = bus;
 
@@ -53,7 +53,7 @@ public partial class CompositionRoot : Node
         if (time == null)
         {
             time = new Adapters.TimeAdapter { Name = "Time" };
-            root.AddChild(time);
+            root.CallDeferred(Node.MethodName.AddChild, time);
         }
         Time = time;
 
@@ -61,7 +61,7 @@ public partial class CompositionRoot : Node
         if (input == null)
         {
             input = new Adapters.InputAdapter { Name = "Input" };
-            root.AddChild(input);
+            root.CallDeferred(Node.MethodName.AddChild, input);
         }
         Input = input;
 
@@ -69,7 +69,7 @@ public partial class CompositionRoot : Node
         if (logger == null)
         {
             logger = new Adapters.LoggerAdapter { Name = "Logger" };
-            root.AddChild(logger);
+            root.CallDeferred(Node.MethodName.AddChild, logger);
         }
         Logger = logger;
 
@@ -77,7 +77,7 @@ public partial class CompositionRoot : Node
         if (store == null)
         {
             store = new Adapters.DataStoreAdapter { Name = "DataStore" };
-            root.AddChild(store);
+            root.CallDeferred(Node.MethodName.AddChild, store);
         }
         DataStore = store;
 
@@ -85,7 +85,7 @@ public partial class CompositionRoot : Node
         if (loader == null)
         {
             loader = new Adapters.ResourceLoaderAdapter { Name = "ResourceLoader" };
-            root.AddChild(loader);
+            root.CallDeferred(Node.MethodName.AddChild, loader);
         }
         ResourceLoader = loader;
     }

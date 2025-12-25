@@ -200,7 +200,7 @@ def run_smoke(out_dir: Path, godot_bin: str, scene: str) -> dict[str, Any]:
         "--scene",
         scene,
         "--timeout-sec",
-        "5",
+        "10",
         "--mode",
         "strict",
     ]

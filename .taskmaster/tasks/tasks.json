@@ -18,6 +18,11 @@
           "ADR-0005",
           "ADR-0023",
           "ADR-0011"
+        ],
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
         ]
       },
       {
@@ -41,6 +46,11 @@
           "ADR-0005",
           "ADR-0024",
           "ADR-0020"
+        ],
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
         ]
       },
       {
@@ -107,6 +117,10 @@
           "ADR-0018",
           "ADR-0024",
           "ADR-0020"
+        ],
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
         ]
       },
       {
@@ -130,13 +144,18 @@
           "ADR-0018",
           "ADR-0024",
           "ADR-0020"
+        ],
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
         ]
       },
       {
         "id": "7",
         "title": "扩展 quality_gates.py 覆盖率阈值与 GdUnit4 集成",
         "description": "承接 Phase-13-Quality-Gates-Script.md 与 Backlog：将 xUnit 覆盖率门禁提升到蓝图标准（行≥90%、分支≥85%，可由环境变量覆盖），并把关键 GdUnit4 集合（Adapters+Security 小集）通过 quality_gates.py 聚合输出到统一 summary，以便在 CI 中统一判定。",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "high",
         "dependencies": [
           "5"
@@ -150,6 +169,10 @@
           "ADR-0015",
           "ADR-0018",
           "ADR-0024"
+        ],
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
         ]
       },
       {
@@ -265,6 +288,10 @@
           "ADR-0007 (Ports and Adapters)",
           "ADR-0004 (Event Bus)",
           "ADR-0011 (Windows-only)"
+        ],
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
         ]
       },
       {
@@ -285,7 +312,11 @@
         "details": "Story: PH16-GAMELOOP-SECURITY-BASELINE\nADR Refs: ADR-0019; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH02; CH04; CH06; CH07\nTest Refs: logs/security-audit-gameloop.json; logs/SECURITY_AUDIT_GAMELOOP_REPORT.md; cifix.txt\nAcceptance: SECURITY_AUDIT_GAMELOOP_REPORT.md 以 ADR-0019 为基线，明确区分 T2_BLOCKING 与 NG_BACKLOG 安全问题，并与 cifix.txt 中的技术债记录一致。; F001/F002/F005 至少映射到一条 T2 相关 NG/GM 任务，F003/F004/F006/F007 映射到 NG 安全或架构 backlog 任务，且在 tasks_back.json / tasks_gameplay.json 中补齐 adr_refs/chapter_refs/overlay_refs/test_refs。; 运行 py -3 scripts/python/task_links_validate.py 时，GameLoop 相关任务不再因为 ADR/Chapter 映射或缺失 Test-Refs 报错。\nTest Strategy: 人工对比 logs/security-audit-gameloop.* 与 tasks_back.json / tasks_gameplay.json，确认每条 F00x 至少有一条对应任务可追踪。; 运行 task_links_validate.py 与 check_tasks_all_refs.py，确认新增/调整后的 NG/GM 任务全部通过回链校验。\nLabels: security; gameloop; docs; audit\nOwner: architecture\nLayer: docs",
         "testStrategy": "人工对比 logs/security-audit-gameloop.* 与 tasks_back.json / tasks_gameplay.json，确认每条 F00x 至少有一条对应任务可追踪。\n运行 task_links_validate.py 与 check_tasks_all_refs.py，确认新增/调整后的 NG/GM 任务全部通过回链校验。",
         "subtasks": [],
-        "updatedAt": "2025-12-08T07:11:29.975Z"
+        "updatedAt": "2025-12-08T07:11:29.975Z",
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+        ]
       },
       {
         "id": "10",
@@ -304,13 +335,17 @@
           "ADR-0004",
           "ADR-0005",
           "ADR-0018"
+        ],
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
         ]
       },
       {
         "id": "11",
         "title": "SqliteDataStore 路径校验与插件后端安全收紧",
         "description": "在 Game.Godot/Adapters/SqliteDataStore 中增强路径与扩展名校验：对 user:// 路径进行规范化后再做前缀与 .. 检查，增加 .db/.sqlite/.sqlite3 等扩展名白名单，并为已有 ValidatePath 逻辑补充文件大小上限检查；同时通过环境变量限制 plugin backend 的启用范围（如仅在开发环境允许），将 plugin backend 风险收敛为受控技术债。",
-        "status": "in-progress",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "8"
@@ -326,6 +361,10 @@
           "ADR-0006",
           "ADR-0005",
           "ADR-0011"
+        ],
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
         ]
       },
       {
@@ -348,6 +387,10 @@
           "ADR-0006",
           "ADR-0005",
           "ADR-0011"
+        ],
+        "overlay_refs": [
+          "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+          "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
         ]
       }
     ],

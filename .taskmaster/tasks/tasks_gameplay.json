@@ -4,7 +4,7 @@
     "story_id": "PRD-GUILD-MANAGER-CORE-EVENT-ENGINE",
     "title": "实现公会管理器事件引擎核心（EventEngine Core）",
     "description": "基于 PRD-Guild-Manager 核心循环（Resolution/Player/AI Simulation）与 Phase-9/Phase-6 设计，在 Game.Core 中实现 EventEngine 核心：负责回合/周循环驱动、事件条件评估、事件执行与冲突解决，作为公会管理垂直切片的事件中枢。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -107,6 +107,7 @@
       "构造典型冲突场景（例如资源争抢、公会关系冲突），验证 AICoordinator 能生成合理事件并与 EventEngine 协同处理。",
       "在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。"
     ],
+    "taskmaster_id": null,
     "taskmaster_exported": false
   },
   {
@@ -114,7 +115,7 @@
     "story_id": "PRD-GUILD-MANAGER-CORE-GAME-LOOP",
     "title": "实现公会管理器核心回合循环与时间推进（Game Loop）",
     "description": "根据 PRD-Guild-Manager 3.0 核心游戏循环设计，在 Game.Core 中实现公会管理器的回合/周循环与时间推进逻辑，并在 Godot 场景中通过 UI 反馈当前周次/阶段/时间进度，支撑首个垂直切片的完整“Resolution→Player→AI Simulation”回合体验。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -167,5 +168,304 @@
     ],
     "taskmaster_id": 4,
     "taskmaster_exported": true
+  },
+  {
+    "id": "GM-0104",
+    "story_id": "PRD-GUILD-MANAGER",
+    "title": "Implement AI Ecosystem",
+    "description": "Develop a multi-layered AI system for NPC guilds and members.",
+    "status": "pending",
+    "priority": "P0",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0020"
+    ],
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [],
+    "test_strategy": [
+      "Simulate AI behavior in different scenarios to validate decision-making and interactions."
+    ],
+    "taskmaster_id": null,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0105",
+    "story_id": "PRD-GUILD-MANAGER",
+    "title": "Design Guild Management Module",
+    "description": "Build the guild management interface and functionalities.",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0020",
+      "NG-0012"
+    ],
+    "adr_refs": [
+      "ADR-0008",
+      "ADR-0011",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [],
+    "test_strategy": [
+      "Conduct UI/UX testing to ensure information is displayed accurately and intuitively."
+    ],
+    "taskmaster_id": null,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0106",
+    "story_id": "PRD-GUILD-MANAGER",
+    "title": "Create Tactical Center Module",
+    "description": "Develop the tactical center for managing raid and PVP compositions.",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0020",
+      "NG-0013"
+    ],
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [],
+    "test_strategy": [
+      "Test composition creation and validation processes to ensure correct role assignments and balance."
+    ],
+    "taskmaster_id": null,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0107",
+    "story_id": "PRD-GUILD-MANAGER",
+    "title": "Develop PVE System",
+    "description": "Implement the PVE system with raid dungeons and boss encounters.",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": [
+      "NG-0012",
+      "NG-0013"
+    ],
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [],
+    "test_strategy": [
+      "Simulate raid encounters to test mechanics, difficulty scaling, and reward distribution."
+    ],
+    "taskmaster_id": null,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0108",
+    "story_id": "PRD-GUILD-MANAGER",
+    "title": "Implement PVP System",
+    "description": "Develop the PVP system for battlegrounds and arenas.",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": [
+      "NG-0015"
+    ],
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [],
+    "test_strategy": [
+      "Conduct PVP simulations to ensure team dynamics and strategy effectiveness."
+    ],
+    "taskmaster_id": null,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0109",
+    "story_id": "PRD-GUILD-MANAGER",
+    "title": "Build Member Management Module",
+    "description": "Create a system for managing guild members and their attributes.",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0014"
+    ],
+    "adr_refs": [
+      "ADR-0008",
+      "ADR-0011",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [],
+    "test_strategy": [
+      "Test member recruitment, role assignment, and relationship dynamics under various scenarios."
+    ],
+    "taskmaster_id": null,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0110",
+    "story_id": "PRD-GUILD-MANAGER",
+    "title": "Develop Social Interaction System",
+    "description": "Implement a system for managing social interactions and relationships.",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": [
+      "NG-0018"
+    ],
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [],
+    "test_strategy": [
+      "Simulate social interactions to test relationship dynamics and event triggering."
+    ],
+    "taskmaster_id": null,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0111",
+    "story_id": "PRD-GUILD-MANAGER",
+    "title": "Design Recruitment System",
+    "description": "Develop a recruitment system for guild members, including legendary members.",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0018",
+      "NG-0019"
+    ],
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [],
+    "test_strategy": [
+      "Test recruitment processes for different member types, ensuring correct filtering and negotiation outcomes."
+    ],
+    "taskmaster_id": null,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0112",
+    "story_id": "PRD-GUILD-MANAGER",
+    "title": "Create Combat Simulation System",
+    "description": "Develop a system for simulating combat outcomes in PVE and PVP.",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": [
+      "NG-0016",
+      "NG-0017"
+    ],
+    "adr_refs": [
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [],
+    "test_strategy": [
+      "Run combat simulations to validate result accuracy and balance."
+    ],
+    "taskmaster_id": null,
+    "taskmaster_exported": false
   }
 ]

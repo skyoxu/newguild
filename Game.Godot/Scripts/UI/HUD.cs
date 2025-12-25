@@ -12,11 +12,19 @@ namespace Game.Godot.Scripts.UI;
 
 public partial class HUD : Control
 {
+    private static readonly JsonDocumentOptions JsonOptions = new()
+    {
+        MaxDepth = 32,
+    };
+
     private Label _score = default!;
     private Label _health = default!;
     private Label _week = default!;
     private Label _phase = default!;
     private Button _nextTurnButton = default!;
+
+    private EventBusAdapter? _eventBus;
+    private Callable _domainEventCallable;
 
     private IGameTurnSystem? _turnSystem;
     private GameTurnState? _currentTurn;
@@ -36,10 +44,11 @@ public partial class HUD : Control
         if (_nextTurnButton != null)
             _nextTurnButton.Pressed += OnNextTurnPressed;
 
-        var bus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
-        if (bus != null)
+        _eventBus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
+        if (_eventBus != null)
         {
-            bus.Connect(EventBusAdapter.SignalName.DomainEventEmitted, new Callable(this, nameof(OnDomainEventEmitted)));
+            _domainEventCallable = new Callable(this, nameof(OnDomainEventEmitted));
+            _eventBus.Connect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
         }
 
         // Resolve GameTurnSystem from CompositionRoot if available; fall back to in-memory wiring for T2 demo.
@@ -50,7 +59,7 @@ public partial class HUD : Control
         if (root != null)
         {
             timePort = root.Time ?? new TimeAdapter();
-            var busNode = root.EventBus ?? GetNodeOrNull<EventBusAdapter>("/root/EventBus");
+            var busNode = root.EventBus ?? _eventBus;
             eventBus = busNode ?? new InMemoryEventBus();
         }
         else
@@ -67,13 +76,21 @@ public partial class HUD : Control
         UpdateTurnLabels();
     }
 
+    public override void _ExitTree()
+    {
+        if (_eventBus == null)
+            return;
+        if (_eventBus.IsConnected(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable))
+            _eventBus.Disconnect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
+    }
+
     private void OnDomainEventEmitted(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso)
     {
         if (type == "core.score.updated" || type == "score.changed")
         {
             try
             {
-                var doc = JsonDocument.Parse(dataJson);
+                using var doc = JsonDocument.Parse(dataJson, JsonOptions);
                 int v = 0;
                 if (doc.RootElement.TryGetProperty("value", out var val)) v = val.GetInt32();
                 else if (doc.RootElement.TryGetProperty("score", out var sc)) v = sc.GetInt32();
@@ -85,7 +102,7 @@ public partial class HUD : Control
         {
             try
             {
-                var doc = JsonDocument.Parse(dataJson);
+                using var doc = JsonDocument.Parse(dataJson, JsonOptions);
                 int v = 0;
                 if (doc.RootElement.TryGetProperty("value", out var val)) v = val.GetInt32();
                 else if (doc.RootElement.TryGetProperty("health", out var hp)) v = hp.GetInt32();
