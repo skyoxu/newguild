@@ -26,3 +26,13 @@ func test_main_menu_emits_start() -> void:
     assert_bool(_received).is_true()
     assert_str(_etype).is_equal("ui.menu.start")
 
+func test_main_menu_emits_guild() -> void:
+    _received = false
+    var menu = preload("res://Game.Godot/Scenes/UI/MainMenu.tscn").instantiate()
+    add_child(auto_free(menu))
+    await get_tree().process_frame
+    var btn = menu.get_node("VBox/BtnGuild")
+    btn.emit_signal("pressed")
+    await get_tree().process_frame
+    assert_bool(_received).is_true()
+    assert_str(_etype).is_equal("ui.menu.guild")
