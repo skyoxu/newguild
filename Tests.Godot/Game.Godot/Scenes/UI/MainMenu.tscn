@@ -22,6 +22,10 @@ offset_bottom = 240.0
 layout_mode = 2
 text = "Play"
 
+[node name="BtnGuild" type="Button" parent="VBox"]
+layout_mode = 2
+text = "Guild"
+
 [node name="BtnSettings" type="Button" parent="VBox"]
 layout_mode = 2
 text = "Settings"
@@ -29,4 +33,3 @@ text = "Settings"
 [node name="BtnQuit" type="Button" parent="VBox"]
 layout_mode = 2
 text = "Quit"
-

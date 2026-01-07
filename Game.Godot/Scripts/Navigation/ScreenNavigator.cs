@@ -43,6 +43,19 @@ public partial class ScreenNavigator : Node
         return true;
     }
 
+    public bool Clear()
+    {
+        if (_busy) return false;
+        if (_root == null) return false;
+        if (_current == null) return true;
+
+        if (_current.HasMethod("Exit"))
+            _current.CallDeferred("Exit");
+        _current.QueueFree();
+        _current = null;
+        return true;
+    }
+
     private void DoSwitch(PackedScene packed)
     {
         // Call Exit on current if present, then remove
