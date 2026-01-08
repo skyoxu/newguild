@@ -130,6 +130,15 @@ def main():
     out_dir = os.path.join(root, 'logs', 'e2e', date)
     os.makedirs(out_dir, exist_ok=True)
 
+    # GdUnit4 writes reports to res://reports by default (i.e., <project>/reports).
+    # In clean CI checkouts this folder may not exist and can cause GdUnit4 to crash
+    # with "Cannot call method 'seek' on a null value." when opening report files.
+    try:
+        os.makedirs(os.path.join(proj, 'reports'), exist_ok=True)
+    except Exception:
+        # Best-effort; do not fail the run just because report pre-creation failed.
+        pass
+
     # Redirect Godot user:// to a repo-local directory (default under logs/).
     user_dir = None
     userdir_flag_used = None
