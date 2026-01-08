@@ -6,8 +6,9 @@ func test_configfile_utf8_roundtrip() -> void:
     await get_tree().process_frame
 
     var user_path = "user://settings_%d.cfg" % int(Time.get_unix_time_from_system())
-    var abs_path = ProjectSettings.globalize_path(user_path)
-    DirAccess.make_dir_recursive_absolute(abs_path.get_base_dir())
+    var abs_path = ProjectSettings.globalize_path(user_path).replace("\\", "/")
+    var base_dir = abs_path.get_base_dir()
+    DirAccess.make_dir_recursive_absolute(base_dir)
 
     var cfg := ConfigFile.new()
     var note := "你好，世界！äöü✓"
