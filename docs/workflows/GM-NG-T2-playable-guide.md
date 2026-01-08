@@ -129,10 +129,11 @@ py -3 scripts/python/task_links_validate.py
 
 4. **回写 Taskmaster：acceptance 与 test_refs 对齐**
    - 当某一小步（例如完成一轮 Week 切换 + 测试通过）完成后：
-     - 在对应 GM/NG 任务中更新：
-       - `acceptance`：描述这一轮具体达成了什么（如“Week 可以从 1 切到 2，并回到 Resolution”）。
-       - `test_refs`：确保引用的是实际存在且通过的测试文件。
-     - 再次运行 `py -3 scripts/python/task_links_validate.py` 确认回链仍然干净。
+      - 在对应 GM/NG 任务中更新：
+        - `acceptance`：描述这一轮具体达成了什么（如“Week 可以从 1 切到 2，并回到 Resolution”）。
+        - `test_refs`：只放“必须存在”的文件引用（测试文件或代码文件），确保路径真实存在且能在 CI 复现。
+        - `artifactRefs`：用于门禁/产物锚点（脚本、工作流、日志 schema、运行产物路径），允许 `logs/ci/<date>/...` 这类占位；不要把 `logs/**` 放进 `test_refs`。
+      - 再次运行 `py -3 scripts/python/task_links_validate.py` 确认回链仍然干净。
 
 ## 6. “首个 T2 Playable 场景流”示例验收条款
 

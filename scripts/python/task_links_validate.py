@@ -2,6 +2,7 @@ from pathlib import Path
 
 import check_tasks_back_references
 import check_tasks_all_refs
+import validate_view_ref_semantics
 
 
 def main() -> None:
@@ -13,7 +14,10 @@ def main() -> None:
     # 2) 全量检查：对所有 tasks_back.json/tasks_gameplay.json 做 ADR/CH/Overlay 校验
     ok_all = check_tasks_all_refs.run_check_all(root)
 
-    if not (ok_new and ok_all):
+    # 3) View field semantics: keep test_refs strict, artifactRefs allows placeholders.
+    ok_semantics = validate_view_ref_semantics.main() == 0
+
+    if not (ok_new and ok_all and ok_semantics):
         raise SystemExit(1)
 
 

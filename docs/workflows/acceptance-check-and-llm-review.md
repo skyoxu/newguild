@@ -49,6 +49,16 @@
   - `tasks_gameplay[].taskmaster_id`
 - 若存在 `taskdoc/<id>.md` 会作为附加上下文被记录在报告中（用于追溯）。
 
+### 2.2.1 视图字段语义（避免“硬门禁误伤”）
+
+本仓库把视图任务文件（`tasks_back.json` / `tasks_gameplay.json`）中的引用字段做了**强语义分离**：
+
+- `test_refs`：**必须存在**的引用（测试文件或代码文件）。禁止放 `logs/**`（因为它通常是运行后才产生的工件）。
+- `artifactRefs`：**门禁/产物锚点**（脚本、工作流、日志 schema、运行产物路径）。允许占位（例如 `logs/ci/<date>/...`、`logs/perf/<YYYY-MM-DD>/...`），**不做存在性硬校验**。
+- `contractRefs`：仅用于**领域契约**（必须是 `Game.Core/Contracts/**` 中已有的 `EventType` 常量值），不允许混入脚本/日志路径。
+
+对应的确定性校验入口是 `py -3 scripts/python/task_links_validate.py`（内部会调用 `scripts/python/validate_view_ref_semantics.py`）。
+
 ### 2.3 输出与退出码
 
 - 输出目录：`logs/ci/<YYYY-MM-DD>/sc-acceptance-check/`

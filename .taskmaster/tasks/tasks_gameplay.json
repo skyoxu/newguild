@@ -62,7 +62,12 @@
     ],
     "taskmaster_id": 3,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [
+      "core.guild.created",
+      "core.guild.member.joined",
+      "core.guild.member.left"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "GM-0103",
@@ -130,7 +135,12 @@
     ],
     "taskmaster_id": 4,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [
+      "core.game_turn.started",
+      "core.game_turn.phase_changed",
+      "core.game_turn.week_advanced"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "GM-0202",
@@ -189,7 +199,17 @@
     ],
     "taskmaster_id": 13,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [
+      "core.guild.created",
+      "core.guild.disbanded",
+      "core.guild.member.joined",
+      "core.guild.member.left",
+      "core.guild.member.role_changed",
+      "core.game_turn.started",
+      "core.game_turn.phase_changed",
+      "core.game_turn.week_advanced"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "GM-0203",
@@ -247,7 +267,13 @@
     ],
     "taskmaster_id": 14,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [
+      "core.recruitment.offer.presented",
+      "core.recruitment.offer.resolved",
+      "core.guild.member.joined",
+      "core.game_turn.week_advanced"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "GM-0201",
@@ -307,7 +333,12 @@
     ],
     "taskmaster_id": 15,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [
+      "core.ai.ecosystem.step.completed",
+      "core.game_turn.week_advanced",
+      "core.game_turn.phase_changed"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "GM-0102",
@@ -369,7 +400,13 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 16,
-    "contractRefs": []
+    "contractRefs": [
+      "core.ai.cycle.started",
+      "core.ai.intent.issued",
+      "core.ai.cycle.completed",
+      "core.game_turn.phase_changed"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "GM-0204",
@@ -430,7 +467,12 @@
     ],
     "taskmaster_id": 17,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [
+      "core.raid.scheduled",
+      "core.raid.resolved",
+      "core.game_turn.week_advanced"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "GM-0205",
@@ -487,7 +529,14 @@
     ],
     "taskmaster_id": 18,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [
+      "core.social.interaction.triggered",
+      "core.social.relationship.changed",
+      "core.guild.member.joined",
+      "core.guild.member.left",
+      "core.game_turn.week_advanced"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "GM-0206",
@@ -544,7 +593,13 @@
     ],
     "taskmaster_id": 19,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [
+      "core.media.beat.triggered",
+      "core.reputation.changed",
+      "core.raid.resolved",
+      "core.social.relationship.changed"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "GM-0207",
@@ -609,6 +664,7 @@
       "core.load.requested",
       "core.load.completed",
       "core.load.failed"
-    ]
+    ],
+    "artifactRefs": []
   }
 ]
