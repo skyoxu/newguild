@@ -47,7 +47,8 @@
     ],
     "taskmaster_id": 1,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": []
   },
   {
     "id": "NG-0012",
@@ -84,10 +85,7 @@
       "headless"
     ],
     "owner": "architecture",
-    "test_refs": [
-      "logs/ci/<date>/smoke/headless.log",
-      "logs/ci/<date>/smoke/selfcheck-summary.json"
-    ],
+    "test_refs": [],
     "acceptance": [
       "新增 scripts/python/smoke_headless.py（或等价脚本），支持 --godot-bin/--scene/--timeout-sec/--project-path 参数，并在 Windows 上可直接运行。",
       "非 strict 模式下，脚本行为与现有 PowerShell 版本等价，输出写入 logs/ci/<date>/smoke/**，并保留宽松判定。",
@@ -100,7 +98,11 @@
     ],
     "taskmaster_id": 5,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/smoke/headless.log",
+      "logs/ci/<date>/smoke/selfcheck-summary.json"
+    ]
   },
   {
     "id": "NG-0013",
@@ -136,11 +138,7 @@
       "gdunit"
     ],
     "owner": "architecture",
-    "test_refs": [
-      "logs/ci/<date>/unit/coverage.json",
-      "logs/e2e/<date>/gdunit-hard/run-summary.json",
-      "logs/ci/<date>/quality-gates-summary.json"
-    ],
+    "test_refs": [],
     "acceptance": [
       "scripts/python/run_dotnet.py 读取覆盖率结果并在 summary.json 中写入 lines/branches 与阈值配置（默认 90/85，可由环境变量覆盖）。",
       "当覆盖率低于阈值时，quality_gates.py 在 summary 中标记为 failed，并可配置为软/硬门禁（至少支持硬门禁）。",
@@ -153,7 +151,12 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 7,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/unit/coverage.json",
+      "logs/e2e/<date>/gdunit-hard/run-summary.json",
+      "logs/ci/<date>/quality-gates-summary.json"
+    ]
   },
   {
     "id": "NG-0014",
@@ -196,8 +199,7 @@
     "owner": "architecture",
     "test_refs": [
       "Tests.Godot/tests/Security/Hard/test_db_path_rejection.gd",
-      "Tests.Godot/tests/Security/Hard/test_settings_config_security.gd",
-      "logs/ci/<date>/security-audit.jsonl"
+      "Tests.Godot/tests/Security/Hard/test_settings_config_security.gd"
     ],
     "acceptance": [
       "外链访问统一通过 SecurityUrlAdapter（或等价组件）完成，强制 https scheme + ALLOWED_EXTERNAL_HOSTS 白名单，禁止 file://、javascript: 等高危 scheme。",
@@ -217,6 +219,9 @@
       "security.url_access.denied",
       "security.file_access.denied",
       "security.process.denied"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/security-audit.jsonl"
     ]
   },
   {
@@ -253,9 +258,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Core.Tests/Performance/PerformanceTrackerTests.cs",
-      "logs/perf/<date>/summary.json",
-      "logs/ci/<date>/perf/performance-gates-summary.json"
+      "Game.Core.Tests/Performance/PerformanceTrackerTests.cs"
     ],
     "acceptance": [
       "Game.Core/Performance/** 下存在 PerformanceTracker/PerformanceMetrics/QueryPerformanceTracker 等类型，API 与 Phase-15 文档保持一致且不依赖 Godot API。",
@@ -270,7 +273,17 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 20,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "scripts/python/perf_smoke_db.py",
+      "scripts/python/quality_gates.py",
+      ".github/workflows/windows-quality-gate.yml",
+      "logs/perf/<YYYY-MM-DD>/db/db-perf-summary.json",
+      "logs/perf/<YYYY-MM-DD>/db/run.json",
+      "logs/perf/<YYYY-MM-DD>/db/gdunit.log",
+      "logs/perf/<date>/summary.json",
+      "logs/ci/<date>/perf/performance-gates-summary.json"
+    ]
   },
   {
     "id": "NG-0016",
@@ -309,8 +322,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Core.Tests/Observability/ObservabilityClientTests.cs",
-      "logs/ci/<date>/release-health.json"
+      "Game.Core.Tests/Observability/ObservabilityClientTests.cs"
     ],
     "acceptance": [
       "Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期初始化 Sentry Godot SDK，并设置 Release/Environment。",
@@ -323,7 +335,16 @@
       "脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "scripts/python/check_sentry_secrets.py",
+      "scripts/python/release_health_gate.py",
+      ".release-health.json",
+      ".github/workflows/windows-release.yml",
+      ".github/workflows/windows-release-tag.yml",
+      "logs/ci/<YYYY-MM-DD>/release-health.json",
+      "logs/ci/<date>/release-health.json"
+    ]
   },
   {
     "id": "NG-0017",
@@ -362,7 +383,6 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "logs/ci/<date>/export/summary.json",
       "build/build-info.json",
       "build/release-profile.json"
     ],
@@ -377,7 +397,10 @@
       "CI 集成：触发 Windows Release (Manual/Tag) 工作流，确认 Artifact 中包含 EXE、PCK、build-info.json 与 SHA256 校验文件。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/export/summary.json"
+    ]
   },
   {
     "id": "NG-0018",
@@ -413,8 +436,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "build/release-profile.json",
-      "logs/ci/<date>/release-health.json"
+      "build/release-profile.json"
     ],
     "acceptance": [
       "构建脚本或 CI 能根据环境变量 RELEASE_CHANNEL（qa/internal/beta/stable）生成包含渠道信息与启用 FeatureFlags 列表的 release-profile.json。",
@@ -427,7 +449,10 @@
       "CI 验证：在测试分支上运行带渠道参数的 Release 工作流，确认生成的 profile 与工件符合预期。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/release-health.json"
+    ]
   },
   {
     "id": "NG-0019",
@@ -472,7 +497,8 @@
       "链接检查：task-links-validate 或等价脚本对新模板文档进行路径与引用校验。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": []
   },
   {
     "id": "NG-0020",
@@ -534,7 +560,12 @@
     ],
     "taskmaster_id": 2,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [
+      "core.guild.created",
+      "core.guild.member.joined",
+      "core.guild.member.left"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "NG-0021",
@@ -579,8 +610,6 @@
       "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
       "Tests.Godot/tests/Scenes/test_guild_main_scene.gd",
       "Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
-      "logs/ci/<date>/ci-pipeline-summary.json",
-      "logs/e2e/<date>/smoke/selfcheck-summary.json",
       "Game.Core.Tests/Domain/GameLoopTests.cs",
       "Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd"
     ],
@@ -598,7 +627,11 @@
     ],
     "taskmaster_id": 6,
     "taskmaster_exported": true,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/ci-pipeline-summary.json",
+      "logs/e2e/<date>/smoke/selfcheck-summary.json"
+    ]
   },
   {
     "id": "NG-0022",
@@ -654,7 +687,17 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 22,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "scripts/python/task_links_validate.py",
+      "scripts/python/check_tasks_all_refs.py",
+      "scripts/python/check_tasks_back_references.py",
+      "scripts/python/validate_task_overlays.py",
+      "scripts/sc/acceptance_check.py",
+      "logs/ci/<YYYY-MM-DD>/sc-acceptance-check/task-links-validate.log",
+      "logs/ci/<YYYY-MM-DD>/sc-acceptance-check/validate-task-overlays.log",
+      "logs/ci/<YYYY-MM-DD>/sc-acceptance-check/adr-compliance.json"
+    ]
   },
   {
     "id": "NG-0023",
@@ -708,7 +751,8 @@
       "CI：在质量门禁中增加针对 core.*.* 事件类型前缀的简单字符串检查脚本。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": []
   },
   {
     "id": "NG-0024",
@@ -761,7 +805,11 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 21,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "docs/architecture/base/03-observability-sentry-logging-v2.md",
+      "docs/adr/ADR-0003-observability-release-health.md"
+    ]
   },
   {
     "id": "NG-0025",
@@ -799,8 +847,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "docs/privacy-compliance.md",
-      "logs/ci/<date>/task-links.json"
+      "docs/privacy-compliance.md"
     ],
     "acceptance": [
       "docs/privacy-compliance.md 存在，并链接自 AGENTS.md 或 testing-framework.md 中的隐私与日志相关章节。",
@@ -813,7 +860,10 @@
       "自动化：在 task-links-validate 中增加针对 privacy-compliance.md 的引用检查，保证后续任务不会绕过该文档。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/task-links.json"
+    ]
   },
   {
     "id": "NG-0026",
@@ -865,7 +915,8 @@
       "自动化：在 task-links-validate 或等价脚本中校验日志相关任务是否引用该文档。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": []
   },
   {
     "id": "NG-0027",
@@ -899,10 +950,7 @@
       "complexity"
     ],
     "owner": "architecture",
-    "test_refs": [
-      "logs/ci/<date>/quality-gates-duplication.json",
-      "logs/ci/<date>/quality-gates-complexity.json"
-    ],
+    "test_refs": [],
     "acceptance": [
       "存在脚本或配置能够生成重复率与圈复杂度的机器可读报告，并写入logs/ci/<date>/quality-gates-duplication.json 与 quality-gates-complexity.json。",
       "quality_gates.py 能够读取上述报告，根据 Phase-13 设定的阈值（例如 Dup% ≤ 2%，最大圈复杂度 ≤ 10，平均圈复杂度 ≤ 5）给出 PASS/FAIL。",
@@ -913,7 +961,11 @@
       "CI：在 windows-quality-gate 工作流中增加对 duplication 与 complexity 报告的校验，并在 Step Summary 中展示关键指标。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/quality-gates-duplication.json",
+      "logs/ci/<date>/quality-gates-complexity.json"
+    ]
   },
   {
     "id": "NG-0028",
@@ -952,11 +1004,7 @@
       "quality-gates"
     ],
     "owner": "architecture",
-    "test_refs": [
-      "logs/perf/<date>/summary.json",
-      "logs/ci/<date>/security-audit.jsonl",
-      "logs/ci/<date>/quality-gates-perf.json"
-    ],
+    "test_refs": [],
     "acceptance": [
       "新增 scripts/python/validate_perf.py 与 scripts/python/validate_audit_logs.py，能够检查 P95 是否在预算内，以及 security-audit.jsonl 每行为合法 JSON 且包含必需字段。",
       "quality_gates.py 支持在 all 模式下调用上述校验脚本，并在失败时返回非零退出码。",
@@ -968,7 +1016,18 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 23,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "scripts/python/perf_smoke_db.py",
+      "scripts/python/validate_audit_logs.py",
+      "scripts/python/quality_gates.py",
+      "logs/ci/<YYYY-MM-DD>/security-audit.jsonl",
+      "logs/perf/<YYYY-MM-DD>/db/db-perf-summary.json",
+      "logs/perf/<YYYY-MM-DD>/db/run.json",
+      "logs/perf/<date>/summary.json",
+      "logs/ci/<date>/security-audit.jsonl",
+      "logs/ci/<date>/quality-gates-perf.json"
+    ]
   },
   {
     "id": "NG-0029",
@@ -1008,8 +1067,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Tests.Godot/tests/Security/Hard/test_security_signals_health.gd",
-      "logs/ci/<date>/signal-health-summary.json"
+      "Tests.Godot/tests/Security/Hard/test_security_signals_health.gd"
     ],
     "acceptance": [
       "与安全相关的关键 Signal（例如 SecurityHttpClient.RequestBlocked 等）具备完整的XML 注释与稳定的命名约定。",
@@ -1021,7 +1079,10 @@
       "CI：在 signal-compliance 相关工作流中集成健康度检查脚本，并观察在故意缺失注释或错误命名时是否会失败。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/signal-health-summary.json"
+    ]
   },
   {
     "id": "NG-0030",
@@ -1058,7 +1119,6 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "logs/perf/<date>/summary.json",
       "reports/performance/current-run-report.json",
       "reports/performance/performance-history.csv"
     ],
@@ -1072,7 +1132,10 @@
       "CI：在性能相关 Job 中执行报告生成步骤，并检查 artifact 中是否包含预期文件。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/perf/<date>/summary.json"
+    ]
   },
   {
     "id": "NG-0031",
@@ -1113,8 +1176,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      ".github/workflows/performance-gates.yml",
-      "logs/ci/<date>/performance-gates-summary.json"
+      ".github/workflows/performance-gates.yml"
     ],
     "acceptance": [
       "仓库中存在独立的性能门禁工作流文件 performance-gates.yml，并在文档中说明触发条件与使用场景。",
@@ -1126,7 +1188,10 @@
       "文档：在 Phase-15 或 README 中记录如何启用或关闭性能门禁工作流。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/performance-gates-summary.json"
+    ]
   },
   {
     "id": "NG-0032",
@@ -1167,7 +1232,6 @@
     "owner": "architecture",
     "test_refs": [
       "scripts/python/build_windows.py",
-      "logs/ci/<date>/signing-summary.json",
       "build/Game.exe"
     ],
     "acceptance": [
@@ -1180,7 +1244,10 @@
       "CI：在 Windows 构建 Job 中对 signing-summary.json 做基础格式检查，确保脚本在有与无证书两种场景下都能稳定运行。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/signing-summary.json"
+    ]
   },
   {
     "id": "NG-0033",
@@ -1217,8 +1284,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "export_presets.cfg",
-      "logs/ci/<date>/export/summary.json"
+      "export_presets.cfg"
     ],
     "acceptance": [
       "export_presets.cfg 中至少定义 Debug 与 Release 两类 Windows Desktop 导出预设，并按需扩展 Demo 等配置。",
@@ -1230,7 +1296,10 @@
       "CI：在 export 相关工作流中记录所用预设名称，并检查导出 summary 中的配置字段。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/export/summary.json"
+    ]
   },
   {
     "id": "NG-0034",
@@ -1265,8 +1334,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "scripts/python/task_links_validate.py",
-      "logs/ci/<date>/quality-gates-structural-refactor.json"
+      "scripts/python/task_links_validate.py"
     ],
     "acceptance": [
       "使用专用脚本或现有工具扫描仓库中所有行级禁用（如 // eslint-disable、#pragma warning disable 等），生成禁用基线清单，并按模块分类输出到 logs/ci/<date>/quality-gates-structural-refactor.json。",
@@ -1278,7 +1346,10 @@
       "基线比较：在两次 CI 运行之间比较禁用基线 JSON，确认整体禁用数量单调下降或保持不变，避免在无计划的情况下新增长期禁用。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/quality-gates-structural-refactor.json"
+    ]
   },
   {
     "id": "NG-0035",
@@ -1313,7 +1384,6 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "logs/ci/<date>/quality-gates-structural-refactor.json",
       "Tests.Godot/addons/gdUnit4/src/dotnet/GdUnit4CSharpApi.cs"
     ],
     "acceptance": [
@@ -1326,7 +1396,10 @@
       "基线比较：对比两次 quality-gates-structural-refactor.json，确认 GdUnit4CSharpApi.cs 相关禁用的变化符合预期，并记录在任务备注中。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/quality-gates-structural-refactor.json"
+    ]
   },
   {
     "id": "NG-0036",
@@ -1359,7 +1432,6 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "logs/ci/<date>/quality-gates-structural-refactor.json",
       ".taskmaster/tasks/tasks_back.json",
       "docs/adr/ADR-0005-quality-gates.md",
       "scripts/python/scan_code_disables.py"
@@ -1374,7 +1446,10 @@
       "脚本回归：在调整脚本过滤规则后运行 scan_code_disables.py，确保不会因为新增过滤逻辑而漏报真实代码中的禁用。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/quality-gates-structural-refactor.json"
+    ]
   },
   {
     "id": "NG-0037",
@@ -1411,9 +1486,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "scripts/python/task_links_validate.py",
-      "logs/ci/<date>/taskmaster/auto_sentry_tasks.json",
-      "logs/ci/<date>/taskmaster/auto_sentry_tasks-summary.json"
+      "scripts/python/task_links_validate.py"
     ],
     "acceptance": [
       "存在 Python 脚本或等价实现，能够在不直接修改 tasks_back.json/tasks_gameplay.json 的前提下，从 Sentry API（或占位假数据）中读取近 24 小时内的新/回归错误 TopN，并生成 .taskmaster/tasks/tasks_sentry_draft.json 或等价草案文件，至少包含 Sentry 链接、错误摘要、初步模块标签。",
@@ -1425,7 +1498,11 @@
       "流程级验证：在测试环境中手动触发 nightly Job，检查生成的 logs/ci/<date>/taskmaster/** 工件是否包含预期的草案与摘要，并在 task_links_validate 或等价脚本中确认草案文件不会被误解为正式回链来源。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/taskmaster/auto_sentry_tasks.json",
+      "logs/ci/<date>/taskmaster/auto_sentry_tasks-summary.json"
+    ]
   },
   {
     "id": "NG-0038",
@@ -1463,10 +1540,7 @@
       "csharp"
     ],
     "owner": "architecture",
-    "test_refs": [
-      "logs/ci/<date>/dependency-guard.json",
-      "logs/ci/<date>/dependency-guard-summary.txt"
-    ],
+    "test_refs": [],
     "acceptance": [
       "docs/architecture/base/07-dev-build-and-gates-v2.md 中 7.y 小节明确给出项目级与目录级依赖矩阵（Game.Core/Game.Godot/Tests.* 与 Scripts/Core/Adapters/Scenes 的允许/禁止依赖关系），AGENTS.md 中引用该小节作为架构依赖 SSoT。",
       "存在 scripts/python/dependency_guard.py 或等价脚本，能够扫描 C# 工程（csproj 与 using 语句）和 Godot Scripts 目录结构，检测是否存在违反依赖矩阵的引用（例如 Game.Core 中出现 Godot 命名空间、Game.Godot 引用 Tests.*、Scripts/Core 引用 Godot API 等），并将结果写入 logs/ci/<date>/dependency-guard.json 与文本摘要。",
@@ -1477,7 +1551,11 @@
       "CI：在测试分支上启用依赖护栏步骤，故意保留一处违规依赖，确认 windows-quality-gate（或等价工作流）中的 Step Summary 能显示违规详情，并在规则配置为硬门禁时正确使 Job 失败。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/dependency-guard.json",
+      "logs/ci/<date>/dependency-guard-summary.txt"
+    ]
   },
   {
     "id": "NG-0039",
@@ -1515,8 +1593,6 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "logs/security-audit-gameloop.json",
-      "logs/SECURITY_AUDIT_GAMELOOP_REPORT.md",
       "cifix.txt"
     ],
     "acceptance": [
@@ -1537,6 +1613,10 @@
       "security.file_access.denied",
       "security.process.denied",
       "security.url_access.denied"
+    ],
+    "artifactRefs": [
+      "logs/security-audit-gameloop.json",
+      "logs/SECURITY_AUDIT_GAMELOOP_REPORT.md"
     ]
   },
   {
@@ -1596,7 +1676,8 @@
       "core.game_turn.started",
       "core.game_turn.phase_changed",
       "core.game_turn.week_advanced"
-    ]
+    ],
+    "artifactRefs": []
   },
   {
     "id": "NG-0041",
@@ -1648,7 +1729,10 @@
       "回归测试：运行 Game.Core.Tests 全量，确保架构调整后所有 GameLoop 相关测试依旧通过。"
     ],
     "taskmaster_exported": false,
-    "contractRefs": []
+    "contractRefs": [
+      "core.game_turn.started"
+    ],
+    "artifactRefs": []
   },
   {
     "id": "NG-0042",
@@ -1685,8 +1769,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Godot/Adapters/SqliteDataStore.cs",
-      "logs/ci/<date>/security-audit.jsonl"
+      "Game.Godot/Adapters/SqliteDataStore.cs"
     ],
     "acceptance": [
       "SqliteDataStore 对传入路径在检查前统一规范化分隔符，严格限制为 user:// 前缀并拒绝任何包含 .. 或 ..\\\\ 的路径。",
@@ -1702,6 +1785,9 @@
     "taskmaster_id": 11,
     "contractRefs": [
       "security.file_access.denied"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/security-audit.jsonl"
     ]
   },
   {
@@ -1739,8 +1825,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Godot/Adapters/Db/GodotSQLiteDatabase.cs",
-      "logs/ci/<date>/security-audit.jsonl"
+      "Game.Godot/Adapters/Db/GodotSQLiteDatabase.cs"
     ],
     "acceptance": [
       "GodotSQLiteDatabase 在 DEBUG 构建下仍然抛出包含路径/SQL 的详细异常，方便开发调试。",
@@ -1755,6 +1840,9 @@
     "taskmaster_id": 12,
     "contractRefs": [
       "security.file_access.denied"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/security-audit.jsonl"
     ]
   },
   {
@@ -1794,8 +1882,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "scripts/python/check_gameloop_contracts.py",
-      "logs/ci/<date>/gameloop-quality-guard.json"
+      "scripts/python/check_gameloop_contracts.py"
     ],
     "acceptance": [
       "新增 scripts/python/check_gameloop_contracts.py 或等价脚本，能够扫描 GameLoop 相关契约/测试/Overlay 文档，并在发现不一致时给出结构化 JSON 报告。",
@@ -1814,6 +1901,9 @@
       "security.file_access.denied",
       "security.process.denied",
       "security.url_access.denied"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/gameloop-quality-guard.json"
     ]
   },
   {
@@ -1852,8 +1942,7 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Godot/Adapters/SecurityAuditLogger.cs",
-      "logs/ci/<date>/security-audit.jsonl"
+      "Game.Godot/Adapters/SecurityAuditLogger.cs"
     ],
     "acceptance": [
       "在 CI/Release/secure 模式下，当产生周推进事件时，security-audit.jsonl 追加一条 ADR-0019 五字段 JSONL 记录（{ts, action, reason, target, caller}）。",
@@ -1867,6 +1956,9 @@
     "taskmaster_exported": false,
     "contractRefs": [
       "core.game_turn.week_advanced"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/security-audit.jsonl"
     ]
   },
   {
@@ -1941,6 +2033,7 @@
       "core.load.completed",
       "core.load.failed",
       "core.storage.migration.applied"
-    ]
+    ],
+    "artifactRefs": []
   }
 ]

@@ -292,6 +292,7 @@ def build_taskmaster_tasks(args: argparse.Namespace) -> None:
             ("chapter_refs", "Chapters"),
             ("overlay_refs", "Overlays"),
             ("test_refs", "Test Refs"),
+            ("artifactRefs", "Artifact Refs"),
             ("acceptance", "Acceptance"),
             ("test_strategy", "Test Strategy"),
             ("labels", "Labels"),

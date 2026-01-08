@@ -18,7 +18,7 @@
     - `priority: "high" | "medium" | "low"`（由 P1/P2/P3 映射而来）
     - `dependencies: number[]`（由字符串 `depends_on` 映射）
     - `testStrategy: string`（从 `test_strategy[]` 合并为多行文本）
-    - `details: string`（将 `story_id` / `adr_refs` / `chapter_refs` / `overlay_refs` / `test_refs` / `acceptance` / `test_strategy` / `labels` / `owner` / `layer` 等聚合为 markdown 风格说明）
+    - `details: string`（将 `story_id` / `adr_refs` / `chapter_refs` / `overlay_refs` / `test_refs` / `artifactRefs` / `acceptance` / `test_strategy` / `labels` / `owner` / `layer` 等聚合为 markdown 风格说明）
 
 ---
 
