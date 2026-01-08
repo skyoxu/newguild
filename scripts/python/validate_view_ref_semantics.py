@@ -5,7 +5,10 @@ Validate view task ref semantics (deterministic, Windows).
 Semantics (repo SSoT):
 - `test_refs`: MUST-EXIST references (tests/source files). No `logs/**` paths.
 - `artifactRefs`: Gate artifacts / outputs / anchors. MAY use placeholders like `<date>` / `<YYYY-MM-DD>`.
-- `contractRefs`: Domain EventType constants only (must exist in Game.Core/Contracts/**).
+- `contractRefs`: Domain EventType constants only.
+  - For tasks in progress or done: must exist in Game.Core/Contracts/**.
+  - For tasks still pending/deferred/cancelled: missing EventType is allowed as a planning hint (WARNING),
+    so CI doesn't get blocked by future contracts.
 
 This script intentionally does NOT enforce existence for `artifactRefs`.
 
@@ -105,10 +108,12 @@ def main() -> int:
         "rules": {
             "test_refs": "MUST exist; MUST NOT include logs/** paths",
             "artifactRefs": "Gate artifacts; MAY include placeholders; existence NOT enforced",
-            "contractRefs": "Domain EventType constants; must exist in Game.Core/Contracts/**",
+            "contractRefs": "EventType constants; strict for in-progress/done, warning for pending/deferred/cancelled",
         },
         "contracts_eventType_count": len(known_event_types),
     }
+
+    non_strict_statuses = {"pending", "deferred", "cancelled"}
 
     for rel in VIEW_FILES:
         path = root / rel
@@ -116,6 +121,8 @@ def main() -> int:
         for t in tasks:
             tid = t.get("id")
             tm_id = t.get("taskmaster_id")
+            status_raw = str(t.get("status") or "").strip().lower()
+            strict_contracts = status_raw not in non_strict_statuses
 
             # artifactRefs: must exist as a list field (schema consistency), but items may be placeholders.
             if "artifactRefs" not in t:
@@ -153,15 +160,19 @@ def main() -> int:
             # contractRefs: must exist in contracts
             for c in normalize_list(t.get("contractRefs")):
                 if known_event_types and c not in known_event_types:
-                    report["errors"].append(
-                        {
-                            "file": rel,
-                            "id": tid,
-                            "taskmaster_id": tm_id,
-                            "error": "contractRefs references unknown EventType (missing in Game.Core/Contracts/**)",
-                            "value": c,
-                        }
-                    )
+                    entry = {
+                        "file": rel,
+                        "id": tid,
+                        "taskmaster_id": tm_id,
+                        "status": status_raw or None,
+                        "value": c,
+                    }
+                    if strict_contracts:
+                        entry["error"] = "contractRefs references unknown EventType (missing in Game.Core/Contracts/**)"
+                        report["errors"].append(entry)
+                    else:
+                        entry["warning"] = "contractRefs references unknown EventType (allowed for planning when task is pending/deferred/cancelled)"
+                        report["warnings"].append(entry)
 
     write_json(out_dir / "validate-view-ref-semantics.json", report)
     ok = len(report["errors"]) == 0
@@ -171,4 +182,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
