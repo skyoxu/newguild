@@ -57,6 +57,10 @@ func collect_full_logs() -> PackedStringArray:
 	await (Engine.get_main_loop() as SceneTree).physics_frame
 
 	var file := FileAccess.open(_godot_log_file, FileAccess.READ)
+	if file == null:
+		# File logging may be disabled or the log path may not exist in CI sandboxes.
+		# Do not crash the test runner; just return no records.
+		return PackedStringArray()
 	file.seek(_eof)
 	var records := PackedStringArray()
 	while not file.eof_reached():
@@ -68,6 +72,10 @@ func collect_full_logs() -> PackedStringArray:
 
 func _collect_log_entries(force_collect_reports: bool) -> Array[ErrorLogEntry]:
 	var file := FileAccess.open(_godot_log_file, FileAccess.READ)
+	if file == null:
+		# File logging may be disabled or the log path may not exist in CI sandboxes.
+		# Do not crash the test runner; just return no entries.
+		return []
 	file.seek(_eof)
 	var records := PackedStringArray()
 	while not file.eof_reached():
