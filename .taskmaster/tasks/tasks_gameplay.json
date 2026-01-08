@@ -61,7 +61,8 @@
       "为冲突场景（多个事件作用于同一实体或互斥条件）编写专门测试，确认 EventEngine 能按预期顺序/规则处理。"
     ],
     "taskmaster_id": 3,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "GM-0103",
@@ -128,7 +129,8 @@
       "结合 GM-0101/GM-0102，用一个最小的“公会一周生活”场景验证事件触发、AI 行为与 UI 反馈闭环。"
     ],
     "taskmaster_id": 4,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "GM-0202",
@@ -186,7 +188,8 @@
       "GdUnit4（可选）：启动 GuildScreen 场景，模拟成员变更事件并断言 UI 列表刷新与关键按钮可用性。"
     ],
     "taskmaster_id": 13,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "GM-0203",
@@ -243,7 +246,8 @@
       "GdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。"
     ],
     "taskmaster_id": 14,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "GM-0201",
@@ -302,7 +306,8 @@
       "如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。"
     ],
     "taskmaster_id": 15,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "GM-0102",
@@ -363,7 +368,8 @@
       "在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 16
+    "taskmaster_id": 16,
+    "contract_refs": []
   },
   {
     "id": "GM-0204",
@@ -423,7 +429,8 @@
       "GdUnit4（可选）：跑一条 headless 冒烟确保演示入口与事件流不崩溃。"
     ],
     "taskmaster_id": 17,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "GM-0205",
@@ -479,7 +486,8 @@
       "GdUnit4（可选）：触发一次关系变化并断言 UI 展示更新。"
     ],
     "taskmaster_id": 18,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "GM-0206",
@@ -535,6 +543,72 @@
       "如有集成演示：在 Godot 场景中显示声望值并观察一次变化。"
     ],
     "taskmaster_id": 19,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
+  },
+  {
+    "id": "GM-0207",
+    "taskmaster_id": 26,
+    "story_id": "PRD-GUILD-MANAGER-T3-SAVELOAD-UI",
+    "title": "T3 Save/Load UI 入口（Menu / Debug Entry）",
+    "description": "为玩家提供可触达的 Save/Load 入口：最小化 UI（或 Debug 面板）触发保存与读取，并展示成功/失败结果；核心存档逻辑在 Game.Core，UI 只负责调用与展示。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0046"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0007",
+      "ADR-0018",
+      "ADR-0019"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
+    ],
+    "labels": [
+      "ui",
+      "save",
+      "load",
+      "menu",
+      "playable"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_save_load_entry_smoke.gd"
+    ],
+    "acceptance": [
+      "在 Godot 中提供 Save/Load 入口（主菜单按钮或 Debug 面板均可），能触发一次保存与一次读取。",
+      "读取失败/写入失败时，UI 展示通用错误信息（Release/secure 模式不泄露路径/SQL），并确保审计条目落盘。",
+      "Save/Load 过程通过核心契约事件可观测（contract_refs），UI 通过订阅/回调展示状态，不直接操作数据库。"
+    ],
+    "test_strategy": [
+      "GdUnit4：headless 冒烟验证按钮/入口可用，触发保存与读取后能看到状态变化（可通过日志或 UI 文本断言）。"
+    ],
+    "contract_refs": [
+      "core.save.requested",
+      "core.save.completed",
+      "core.save.failed",
+      "core.load.requested",
+      "core.load.completed",
+      "core.load.failed"
+    ],
+    "taskmaster_exported": false
   }
 ]

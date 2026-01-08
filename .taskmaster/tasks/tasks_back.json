@@ -4,7 +4,7 @@
     "story_id": "PRD-NEWGUILD-VS-0001",
     "title": "整理 newguild 首个垂直切片 PRD 与 Overlay 映射",
     "description": "基于现有 ADR 与 Phase 文档，为 newguild 定义首个可玩的垂直切片（例如基础公会管理循环），并将 Story 对齐到 PRD-<PRODUCT> / overlays/08 中的功能纵切文档。产出：一份最小 PRD 片段、对应 overlays 目录与 Test-Refs 协议。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "docs",
     "depends_on": [],
@@ -46,14 +46,15 @@
       "链接校验：任务/回链校验脚本通过（task-links-validate）。"
     ],
     "taskmaster_id": 1,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "NG-0012",
     "story_id": "PH12-BACKLOG-B1-B2",
     "title": "Python 版 headless smoke 封装与 strict 模式开关",
     "description": "根据 Phase-12-Headless-Smoke-Backlog.md B1/B2，在当前 Godot + C# 模板中实现 Python 版 headless smoke 封装脚本（替代/补充 PowerShell 版本），并增加 strict 模式：严格依赖 [TEMPLATE_SMOKE_READY]/[DB] opened marker 决定通过与否。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "ci",
     "depends_on": [
@@ -98,7 +99,8 @@
       "CI 演练：在非受保护分支上打开 strict 模式，观察 smoke 失败时的门禁行为与日志输出。"
     ],
     "taskmaster_id": 5,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "NG-0013",
@@ -150,14 +152,15 @@
       "CI 验证：在 PR 上运行 windows-quality-gate 工作流，观察 coverage 与 GdUnit4 结果是否在 Step Summary 与 artifacts 中正确展示。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 7
+    "taskmaster_id": 7,
+    "contract_refs": []
   },
   {
     "id": "NG-0014",
     "story_id": "PH14-BACKLOG-B1-B2-B3-B4",
     "title": "Godot 安全适配层增强：外链白名单、文件访问与 OS.execute 守卫",
     "description": "按照 Phase-14-Godot-Security-Baseline.md 与 Backlog，对当前 Godot+C# 模板补齐安全适配层：统一外链白名单配置（ALLOWED_EXTERNAL_HOSTS）、文件访问适配（仅 res:// 与 user://，拒绝 .. 和绝对路径）、显式封装 OS.execute，并为安全审计 JSONL 增加格式校验与最小测试集。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "adapter",
     "depends_on": [
@@ -266,10 +269,12 @@
       "CI 集成：在 windows-quality-gate 工作流中增加可选性能门禁 step，观察超阈值时的报告与退出码。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 20
+    "taskmaster_id": 20,
+    "contract_refs": []
   },
   {
     "id": "NG-0016",
+    "taskmaster_id": 24,
     "story_id": "PH16-BACKLOG-B1-B3",
     "title": "Observability Autoload 与 Sentry Release Health Gate",
     "description": "按照 Phase-16-Observability-Sentry-Integration.md 与 Backlog，在 Game.Godot 中引入 Observability Autoload（初始化 Sentry Godot SDK、统一日志接口），并实现 Python 版 release_health_gate 脚本：从 Sentry API 读取 Crash-Free Sessions/Users 指标，与 ADR-0003/0015 定义的阈值对齐，在 CI 中生成 release-health.json 并支持作为发布门禁。",
@@ -317,7 +322,8 @@
       "核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。",
       "脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0017",
@@ -370,7 +376,8 @@
       "本地构建：在开发机运行 build_windows.py release/debug，验证输出文件与日志。",
       "CI 集成：触发 Windows Release (Manual/Tag) 工作流，确认 Artifact 中包含 EXE、PCK、build-info.json 与 SHA256 校验文件。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0018",
@@ -419,7 +426,8 @@
       "本地验证：手工设置不同 RELEASE_CHANNEL，运行构建脚本并检查 release-profile.json 差异。",
       "CI 验证：在测试分支上运行带渠道参数的 Release 工作流，确认生成的 profile 与工件符合预期。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0019",
@@ -463,14 +471,15 @@
       "文档审阅：由架构/产品共同确认模板文档结构对真实项目足够且不过度约束。",
       "链接检查：task-links-validate 或等价脚本对新模板文档进行路径与引用校验。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0020",
     "story_id": "PRD-GUILD-MANAGER-VS-CORE-LOOP",
     "title": "公会管理器首个垂直切片的三层架构与核心类型落地",
     "description": "依据 PRD-Guild-Manager 与 08-功能纵切-公会管理器.md，在 Game.Core / Game.Godot / Tests.Godot 三层落地首个可玩的公会管理垂直切片：实现基础 Guild/GuildMember/Raid/Event 域模型与服务，提供对应的 Godot 场景与 UI Glue，并为该循环建立最小 xUnit 与 GdUnit4 测试集。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -524,14 +533,15 @@
       "集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。"
     ],
     "taskmaster_id": 2,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "NG-0021",
     "story_id": "PRD-GUILD-MANAGER-VS-TEST-CI",
     "title": "首个垂直切片的最小 xUnit/GdUnit4/Smoke 流程打通",
     "description": "在 newguild 模板下，为 PRD-Guild-Manager 的首个公会管理垂直切片建立最小可用的测试与 CI 流程：xUnit 覆盖核心域逻辑，GdUnit4 覆盖主场景与基本交互，headless smoke 验证游戏能从命令行启动到主场景并正常退出，所有步骤在 dev_cli.py 与 Windows CI 工作流中可自动执行。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "ci",
     "depends_on": [
@@ -587,7 +597,8 @@
       "CI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。"
     ],
     "taskmaster_id": 6,
-    "taskmaster_exported": true
+    "taskmaster_exported": true,
+    "contract_refs": []
   },
   {
     "id": "NG-0022",
@@ -642,7 +653,8 @@
       "自动化：扩展或实现 task-links-validate 脚本，针对 NG-00xx 与玩法任务校验 story_id/adr_refs/chapter_refs/overlay_refs 与文档实际存在性和一致性。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 22
+    "taskmaster_id": 22,
+    "contract_refs": []
   },
   {
     "id": "NG-0023",
@@ -695,7 +707,8 @@
       "本地：运行 GameEngineCoreEventTests，并通过全文搜索核对事件类型常量。",
       "CI：在质量门禁中增加针对 core.*.* 事件类型前缀的简单字符串检查脚本。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0024",
@@ -747,7 +760,8 @@
       "CI：在 dotnet-unit 任务中确保 Observability 测试纳入覆盖率统计，并在质量门禁报告中展示相关用例。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 21
+    "taskmaster_id": 21,
+    "contract_refs": []
   },
   {
     "id": "NG-0025",
@@ -798,7 +812,8 @@
       "文档审阅：由架构或安全角色人工检查 privacy-compliance.md 是否覆盖日志、Sentry 与审计 JSONL 的隐私约束。",
       "自动化：在 task-links-validate 中增加针对 privacy-compliance.md 的引用检查，保证后续任务不会绕过该文档。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0026",
@@ -849,7 +864,8 @@
       "文档审阅：在评审 PR 时检查日志相关变更是否引用 logging-guidelines.md 并符合其约定。",
       "自动化：在 task-links-validate 或等价脚本中校验日志相关任务是否引用该文档。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0027",
@@ -896,7 +912,8 @@
       "本地：构造一个故意高重复率、高复杂度的小示例，验证 quality_gates.py 能将其标记为 failed。",
       "CI：在 windows-quality-gate 工作流中增加对 duplication 与 complexity 报告的校验，并在 Step Summary 中展示关键指标。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0028",
@@ -950,7 +967,8 @@
       "集成：在 CI 中对刻意构造的超阈值样例运行 quality_gates.py，验证能够正确失败并输出预期的 JSON 摘要。"
     ],
     "taskmaster_exported": true,
-    "taskmaster_id": 23
+    "taskmaster_id": 23,
+    "contract_refs": []
   },
   {
     "id": "NG-0029",
@@ -1002,7 +1020,8 @@
       "GdUnit4：为安全相关 Signal 编写 Hard 套件，用于验证触发路径与 XML 注释是否齐全。",
       "CI：在 signal-compliance 相关工作流中集成健康度检查脚本，并观察在故意缺失注释或错误命名时是否会失败。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0030",
@@ -1052,7 +1071,8 @@
       "本地：构造多次性能采样结果，运行报告生成脚本，检查历史文件是否按预期累积数据。",
       "CI：在性能相关 Job 中执行报告生成步骤，并检查 artifact 中是否包含预期文件。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0031",
@@ -1105,7 +1125,8 @@
       "CI：针对测试分支手动触发 performance-gates 工作流，观察在性能超阈值和正常情况下的行为差异。",
       "文档：在 Phase-15 或 README 中记录如何启用或关闭性能门禁工作流。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0032",
@@ -1158,7 +1179,8 @@
       "本地：在具备测试证书的环境下执行构建，验证 EXE 已被签名且系统属性中可见。",
       "CI：在 Windows 构建 Job 中对 signing-summary.json 做基础格式检查，确保脚本在有与无证书两种场景下都能稳定运行。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0033",
@@ -1207,7 +1229,8 @@
       "本地：在 Godot 编辑器与 headless 模式下分别验证各导出预设可以成功生成可运行的 EXE。",
       "CI：在 export 相关工作流中记录所用预设名称，并检查导出 summary 中的配置字段。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0034",
@@ -1254,7 +1277,8 @@
       "脚本校验：为禁用扫描脚本编写最小单元测试或集成测试，验证对典型文件（TS/CS/配置文件）能正确识别和统计行级禁用标记。",
       "基线比较：在两次 CI 运行之间比较禁用基线 JSON，确认整体禁用数量单调下降或保持不变，避免在无计划的情况下新增长期禁用。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0035",
@@ -1301,7 +1325,8 @@
       "手动与 xUnit/GdUnit4 回归：在尝试移除或调整 pragma 前后运行 Tests.Godot 相关套件，确保测试仍然稳定。",
       "基线比较：对比两次 quality-gates-structural-refactor.json，确认 GdUnit4CSharpApi.cs 相关禁用的变化符合预期，并记录在任务备注中。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0036",
@@ -1348,7 +1373,8 @@
       "文档审阅：由架构/维护者确认调整后的示例仍然传达相同含义，且不会误导协作者。",
       "脚本回归：在调整脚本过滤规则后运行 scan_code_disables.py，确保不会因为新增过滤逻辑而漏报真实代码中的禁用。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0037",
@@ -1398,7 +1424,8 @@
       "脚本级测试：对占位的 Sentry 响应样本运行草案生成脚本，验证能够正确过滤环境与时间窗口、生成 TopN 草案条目，并写入预期 JSON 文件路径。",
       "流程级验证：在测试环境中手动触发 nightly Job，检查生成的 logs/ci/<date>/taskmaster/** 工件是否包含预期的草案与摘要，并在 task_links_validate 或等价脚本中确认草案文件不会被误解为正式回链来源。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0038",
@@ -1449,14 +1476,15 @@
       "本地：构造刻意违反依赖矩阵的示例（例如在 Game.Core 中添加 using Godot; 或在 Scripts/Core 中直接引用 Godot API），运行 dependency_guard 脚本验证其能正确发现并在 JSON/文本摘要中报告。",
       "CI：在测试分支上启用依赖护栏步骤，故意保留一处违规依赖，确认 windows-quality-gate（或等价工作流）中的 Step Summary 能显示违规详情，并在规则配置为硬门禁时正确使 Job 失败。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0039",
     "story_id": "PH16-GAMELOOP-SECURITY-BASELINE",
     "title": "GameLoop 安全审计基线与任务映射收口",
     "description": "根据最新的 GameLoop 安全审计报告（logs/security-audit-gameloop.*）和 cifix.txt，对照 ADR-0019/0004/0005/0018 重新梳理 F001–F007，区分 T2 阶段必须完成与 NG 安全 backlog 的工作，并在 tasks_back.json / tasks_gameplay.json 中补齐 adr_refs/chapter_refs/overlay_refs/test_refs，使后续审计与 task_links_validate 以统一口径运行。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "docs",
     "depends_on": [
@@ -1516,7 +1544,7 @@
     "story_id": "PH16-GAMELOOP-SAVEID-VALUE",
     "title": "GameLoop SaveIdValue 值对象与白名单校验",
     "description": "在 Game.Core 中为 GameLoop 引入 SaveIdValue 值对象（或等价验证器），实现基于 ADR-0019 的白名单规则（仅允许 [a-zA-Z0-9_-] 且长度 1-64），并在 GameTurnState/GameTurnSystem 与 GameLoop 相关合约中统一使用该类型；同时新增 SaveId 安全向单元测试，覆盖非法输入与边界值。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -1619,14 +1647,15 @@
       "结构检查：通过现有 dependency_guard.py（或临时脚本）扫描接口文件位置与命名空间，确认 Ports/Domain/Engine 层次符合 ADR-0007。",
       "回归测试：运行 Game.Core.Tests 全量，确保架构调整后所有 GameLoop 相关测试依旧通过。"
     ],
-    "taskmaster_exported": false
+    "taskmaster_exported": false,
+    "contract_refs": []
   },
   {
     "id": "NG-0042",
     "story_id": "PH06-GAMELOOP-SQLITE-PATH-HARDENING",
     "title": "SqliteDataStore 路径校验与插件后端安全收紧",
     "description": "在 Game.Godot/Adapters/SqliteDataStore 中增强路径与扩展名校验：对 user:// 路径进行规范化后再做前缀与 .. 检查，增加 .db/.sqlite/.sqlite3 等扩展名白名单，并为已有 ValidatePath 逻辑补充文件大小上限检查；同时通过环境变量限制 plugin backend 的启用范围（如仅在开发环境允许），将 plugin backend 风险收敛为受控技术债。",
-    "status": "pending",
+    "status": "in-progress",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -1680,7 +1709,7 @@
     "story_id": "PH06-GAMELOOP-DB-ERROR-AND-AUDIT",
     "title": "GodotSQLiteDatabase 错误脱敏与审计挂钩",
     "description": "在 Game.Godot/Adapters/Db/GodotSQLiteDatabase 中按 ADR-0019 要求改造错误处理：开发环境保留详细异常信息方便排查；生产环境仅抛出脱敏后的通用错误消息，并将包含路径/SQL 明细的诊断信息写入安全审计日志或内部日志文件；同时为 OpenAsync/Execute* 等路径补充最小测试或 smoke 验证。",
-    "status": "pending",
+    "status": "done",
     "priority": "P3",
     "layer": "adapter",
     "depends_on": [
@@ -1839,5 +1868,78 @@
     "contract_refs": [
       "core.game_turn.week_advanced"
     ]
+  },
+  {
+    "id": "NG-0046",
+    "taskmaster_id": 25,
+    "story_id": "PRD-GUILD-MANAGER-T3-SAVELOAD-SSOT",
+    "title": "T3 Save/Load + Schema Migration（SSoT）",
+    "description": "为 T3 提供跨会话可玩性：定义 Save/Load 的领域契约、SQLite schema 版本与迁移策略，以及错误脱敏与审计要求。该任务是“验收/契约视图”，实现任务应在 master/tasks.json 中完成。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": [
+      "NG-0040",
+      "NG-0042",
+      "NG-0043"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0007",
+      "ADR-0018",
+      "ADR-0019"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
+    ],
+    "labels": [
+      "save",
+      "load",
+      "sqlite",
+      "migration",
+      "schema",
+      "crosscutting"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+      "Game.Core.Tests/Persistence/Migrations/SchemaMigrationTests.cs",
+      "Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd"
+    ],
+    "acceptance": [
+      "定义 Save/Load 的最小契约与事件类型（contract_refs），并在 master 任务实现中落盘到 Game.Core/Contracts（纯 C#，不依赖 Godot API）。",
+      "定义 SQLite schema 版本机制：至少包含 SchemaVersion 表（或等价元数据）与迁移 runner，支持从旧版本升级到新版本。",
+      "迁移必须是幂等且可审计：失败时写入 security-audit.jsonl（五字段 JSONL），且错误信息在 Release/secure 模式下脱敏（不泄露路径/SQL）。",
+      "Save/Load 必须限制在 user:// 且拒绝路径穿越与非白名单扩展名；文件大小上限与 DoS 防护策略在验收中明确。"
+    ],
+    "test_strategy": [
+      "xUnit：覆盖 schema version 迁移（升级路径 + 失败路径），以及 Save/Load 的 round-trip（最小模型）与错误脱敏。",
+      "GdUnit4：提供一条 headless 冒烟，验证 user:// 下能创建存档、读取存档并生成必要审计条目（失败路径也要覆盖）。"
+    ],
+    "contract_refs": [
+      "core.save.requested",
+      "core.save.completed",
+      "core.save.failed",
+      "core.load.requested",
+      "core.load.completed",
+      "core.load.failed",
+      "core.storage.migration.applied"
+    ],
+    "taskmaster_exported": false
   }
 ]

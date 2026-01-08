@@ -481,7 +481,8 @@
         "dependencies": [
           "2",
           "3",
-          "4"
+          "4",
+          "24"
         ],
         "details": "Story: PRD-GUILD-MANAGER-T3-MEMBER-MANAGEMENT\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nAcceptance: Game.Core 提供成员 roster 的模型与操作（至少包含：加入/退出、角色变更、踢出），并包含必要的边界校验（例如：重复成员、无效角色、无权限变更）。; 成员变更通过领域事件对外发布（例如 core.guild.member.joined / left / role_changed），事件类型常量与字段定义落盘到 Game.Core/Contracts 并遵循 ADR-0004。; Game.Godot 的 GuildScreen 能展示 roster，并在收到事件后更新 UI；UI 操作通过适配层调用核心命令，不直接修改核心状态。; 至少提供一组 xUnit 单测覆盖 roster 关键状态迁移与事件生成；如有 GdUnit4，则补一条 UI 冒烟验证“事件驱动刷新”。\nTest Strategy: xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。; GdUnit4（可选）：启动 GuildScreen 场景，模拟成员变更事件并断言 UI 列表刷新与关键按钮可用性。\nLabels: ui; guild; member; roster\nOwner: architecture\nLayer: adapter",
         "testStrategy": "xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。\nGdUnit4（可选）：启动 GuildScreen 场景，模拟成员变更事件并断言 UI 列表刷新与关键按钮可用性。",
@@ -544,7 +545,9 @@
         "status": "pending",
         "priority": "medium",
         "dependencies": [
-          "14"
+          "14",
+          "20",
+          "25"
         ],
         "details": "Story: PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0015; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nAcceptance: Game.Core 提供 AIEcosystem（或等价模块），在 GameTurn/时间推进下驱动 NPC 行为生成，并能稳定复现实例（可通过种子或确定性输入）。; 至少实现 3 类可观测行为并以领域事件发布（例如 core.guild.recruitment.posted、core.guild.member.joined、core.guild.member.left），事件类型与字段遵循 ADR-0004。; AIEcosystem 的输入/输出与存储边界清晰：核心逻辑不依赖 Godot API，适配层负责时间/随机源注入。; xUnit 覆盖：确定性推进、事件数量/类型、边界条件（空 guild、满员、无候选等）。\nTest Strategy: xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。; 如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。\nLabels: core; ai; simulation; npc; guild\nOwner: architecture\nLayer: core",
         "testStrategy": "xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。\n如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。",
@@ -821,12 +824,204 @@
         ],
         "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
         "updatedAt": "2026-01-07T18:25:01.169Z"
+      },
+      {
+        "id": "24",
+        "title": "Observability Autoload 与 Sentry Release Health Gate",
+        "description": "按照 Phase-16-Observability-Sentry-Integration.md 与 Backlog，在 Game.Godot 中引入 Observability Autoload（初始化 Sentry Godot SDK、统一日志接口），并实现 Python 版 release_health_gate 脚本：从 Sentry API 读取 Crash-Free Sessions/Users 指标，与 ADR-0003/0015 定义的阈值对齐，在 CI 中生成 release-health.json 并支持作为发布门禁。",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "21"
+        ],
+        "details": "Story: PH16-BACKLOG-B1-B3\nADR Refs: ADR-0003; ADR-0005; ADR-0015; ADR-0018\nChapters: CH01; CH03; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Observability/ObservabilityClientTests.cs; logs/ci/<date>/release-health.json\nAcceptance: Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期初始化 Sentry Godot SDK，并设置 Release/Environment。; Game.Core 中存在 ObservabilityClient/StructuredLogger（或等价实现），通过接口注入到核心服务，避免直接依赖 Godot 或 Sentry。; 新增 scripts/python/release_health_gate.py，支持配置 SENTRY_* 环境变量与阈值 JSON，生成 logs/ci/<date>/release-health.json 并根据阈值返回 exit code。; CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），在配置正确的情况下能拉取 Sentry 数据并给出清晰的通过/失败原因。\nTest Strategy: 核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。; 脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。\nLabels: observability; sentry; release-health; godot\nOwner: architecture\nLayer: adapter",
+        "testStrategy": "核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。\n脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。",
+        "subtasks": [],
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0005",
+          "ADR-0015",
+          "ADR-0018"
+        ],
+        "recommendedSubtasks": 0,
+        "complexity": 6,
+        "expansionPrompt": "Use TDD (red->green->refactor) and keep Game.Core free of Godot API. Write audit/perf artifacts under logs/* and keep task links (ADR/CH/Overlays/Test Refs) valid.",
+        "archRefs": [
+          "CH01",
+          "CH03",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+        "updatedAt": "2026-01-08T16:23:00.000Z"
+      },
+      {
+        "id": "25",
+        "title": "T3 Save/Load + Schema Migration（Core + SQLite）",
+        "description": "实现跨会话可玩性：在 Game.Core 建立 Save/Load 与 schema version/migration 机制，并通过 SqliteDataStore 落地到 user:// SQLite；错误脱敏与审计遵循 ADR-0019。",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "10",
+          "11",
+          "12",
+          "20"
+        ],
+        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.storage.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contract_refs.\n",
+        "testStrategy": "Use TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/*.",
+        "complexity": 8,
+        "recommendedSubtasks": 7,
+        "expansionPrompt": "Break down into small, testable slices focused on persistent playable loops.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define Save/Load contracts and event types",
+            "description": "Define minimal DTOs/interfaces and event type constants for save/load and migrations in Game.Core/Contracts (no Godot deps).",
+            "dependencies": [],
+            "details": "Add contract files and align event naming to ADR-0004. Update overlay references only, do not duplicate thresholds.",
+            "status": "pending",
+            "testStrategy": "xUnit compile-level tests for contracts + event type constants.",
+            "parentId": "25",
+            "updatedAt": "2026-01-08T17:13:31"
+          },
+          {
+            "id": 2,
+            "title": "Implement schema version table and migration runner",
+            "description": "Add migration runner that can detect current schema version and apply ordered, idempotent migrations.",
+            "dependencies": [
+              1
+            ],
+            "details": "Store schema version in SQLite. Migrations must be replay-safe and produce audit entries on failure.",
+            "status": "pending",
+            "testStrategy": "xUnit migration tests: fresh DB, upgrade path, failure path, idempotency.",
+            "parentId": "25",
+            "updatedAt": "2026-01-08T17:13:31"
+          },
+          {
+            "id": 3,
+            "title": "Persist core T3 models (roster + recruitment)",
+            "description": "Define minimal persistence mapping for roster/recruitment state required by Tasks 13/14.",
+            "dependencies": [
+              2
+            ],
+            "details": "Keep mapping deterministic. Avoid leaking SQL/path details in exceptions in secure mode.",
+            "status": "pending",
+            "testStrategy": "xUnit round-trip tests for minimal dataset.",
+            "parentId": "25",
+            "updatedAt": "2026-01-08T17:13:31"
+          },
+          {
+            "id": 4,
+            "title": "Implement Save operation via SqliteDataStore",
+            "description": "Implement save snapshot writing (transactional) and emit save events.",
+            "dependencies": [
+              3
+            ],
+            "details": "Only user:// paths. Enforce extension whitelist + size limit. Audit on rejection/failure.",
+            "status": "pending",
+            "testStrategy": "xUnit: save success/failure; verify audit jsonl format on failures.",
+            "parentId": "25",
+            "updatedAt": "2026-01-08T17:13:31"
+          },
+          {
+            "id": 5,
+            "title": "Implement Load operation and recovery behavior",
+            "description": "Implement load snapshot reading and apply to core state; handle corrupted DB gracefully.",
+            "dependencies": [
+              4
+            ],
+            "details": "Recovery path must not crash game loop; emit load.failed with sanitized reason.",
+            "status": "pending",
+            "testStrategy": "xUnit: corrupted/missing db; ensure sanitized errors in secure mode.",
+            "parentId": "25",
+            "updatedAt": "2026-01-08T17:13:31"
+          },
+          {
+            "id": 6,
+            "title": "Integrate security + audit logging requirements",
+            "description": "Ensure all reject/failure paths produce ADR-0019 compliant audit lines and never leak sensitive info in Release/secure.",
+            "dependencies": [
+              5
+            ],
+            "details": "Validate file path normalization, traversal reject, percent-encoding edge cases, and JSONL format.",
+            "status": "pending",
+            "testStrategy": "xUnit: decision table coverage for sanitization and audit event generation.",
+            "parentId": "25",
+            "updatedAt": "2026-01-08T17:13:31"
+          },
+          {
+            "id": 7,
+            "title": "Add GdUnit4 smoke for save/load entry points",
+            "description": "Add headless Godot smoke that writes and reads a save in user:// and verifies non-empty audit trail.",
+            "dependencies": [
+              6
+            ],
+            "details": "Use scripts/python/run_gdunit.py and ensure reports/logs are archived under logs/e2e.",
+            "status": "pending",
+            "testStrategy": "GdUnit4: one suite under Tests.Godot/tests/Adapters/Db.",
+            "parentId": "25",
+            "updatedAt": "2026-01-08T17:13:31"
+          }
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0007",
+          "ADR-0018",
+          "ADR-0019"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH02",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+        "updatedAt": "2026-01-08T17:13:31"
+      },
+      {
+        "id": "26",
+        "title": "T3 Save/Load UI Entry（Godot）",
+        "description": "在 Godot 场景中提供 Save/Load 入口并接入核心存档服务；入口只做调用与展示，不直接写 SQL。",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "25"
+        ],
+        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.storage.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contract_refs.\n",
+        "testStrategy": "Use TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/*.",
+        "complexity": 6,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "Break down into small, testable slices focused on persistent playable loops.",
+        "subtasks": [],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0007",
+          "ADR-0018",
+          "ADR-0019"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH02",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "updatedAt": "2026-01-08T17:13:31"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-01-07T18:25:01.169Z",
-      "taskCount": 23,
+      "lastModified": "2026-01-08T17:13:31",
+      "taskCount": 26,
       "completedCount": 10,
       "tags": [
         "master"
