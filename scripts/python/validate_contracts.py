@@ -12,7 +12,8 @@ Responsibilities:
 
 Exit code:
 - 0 if no blocking issues are found.
-- 1 if missing contract files or docs without any contract references are detected.
+- 1 if missing contract files are detected, or if contract docs (08-Contracts-*.md)
+  contain no contract references.
 """
 
 from __future__ import annotations
@@ -27,6 +28,18 @@ from typing import Dict, List
 
 
 CONTRACTS_PREFIX = "Game.Core/Contracts/"
+
+
+def is_contract_doc(md_path: Path) -> bool:
+    """Return True if the overlay doc is a contract-focused page.
+
+    Policy:
+    - Only 08-Contracts-*.md pages are required to reference at least one contract file.
+    - Other overlay pages (e.g. _index.md, ACCEPTANCE_CHECKLIST.md, 08-DataSchema.md,
+      08-FeatureSlice-*.md) may legitimately have zero contract references.
+    """
+
+    return md_path.name.startswith("08-Contracts-") and md_path.suffix.lower() == ".md"
 
 
 def find_overlay_docs(root: Path) -> List[Path]:
@@ -78,7 +91,7 @@ def find_all_contract_files(root: Path) -> List[str]:
     Returned paths are relative to project root and use forward slashes.
     """
 
-    contracts_root = root / "Scripts" / "Core" / "Contracts"
+    contracts_root = root / "Game.Core" / "Contracts"
     if not contracts_root.exists():
         return []
 
@@ -96,9 +109,11 @@ def build_report(root: Path) -> Dict[str, object]:
     overlay_docs = find_overlay_docs(root)
 
     doc_contracts: Dict[str, List[str]] = {}
+    doc_is_contract_doc: Dict[str, bool] = {}
     for md in overlay_docs:
         rel_doc = md.relative_to(root).as_posix()
         doc_contracts[rel_doc] = extract_contract_paths(md)
+        doc_is_contract_doc[rel_doc] = is_contract_doc(md)
 
     # Flatten referenced contracts
     referenced_contracts: List[str] = []
@@ -119,9 +134,11 @@ def build_report(root: Path) -> Dict[str, object]:
                     {"doc": doc, "contract": contract_rel}
                 )
 
-    # Docs that do not reference any contract at all
+    # Contract docs that do not reference any contract at all
     docs_without_contracts = [
-        doc for doc, contracts in doc_contracts.items() if not contracts
+        doc
+        for doc, contracts in doc_contracts.items()
+        if doc_is_contract_doc.get(doc, False) and not contracts
     ]
 
     # Contracts that are present on disk but not referenced by any overlay doc
