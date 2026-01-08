@@ -1,0 +1,18 @@
+{
+  "contentVersion": "1.0.0",
+  "socialInteractions": [
+    {
+      "id": "Base_SocialInteraction_CouncilMeeting",
+      "nameKey": "官员会议",
+      "weight": 6,
+      "effects": [{ "type": "QueueMail", "refId": "mail.council_meeting" }]
+    },
+    {
+      "id": "Base_SocialInteraction_FriendGroupDrama",
+      "nameKey": "亲友团风波",
+      "weight": 3,
+      "effects": [{ "type": "AdjustMemberMorale", "amount": -1 }]
+    }
+  ]
+}
+

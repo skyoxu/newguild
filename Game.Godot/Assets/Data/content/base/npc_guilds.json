@@ -1,0 +1,22 @@
+{
+  "contentVersion": "1.0.0",
+  "npcGuildArchetypes": [
+    {
+      "id": "Base_NpcGuild_HardcoreRaiders",
+      "nameKey": "硬核开荒团",
+      "style": "Hardcore",
+      "recruitmentPreferences": { "tank": 0.25, "healer": 0.25, "dps": 0.5 },
+      "tacticPreferences": ["Base_Tactic_AggressivePush"],
+      "reputationBaseline": 10
+    },
+    {
+      "id": "Base_NpcGuild_CasualSocial",
+      "nameKey": "休闲社交团",
+      "style": "Casual",
+      "recruitmentPreferences": { "tank": 0.2, "healer": 0.2, "dps": 0.6 },
+      "tacticPreferences": ["Base_Tactic_SafeAndSteady"],
+      "reputationBaseline": 5
+    }
+  ]
+}
+

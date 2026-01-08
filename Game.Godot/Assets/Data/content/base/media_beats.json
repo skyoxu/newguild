@@ -1,0 +1,18 @@
+{
+  "contentVersion": "1.0.0",
+  "mediaBeats": [
+    {
+      "id": "Base_MediaBeat_Praise",
+      "nameKey": "媒体称赞",
+      "weight": 8,
+      "reputationDelta": { "min": 1, "max": 3 }
+    },
+    {
+      "id": "Base_MediaBeat_Criticism",
+      "nameKey": "媒体批评",
+      "weight": 5,
+      "reputationDelta": { "min": -3, "max": -1 }
+    }
+  ]
+}
+
