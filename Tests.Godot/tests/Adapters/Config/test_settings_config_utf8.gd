@@ -7,9 +7,10 @@ func test_configfile_utf8_roundtrip() -> void:
     await get_tree().process_frame
 
     var dir_user = "user://config-tests"
-    var dir_abs = ProjectSettings.globalize_path(dir_user).replace("\\", "/")
+    var file_path = dir_user.path_join("settings_%d.cfg" % int(Time.get_unix_time_from_system()))
+
+    var dir_abs = OS.get_user_data_dir().replace("\\", "/").path_join("config-tests")
     DirAccess.make_dir_recursive_absolute(dir_abs)
-    var file_path = dir_abs.path_join("settings_%d.cfg" % int(Time.get_unix_time_from_system()))
 
     var cfg := ConfigFile.new()
     var note := "Hello, world! äöü ✓"
@@ -23,7 +24,12 @@ func test_configfile_utf8_roundtrip() -> void:
     f.close()
 
     var cfg2 := ConfigFile.new()
-    var err2 = cfg2.load(file_path)
+    var f2 := FileAccess.open(file_path, FileAccess.READ)
+    assert_object(f2).is_not_null()
+    var text2 := f2.get_as_text()
+    f2.close()
+
+    var err2 = cfg2.parse(text2)
     assert_int(err2).is_equal(0)
     assert_float(float(cfg2.get_value("app", "volume", 0.0))).is_equal(0.66)
     assert_str(str(cfg2.get_value("app", "lang", ""))).is_equal("zh")
