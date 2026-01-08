@@ -47,7 +47,7 @@
     ],
     "taskmaster_id": 1,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0012",
@@ -100,7 +100,7 @@
     ],
     "taskmaster_id": 5,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0013",
@@ -153,7 +153,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 7,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0014",
@@ -213,7 +213,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 8,
-    "contract_refs": [
+    "contractRefs": [
       "security.url_access.denied",
       "security.file_access.denied",
       "security.process.denied"
@@ -270,7 +270,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 20,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0016",
@@ -323,7 +323,7 @@
       "脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0017",
@@ -377,7 +377,7 @@
       "CI 集成：触发 Windows Release (Manual/Tag) 工作流，确认 Artifact 中包含 EXE、PCK、build-info.json 与 SHA256 校验文件。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0018",
@@ -427,7 +427,7 @@
       "CI 验证：在测试分支上运行带渠道参数的 Release 工作流，确认生成的 profile 与工件符合预期。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0019",
@@ -472,7 +472,7 @@
       "链接检查：task-links-validate 或等价脚本对新模板文档进行路径与引用校验。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0020",
@@ -534,7 +534,7 @@
     ],
     "taskmaster_id": 2,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0021",
@@ -598,7 +598,7 @@
     ],
     "taskmaster_id": 6,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0022",
@@ -654,7 +654,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 22,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0023",
@@ -708,7 +708,7 @@
       "CI：在质量门禁中增加针对 core.*.* 事件类型前缀的简单字符串检查脚本。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0024",
@@ -761,7 +761,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 21,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0025",
@@ -813,7 +813,7 @@
       "自动化：在 task-links-validate 中增加针对 privacy-compliance.md 的引用检查，保证后续任务不会绕过该文档。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0026",
@@ -865,7 +865,7 @@
       "自动化：在 task-links-validate 或等价脚本中校验日志相关任务是否引用该文档。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0027",
@@ -913,7 +913,7 @@
       "CI：在 windows-quality-gate 工作流中增加对 duplication 与 complexity 报告的校验，并在 Step Summary 中展示关键指标。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0028",
@@ -968,7 +968,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 23,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0029",
@@ -1021,7 +1021,7 @@
       "CI：在 signal-compliance 相关工作流中集成健康度检查脚本，并观察在故意缺失注释或错误命名时是否会失败。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0030",
@@ -1072,7 +1072,7 @@
       "CI：在性能相关 Job 中执行报告生成步骤，并检查 artifact 中是否包含预期文件。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0031",
@@ -1126,7 +1126,7 @@
       "文档：在 Phase-15 或 README 中记录如何启用或关闭性能门禁工作流。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0032",
@@ -1180,7 +1180,7 @@
       "CI：在 Windows 构建 Job 中对 signing-summary.json 做基础格式检查，确保脚本在有与无证书两种场景下都能稳定运行。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0033",
@@ -1230,7 +1230,7 @@
       "CI：在 export 相关工作流中记录所用预设名称，并检查导出 summary 中的配置字段。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0034",
@@ -1278,7 +1278,7 @@
       "基线比较：在两次 CI 运行之间比较禁用基线 JSON，确认整体禁用数量单调下降或保持不变，避免在无计划的情况下新增长期禁用。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0035",
@@ -1326,7 +1326,7 @@
       "基线比较：对比两次 quality-gates-structural-refactor.json，确认 GdUnit4CSharpApi.cs 相关禁用的变化符合预期，并记录在任务备注中。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0036",
@@ -1374,7 +1374,7 @@
       "脚本回归：在调整脚本过滤规则后运行 scan_code_disables.py，确保不会因为新增过滤逻辑而漏报真实代码中的禁用。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0037",
@@ -1425,7 +1425,7 @@
       "流程级验证：在测试环境中手动触发 nightly Job，检查生成的 logs/ci/<date>/taskmaster/** 工件是否包含预期的草案与摘要，并在 task_links_validate 或等价脚本中确认草案文件不会被误解为正式回链来源。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0038",
@@ -1477,7 +1477,7 @@
       "CI：在测试分支上启用依赖护栏步骤，故意保留一处违规依赖，确认 windows-quality-gate（或等价工作流）中的 Step Summary 能显示违规详情，并在规则配置为硬门禁时正确使 Job 失败。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0039",
@@ -1530,7 +1530,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 9,
-    "contract_refs": [
+    "contractRefs": [
       "core.game_turn.started",
       "core.game_turn.phase_changed",
       "core.game_turn.week_advanced",
@@ -1592,7 +1592,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 10,
-    "contract_refs": [
+    "contractRefs": [
       "core.game_turn.started",
       "core.game_turn.phase_changed",
       "core.game_turn.week_advanced"
@@ -1648,7 +1648,7 @@
       "回归测试：运行 Game.Core.Tests 全量，确保架构调整后所有 GameLoop 相关测试依旧通过。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "NG-0042",
@@ -1700,7 +1700,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 11,
-    "contract_refs": [
+    "contractRefs": [
       "security.file_access.denied"
     ]
   },
@@ -1753,7 +1753,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 12,
-    "contract_refs": [
+    "contractRefs": [
       "security.file_access.denied"
     ]
   },
@@ -1807,7 +1807,7 @@
       "流程测试：在 CI 或本地通过 build_taskmaster_tasks.py + Taskmaster MCP 读取 gameloop-quality-guard.json，验证报告能被后续工作流消费。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": [
+    "contractRefs": [
       "core.game_turn.started",
       "core.game_turn.phase_changed",
       "core.game_turn.week_advanced",
@@ -1865,7 +1865,7 @@
       "脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。"
     ],
     "taskmaster_exported": false,
-    "contract_refs": [
+    "contractRefs": [
       "core.game_turn.week_advanced"
     ]
   },
@@ -1922,7 +1922,7 @@
       "Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd"
     ],
     "acceptance": [
-      "定义 Save/Load 的最小契约与事件类型（contract_refs），并在 master 任务实现中落盘到 Game.Core/Contracts（纯 C#，不依赖 Godot API）。",
+      "定义 Save/Load 的最小契约与事件类型（contractRefs），并在 master 任务实现中落盘到 Game.Core/Contracts（纯 C#，不依赖 Godot API）。",
       "定义 SQLite schema 版本机制：至少包含 SchemaVersion 表（或等价元数据）与迁移 runner，支持从旧版本升级到新版本。",
       "迁移必须是幂等且可审计：失败时写入 security-audit.jsonl（五字段 JSONL），且错误信息在 Release/secure 模式下脱敏（不泄露路径/SQL）。",
       "Save/Load 必须限制在 user:// 且拒绝路径穿越与非白名单扩展名；文件大小上限与 DoS 防护策略在验收中明确。"
@@ -1931,7 +1931,8 @@
       "xUnit：覆盖 schema version 迁移（升级路径 + 失败路径），以及 Save/Load 的 round-trip（最小模型）与错误脱敏。",
       "GdUnit4：提供一条 headless 冒烟，验证 user:// 下能创建存档、读取存档并生成必要审计条目（失败路径也要覆盖）。"
     ],
-    "contract_refs": [
+    "taskmaster_exported": false,
+    "contractRefs": [
       "core.save.requested",
       "core.save.completed",
       "core.save.failed",
@@ -1939,7 +1940,6 @@
       "core.load.completed",
       "core.load.failed",
       "core.storage.migration.applied"
-    ],
-    "taskmaster_exported": false
+    ]
   }
 ]
