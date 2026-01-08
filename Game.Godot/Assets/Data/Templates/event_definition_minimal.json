@@ -1,0 +1,23 @@
+{
+  "id": "content.guild.event.welcome_new_member",
+  "version": 1,
+  "type": "guild_event",
+  "title": "Welcome New Member",
+  "weight": 1.0,
+  "conditions": [
+    {
+      "key": "guild.member_joined_recently",
+      "op": "eq",
+      "value": true
+    }
+  ],
+  "effects": [
+    {
+      "key": "guild.reputation_delta",
+      "op": "add",
+      "value": 1
+    }
+  ],
+  "notes": "Minimal sample template for content-driven events."
+}
+
