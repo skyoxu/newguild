@@ -180,6 +180,19 @@ def main():
     enc_sum = read_json(os.path.join('logs', 'ci', date, 'encoding', 'session-summary.json')) or {}
     summary['encoding'] = enc_sum
 
+    # 6) Content assets validation (hard gate)
+    rc_content, out_content = run_cmd(['py', '-3', 'scripts/python/validate_content_assets.py'], cwd=root)
+    with io.open(os.path.join('logs', 'ci', date, 'content-validation-stdout.txt'), 'w', encoding='utf-8') as f:
+        f.write(out_content)
+    content_report = read_json(os.path.join('logs', 'ci', date, 'content-validation', 'report.json')) or {}
+    summary['content_validation'] = {
+        'rc': rc_content,
+        'status': content_report.get('status') or ('ok' if rc_content == 0 else 'fail'),
+        'errors': content_report.get('errors'),
+    }
+    if rc_content != 0:
+        hard_fail = True
+
     summary['status'] = 'ok' if not hard_fail else 'fail'
     with io.open(os.path.join(ci_dir, 'ci-pipeline-summary.json'), 'w', encoding='utf-8') as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
@@ -190,6 +203,7 @@ def main():
         f"selfcheck={summary['selfcheck'].get('status')} "
         f"sql_scan={summary['sql_scan'].get('status')} "
         f"perf_db={summary['perf_db'].get('status')} "
+        f"content={summary.get('content_validation', {}).get('status')} "
         f"encoding_bad={summary['encoding'].get('bad', 'n/a')}"
     )
     return 0 if not hard_fail else 1
