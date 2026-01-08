@@ -41,7 +41,7 @@ ADR-Refs:
       - Game.Core.Tests/Engine/GameEngineCoreEventTests.cs（事件类型常量）
     - 文档落点：
       - docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md
-      - docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md
+      - docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md
 
 B2–B5 目前只在 `docs/migration/Phase-9-Signal-Backlog.md` + tasks_longterm.json
 （NG-1001..NG-1004）中存在，用作以后增强与治理的候选；不视作模板当前 DoD。

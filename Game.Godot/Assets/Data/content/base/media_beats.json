@@ -3,16 +3,15 @@
   "mediaBeats": [
     {
       "id": "Base_MediaBeat_Praise",
-      "nameKey": "媒体称赞",
+      "nameKey": "Media Praise",
       "weight": 8,
       "reputationDelta": { "min": 1, "max": 3 }
     },
     {
       "id": "Base_MediaBeat_Criticism",
-      "nameKey": "媒体批评",
+      "nameKey": "Media Criticism",
       "weight": 5,
       "reputationDelta": { "min": -3, "max": -1 }
     }
   ]
 }
-

@@ -17,7 +17,7 @@ Chapter-Refs:
   - CH10
 Overlay-Refs:
   - docs/architecture/overlays/PRD-Guild-Manager/08/_index.md
-  - docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md
+  - docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md
   - docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md
 Test-Refs:
   - Game.Core.Tests/Domain/GuildCoreTests.cs
@@ -244,7 +244,7 @@ Tests.Godot/tests/Integration/test_guild_workflow.gd
 ### A.4 Overlay 文档路径
 ```
 docs/architecture/overlays/PRD-Guild-Manager/08/_index.md
-docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md
+docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md
 docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md
 ```
 

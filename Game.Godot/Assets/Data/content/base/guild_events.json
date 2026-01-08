@@ -3,8 +3,8 @@
   "guildEvents": [
     {
       "id": "Base_GuildEvent_WelcomeNewMember",
-      "nameKey": "欢迎新成员",
-      "descKey": "新成员加入公会，引发一轮欢迎与讨论。",
+      "nameKey": "Welcome New Member",
+      "descKey": "A new member joins the guild, triggering a welcome discussion.",
       "category": "Roster",
       "weight": 10,
       "cooldownWeeks": 1,
@@ -19,8 +19,8 @@
     },
     {
       "id": "Base_GuildEvent_InternalConflict",
-      "nameKey": "内部矛盾",
-      "descKey": "成员之间产生冲突，需要会长介入。",
+      "nameKey": "Internal Conflict",
+      "descKey": "A conflict erupts between members and requires the leader to intervene.",
       "category": "Social",
       "weight": 6,
       "cooldownWeeks": 2,
@@ -35,4 +35,3 @@
     }
   ]
 }
-

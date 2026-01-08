@@ -87,7 +87,7 @@ def infer_overlays(title: str, description: str) -> list[str]:
     if "security" in text or "安全" in text:
         overlays.append("docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md")
     if "guild manager" in text or "公会管理" in text:
-        overlays.append("docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md")
+        overlays.append("docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md")
         overlays.append("docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md")
 
     # 去重保持顺序

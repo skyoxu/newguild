@@ -3,7 +3,7 @@
   "recruitOffers": [
     {
       "id": "Base_RecruitOffer_NewbieTank",
-      "nameKey": "新手坦克候选",
+      "nameKey": "Newbie Tank Candidate",
       "role": "Tank",
       "difficultyTier": 1,
       "baseSuccessChance": 0.45,
@@ -12,7 +12,7 @@
     },
     {
       "id": "Base_RecruitOffer_VeteranHealer",
-      "nameKey": "老练治疗候选",
+      "nameKey": "Veteran Healer Candidate",
       "role": "Healer",
       "difficultyTier": 2,
       "baseSuccessChance": 0.25,
@@ -21,4 +21,3 @@
     }
   ]
 }
-
