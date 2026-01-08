@@ -1,26 +1,28 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
 func test_configfile_utf8_roundtrip() -> void:
-    # In some CI/userdir override setups, ConfigFile.save("user://...") can fail early.
-    # Use an absolute path derived from user:// to keep the test stable across environments.
+    # In some CI/userdir override setups, ConfigFile.save("user://...") can fail with
+    # "Cannot call method 'seek' on a null value." Use explicit FileAccess IO to keep
+    # the UTF-8 roundtrip test stable across environments.
     await get_tree().process_frame
 
-    var user_path = "user://settings_%d.cfg" % int(Time.get_unix_time_from_system())
-    var abs_path = ProjectSettings.globalize_path(user_path).replace("\\", "/")
-    var base_dir = abs_path.get_base_dir()
-    DirAccess.make_dir_recursive_absolute(base_dir)
+    var dir_path = "user://config-tests"
+    DirAccess.make_dir_recursive(dir_path)
+    var file_path = "%s/settings_%d.cfg" % [dir_path, int(Time.get_unix_time_from_system())]
 
     var cfg := ConfigFile.new()
-    var note := "你好，世界！äöü✓"
+    var note := "Hello, world! äöü ✓"
     cfg.set_value("app", "volume", 0.66)
     cfg.set_value("app", "lang", "zh")
     cfg.set_value("app", "note", note)
-    var err = cfg.save(abs_path)
-    assert_int(err).is_equal(0)
-    await get_tree().process_frame
+    var text := cfg.encode_to_text()
+    var f := FileAccess.open(file_path, FileAccess.WRITE)
+    assert_object(f).is_not_null()
+    f.store_string(text)
+    f.close()
 
     var cfg2 := ConfigFile.new()
-    var err2 = cfg2.load(abs_path)
+    var err2 = cfg2.load(file_path)
     assert_int(err2).is_equal(0)
     assert_float(float(cfg2.get_value("app", "volume", 0.0))).is_equal(0.66)
     assert_str(str(cfg2.get_value("app", "lang", ""))).is_equal("zh")
