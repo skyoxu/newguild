@@ -79,13 +79,13 @@ def _str_id(v: Any) -> str:
     return str(v).strip()
 
 
-def _ensure_contract_refs(view_tasks: list[dict[str, Any]], changes: list[dict[str, Any]], view_name: str) -> None:
+def _ensure_contractrefs(view_tasks: list[dict[str, Any]], changes: list[dict[str, Any]], view_name: str) -> None:
     for t in view_tasks:
         if not isinstance(t, dict):
             continue
-        if "contract_refs" not in t:
-            t["contract_refs"] = []
-            changes.append({"view": view_name, "id": t.get("id"), "change": "add_contract_refs_default_empty"})
+        if "contractRefs" not in t:
+            t["contractRefs"] = []
+            changes.append({"view": view_name, "id": t.get("id"), "change": "add_contractRefs_default_empty"})
 
 
 def _find_task(tasks: list[dict[str, Any]], task_id: str) -> dict[str, Any] | None:
@@ -116,9 +116,9 @@ def main() -> int:
     back_tasks: list[dict[str, Any]] = _read_json(BACK_PATH)
     play_tasks: list[dict[str, Any]] = _read_json(PLAY_PATH)
 
-    # Normalize view schemas (contract_refs should exist for both views).
-    _ensure_contract_refs(back_tasks, report_changes, "tasks_back.json")
-    _ensure_contract_refs(play_tasks, report_changes, "tasks_gameplay.json")
+    # Normalize view schemas (contractRefs should exist for both views).
+    _ensure_contractrefs(back_tasks, report_changes, "tasks_back.json")
+    _ensure_contractrefs(play_tasks, report_changes, "tasks_gameplay.json")
 
     # Ensure view tasks exist; if missing, add minimal placeholders.
     back_task = _find_task(back_tasks, NEW_BACK_ID)
@@ -141,7 +141,7 @@ def main() -> int:
             "test_refs": [],
             "acceptance": [],
             "test_strategy": [],
-            "contract_refs": CORE_CONTRACT_REFS,
+            "contractRefs": CORE_CONTRACT_REFS,
             "taskmaster_exported": False,
         }
         back_tasks.append(back_task)
@@ -158,9 +158,9 @@ def main() -> int:
                 }
             )
             back_task["taskmaster_id"] = int(MASTER_CORE_ID)
-        if not back_task.get("contract_refs"):
-            back_task["contract_refs"] = CORE_CONTRACT_REFS
-            report_changes.append({"view": "tasks_back.json", "id": NEW_BACK_ID, "change": "fill_contract_refs"})
+        if not back_task.get("contractRefs"):
+            back_task["contractRefs"] = CORE_CONTRACT_REFS
+            report_changes.append({"view": "tasks_back.json", "id": NEW_BACK_ID, "change": "fill_contractRefs"})
 
     play_task = _find_task(play_tasks, NEW_PLAY_ID)
     if play_task is None:
@@ -182,7 +182,7 @@ def main() -> int:
             "test_refs": [],
             "acceptance": [],
             "test_strategy": [],
-            "contract_refs": UI_CONTRACT_REFS,
+            "contractRefs": UI_CONTRACT_REFS,
             "taskmaster_exported": False,
         }
         play_tasks.append(play_task)
@@ -199,9 +199,9 @@ def main() -> int:
                 }
             )
             play_task["taskmaster_id"] = int(MASTER_UI_ID)
-        if not play_task.get("contract_refs"):
-            play_task["contract_refs"] = UI_CONTRACT_REFS
-            report_changes.append({"view": "tasks_gameplay.json", "id": NEW_PLAY_ID, "change": "fill_contract_refs"})
+        if not play_task.get("contractRefs"):
+            play_task["contractRefs"] = UI_CONTRACT_REFS
+            report_changes.append({"view": "tasks_gameplay.json", "id": NEW_PLAY_ID, "change": "fill_contractRefs"})
 
     # Ensure master tasks exist; if missing, warn (do not create here to avoid unintended semantics rewrites).
     master_by_id = {str(t.get("id")): t for t in master_tasks if isinstance(t, dict) and t.get("id") is not None}
@@ -264,4 +264,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

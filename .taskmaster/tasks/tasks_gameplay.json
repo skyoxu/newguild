@@ -62,7 +62,7 @@
     ],
     "taskmaster_id": 3,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "GM-0103",
@@ -130,7 +130,7 @@
     ],
     "taskmaster_id": 4,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "GM-0202",
@@ -189,7 +189,7 @@
     ],
     "taskmaster_id": 13,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "GM-0203",
@@ -247,7 +247,7 @@
     ],
     "taskmaster_id": 14,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "GM-0201",
@@ -307,7 +307,7 @@
     ],
     "taskmaster_id": 15,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "GM-0102",
@@ -369,7 +369,7 @@
     ],
     "taskmaster_exported": true,
     "taskmaster_id": 16,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "GM-0204",
@@ -430,7 +430,7 @@
     ],
     "taskmaster_id": 17,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "GM-0205",
@@ -487,7 +487,7 @@
     ],
     "taskmaster_id": 18,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "GM-0206",
@@ -544,7 +544,7 @@
     ],
     "taskmaster_id": 19,
     "taskmaster_exported": true,
-    "contract_refs": []
+    "contractRefs": []
   },
   {
     "id": "GM-0207",
@@ -596,19 +596,19 @@
     "acceptance": [
       "在 Godot 中提供 Save/Load 入口（主菜单按钮或 Debug 面板均可），能触发一次保存与一次读取。",
       "读取失败/写入失败时，UI 展示通用错误信息（Release/secure 模式不泄露路径/SQL），并确保审计条目落盘。",
-      "Save/Load 过程通过核心契约事件可观测（contract_refs），UI 通过订阅/回调展示状态，不直接操作数据库。"
+      "Save/Load 过程通过核心契约事件可观测（contractRefs），UI 通过订阅/回调展示状态，不直接操作数据库。"
     ],
     "test_strategy": [
       "GdUnit4：headless 冒烟验证按钮/入口可用，触发保存与读取后能看到状态变化（可通过日志或 UI 文本断言）。"
     ],
-    "contract_refs": [
+    "taskmaster_exported": false,
+    "contractRefs": [
       "core.save.requested",
       "core.save.completed",
       "core.save.failed",
       "core.load.requested",
       "core.load.completed",
       "core.load.failed"
-    ],
-    "taskmaster_exported": false
+    ]
   }
 ]
