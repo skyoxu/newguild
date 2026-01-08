@@ -69,7 +69,7 @@
 
 ### Overlays 引用
 
-- `docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md`
+- `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md`
 - `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md`
 
 ---

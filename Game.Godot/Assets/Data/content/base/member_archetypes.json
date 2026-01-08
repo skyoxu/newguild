@@ -3,21 +3,21 @@
   "memberArchetypes": [
     {
       "id": "Base_MemberArchetype_ReliableTank",
-      "nameKey": "可靠坦克",
+      "nameKey": "Reliable Tank",
       "role": "Tank",
       "personalityTags": ["stable", "team_first"],
       "baseRatings": { "skill": 60, "discipline": 70, "social": 40 }
     },
     {
       "id": "Base_MemberArchetype_ShyHealer",
-      "nameKey": "内向治疗",
+      "nameKey": "Shy Healer",
       "role": "Healer",
       "personalityTags": ["shy", "supportive"],
       "baseRatings": { "skill": 62, "discipline": 60, "social": 35 }
     },
     {
       "id": "Base_MemberArchetype_AmbitiousDps",
-      "nameKey": "上进输出",
+      "nameKey": "Ambitious DPS",
       "role": "DPS",
       "personalityTags": ["ambitious", "competitive"],
       "baseRatings": { "skill": 65, "discipline": 45, "social": 55 }

@@ -116,7 +116,7 @@ def main() -> None:
     update_tasks_back(tasks_dir / "tasks_back.json")
     update_tasks_gameplay(tasks_dir / "tasks_gameplay.json")
 
-    overlay_path = Path("docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md")
+    overlay_path = Path("docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md")
     if overlay_path.exists():
         update_overlay_08(overlay_path)
     else:

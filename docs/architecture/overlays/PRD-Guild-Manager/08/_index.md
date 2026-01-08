@@ -18,7 +18,7 @@ Arch-Refs:
 - 公会管理事件（Guild Manager Events）：`08-Contracts-Guild-Manager-Events.md`
 - 质量指标（Quality Metrics）：`08-Contracts-Quality-Metrics.md`
 - 安全契约：`08-Contracts-Security.md`
-- 功能纵切：公会管理器：`08-功能纵切-公会管理器.md`
+- 功能纵切：公会管理器：`08-FeatureSlice-Guild-Manager.md`
 
 ## T3 前置：数据/内容/调参（不进入 Task 25/26）
 

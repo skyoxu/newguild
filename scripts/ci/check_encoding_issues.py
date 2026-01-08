@@ -57,7 +57,7 @@ UTF8_FILES = [
     "architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Preload-Whitelist.md",
     "architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
     "architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-    "architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+    "architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
     "architecture/overlays/PRD-Guild-Manager/08/_index.md",
     "contracts/signals/README.md",
     "migration/CODE_EXAMPLES_VERIFICATION_Phase1-12.md",

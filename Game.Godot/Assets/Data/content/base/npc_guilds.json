@@ -3,7 +3,7 @@
   "npcGuildArchetypes": [
     {
       "id": "Base_NpcGuild_HardcoreRaiders",
-      "nameKey": "硬核开荒团",
+      "nameKey": "Hardcore Raiders",
       "style": "Hardcore",
       "recruitmentPreferences": { "tank": 0.25, "healer": 0.25, "dps": 0.5 },
       "tacticPreferences": ["Base_Tactic_AggressivePush"],
@@ -11,7 +11,7 @@
     },
     {
       "id": "Base_NpcGuild_CasualSocial",
-      "nameKey": "休闲社交团",
+      "nameKey": "Casual Social Guild",
       "style": "Casual",
       "recruitmentPreferences": { "tank": 0.2, "healer": 0.2, "dps": 0.6 },
       "tacticPreferences": ["Base_Tactic_SafeAndSteady"],
@@ -19,4 +19,3 @@
     }
   ]
 }
-

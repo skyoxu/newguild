@@ -8,7 +8,7 @@
         "status": "done",
         "priority": "high",
         "dependencies": [],
-        "details": "Story: PRD-NEWGUILD-VS-0001\nADR Refs: ADR-0004; ADR-0005; ADR-0011; ADR-0018; ADR-0023\nChapters: CH01; CH04; CH05; CH06; CH07; CH10\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nAcceptance: 存在一份针对 newguild 的最小 PRD 片段（含输入/输出/状态/存储与非功能约束），并显式引用 ADR-0018/0004/0005/0023/0011。; 在 overlays/PRD-*/08 下新增或调整功能纵切文档，严格遵守 08 章只引用 01/02/03 口径的规则（不复制阈值）。; 每个 Story 至少关联一条 Test-Ref（xUnit 或 GdUnit4），并在文档脚注中列出。\nTest Strategy: 文档审阅：由架构负责人确认 PRD 与 ADR/Phase 一致性。; 链接校验：任务/回链校验脚本通过（task-links-validate）。\nLabels: prd; vertical-slice; docs; architecture\nOwner: architecture\nLayer: docs",
+        "details": "Story: PRD-NEWGUILD-VS-0001\nADR Refs: ADR-0004; ADR-0005; ADR-0011; ADR-0018; ADR-0023\nChapters: CH01; CH04; CH05; CH06; CH07; CH10\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nAcceptance: 存在一份针对 newguild 的最小 PRD 片段（含输入/输出/状态/存储与非功能约束），并显式引用 ADR-0018/0004/0005/0023/0011。; 在 overlays/PRD-*/08 下新增或调整功能纵切文档，严格遵守 08 章只引用 01/02/03 口径的规则（不复制阈值）。; 每个 Story 至少关联一条 Test-Ref（xUnit 或 GdUnit4），并在文档脚注中列出。\nTest Strategy: 文档审阅：由架构负责人确认 PRD 与 ADR/Phase 一致性。; 链接校验：任务/回链校验脚本通过（task-links-validate）。\nLabels: prd; vertical-slice; docs; architecture\nOwner: architecture\nLayer: docs",
         "testStrategy": "文档审阅：由架构负责人确认 PRD 与 ADR/Phase 一致性。\n链接校验：任务/回链校验脚本通过（task-links-validate）。",
         "updatedAt": "2025-11-30T17:00:56.080Z",
         "subtasks": [],
@@ -27,7 +27,7 @@
           "CH07",
           "CH10"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "recommendedSubtasks": 0,
         "complexity": 6,
         "expansionPrompt": "Break down this task for a Windows-only Godot + C# project. Follow the listed ADRs, keep Contracts in Game.Core/Contracts (no Godot API), and ensure logs/* artifacts and task links remain valid."
@@ -35,13 +35,13 @@
       {
         "id": "2",
         "title": "公会管理器首个垂直切片的三层架构与核心类型落地",
-        "description": "依据 PRD-Guild-Manager 与 08-功能纵切-公会管理器.md，在 Game.Core / Game.Godot / Tests.Godot 三层落地首个可玩的公会管理垂直切片：实现基础 Guild/GuildMember/Raid/Event 域模型与服务，提供对应的 Godot 场景与 UI Glue，并为该循环建立最小 xUnit 与 GdUnit4 测试集。",
+        "description": "依据 PRD-Guild-Manager 与 08-FeatureSlice-Guild-Manager.md，在 Game.Core / Game.Godot / Tests.Godot 三层落地首个可玩的公会管理垂直切片：实现基础 Guild/GuildMember/Raid/Event 域模型与服务，提供对应的 Godot 场景与 UI Glue，并为该循环建立最小 xUnit 与 GdUnit4 测试集。",
         "status": "done",
         "priority": "high",
         "dependencies": [
           "1"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-VS-CORE-LOOP\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0020; ADR-0024\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GuildCoreTests.cs; Game.Core.Tests/Domain/EventEngineTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Tests.Godot/tests/Integration/test_guild_workflow.gd\nAcceptance: Game.Core 中存在 Guild、GuildMember、Raid、Event 等核心域模型与服务，且不依赖 Godot API。; Game.Godot 中存在与 08-功能纵切-公会管理器.md 一致的主场景与公会管理 UI 节点结构，并通过 Adapters 调用 Game.Core 服务。; Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。; Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。; 上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。; 完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。\nTest Strategy: 单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。; 场景测试：在 Tests.Godot 中编写主场景与公会管理 UI 的 GdUnit4 用例，验证节点结构与关键 Signals。; 集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。\nLabels: core; guild; vertical-slice; architecture\nOwner: architecture\nLayer: core",
+        "details": "Story: PRD-GUILD-MANAGER-VS-CORE-LOOP\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0020; ADR-0024\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GuildCoreTests.cs; Game.Core.Tests/Domain/EventEngineTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Tests.Godot/tests/Integration/test_guild_workflow.gd\nAcceptance: Game.Core 中存在 Guild、GuildMember、Raid、Event 等核心域模型与服务，且不依赖 Godot API。; Game.Godot 中存在与 08-FeatureSlice-Guild-Manager.md 一致的主场景与公会管理 UI 节点结构，并通过 Adapters 调用 Game.Core 服务。; Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。; Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。; 上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。; 完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。\nTest Strategy: 单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。; 场景测试：在 Tests.Godot 中编写主场景与公会管理 UI 的 GdUnit4 用例，验证节点结构与关键 Signals。; 集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。\nLabels: core; guild; vertical-slice; architecture\nOwner: architecture\nLayer: core",
         "testStrategy": "单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。\n场景测试：在 Tests.Godot 中编写主场景与公会管理 UI 的 GdUnit4 用例，验证节点结构与关键 Signals。\n集成验证：通过 dev_cli.py run-ci-basic 在本地与 CI 中执行，确认新垂直切片不会破坏现有 CI 流程。",
         "subtasks": [],
         "updatedAt": "2025-12-01T07:06:50.934Z",
@@ -61,7 +61,7 @@
           "CH06",
           "CH07"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "recommendedSubtasks": 0,
         "complexity": 6,
         "expansionPrompt": "Break down this task for a Windows-only Godot + C# project. Follow the listed ADRs, keep Contracts in Game.Core/Contracts (no Godot API), and ensure logs/* artifacts and task links remain valid."
@@ -75,7 +75,7 @@
         "dependencies": [
           "2"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-CORE-EVENT-ENGINE\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0020; ADR-0024\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/EventEngineTests.cs\nAcceptance: Game.Core 中存在 EventEngine 类（或等价聚合根），负责驱动回合/周循环并对外暴露明确的 API（如 ExecuteResolutionPhase/ExecutePlayerPhase/ExecuteAiPhase）。; 事件引擎能够接受一组领域事件定义（来自 Contracts 或 Domain 类型），根据当前游戏状态评估触发条件，并执行对应效果。; 事件冲突解决规则在 EventEngine 中有清晰实现（如优先级、排他性、合并策略），并在 xUnit 测试中覆盖。; Game.Core.Tests/Domain/EventEngineTests.cs 中存在针对回合循环、条件评估、事件执行、冲突解决的单元测试，全部通过。; EventEngine 不直接依赖 Godot API；与 Godot 的集成通过适配层/Signals 完成（见 NG-0020/NG-0014）。; EventEngine 至少支持上述三类 Guild 领域事件的基本调度：在 Resolution/Player/AI Simulation 周期内能够消费和发布 GuildCreated、GuildMemberJoined、GuildMemberLeft 等事件，对应的行为由 Game.Core.Tests/Domain/EventEngineTests.cs 及相关用例覆盖。\nTest Strategy: 按 PRD 中定义的核心循环（Resolution/Player/AI Simulation）为 EventEngine 设计一组最小测试场景，用 xUnit 验证每个阶段的状态变更是否符合预期。; 为常见事件类型（如成员加入、资源变化、活动结算）设计条件/效果组合，在测试中模拟不同初始状态并验证 EventEngine 输出。; 为冲突场景（多个事件作用于同一实体或互斥条件）编写专门测试，确认 EventEngine 能按预期顺序/规则处理。\nLabels: core; event-engine; guild; simulation\nOwner: architecture\nLayer: core",
+        "details": "Story: PRD-GUILD-MANAGER-CORE-EVENT-ENGINE\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0020; ADR-0024\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/EventEngineTests.cs\nAcceptance: Game.Core 中存在 EventEngine 类（或等价聚合根），负责驱动回合/周循环并对外暴露明确的 API（如 ExecuteResolutionPhase/ExecutePlayerPhase/ExecuteAiPhase）。; 事件引擎能够接受一组领域事件定义（来自 Contracts 或 Domain 类型），根据当前游戏状态评估触发条件，并执行对应效果。; 事件冲突解决规则在 EventEngine 中有清晰实现（如优先级、排他性、合并策略），并在 xUnit 测试中覆盖。; Game.Core.Tests/Domain/EventEngineTests.cs 中存在针对回合循环、条件评估、事件执行、冲突解决的单元测试，全部通过。; EventEngine 不直接依赖 Godot API；与 Godot 的集成通过适配层/Signals 完成（见 NG-0020/NG-0014）。; EventEngine 至少支持上述三类 Guild 领域事件的基本调度：在 Resolution/Player/AI Simulation 周期内能够消费和发布 GuildCreated、GuildMemberJoined、GuildMemberLeft 等事件，对应的行为由 Game.Core.Tests/Domain/EventEngineTests.cs 及相关用例覆盖。\nTest Strategy: 按 PRD 中定义的核心循环（Resolution/Player/AI Simulation）为 EventEngine 设计一组最小测试场景，用 xUnit 验证每个阶段的状态变更是否符合预期。; 为常见事件类型（如成员加入、资源变化、活动结算）设计条件/效果组合，在测试中模拟不同初始状态并验证 EventEngine 输出。; 为冲突场景（多个事件作用于同一实体或互斥条件）编写专门测试，确认 EventEngine 能按预期顺序/规则处理。\nLabels: core; event-engine; guild; simulation\nOwner: architecture\nLayer: core",
         "testStrategy": "按 PRD 中定义的核心循环（Resolution/Player/AI Simulation）为 EventEngine 设计一组最小测试场景，用 xUnit 验证每个阶段的状态变更是否符合预期。\n为常见事件类型（如成员加入、资源变化、活动结算）设计条件/效果组合，在测试中模拟不同初始状态并验证 EventEngine 输出。\n为冲突场景（多个事件作用于同一实体或互斥条件）编写专门测试，确认 EventEngine 能按预期顺序/规则处理。",
         "subtasks": [],
         "updatedAt": "2025-12-02T07:03:53.577Z",
@@ -95,7 +95,7 @@
           "CH06",
           "CH07"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "recommendedSubtasks": 0,
         "complexity": 6,
         "expansionPrompt": "Break down this task for a Windows-only Godot + C# project. Follow the listed ADRs, keep Contracts in Game.Core/Contracts (no Godot API), and ensure logs/* artifacts and task links remain valid."
@@ -110,7 +110,7 @@
           "2",
           "3"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-CORE-GAME-LOOP\nADR Refs: ADR-0004; ADR-0006; ADR-0018; ADR-0020; ADR-0024\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GameLoopTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Tests.Godot/tests/Scenes/test_main_scene_smoke.gd; Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd\nAcceptance: Game.Core 中存在表示游戏周次/阶段/时间的核心类型与服务（例如 GameTurnSystem 或等价接口），并实现 PRD 中定义的三阶段回合循环。; 游戏时间推进逻辑能够驱动 EventEngine 与 AICoordinator，在至少一个简单场景中完成从 Resolution → Player → AI Simulation 的完整一周循环。; Godot 主场景 UI 能够显示当前周次/阶段/时间状态，并在回合推进时实时更新。; Game.Core.Tests 中存在 GameLoopTests（或等价），覆盖时间推进、阶段切换以及回合边界条件；Tests.Godot 中有用例验证 UI 与 Core 状态同步。; Game.Core 与 Godot 场景的组合至少能够完成 PRD 3.0.3 T2 可玩性场景流中描述的一次完整循环：从启动主场景进入首周公会管理界面，执行一次完整的 Resolution→Player→AI Simulation 一周循环，并安全返回主菜单或结束会话；对应的 xUnit 和 GdUnit4/headless 用例挂接在 NG-0021 的 test_refs 中并在 CI 中保持绿灯。; GM-0103 所需的 T2 流程最小测试入口已经落在 Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd；后续扩展测试应在此基础上补充，而不是新建平行入口文件。\nTest Strategy: 在 xUnit 中为 GameLoop 设计一组“单周循环”用例，验证每个阶段的调用顺序与状态变化是否符合 PRD 描述。; 在 GdUnit4 中为主场景编写测试，通过模拟回合推进（调用 public 方法或连接信号）检查 UI 显示是否与 Core 状态一致。; 结合 GM-0101/GM-0102，用一个最小的“公会一周生活”场景验证事件触发、AI 行为与 UI 反馈闭环。\nLabels: core; game-loop; time; guild\nOwner: architecture\nLayer: core",
+        "details": "Story: PRD-GUILD-MANAGER-CORE-GAME-LOOP\nADR Refs: ADR-0004; ADR-0006; ADR-0018; ADR-0020; ADR-0024\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GameLoopTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Tests.Godot/tests/Scenes/test_main_scene_smoke.gd; Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd\nAcceptance: Game.Core 中存在表示游戏周次/阶段/时间的核心类型与服务（例如 GameTurnSystem 或等价接口），并实现 PRD 中定义的三阶段回合循环。; 游戏时间推进逻辑能够驱动 EventEngine 与 AICoordinator，在至少一个简单场景中完成从 Resolution → Player → AI Simulation 的完整一周循环。; Godot 主场景 UI 能够显示当前周次/阶段/时间状态，并在回合推进时实时更新。; Game.Core.Tests 中存在 GameLoopTests（或等价），覆盖时间推进、阶段切换以及回合边界条件；Tests.Godot 中有用例验证 UI 与 Core 状态同步。; Game.Core 与 Godot 场景的组合至少能够完成 PRD 3.0.3 T2 可玩性场景流中描述的一次完整循环：从启动主场景进入首周公会管理界面，执行一次完整的 Resolution→Player→AI Simulation 一周循环，并安全返回主菜单或结束会话；对应的 xUnit 和 GdUnit4/headless 用例挂接在 NG-0021 的 test_refs 中并在 CI 中保持绿灯。; GM-0103 所需的 T2 流程最小测试入口已经落在 Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd；后续扩展测试应在此基础上补充，而不是新建平行入口文件。\nTest Strategy: 在 xUnit 中为 GameLoop 设计一组“单周循环”用例，验证每个阶段的调用顺序与状态变化是否符合 PRD 描述。; 在 GdUnit4 中为主场景编写测试，通过模拟回合推进（调用 public 方法或连接信号）检查 UI 显示是否与 Core 状态一致。; 结合 GM-0101/GM-0102，用一个最小的“公会一周生活”场景验证事件触发、AI 行为与 UI 反馈闭环。\nLabels: core; game-loop; time; guild\nOwner: architecture\nLayer: core",
         "testStrategy": "在 xUnit 中为 GameLoop 设计一组“单周循环”用例，验证每个阶段的调用顺序与状态变化是否符合 PRD 描述。\n在 GdUnit4 中为主场景编写测试，通过模拟回合推进（调用 public 方法或连接信号）检查 UI 显示是否与 Core 状态一致。\n结合 GM-0101/GM-0102，用一个最小的“公会一周生活”场景验证事件触发、AI 行为与 UI 反馈闭环。",
         "subtasks": [],
         "updatedAt": "2025-12-02T09:24:59.747Z",
@@ -128,7 +128,7 @@
           "CH06",
           "CH07"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "recommendedSubtasks": 0,
         "complexity": 6,
         "expansionPrompt": "Break down this task for a Windows-only Godot + C# project. Follow the listed ADRs, keep Contracts in Game.Core/Contracts (no Godot API), and ensure logs/* artifacts and task links remain valid."
@@ -174,7 +174,7 @@
           "5",
           "2"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-VS-TEST-CI\nADR Refs: ADR-0005; ADR-0011; ADR-0018; ADR-0024\nChapters: CH01; CH06; CH07; CH10\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GuildCoreTests.cs; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Tests.Godot/tests/Scenes/test_main_scene_smoke.gd; logs/ci/<date>/ci-pipeline-summary.json; logs/e2e/<date>/smoke/selfcheck-summary.json; Game.Core.Tests/Domain/GameLoopTests.cs; Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd\nAcceptance: dev_cli.py run-ci-basic 在本地 Windows 环境下能成功运行，并至少执行一次 dotnet test 与一次 headless smoke。; Windows CI 工作流（ci-windows.yml 或 windows-quality-gate.yml）中包含对 Game.Core.Tests 与 Tests.Godot 的执行步骤，且在首个垂直切片落地后仍然全部通过。; headless smoke 用例能够在不依赖交互的情况下启动游戏主场景，并输出 [TEMPLATE_SMOKE_READY] 或 [DB] opened 标记。; 至少存在一条覆盖 PRD 3.0.3 T2 可玩性场景流的端到端测试路径：Game.Core.Tests/Domain/GameTurnSystemTests.cs（或等价用例）验证三阶段一周循环的状态推进，Tests.Godot/tests/Scenes/test_main_scene_smoke.gd（或等价用例）验证从启动主场景进入首周公会管理界面并完成一次“推进一周”的 UI 流程。; 失败的测试或 smoke 能在 logs/ci 与 logs/e2e 目录下生成可用于排查的 JSON/文本日志，与 AGENTS.md 中的日志规范一致。; Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd 已作为 PRD 3.0.3 T2 可玩性场景流的最小测试入口，分别覆盖 Core 回合状态与场景可玩闭环，并挂接在 NG-0021 与 GM-0103 的 Test-Refs 中。\nTest Strategy: 本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。; CI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。\nLabels: ci; testing; smoke; xunit; gdunit\nOwner: architecture\nLayer: ci",
+        "details": "Story: PRD-GUILD-MANAGER-VS-TEST-CI\nADR Refs: ADR-0005; ADR-0011; ADR-0018; ADR-0024\nChapters: CH01; CH06; CH07; CH10\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GuildCoreTests.cs; Game.Core.Tests/Domain/GameTurnSystemTests.cs; Tests.Godot/tests/Scenes/test_guild_main_scene.gd; Tests.Godot/tests/Scenes/test_main_scene_smoke.gd; logs/ci/<date>/ci-pipeline-summary.json; logs/e2e/<date>/smoke/selfcheck-summary.json; Game.Core.Tests/Domain/GameLoopTests.cs; Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd\nAcceptance: dev_cli.py run-ci-basic 在本地 Windows 环境下能成功运行，并至少执行一次 dotnet test 与一次 headless smoke。; Windows CI 工作流（ci-windows.yml 或 windows-quality-gate.yml）中包含对 Game.Core.Tests 与 Tests.Godot 的执行步骤，且在首个垂直切片落地后仍然全部通过。; headless smoke 用例能够在不依赖交互的情况下启动游戏主场景，并输出 [TEMPLATE_SMOKE_READY] 或 [DB] opened 标记。; 至少存在一条覆盖 PRD 3.0.3 T2 可玩性场景流的端到端测试路径：Game.Core.Tests/Domain/GameTurnSystemTests.cs（或等价用例）验证三阶段一周循环的状态推进，Tests.Godot/tests/Scenes/test_main_scene_smoke.gd（或等价用例）验证从启动主场景进入首周公会管理界面并完成一次“推进一周”的 UI 流程。; 失败的测试或 smoke 能在 logs/ci 与 logs/e2e 目录下生成可用于排查的 JSON/文本日志，与 AGENTS.md 中的日志规范一致。; Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd 已作为 PRD 3.0.3 T2 可玩性场景流的最小测试入口，分别覆盖 Core 回合状态与场景可玩闭环，并挂接在 NG-0021 与 GM-0103 的 Test-Refs 中。\nTest Strategy: 本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。; CI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。\nLabels: ci; testing; smoke; xunit; gdunit\nOwner: architecture\nLayer: ci",
         "testStrategy": "本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。\nCI：在测试分支上触发 ci-windows 与 windows-quality-gate 工作流，确认所有步骤通过且生成预期的 logs/** 工件。",
         "subtasks": [],
         "updatedAt": "2025-12-04T14:19:40.651Z",
@@ -190,7 +190,7 @@
           "CH07",
           "CH10"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "recommendedSubtasks": 0,
         "complexity": 6,
         "expansionPrompt": "Break down this task for a Windows-only Godot + C# project. Follow the listed ADRs, keep Contracts in Game.Core/Contracts (no Godot API), and ensure logs/* artifacts and task links remain valid."
@@ -484,7 +484,7 @@
           "4",
           "24"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-MEMBER-MANAGEMENT\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nAcceptance: Game.Core 提供成员 roster 的模型与操作（至少包含：加入/退出、角色变更、踢出），并包含必要的边界校验（例如：重复成员、无效角色、无权限变更）。; 成员变更通过领域事件对外发布（例如 core.guild.member.joined / left / role_changed），事件类型常量与字段定义落盘到 Game.Core/Contracts 并遵循 ADR-0004。; Game.Godot 的 GuildScreen 能展示 roster，并在收到事件后更新 UI；UI 操作通过适配层调用核心命令，不直接修改核心状态。; 至少提供一组 xUnit 单测覆盖 roster 关键状态迁移与事件生成；如有 GdUnit4，则补一条 UI 冒烟验证“事件驱动刷新”。\nTest Strategy: xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。; GdUnit4（可选）：启动 GuildScreen 场景，模拟成员变更事件并断言 UI 列表刷新与关键按钮可用性。\nLabels: ui; guild; member; roster\nOwner: architecture\nLayer: adapter",
+        "details": "Story: PRD-GUILD-MANAGER-T3-MEMBER-MANAGEMENT\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供成员 roster 的模型与操作（至少包含：加入/退出、角色变更、踢出），并包含必要的边界校验（例如：重复成员、无效角色、无权限变更）。; 成员变更通过领域事件对外发布（例如 core.guild.member.joined / left / role_changed），事件类型常量与字段定义落盘到 Game.Core/Contracts 并遵循 ADR-0004。; Game.Godot 的 GuildScreen 能展示 roster，并在收到事件后更新 UI；UI 操作通过适配层调用核心命令，不直接修改核心状态。; 至少提供一组 xUnit 单测覆盖 roster 关键状态迁移与事件生成；如有 GdUnit4，则补一条 UI 冒烟验证“事件驱动刷新”。\nTest Strategy: xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。; GdUnit4（可选）：启动 GuildScreen 场景，模拟成员变更事件并断言 UI 列表刷新与关键按钮可用性。\nLabels: ui; guild; member; roster\nOwner: architecture\nLayer: adapter",
         "testStrategy": "xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。\nGdUnit4（可选）：启动 GuildScreen 场景，模拟成员变更事件并断言 UI 列表刷新与关键按钮可用性。",
         "complexity": 6,
         "recommendedSubtasks": 0,
@@ -503,7 +503,7 @@
           "CH06",
           "CH07"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-07T18:25:01.169Z"
       },
       {
@@ -515,7 +515,7 @@
         "dependencies": [
           "13"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-RECRUITMENT\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nAcceptance: Game.Core 提供 RecruitmentSystem（或等价服务），支持“申请加入/审批/拒绝/撤回”并能驱动成员变更。; 流程关键节点产生领域事件（例如 core.guild.recruitment.applied / approved / rejected 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。; Game.Godot 提供最小 UI 或调试入口以驱动招募流程（至少覆盖：发起申请与审批一次）。; xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。\nTest Strategy: xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。; GdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。\nLabels: ui; guild; recruitment; simulation\nOwner: architecture\nLayer: adapter",
+        "details": "Story: PRD-GUILD-MANAGER-T3-RECRUITMENT\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供 RecruitmentSystem（或等价服务），支持“申请加入/审批/拒绝/撤回”并能驱动成员变更。; 流程关键节点产生领域事件（例如 core.guild.recruitment.applied / approved / rejected 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。; Game.Godot 提供最小 UI 或调试入口以驱动招募流程（至少覆盖：发起申请与审批一次）。; xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。\nTest Strategy: xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。; GdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。\nLabels: ui; guild; recruitment; simulation\nOwner: architecture\nLayer: adapter",
         "testStrategy": "xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。\nGdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。",
         "complexity": 6,
         "recommendedSubtasks": 0,
@@ -535,7 +535,7 @@
           "CH06",
           "CH07"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-07T18:25:01.169Z"
       },
       {
@@ -549,7 +549,7 @@
           "20",
           "25"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0015; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nAcceptance: Game.Core 提供 AIEcosystem（或等价模块），在 GameTurn/时间推进下驱动 NPC 行为生成，并能稳定复现实例（可通过种子或确定性输入）。; 至少实现 3 类可观测行为并以领域事件发布（例如 core.guild.recruitment.posted、core.guild.member.joined、core.guild.member.left），事件类型与字段遵循 ADR-0004。; AIEcosystem 的输入/输出与存储边界清晰：核心逻辑不依赖 Godot API，适配层负责时间/随机源注入。; xUnit 覆盖：确定性推进、事件数量/类型、边界条件（空 guild、满员、无候选等）。\nTest Strategy: xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。; 如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。\nLabels: core; ai; simulation; npc; guild\nOwner: architecture\nLayer: core",
+        "details": "Story: PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0015; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供 AIEcosystem（或等价模块），在 GameTurn/时间推进下驱动 NPC 行为生成，并能稳定复现实例（可通过种子或确定性输入）。; 至少实现 3 类可观测行为并以领域事件发布（例如 core.guild.recruitment.posted、core.guild.member.joined、core.guild.member.left），事件类型与字段遵循 ADR-0004。; AIEcosystem 的输入/输出与存储边界清晰：核心逻辑不依赖 Godot API，适配层负责时间/随机源注入。; xUnit 覆盖：确定性推进、事件数量/类型、边界条件（空 guild、满员、无候选等）。\nTest Strategy: xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。; 如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。\nLabels: core; ai; simulation; npc; guild\nOwner: architecture\nLayer: core",
         "testStrategy": "xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。\n如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。",
         "complexity": 6,
         "recommendedSubtasks": 0,
@@ -570,7 +570,7 @@
           "CH07",
           "CH09"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-07T18:25:01.169Z"
       },
       {
@@ -582,7 +582,7 @@
         "dependencies": [
           "15"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-CORE-AI-COORDINATOR\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0015; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nTest Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs\nAcceptance: Game.Core 中存在 AICoordinator 类（或等价服务），负责在每个 AI 周期内驱动 NPC 公会与成员行为（决策、关系更新、事件生成）。; AICoordinator 对外暴露用于集成的接口（如 StepAiCycle/GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。; xUnit 测试涵盖基本 AI 行为（例如简单策略下的成员状态变化）、冲突场景（多个 NPC 目标冲突）以及性能边界（在模拟大量 NPC 时仍保持可接受性能）。; 如采用多线程/ThreadPool 优化 AI 计算，AICoordinator 提供线程安全保证，并在测试中验证无竞态条件。\nTest Strategy: 为小规模 NPC 集合设计 AI 周期测试，用 xUnit 验证行为决策与状态更新是否符合 PRD 中定义的规则。; 构造典型冲突场景（例如资源争抢、公会关系冲突），验证 AICoordinator 能生成合理事件并与 EventEngine 协同处理。; 在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。\nLabels: core; ai; simulation; guild\nOwner: architecture\nLayer: core",
+        "details": "Story: PRD-GUILD-MANAGER-CORE-AI-COORDINATOR\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0015; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nTest Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs\nAcceptance: Game.Core 中存在 AICoordinator 类（或等价服务），负责在每个 AI 周期内驱动 NPC 公会与成员行为（决策、关系更新、事件生成）。; AICoordinator 对外暴露用于集成的接口（如 StepAiCycle/GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。; xUnit 测试涵盖基本 AI 行为（例如简单策略下的成员状态变化）、冲突场景（多个 NPC 目标冲突）以及性能边界（在模拟大量 NPC 时仍保持可接受性能）。; 如采用多线程/ThreadPool 优化 AI 计算，AICoordinator 提供线程安全保证，并在测试中验证无竞态条件。\nTest Strategy: 为小规模 NPC 集合设计 AI 周期测试，用 xUnit 验证行为决策与状态更新是否符合 PRD 中定义的规则。; 构造典型冲突场景（例如资源争抢、公会关系冲突），验证 AICoordinator 能生成合理事件并与 EventEngine 协同处理。; 在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。\nLabels: core; ai; simulation; guild\nOwner: architecture\nLayer: core",
         "testStrategy": "为小规模 NPC 集合设计 AI 周期测试，用 xUnit 验证行为决策与状态更新是否符合 PRD 中定义的规则。\n构造典型冲突场景（例如资源争抢、公会关系冲突），验证 AICoordinator 能生成合理事件并与 EventEngine 协同处理。\n在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。",
         "complexity": 6,
         "recommendedSubtasks": 0,
@@ -603,7 +603,7 @@
           "CH07",
           "CH09"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-07T18:25:01.169Z"
       },
       {
@@ -615,7 +615,7 @@
         "dependencies": [
           "16"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-PVE-RAID\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0015; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nAcceptance: Game.Core 提供 RaidDungeon/Encounter 的最小状态机（至少包含：进入->战斗->结算/失败），并能在回合推进中演化。; 关键状态变化发布领域事件（例如 core.raid.encounter.started / resolved / failed），事件契约落盘到 Game.Core/Contracts。; Game.Godot 提供最小演示入口（按钮或调试命令）可触发一次遭遇并在 UI 或日志中呈现结果。; xUnit 覆盖：成功/失败两条路径与边界条件；如有 GdUnit4，补一个端到端冒烟（触发->看到结果->退出）。\nTest Strategy: xUnit：覆盖 Encounter 结算与状态迁移（包含异常输入/非法状态转换的负例）。; GdUnit4（可选）：跑一条 headless 冒烟确保演示入口与事件流不崩溃。\nLabels: core; pve; raid; simulation\nOwner: architecture\nLayer: core",
+        "details": "Story: PRD-GUILD-MANAGER-T3-PVE-RAID\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0015; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供 RaidDungeon/Encounter 的最小状态机（至少包含：进入->战斗->结算/失败），并能在回合推进中演化。; 关键状态变化发布领域事件（例如 core.raid.encounter.started / resolved / failed），事件契约落盘到 Game.Core/Contracts。; Game.Godot 提供最小演示入口（按钮或调试命令）可触发一次遭遇并在 UI 或日志中呈现结果。; xUnit 覆盖：成功/失败两条路径与边界条件；如有 GdUnit4，补一个端到端冒烟（触发->看到结果->退出）。\nTest Strategy: xUnit：覆盖 Encounter 结算与状态迁移（包含异常输入/非法状态转换的负例）。; GdUnit4（可选）：跑一条 headless 冒烟确保演示入口与事件流不崩溃。\nLabels: core; pve; raid; simulation\nOwner: architecture\nLayer: core",
         "testStrategy": "xUnit：覆盖 Encounter 结算与状态迁移（包含异常输入/非法状态转换的负例）。\nGdUnit4（可选）：跑一条 headless 冒烟确保演示入口与事件流不崩溃。",
         "complexity": 6,
         "recommendedSubtasks": 0,
@@ -636,7 +636,7 @@
           "CH07",
           "CH09"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-07T18:25:01.169Z"
       },
       {
@@ -648,7 +648,7 @@
         "dependencies": [
           "17"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-SOCIAL\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nAcceptance: Game.Core 提供 IntimacySystem（或等价模块），能在成员交互或回合推进下更新亲密度/关系状态。; 关系变化通过领域事件发布（例如 core.guild.social.intimacy.changed），契约落盘到 Game.Core/Contracts 并遵循 ADR-0004。; Game.Godot 提供最小展示（列表或详情面板）能看到关系值变化，且不直接修改核心状态。; xUnit 覆盖：关系变化规则、上下限边界、无效成员对等错误路径。\nTest Strategy: xUnit：覆盖 IntimacySystem 的规则与边界（上下限/重复输入/不存在成员）。; GdUnit4（可选）：触发一次关系变化并断言 UI 展示更新。\nLabels: core; social; relationship; events\nOwner: architecture\nLayer: core",
+        "details": "Story: PRD-GUILD-MANAGER-T3-SOCIAL\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供 IntimacySystem（或等价模块），能在成员交互或回合推进下更新亲密度/关系状态。; 关系变化通过领域事件发布（例如 core.guild.social.intimacy.changed），契约落盘到 Game.Core/Contracts 并遵循 ADR-0004。; Game.Godot 提供最小展示（列表或详情面板）能看到关系值变化，且不直接修改核心状态。; xUnit 覆盖：关系变化规则、上下限边界、无效成员对等错误路径。\nTest Strategy: xUnit：覆盖 IntimacySystem 的规则与边界（上下限/重复输入/不存在成员）。; GdUnit4（可选）：触发一次关系变化并断言 UI 展示更新。\nLabels: core; social; relationship; events\nOwner: architecture\nLayer: core",
         "testStrategy": "xUnit：覆盖 IntimacySystem 的规则与边界（上下限/重复输入/不存在成员）。\nGdUnit4（可选）：触发一次关系变化并断言 UI 展示更新。",
         "complexity": 5,
         "recommendedSubtasks": 0,
@@ -667,7 +667,7 @@
           "CH06",
           "CH07"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-07T18:25:01.169Z"
       },
       {
@@ -679,7 +679,7 @@
         "dependencies": [
           "18"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-MEDIA\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nAcceptance: Game.Core 提供 Reputation（或等价模块），支持声望值变更与来源记录（例如：战斗胜利/负面事件）。; 声望/曝光变化发布领域事件（例如 core.guild.reputation.changed / core.guild.media.exposure.created），契约落盘到 Game.Core/Contracts。; 至少一个系统能读取声望并产生可观测影响（例如：招募成功率/候选数量的变化，或 UI 显示声望等级）。; xUnit 覆盖：声望变更累积、上下限、来源合并/去重（如适用）与事件生成。\nTest Strategy: xUnit：覆盖 Reputation 的数值规则、来源记录与事件生成；对非法输入给出负例。; 如有集成演示：在 Godot 场景中显示声望值并观察一次变化。\nLabels: core; reputation; media; events\nOwner: architecture\nLayer: core",
+        "details": "Story: PRD-GUILD-MANAGER-T3-MEDIA\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供 Reputation（或等价模块），支持声望值变更与来源记录（例如：战斗胜利/负面事件）。; 声望/曝光变化发布领域事件（例如 core.guild.reputation.changed / core.guild.media.exposure.created），契约落盘到 Game.Core/Contracts。; 至少一个系统能读取声望并产生可观测影响（例如：招募成功率/候选数量的变化，或 UI 显示声望等级）。; xUnit 覆盖：声望变更累积、上下限、来源合并/去重（如适用）与事件生成。\nTest Strategy: xUnit：覆盖 Reputation 的数值规则、来源记录与事件生成；对非法输入给出负例。; 如有集成演示：在 Godot 场景中显示声望值并观察一次变化。\nLabels: core; reputation; media; events\nOwner: architecture\nLayer: core",
         "testStrategy": "xUnit：覆盖 Reputation 的数值规则、来源记录与事件生成；对非法输入给出负例。\n如有集成演示：在 Godot 场景中显示声望值并观察一次变化。",
         "complexity": 5,
         "recommendedSubtasks": 0,
@@ -698,7 +698,7 @@
           "CH06",
           "CH07"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-07T18:25:01.169Z"
       },
       {
@@ -770,7 +770,7 @@
         "dependencies": [
           "1"
         ],
-        "details": "Story: PRD-GUILD-Manager-DOCS-LINKS\nADR Refs: ADR-0003; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH03; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: docs/prd.txt; docs/architecture/base/01-introduction-and-goals-v2.md; docs/adr/ADR-0018-godot-csharp-tech-stack.md; docs/adr/ADR-0019-godot-security-baseline.md\nAcceptance: docs/prd.txt 中与公会管理器相关的章节在 Overlay/08 中都有对应条目或引用。; 与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-功能纵切-公会管理器.md 与本验收清单的 Front-Matter 中有一致引用。; Taskmaster 任务（NG-0001/NG-0020/NG-0021 以及后续玩法任务）在 story_id/adr_refs/chapter_refs/overlay_refs 上与 PRD/Base/ADR/Overlay 建立清晰回链。; task-links-validate（或等价脚本）能够在 CI 中验证上述回链关系并生成报告。\nTest Strategy: 文档审阅：由架构/产品共同检查 PRD/Base/ADR/Overlay 是否互相引用、无矛盾口径。; 自动化：扩展或实现 task-links-validate 脚本，针对 NG-00xx 与玩法任务校验 story_id/adr_refs/chapter_refs/overlay_refs 与文档实际存在性和一致性。\nLabels: docs; links; acceptance; task-links\nOwner: architecture\nLayer: docs",
+        "details": "Story: PRD-GUILD-Manager-DOCS-LINKS\nADR Refs: ADR-0003; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH03; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: docs/prd.txt; docs/architecture/base/01-introduction-and-goals-v2.md; docs/adr/ADR-0018-godot-csharp-tech-stack.md; docs/adr/ADR-0019-godot-security-baseline.md\nAcceptance: docs/prd.txt 中与公会管理器相关的章节在 Overlay/08 中都有对应条目或引用。; 与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-FeatureSlice-Guild-Manager.md 与本验收清单的 Front-Matter 中有一致引用。; Taskmaster 任务（NG-0001/NG-0020/NG-0021 以及后续玩法任务）在 story_id/adr_refs/chapter_refs/overlay_refs 上与 PRD/Base/ADR/Overlay 建立清晰回链。; task-links-validate（或等价脚本）能够在 CI 中验证上述回链关系并生成报告。\nTest Strategy: 文档审阅：由架构/产品共同检查 PRD/Base/ADR/Overlay 是否互相引用、无矛盾口径。; 自动化：扩展或实现 task-links-validate 脚本，针对 NG-00xx 与玩法任务校验 story_id/adr_refs/chapter_refs/overlay_refs 与文档实际存在性和一致性。\nLabels: docs; links; acceptance; task-links\nOwner: architecture\nLayer: docs",
         "testStrategy": "文档审阅：由架构/产品共同检查 PRD/Base/ADR/Overlay 是否互相引用、无矛盾口径。\n自动化：扩展或实现 task-links-validate 脚本，针对 NG-00xx 与玩法任务校验 story_id/adr_refs/chapter_refs/overlay_refs 与文档实际存在性和一致性。",
         "subtasks": [],
         "adrRefs": [
@@ -789,7 +789,7 @@
           "CH06",
           "CH07"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-07T18:25:01.169Z"
       },
       {
@@ -868,7 +868,7 @@
           "12",
           "20"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-DataSchema.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.storage.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contractRefs.\n",
+        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-DataSchema.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.storage.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contractRefs.\n",
         "testStrategy": "Use TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/*.",
         "complexity": 8,
         "recommendedSubtasks": 7,
@@ -992,7 +992,7 @@
         "dependencies": [
           "25"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.storage.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contractRefs.\n",
+        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.storage.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contractRefs.\n",
         "testStrategy": "Use TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/*.",
         "complexity": 6,
         "recommendedSubtasks": 0,
@@ -1014,7 +1014,7 @@
           "CH06",
           "CH07"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-08T17:13:31"
       }
     ],

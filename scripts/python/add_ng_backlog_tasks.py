@@ -36,7 +36,7 @@ def update_tasks_back(tasks_back_path: Path) -> None:
             "chapter_refs": ["CH01", "CH04", "CH05", "CH06", "CH07"],
             "overlay_refs": [
                 "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-                "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+                "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
                 "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
             ],
             "labels": ["signal", "events", "naming", "core"],
@@ -49,7 +49,7 @@ def update_tasks_back(tasks_back_path: Path) -> None:
                 "Game.Core 与 Tests 中不再存在 game.started/score.changed/"
                 "player.health.changed 等旧事件类型，全部迁移为 core.*.* 命名。",
                 "GameEngineCoreEventTests 覆盖新的事件类型常量，并全部通过。",
-                "Overlay 08-Contracts-Guild-Manager-Events.md 与 08-功能纵切-公会管理器.md"
+                "Overlay 08-Contracts-Guild-Manager-Events.md 与 08-FeatureSlice-Guild-Manager.md"
                 " 中的事件示例与实际事件类型保持一致。",
                 "一次 signal 自检（例如全文搜索）可以证明仓库内仅保留 core.*.* 作为事件命名前缀。",
             ],

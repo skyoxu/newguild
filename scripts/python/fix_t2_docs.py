@@ -35,7 +35,7 @@ def update_t2_guide() -> None:
   - 完成一轮 Week/Phase 的切换；
   - 场景结束或返回菜单的方式。
 - 在 Overlay：
-  - 打开 `docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md`，确认 T2 流程已被引用（而不是重复阈值或策略）。
+  - 打开 `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md`，确认 T2 流程已被引用（而不是重复阈值或策略）。
 - 在 Checklist：
   - 查看 `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md`，确保存在一条描述“首个 T2 Playable 场景流”的验收条款。
 
@@ -77,7 +77,7 @@ def update_t2_guide() -> None:
 - `chapter_refs`：
   - 例如 `CH01`（目标）、`CH04`（系统上下文）、`CH06`（运行时视图）、`CH07`（开发与门禁）。
 - `overlay_refs`：
-  - `docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md`。
+  - `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md`。
   - `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md`。
 - `test_refs`：
   - Core 测试（xUnit）：

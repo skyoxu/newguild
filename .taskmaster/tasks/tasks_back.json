@@ -25,7 +25,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -478,7 +478,7 @@
     "id": "NG-0020",
     "story_id": "PRD-GUILD-MANAGER-VS-CORE-LOOP",
     "title": "公会管理器首个垂直切片的三层架构与核心类型落地",
-    "description": "依据 PRD-Guild-Manager 与 08-功能纵切-公会管理器.md，在 Game.Core / Game.Godot / Tests.Godot 三层落地首个可玩的公会管理垂直切片：实现基础 Guild/GuildMember/Raid/Event 域模型与服务，提供对应的 Godot 场景与 UI Glue，并为该循环建立最小 xUnit 与 GdUnit4 测试集。",
+    "description": "依据 PRD-Guild-Manager 与 08-FeatureSlice-Guild-Manager.md，在 Game.Core / Game.Godot / Tests.Godot 三层落地首个可玩的公会管理垂直切片：实现基础 Guild/GuildMember/Raid/Event 域模型与服务，提供对应的 Godot 场景与 UI Glue，并为该循环建立最小 xUnit 与 GdUnit4 测试集。",
     "status": "done",
     "priority": "P1",
     "layer": "core",
@@ -503,7 +503,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -521,7 +521,7 @@
     ],
     "acceptance": [
       "Game.Core 中存在 Guild、GuildMember、Raid、Event 等核心域模型与服务，且不依赖 Godot API。",
-      "Game.Godot 中存在与 08-功能纵切-公会管理器.md 一致的主场景与公会管理 UI 节点结构，并通过 Adapters 调用 Game.Core 服务。",
+      "Game.Godot 中存在与 08-FeatureSlice-Guild-Manager.md 一致的主场景与公会管理 UI 节点结构，并通过 Adapters 调用 Game.Core 服务。",
       "Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。",
       "Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。",
       "上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。",
@@ -563,7 +563,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -626,7 +626,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -644,7 +644,7 @@
     ],
     "acceptance": [
       "docs/prd.txt 中与公会管理器相关的章节在 Overlay/08 中都有对应条目或引用。",
-      "与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-功能纵切-公会管理器.md 与本验收清单的 Front-Matter 中有一致引用。",
+      "与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-FeatureSlice-Guild-Manager.md 与本验收清单的 Front-Matter 中有一致引用。",
       "Taskmaster 任务（NG-0001/NG-0020/NG-0021 以及后续玩法任务）在 story_id/adr_refs/chapter_refs/overlay_refs 上与 PRD/Base/ADR/Overlay 建立清晰回链。",
       "task-links-validate（或等价脚本）能够在 CI 中验证上述回链关系并生成报告。"
     ],
@@ -683,7 +683,7 @@
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -700,7 +700,7 @@
     "acceptance": [
       "Game.Core 与 Tests 中不再存在 game.started/score.changed/player.health.changed 等旧事件类型，全部迁移为 core.*.* 命名。",
       "GameEngineCoreEventTests 覆盖新的事件类型常量，并全部通过。",
-      "Overlay 08-Contracts-Guild-Manager-Events.md 与 08-功能纵切-公会管理器.md 中的事件示例与实际事件类型保持一致。",
+      "Overlay 08-Contracts-Guild-Manager-Events.md 与 08-FeatureSlice-Guild-Manager.md 中的事件示例与实际事件类型保持一致。",
       "一次 signal 自检（例如全文搜索）可以证明仓库内仅保留 core.*.* 作为事件命名前缀。"
     ],
     "test_strategy": [
@@ -1905,7 +1905,7 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-DataSchema.md"
     ],
     "labels": [

@@ -30,7 +30,7 @@
 
 - [ ] 本次改动未修改领域契约（Contracts），或：
   - [ ] 已更新 `Game.Core/Contracts/**` 中的 C# 契约文件
-  - [ ] 已更新对应 Overlay 08 文档（例如：`08-Contracts-*.md` / `08-功能纵切-*.md`），记录事件/DTO/文件路径
+  - [ ] 已更新对应 Overlay 08 文档（例如：`08-Contracts-*.md` / `08-FeatureSlice-*.md`），记录事件/DTO/文件路径
   - [ ] 已更新/新增对应测试：
     - [ ] `Game.Core.Tests/Domain/*ContractsTests.cs`
     - [ ] （如适用）`Tests.Godot/tests/**`

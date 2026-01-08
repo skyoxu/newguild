@@ -1,7 +1,7 @@
 ---
 PRD-ID: PRD-Guild-Manager
 Story-ID: PRD-NEWGUILD-VS-0001
-Title: 功能纵切 — 公会管理器
+Title: Feature Slice — Guild Manager（功能纵切）
 Status: Active
 ADR-Refs:
   - ADR-0018

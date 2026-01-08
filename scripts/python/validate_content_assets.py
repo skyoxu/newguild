@@ -31,6 +31,13 @@ DATA_ROOT = REPO_ROOT / "Game.Godot" / "Assets" / "Data"
 BASE_MANIFEST = "Game.Godot/Assets/Data/content/base/manifest.json"
 BASE_EVENTS = "Game.Godot/Assets/Data/content/base/guild_events.json"
 BASE_TUNING = "Game.Godot/Assets/Data/content/base/tuning.json"
+BASE_MEMBER_ARCHETYPES = "Game.Godot/Assets/Data/content/base/member_archetypes.json"
+BASE_NPC_GUILDS = "Game.Godot/Assets/Data/content/base/npc_guilds.json"
+BASE_RECRUIT_OFFERS = "Game.Godot/Assets/Data/content/base/recruit_offers.json"
+BASE_RAID_ENCOUNTERS = "Game.Godot/Assets/Data/content/base/raid_encounters.json"
+BASE_TACTICS = "Game.Godot/Assets/Data/content/base/tactics.json"
+BASE_MEDIA_BEATS = "Game.Godot/Assets/Data/content/base/media_beats.json"
+BASE_SOCIAL_INTERACTIONS = "Game.Godot/Assets/Data/content/base/social_interactions.json"
 
 
 CONTENT_ID_RE = re.compile(r"^(Base|DLC1)_[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*$")
@@ -222,6 +229,224 @@ def _validate_base_guild_events(obj: Any) -> list[str]:
     return issues
 
 
+def _validate_member_archetypes(obj: Any) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(obj, dict):
+        return ["root_not_object"]
+    _ensure_str(obj, "contentVersion", issues)
+    items = obj.get("memberArchetypes")
+    if not isinstance(items, list) or not items:
+        issues.append("memberArchetypes_missing_or_empty")
+        return issues
+    for i, it in enumerate(items):
+        if not isinstance(it, dict):
+            issues.append(f"memberArchetypes[{i}]_not_object")
+            continue
+        cid = it.get("id")
+        if not isinstance(cid, str) or not cid.strip() or not CONTENT_ID_RE.match(cid.strip()):
+            issues.append(f"memberArchetypes[{i}].id_invalid")
+        if not isinstance(it.get("nameKey"), str) or not str(it.get("nameKey")).strip():
+            issues.append(f"memberArchetypes[{i}].nameKey_invalid")
+        role = it.get("role")
+        if role not in {"Tank", "Healer", "DPS"}:
+            issues.append(f"memberArchetypes[{i}].role_invalid")
+        tags = it.get("personalityTags")
+        if tags is not None and not isinstance(tags, list):
+            issues.append(f"memberArchetypes[{i}].personalityTags_invalid")
+        ratings = it.get("baseRatings")
+        if ratings is not None and not isinstance(ratings, dict):
+            issues.append(f"memberArchetypes[{i}].baseRatings_invalid")
+    return issues
+
+
+def _validate_tactics(obj: Any) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(obj, dict):
+        return ["root_not_object"]
+    _ensure_str(obj, "contentVersion", issues)
+    items = obj.get("tactics")
+    if not isinstance(items, list) or not items:
+        issues.append("tactics_missing_or_empty")
+        return issues
+    for i, it in enumerate(items):
+        if not isinstance(it, dict):
+            issues.append(f"tactics[{i}]_not_object")
+            continue
+        cid = it.get("id")
+        if not isinstance(cid, str) or not cid.strip() or not CONTENT_ID_RE.match(cid.strip()):
+            issues.append(f"tactics[{i}].id_invalid")
+        if not isinstance(it.get("nameKey"), str) or not str(it.get("nameKey")).strip():
+            issues.append(f"tactics[{i}].nameKey_invalid")
+        mods = it.get("modifiers")
+        if mods is not None and not isinstance(mods, dict):
+            issues.append(f"tactics[{i}].modifiers_invalid")
+    return issues
+
+
+def _validate_npc_guilds(obj: Any) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(obj, dict):
+        return ["root_not_object"]
+    _ensure_str(obj, "contentVersion", issues)
+    items = obj.get("npcGuildArchetypes")
+    if not isinstance(items, list) or not items:
+        issues.append("npcGuildArchetypes_missing_or_empty")
+        return issues
+    for i, it in enumerate(items):
+        if not isinstance(it, dict):
+            issues.append(f"npcGuildArchetypes[{i}]_not_object")
+            continue
+        cid = it.get("id")
+        if not isinstance(cid, str) or not cid.strip() or not CONTENT_ID_RE.match(cid.strip()):
+            issues.append(f"npcGuildArchetypes[{i}].id_invalid")
+        if not isinstance(it.get("nameKey"), str) or not str(it.get("nameKey")).strip():
+            issues.append(f"npcGuildArchetypes[{i}].nameKey_invalid")
+        prefs = it.get("recruitmentPreferences")
+        if not isinstance(prefs, dict):
+            issues.append(f"npcGuildArchetypes[{i}].recruitmentPreferences_invalid")
+        else:
+            for k in ("tank", "healer", "dps"):
+                if k in prefs and isinstance(prefs[k], (int, float)):
+                    v = float(prefs[k])
+                    if v < 0.0 or v > 1.0:
+                        issues.append(f"npcGuildArchetypes[{i}].recruitmentPreferences.{k}_out_of_range_0_1")
+        tactics = it.get("tacticPreferences")
+        if tactics is not None and not isinstance(tactics, list):
+            issues.append(f"npcGuildArchetypes[{i}].tacticPreferences_invalid")
+    return issues
+
+
+def _validate_range_int(obj: Any, path: str, issues: list[str]) -> None:
+    if not isinstance(obj, dict):
+        issues.append(f"{path}_invalid")
+        return
+    mn = obj.get("min")
+    mx = obj.get("max")
+    if not isinstance(mn, int) or not isinstance(mx, int):
+        issues.append(f"{path}.minmax_invalid")
+        return
+    if mn > mx:
+        issues.append(f"{path}.min_greater_than_max")
+
+
+def _validate_raid_encounters(obj: Any) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(obj, dict):
+        return ["root_not_object"]
+    _ensure_str(obj, "contentVersion", issues)
+    items = obj.get("raidEncounters")
+    if not isinstance(items, list) or not items:
+        issues.append("raidEncounters_missing_or_empty")
+        return issues
+    for i, it in enumerate(items):
+        if not isinstance(it, dict):
+            issues.append(f"raidEncounters[{i}]_not_object")
+            continue
+        cid = it.get("id")
+        if not isinstance(cid, str) or not cid.strip() or not CONTENT_ID_RE.match(cid.strip()):
+            issues.append(f"raidEncounters[{i}].id_invalid")
+        if not isinstance(it.get("nameKey"), str) or not str(it.get("nameKey")).strip():
+            issues.append(f"raidEncounters[{i}].nameKey_invalid")
+        rr = it.get("recommendedRoleRatio")
+        if rr is not None and not isinstance(rr, dict):
+            issues.append(f"raidEncounters[{i}].recommendedRoleRatio_invalid")
+        for rk in ("successReputationDelta", "failMoraleDelta"):
+            rv = it.get(rk)
+            if rv is not None:
+                _validate_range_int(rv, f"raidEncounters[{i}].{rk}", issues)
+    return issues
+
+
+def _validate_media_beats(obj: Any) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(obj, dict):
+        return ["root_not_object"]
+    _ensure_str(obj, "contentVersion", issues)
+    items = obj.get("mediaBeats")
+    if not isinstance(items, list) or not items:
+        issues.append("mediaBeats_missing_or_empty")
+        return issues
+    for i, it in enumerate(items):
+        if not isinstance(it, dict):
+            issues.append(f"mediaBeats[{i}]_not_object")
+            continue
+        cid = it.get("id")
+        if not isinstance(cid, str) or not cid.strip() or not CONTENT_ID_RE.match(cid.strip()):
+            issues.append(f"mediaBeats[{i}].id_invalid")
+        if not isinstance(it.get("nameKey"), str) or not str(it.get("nameKey")).strip():
+            issues.append(f"mediaBeats[{i}].nameKey_invalid")
+        if not isinstance(it.get("weight"), int) or it.get("weight") < 0:
+            issues.append(f"mediaBeats[{i}].weight_invalid")
+        _validate_range_int(it.get("reputationDelta"), f"mediaBeats[{i}].reputationDelta", issues)
+    return issues
+
+
+def _validate_social_interactions(obj: Any) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(obj, dict):
+        return ["root_not_object"]
+    _ensure_str(obj, "contentVersion", issues)
+    items = obj.get("socialInteractions")
+    if not isinstance(items, list) or not items:
+        issues.append("socialInteractions_missing_or_empty")
+        return issues
+    for i, it in enumerate(items):
+        if not isinstance(it, dict):
+            issues.append(f"socialInteractions[{i}]_not_object")
+            continue
+        cid = it.get("id")
+        if not isinstance(cid, str) or not cid.strip() or not CONTENT_ID_RE.match(cid.strip()):
+            issues.append(f"socialInteractions[{i}].id_invalid")
+        if not isinstance(it.get("nameKey"), str) or not str(it.get("nameKey")).strip():
+            issues.append(f"socialInteractions[{i}].nameKey_invalid")
+        if not isinstance(it.get("weight"), int) or it.get("weight") < 0:
+            issues.append(f"socialInteractions[{i}].weight_invalid")
+        effs = it.get("effects")
+        if effs is not None:
+            if not isinstance(effs, list):
+                issues.append(f"socialInteractions[{i}].effects_not_list")
+            else:
+                for j, e in enumerate(effs):
+                    for ei in _validate_effect(e):
+                        issues.append(f"socialInteractions[{i}].effects[{j}].{ei}")
+    return issues
+
+
+def _validate_recruit_offers(obj: Any) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(obj, dict):
+        return ["root_not_object"]
+    _ensure_str(obj, "contentVersion", issues)
+    items = obj.get("recruitOffers")
+    if not isinstance(items, list) or not items:
+        issues.append("recruitOffers_missing_or_empty")
+        return issues
+    for i, it in enumerate(items):
+        if not isinstance(it, dict):
+            issues.append(f"recruitOffers[{i}]_not_object")
+            continue
+        cid = it.get("id")
+        if not isinstance(cid, str) or not cid.strip() or not CONTENT_ID_RE.match(cid.strip()):
+            issues.append(f"recruitOffers[{i}].id_invalid")
+        if not isinstance(it.get("nameKey"), str) or not str(it.get("nameKey")).strip():
+            issues.append(f"recruitOffers[{i}].nameKey_invalid")
+        role = it.get("role")
+        if role not in {"Tank", "Healer", "DPS"}:
+            issues.append(f"recruitOffers[{i}].role_invalid")
+        if not isinstance(it.get("difficultyTier"), int) or it.get("difficultyTier") < 1:
+            issues.append(f"recruitOffers[{i}].difficultyTier_invalid")
+        _ensure_num(it, "baseSuccessChance", issues, lo=0.0, hi=1.0)
+        for k in ("effectsOnSuccess", "effectsOnFail"):
+            v = it.get(k)
+            if v is not None and not isinstance(v, list):
+                issues.append(f"recruitOffers[{i}].{k}_not_list")
+            elif isinstance(v, list):
+                for j, e in enumerate(v):
+                    for ei in _validate_effect(e):
+                        issues.append(f"recruitOffers[{i}].{k}[{j}].{ei}")
+    return issues
+
+
 def _validate_ratio_map(obj: Any, key: str, issues: list[str]) -> None:
     v = obj.get(key)
     if not isinstance(v, dict):
@@ -237,19 +462,6 @@ def _validate_ratio_map(obj: Any, key: str, issues: list[str]) -> None:
         x = float(v[k])
         if x < 0.0 or x > 1.0:
             issues.append(f"{key}.{k}_out_of_range_0_1")
-
-
-def _validate_range_int(obj: Any, path: str, issues: list[str]) -> None:
-    if not isinstance(obj, dict):
-        issues.append(f"{path}_invalid")
-        return
-    mn = obj.get("min")
-    mx = obj.get("max")
-    if not isinstance(mn, int) or not isinstance(mx, int):
-        issues.append(f"{path}.minmax_invalid")
-        return
-    if mn > mx:
-        issues.append(f"{path}.min_greater_than_max")
 
 
 def _validate_base_tuning(obj: Any) -> list[str]:
@@ -371,11 +583,64 @@ def main() -> int:
                     entry["status"] = "fail"
                     entry["issues"].extend(issues)
                     report["errors"] += 1
+            if rel == BASE_MEMBER_ARCHETYPES:
+                issues = _validate_member_archetypes(obj)
+                if issues:
+                    entry["status"] = "fail"
+                    entry["issues"].extend(issues)
+                    report["errors"] += 1
+            if rel == BASE_NPC_GUILDS:
+                issues = _validate_npc_guilds(obj)
+                if issues:
+                    entry["status"] = "fail"
+                    entry["issues"].extend(issues)
+                    report["errors"] += 1
+            if rel == BASE_RECRUIT_OFFERS:
+                issues = _validate_recruit_offers(obj)
+                if issues:
+                    entry["status"] = "fail"
+                    entry["issues"].extend(issues)
+                    report["errors"] += 1
+            if rel == BASE_RAID_ENCOUNTERS:
+                issues = _validate_raid_encounters(obj)
+                if issues:
+                    entry["status"] = "fail"
+                    entry["issues"].extend(issues)
+                    report["errors"] += 1
+            if rel == BASE_TACTICS:
+                issues = _validate_tactics(obj)
+                if issues:
+                    entry["status"] = "fail"
+                    entry["issues"].extend(issues)
+                    report["errors"] += 1
+            if rel == BASE_MEDIA_BEATS:
+                issues = _validate_media_beats(obj)
+                if issues:
+                    entry["status"] = "fail"
+                    entry["issues"].extend(issues)
+                    report["errors"] += 1
+            if rel == BASE_SOCIAL_INTERACTIONS:
+                issues = _validate_social_interactions(obj)
+                if issues:
+                    entry["status"] = "fail"
+                    entry["issues"].extend(issues)
+                    report["errors"] += 1
 
             report["files"].append(entry)
 
         # Ensure required files exist (hard requirement)
-        required = {BASE_MANIFEST, BASE_EVENTS, BASE_TUNING}
+        required = {
+            BASE_MANIFEST,
+            BASE_EVENTS,
+            BASE_TUNING,
+            BASE_MEMBER_ARCHETYPES,
+            BASE_NPC_GUILDS,
+            BASE_RECRUIT_OFFERS,
+            BASE_RAID_ENCOUNTERS,
+            BASE_TACTICS,
+            BASE_MEDIA_BEATS,
+            BASE_SOCIAL_INTERACTIONS,
+        }
         present = {f["path"] for f in report["files"] if isinstance(f, dict) and "path" in f}
         missing = sorted(required - present)
         for m in missing:
@@ -409,4 +674,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

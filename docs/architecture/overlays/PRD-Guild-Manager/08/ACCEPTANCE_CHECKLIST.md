@@ -39,7 +39,7 @@ Test-Refs:
 ## 一、文档完整性验收
 
 - [ ] 功能纵切文档存在且 Front‑Matter 完整：
-  - `docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md`
+  - `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md`
   - `_index.md` 中已收录公会管理器相关条目
 - [ ] 08 章仅作“引用”，不复制 01/02/03 章中的阈值/策略/门禁具体数值：
   - 安全：引用 CH02 + ADR‑0019
