@@ -1,0 +1,37 @@
+{
+  "contentVersion": "1.0.0",
+  "global": {
+    "uiRefreshSeconds": 0.3,
+    "percentAsDecimal": true
+  },
+  "turn": {
+    "weeksPerTurn": 1,
+    "fastForward": { "maxWeeks": 12, "weekChunk": 1 }
+  },
+  "events": {
+    "defaultWeight": 10,
+    "defaultCooldownWeeks": 0
+  },
+  "recruitment": {
+    "baseSuccessChance": 0.35,
+    "negotiationMaxRounds": 3,
+    "cooldownWeeks": 1
+  },
+  "roster": {
+    "maxMembersSoft": 50,
+    "roleRatioTargets": { "tank": 0.2, "healer": 0.2, "dps": 0.6 }
+  },
+  "ai": {
+    "actionBudgetPerTurn": 5
+  },
+  "raid": {
+    "baseSuccessChance": 0.55,
+    "rewardReputation": { "min": 1, "max": 4 },
+    "penaltyMorale": { "min": -4, "max": -1 }
+  },
+  "media": {
+    "postsPerTurn": { "min": 0, "max": 2 },
+    "reputationDeltaPerBeat": { "min": -3, "max": 3 }
+  }
+}
+

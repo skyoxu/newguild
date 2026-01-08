@@ -1,0 +1,16 @@
+{
+  "contentVersion": "1.0.0",
+  "packId": "Base",
+  "idNamespacePrefix": "Base_",
+  "files": [
+    "guild_events.json",
+    "member_archetypes.json",
+    "npc_guilds.json",
+    "recruit_offers.json",
+    "raid_encounters.json",
+    "tactics.json",
+    "media_beats.json",
+    "social_interactions.json",
+    "tuning.json"
+  ]
+}

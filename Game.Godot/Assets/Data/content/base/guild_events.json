@@ -1,0 +1,38 @@
+{
+  "contentVersion": "1.0.0",
+  "guildEvents": [
+    {
+      "id": "Base_GuildEvent_WelcomeNewMember",
+      "nameKey": "欢迎新成员",
+      "descKey": "新成员加入公会，引发一轮欢迎与讨论。",
+      "category": "Roster",
+      "weight": 10,
+      "cooldownWeeks": 1,
+      "conditions": [
+        { "type": "GuildMemberCountAtLeast", "value": 1 },
+        { "type": "RandomRoll", "chance": 0.35 }
+      ],
+      "effects": [
+        { "type": "QueueMail", "refId": "mail.welcome_new_member" },
+        { "type": "AdjustGuildReputation", "amount": 1 }
+      ]
+    },
+    {
+      "id": "Base_GuildEvent_InternalConflict",
+      "nameKey": "内部矛盾",
+      "descKey": "成员之间产生冲突，需要会长介入。",
+      "category": "Social",
+      "weight": 6,
+      "cooldownWeeks": 2,
+      "conditions": [
+        { "type": "WeekAtLeast", "value": 2 },
+        { "type": "RandomRoll", "chance": 0.15 }
+      ],
+      "effects": [
+        { "type": "QueueMail", "refId": "mail.internal_conflict" },
+        { "type": "AdjustMemberMorale", "amount": -2 }
+      ]
+    }
+  ]
+}
+

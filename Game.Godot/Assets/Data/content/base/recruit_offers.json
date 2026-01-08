@@ -1,0 +1,24 @@
+{
+  "contentVersion": "1.0.0",
+  "recruitOffers": [
+    {
+      "id": "Base_RecruitOffer_NewbieTank",
+      "nameKey": "新手坦克候选",
+      "role": "Tank",
+      "difficultyTier": 1,
+      "baseSuccessChance": 0.45,
+      "effectsOnSuccess": [{ "type": "AddMember", "refId": "Base_MemberArchetype_ReliableTank" }],
+      "effectsOnFail": [{ "type": "AdjustGuildReputation", "amount": -1 }]
+    },
+    {
+      "id": "Base_RecruitOffer_VeteranHealer",
+      "nameKey": "老练治疗候选",
+      "role": "Healer",
+      "difficultyTier": 2,
+      "baseSuccessChance": 0.25,
+      "effectsOnSuccess": [{ "type": "AddMember", "refId": "Base_MemberArchetype_ShyHealer" }],
+      "effectsOnFail": [{ "type": "AdjustMemberMorale", "amount": -1 }]
+    }
+  ]
+}
+

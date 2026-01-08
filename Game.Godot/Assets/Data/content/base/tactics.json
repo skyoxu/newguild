@@ -1,0 +1,18 @@
+{
+  "contentVersion": "1.0.0",
+  "tactics": [
+    {
+      "id": "Base_Tactic_AggressivePush",
+      "nameKey": "强攻推进",
+      "tags": ["raid", "aggressive"],
+      "modifiers": { "raidSuccessChanceDelta": 0.05, "moraleDeltaOnFail": -1 }
+    },
+    {
+      "id": "Base_Tactic_SafeAndSteady",
+      "nameKey": "稳健推进",
+      "tags": ["raid", "safe"],
+      "modifiers": { "raidSuccessChanceDelta": 0.0, "moraleDeltaOnFail": 0 }
+    }
+  ]
+}
+

@@ -1,0 +1,22 @@
+{
+  "contentVersion": "1.0.0",
+  "raidEncounters": [
+    {
+      "id": "Base_RaidEncounter_TrainingDummy",
+      "nameKey": "训练木桩",
+      "difficultyTier": 1,
+      "recommendedRoleRatio": { "tank": 0.2, "healer": 0.2, "dps": 0.6 },
+      "successReputationDelta": { "min": 1, "max": 2 },
+      "failMoraleDelta": { "min": -2, "max": -1 }
+    },
+    {
+      "id": "Base_RaidEncounter_Boss_Trial",
+      "nameKey": "试炼首领",
+      "difficultyTier": 2,
+      "recommendedRoleRatio": { "tank": 0.2, "healer": 0.25, "dps": 0.55 },
+      "successReputationDelta": { "min": 2, "max": 4 },
+      "failMoraleDelta": { "min": -4, "max": -2 }
+    }
+  ]
+}
+
