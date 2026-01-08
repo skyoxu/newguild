@@ -34,27 +34,31 @@ def run_cmd(args, cwd=None, timeout=600_000, env=None):
 
 
 def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None, env=None):
-    """Run a process and stream stdout; if any line contains a break marker, kill early.
+    """Run a process and stream stdout; kill early only for known hang conditions.
 
     In Godot headless/script mode, a Debugger Break (for example GdUnit4 failing
     to preload a script and printing `Debugger Break, Reason: 'Parser Error: ...'`)
     will block waiting for interactive input and never exit by itself.
 
-    To avoid long CI timeouts we treat the following patterns as hard failures
-    and terminate the process early:
-    - SCRIPT ERROR
+    To avoid long CI timeouts we terminate early only for known hang patterns:
     - Debugger Break
     - Parser Error:
+
+    For regular `SCRIPT ERROR` we keep streaming output so the full backtrace
+    can be captured in CI logs (it usually exits by itself).
     """
-    break_markers = break_markers or [
-        'SCRIPT ERROR',
+    kill_markers = break_markers or [
         'Debugger Break',
         'Parser Error:',
+    ]
+    failure_markers = [
+        'SCRIPT ERROR',
     ]
     p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          text=True, encoding='utf-8', errors='ignore', env=env)
     buf_lines = []
-    hit_break = False
+    hit_kill = False
+    hit_failure = False
     try:
         # Poll line-by-line up to timeout
         end_ts = dt.datetime.now().timestamp() + (timeout/1000.0)
@@ -63,8 +67,10 @@ def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None, env=No
             if line:
                 buf_lines.append(line)
                 low = line.lower()
-                if any(m.lower() in low for m in break_markers):
-                    hit_break = True
+                if any(m.lower() in low for m in failure_markers):
+                    hit_failure = True
+                if any(m.lower() in low for m in kill_markers):
+                    hit_kill = True
                     p.kill()
                     break
             else:
@@ -74,9 +80,12 @@ def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None, env=No
                 p.kill()
                 return 124, ''.join(buf_lines)
         out = ''.join(buf_lines)
-        if hit_break:
+        if hit_kill:
             return 1, out
-        return (p.returncode or 0), out
+        rc = p.returncode or 0
+        if rc == 0 and hit_failure:
+            rc = 1
+        return rc, out
     except Exception:
         try:
             p.kill()
