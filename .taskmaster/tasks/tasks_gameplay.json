@@ -16,7 +16,8 @@
       "ADR-0006",
       "ADR-0007",
       "ADR-0005",
-      "ADR-0024"
+      "ADR-0024",
+      "ADR-0020"
     ],
     "chapter_refs": [
       "CH01",
@@ -26,8 +27,15 @@
       "CH07"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
     "labels": [
       "core",
@@ -56,61 +64,6 @@
     "taskmaster_exported": true
   },
   {
-    "id": "GM-0102",
-    "story_id": "PRD-GUILD-MANAGER-CORE-AI-COORDINATOR",
-    "title": "实现 AI 协调器（AICoordinator）管理 NPC 公会与成员行为",
-    "description": "在 Game.Core 中实现 AICoordinator（或等价组件），负责管理 NPC 公会和成员 AI：处理 AI 周期、关系网络更新、冲突解决与 AI 事件生成，并通过接口向 EventEngine 与 Godot 适配层暴露能力，支撑 PRD-Guild-Manager 中“生态模拟与多主体 AI”要求。",
-    "status": "pending",
-    "priority": "P2",
-    "layer": "core",
-    "depends_on": [
-      "NG-0020",
-      "GM-0101"
-    ],
-    "adr_refs": [
-      "ADR-0018",
-      "ADR-0004",
-      "ADR-0007",
-      "ADR-0005",
-      "ADR-0015"
-    ],
-    "chapter_refs": [
-      "CH01",
-      "CH04",
-      "CH05",
-      "CH06",
-      "CH07",
-      "CH09"
-    ],
-    "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
-    ],
-    "labels": [
-      "core",
-      "ai",
-      "simulation",
-      "guild"
-    ],
-    "owner": "architecture",
-    "test_refs": [
-      "Game.Core.Tests/Domain/AICoordinatorTests.cs"
-    ],
-    "acceptance": [
-      "Game.Core 中存在 AICoordinator 类（或等价服务），负责在每个 AI 周期内驱动 NPC 公会与成员行为（决策、关系更新、事件生成）。",
-      "AICoordinator 对外暴露用于集成的接口（如 StepAiCycle/GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。",
-      "xUnit 测试涵盖基本 AI 行为（例如简单策略下的成员状态变化）、冲突场景（多个 NPC 目标冲突）以及性能边界（在模拟大量 NPC 时仍保持可接受性能）。",
-      "如采用多线程/ThreadPool 优化 AI 计算，AICoordinator 提供线程安全保证，并在测试中验证无竞态条件。"
-    ],
-    "test_strategy": [
-      "为小规模 NPC 集合设计 AI 周期测试，用 xUnit 验证行为决策与状态更新是否符合 PRD 中定义的规则。",
-      "构造典型冲突场景（例如资源争抢、公会关系冲突），验证 AICoordinator 能生成合理事件并与 EventEngine 协同处理。",
-      "在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。"
-    ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
-  },
-  {
     "id": "GM-0103",
     "story_id": "PRD-GUILD-MANAGER-CORE-GAME-LOOP",
     "title": "实现公会管理器核心回合循环与时间推进（Game Loop）",
@@ -126,7 +79,8 @@
       "ADR-0018",
       "ADR-0004",
       "ADR-0006",
-      "ADR-0024"
+      "ADR-0024",
+      "ADR-0020"
     ],
     "chapter_refs": [
       "CH01",
@@ -136,8 +90,15 @@
       "CH07"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
     "labels": [
       "core",
@@ -170,302 +131,410 @@
     "taskmaster_exported": true
   },
   {
-    "id": "GM-0104",
-    "story_id": "PRD-GUILD-MANAGER",
-    "title": "Implement AI Ecosystem",
-    "description": "Develop a multi-layered AI system for NPC guilds and members.",
+    "id": "GM-0202",
+    "story_id": "PRD-GUILD-MANAGER-T3-MEMBER-MANAGEMENT",
+    "title": "T3 成员管理 UI（Roster / Member Management）",
+    "description": "实现公会成员管理与 roster 展示的核心能力：在 Game.Core 建模成员列表、角色与变更命令，在 Game.Godot 提供可操作的 GuildScreen UI（查看成员、提升/降级、踢出/退出等）。事件发布遵循 ADR-0004，避免 UI 直接耦合核心状态。",
     "status": "pending",
-    "priority": "P0",
-    "layer": "adapter",
-    "depends_on": [
-      "NG-0020"
-    ],
-    "adr_refs": [
-      "ADR-0018"
-    ],
-    "chapter_refs": [
-      "CH01",
-      "CH06",
-      "CH07"
-    ],
-    "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
-    ],
-    "labels": [],
-    "owner": "architecture",
-    "test_refs": [],
-    "acceptance": [],
-    "test_strategy": [
-      "Simulate AI behavior in different scenarios to validate decision-making and interactions."
-    ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
-  },
-  {
-    "id": "GM-0105",
-    "story_id": "PRD-GUILD-MANAGER",
-    "title": "Design Guild Management Module",
-    "description": "Build the guild management interface and functionalities.",
-    "status": "pending",
-    "priority": "P1",
+    "priority": "P2",
     "layer": "adapter",
     "depends_on": [
       "NG-0020",
-      "NG-0012"
+      "GM-0101",
+      "GM-0103"
     ],
     "adr_refs": [
-      "ADR-0008",
-      "ADR-0011",
-      "ADR-0018"
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0007",
+      "ADR-0005"
     ],
     "chapter_refs": [
       "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
+    ],
+    "labels": [
+      "ui",
+      "guild",
+      "member",
+      "roster"
+    ],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [
+      "Game.Core 提供成员 roster 的模型与操作（至少包含：加入/退出、角色变更、踢出），并包含必要的边界校验（例如：重复成员、无效角色、无权限变更）。",
+      "成员变更通过领域事件对外发布（例如 core.guild.member.joined / left / role_changed），事件类型常量与字段定义落盘到 Game.Core/Contracts 并遵循 ADR-0004。",
+      "Game.Godot 的 GuildScreen 能展示 roster，并在收到事件后更新 UI；UI 操作通过适配层调用核心命令，不直接修改核心状态。",
+      "至少提供一组 xUnit 单测覆盖 roster 关键状态迁移与事件生成；如有 GdUnit4，则补一条 UI 冒烟验证“事件驱动刷新”。"
+    ],
+    "test_strategy": [
+      "xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。",
+      "GdUnit4（可选）：启动 GuildScreen 场景，模拟成员变更事件并断言 UI 列表刷新与关键按钮可用性。"
+    ],
+    "taskmaster_id": 13,
+    "taskmaster_exported": true
+  },
+  {
+    "id": "GM-0203",
+    "story_id": "PRD-GUILD-MANAGER-T3-RECRUITMENT",
+    "title": "T3 招募系统（Recruitment System）",
+    "description": "实现公会招募与入会流程：支持发布招募信息、申请加入、审批/拒绝、自动入会等路径。核心逻辑在 Game.Core，UI/输入在 Game.Godot 适配；事件发布遵循 ADR-0004。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "depends_on": [
+      "GM-0202"
+    ],
+    "adr_refs": [
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0006",
+      "ADR-0007",
+      "ADR-0005"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
+    ],
+    "labels": [
+      "ui",
+      "guild",
+      "recruitment",
+      "simulation"
+    ],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [
+      "Game.Core 提供 RecruitmentSystem（或等价服务），支持“申请加入/审批/拒绝/撤回”并能驱动成员变更。",
+      "流程关键节点产生领域事件（例如 core.guild.recruitment.applied / approved / rejected 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。",
+      "Game.Godot 提供最小 UI 或调试入口以驱动招募流程（至少覆盖：发起申请与审批一次）。",
+      "xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。"
+    ],
+    "test_strategy": [
+      "xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。",
+      "GdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。"
+    ],
+    "taskmaster_id": 14,
+    "taskmaster_exported": true
+  },
+  {
+    "id": "GM-0201",
+    "story_id": "PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM",
+    "title": "T3 NPC 公会生态（AI Ecosystem）",
+    "description": "为 T3 提供 NPC 公会生态的最小闭环：在 Game.Core 中实现 AIEcosystem（或等价模块），让 NPC 公会/成员在回合推进下产生行为（招募、离开、角色调整等），并通过事件总线对外可观测。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "GM-0203"
+    ],
+    "adr_refs": [
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0007",
+      "ADR-0005",
+      "ADR-0015"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
       "CH06",
       "CH07",
-      "CH10"
+      "CH09"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
-    "labels": [],
+    "labels": [
+      "core",
+      "ai",
+      "simulation",
+      "npc",
+      "guild"
+    ],
     "owner": "architecture",
     "test_refs": [],
-    "acceptance": [],
-    "test_strategy": [
-      "Conduct UI/UX testing to ensure information is displayed accurately and intuitively."
+    "acceptance": [
+      "Game.Core 提供 AIEcosystem（或等价模块），在 GameTurn/时间推进下驱动 NPC 行为生成，并能稳定复现实例（可通过种子或确定性输入）。",
+      "至少实现 3 类可观测行为并以领域事件发布（例如 core.guild.recruitment.posted、core.guild.member.joined、core.guild.member.left），事件类型与字段遵循 ADR-0004。",
+      "AIEcosystem 的输入/输出与存储边界清晰：核心逻辑不依赖 Godot API，适配层负责时间/随机源注入。",
+      "xUnit 覆盖：确定性推进、事件数量/类型、边界条件（空 guild、满员、无候选等）。"
     ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
+    "test_strategy": [
+      "xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。",
+      "如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。"
+    ],
+    "taskmaster_id": 15,
+    "taskmaster_exported": true
   },
   {
-    "id": "GM-0106",
-    "story_id": "PRD-GUILD-MANAGER",
-    "title": "Create Tactical Center Module",
-    "description": "Develop the tactical center for managing raid and PVP compositions.",
+    "id": "GM-0102",
+    "story_id": "PRD-GUILD-MANAGER-CORE-AI-COORDINATOR",
+    "title": "实现 AI 协调器（AICoordinator）管理 NPC 公会与成员行为",
+    "description": "在 Game.Core 中实现 AICoordinator（或等价组件），负责管理 NPC 公会和成员 AI：处理 AI 周期、关系网络更新、冲突解决与 AI 事件生成，并通过接口向 EventEngine 与 Godot 适配层暴露能力，支撑 PRD-Guild-Manager 中“生态模拟与多主体 AI”要求。",
     "status": "pending",
-    "priority": "P1",
-    "layer": "adapter",
-    "depends_on": [
-      "NG-0020",
-      "NG-0013"
-    ],
-    "adr_refs": [
-      "ADR-0018"
-    ],
-    "chapter_refs": [
-      "CH01",
-      "CH06",
-      "CH07"
-    ],
-    "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
-    ],
-    "labels": [],
-    "owner": "architecture",
-    "test_refs": [],
-    "acceptance": [],
-    "test_strategy": [
-      "Test composition creation and validation processes to ensure correct role assignments and balance."
-    ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
-  },
-  {
-    "id": "GM-0107",
-    "story_id": "PRD-GUILD-MANAGER",
-    "title": "Develop PVE System",
-    "description": "Implement the PVE system with raid dungeons and boss encounters.",
-    "status": "pending",
-    "priority": "P1",
+    "priority": "P2",
     "layer": "core",
     "depends_on": [
-      "NG-0012",
-      "NG-0013"
+      "GM-0201"
     ],
     "adr_refs": [
-      "ADR-0018"
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0007",
+      "ADR-0005",
+      "ADR-0015"
     ],
     "chapter_refs": [
       "CH01",
-      "CH06",
-      "CH07"
-    ],
-    "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
-    ],
-    "labels": [],
-    "owner": "architecture",
-    "test_refs": [],
-    "acceptance": [],
-    "test_strategy": [
-      "Simulate raid encounters to test mechanics, difficulty scaling, and reward distribution."
-    ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
-  },
-  {
-    "id": "GM-0108",
-    "story_id": "PRD-GUILD-MANAGER",
-    "title": "Implement PVP System",
-    "description": "Develop the PVP system for battlegrounds and arenas.",
-    "status": "pending",
-    "priority": "P1",
-    "layer": "core",
-    "depends_on": [
-      "NG-0015"
-    ],
-    "adr_refs": [
-      "ADR-0018"
-    ],
-    "chapter_refs": [
-      "CH01",
-      "CH06",
-      "CH07"
-    ],
-    "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
-    ],
-    "labels": [],
-    "owner": "architecture",
-    "test_refs": [],
-    "acceptance": [],
-    "test_strategy": [
-      "Conduct PVP simulations to ensure team dynamics and strategy effectiveness."
-    ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
-  },
-  {
-    "id": "GM-0109",
-    "story_id": "PRD-GUILD-MANAGER",
-    "title": "Build Member Management Module",
-    "description": "Create a system for managing guild members and their attributes.",
-    "status": "pending",
-    "priority": "P1",
-    "layer": "adapter",
-    "depends_on": [
-      "NG-0014"
-    ],
-    "adr_refs": [
-      "ADR-0008",
-      "ADR-0011",
-      "ADR-0018"
-    ],
-    "chapter_refs": [
-      "CH01",
+      "CH04",
+      "CH05",
       "CH06",
       "CH07",
-      "CH10"
+      "CH09"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
-    "labels": [],
+    "labels": [
+      "core",
+      "ai",
+      "simulation",
+      "guild"
+    ],
     "owner": "architecture",
-    "test_refs": [],
-    "acceptance": [],
-    "test_strategy": [
-      "Test member recruitment, role assignment, and relationship dynamics under various scenarios."
+    "test_refs": [
+      "Game.Core.Tests/Domain/AICoordinatorTests.cs"
     ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
+    "acceptance": [
+      "Game.Core 中存在 AICoordinator 类（或等价服务），负责在每个 AI 周期内驱动 NPC 公会与成员行为（决策、关系更新、事件生成）。",
+      "AICoordinator 对外暴露用于集成的接口（如 StepAiCycle/GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。",
+      "xUnit 测试涵盖基本 AI 行为（例如简单策略下的成员状态变化）、冲突场景（多个 NPC 目标冲突）以及性能边界（在模拟大量 NPC 时仍保持可接受性能）。",
+      "如采用多线程/ThreadPool 优化 AI 计算，AICoordinator 提供线程安全保证，并在测试中验证无竞态条件。"
+    ],
+    "test_strategy": [
+      "为小规模 NPC 集合设计 AI 周期测试，用 xUnit 验证行为决策与状态更新是否符合 PRD 中定义的规则。",
+      "构造典型冲突场景（例如资源争抢、公会关系冲突），验证 AICoordinator 能生成合理事件并与 EventEngine 协同处理。",
+      "在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。"
+    ],
+    "taskmaster_exported": true,
+    "taskmaster_id": 16
   },
   {
-    "id": "GM-0110",
-    "story_id": "PRD-GUILD-MANAGER",
-    "title": "Develop Social Interaction System",
-    "description": "Implement a system for managing social interactions and relationships.",
+    "id": "GM-0204",
+    "story_id": "PRD-GUILD-MANAGER-T3-PVE-RAID",
+    "title": "T3 PVE 副本（Raid Dungeon / Encounter）",
+    "description": "实现 T3 的 PVE 副本与遭遇战最小循环：在 Game.Core 定义 RaidDungeon/Encounter 的状态机与结算，通过事件驱动 UI 展示与奖励发放；事件/契约遵循 ADR-0004。",
     "status": "pending",
-    "priority": "P1",
+    "priority": "P2",
     "layer": "core",
     "depends_on": [
-      "NG-0018"
+      "GM-0102",
+      "GM-0202",
+      "GM-0103"
     ],
     "adr_refs": [
-      "ADR-0018"
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0007",
+      "ADR-0005",
+      "ADR-0015"
     ],
     "chapter_refs": [
       "CH01",
+      "CH04",
+      "CH05",
       "CH06",
-      "CH07"
+      "CH07",
+      "CH09"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
-    "labels": [],
+    "labels": [
+      "core",
+      "pve",
+      "raid",
+      "simulation"
+    ],
     "owner": "architecture",
     "test_refs": [],
-    "acceptance": [],
-    "test_strategy": [
-      "Simulate social interactions to test relationship dynamics and event triggering."
+    "acceptance": [
+      "Game.Core 提供 RaidDungeon/Encounter 的最小状态机（至少包含：进入->战斗->结算/失败），并能在回合推进中演化。",
+      "关键状态变化发布领域事件（例如 core.raid.encounter.started / resolved / failed），事件契约落盘到 Game.Core/Contracts。",
+      "Game.Godot 提供最小演示入口（按钮或调试命令）可触发一次遭遇并在 UI 或日志中呈现结果。",
+      "xUnit 覆盖：成功/失败两条路径与边界条件；如有 GdUnit4，补一个端到端冒烟（触发->看到结果->退出）。"
     ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
+    "test_strategy": [
+      "xUnit：覆盖 Encounter 结算与状态迁移（包含异常输入/非法状态转换的负例）。",
+      "GdUnit4（可选）：跑一条 headless 冒烟确保演示入口与事件流不崩溃。"
+    ],
+    "taskmaster_id": 17,
+    "taskmaster_exported": true
   },
   {
-    "id": "GM-0111",
-    "story_id": "PRD-GUILD-MANAGER",
-    "title": "Design Recruitment System",
-    "description": "Develop a recruitment system for guild members, including legendary members.",
+    "id": "GM-0205",
+    "story_id": "PRD-GUILD-MANAGER-T3-SOCIAL",
+    "title": "T3 社交系统（Social / Intimacy）",
+    "description": "实现公会成员间的社交/亲密度最小系统：在 Game.Core 建模关系值与变化规则，并通过事件驱动 UI 展示与玩法联动（可与招募/声望产生弱耦合）。",
     "status": "pending",
-    "priority": "P1",
-    "layer": "adapter",
-    "depends_on": [
-      "NG-0018",
-      "NG-0019"
-    ],
-    "adr_refs": [
-      "ADR-0018"
-    ],
-    "chapter_refs": [
-      "CH01",
-      "CH06",
-      "CH07"
-    ],
-    "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
-    ],
-    "labels": [],
-    "owner": "architecture",
-    "test_refs": [],
-    "acceptance": [],
-    "test_strategy": [
-      "Test recruitment processes for different member types, ensuring correct filtering and negotiation outcomes."
-    ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
-  },
-  {
-    "id": "GM-0112",
-    "story_id": "PRD-GUILD-MANAGER",
-    "title": "Create Combat Simulation System",
-    "description": "Develop a system for simulating combat outcomes in PVE and PVP.",
-    "status": "pending",
-    "priority": "P1",
+    "priority": "P2",
     "layer": "core",
     "depends_on": [
-      "NG-0016",
-      "NG-0017"
+      "GM-0204"
     ],
     "adr_refs": [
-      "ADR-0018"
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0007",
+      "ADR-0005"
     ],
     "chapter_refs": [
       "CH01",
+      "CH04",
+      "CH05",
       "CH06",
       "CH07"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
     ],
-    "labels": [],
+    "labels": [
+      "core",
+      "social",
+      "relationship",
+      "events"
+    ],
     "owner": "architecture",
     "test_refs": [],
-    "acceptance": [],
-    "test_strategy": [
-      "Run combat simulations to validate result accuracy and balance."
+    "acceptance": [
+      "Game.Core 提供 IntimacySystem（或等价模块），能在成员交互或回合推进下更新亲密度/关系状态。",
+      "关系变化通过领域事件发布（例如 core.guild.social.intimacy.changed），契约落盘到 Game.Core/Contracts 并遵循 ADR-0004。",
+      "Game.Godot 提供最小展示（列表或详情面板）能看到关系值变化，且不直接修改核心状态。",
+      "xUnit 覆盖：关系变化规则、上下限边界、无效成员对等错误路径。"
     ],
-    "taskmaster_id": null,
-    "taskmaster_exported": false
+    "test_strategy": [
+      "xUnit：覆盖 IntimacySystem 的规则与边界（上下限/重复输入/不存在成员）。",
+      "GdUnit4（可选）：触发一次关系变化并断言 UI 展示更新。"
+    ],
+    "taskmaster_id": 18,
+    "taskmaster_exported": true
+  },
+  {
+    "id": "GM-0206",
+    "story_id": "PRD-GUILD-MANAGER-T3-MEDIA",
+    "title": "T3 媒体与声望（Media / Reputation）",
+    "description": "实现媒体曝光与声望的最小系统：在 Game.Core 建模声望值与曝光事件，并让其对招募/社交产生可观测影响；事件契约遵循 ADR-0004。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "GM-0205"
+    ],
+    "adr_refs": [
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0007",
+      "ADR-0005"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-功能纵切-公会管理器.md"
+    ],
+    "labels": [
+      "core",
+      "reputation",
+      "media",
+      "events"
+    ],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [
+      "Game.Core 提供 Reputation（或等价模块），支持声望值变更与来源记录（例如：战斗胜利/负面事件）。",
+      "声望/曝光变化发布领域事件（例如 core.guild.reputation.changed / core.guild.media.exposure.created），契约落盘到 Game.Core/Contracts。",
+      "至少一个系统能读取声望并产生可观测影响（例如：招募成功率/候选数量的变化，或 UI 显示声望等级）。",
+      "xUnit 覆盖：声望变更累积、上下限、来源合并/去重（如适用）与事件生成。"
+    ],
+    "test_strategy": [
+      "xUnit：覆盖 Reputation 的数值规则、来源记录与事件生成；对非法输入给出负例。",
+      "如有集成演示：在 Godot 场景中显示声望值并观察一次变化。"
+    ],
+    "taskmaster_id": 19,
+    "taskmaster_exported": true
   }
 ]
