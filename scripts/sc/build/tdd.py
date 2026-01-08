@@ -104,6 +104,11 @@ def run_green_gate(*, solution: str, configuration: str, out_dir: Path, no_cover
     if not no_coverage_gate:
         os.environ.setdefault("COVERAGE_LINES_MIN", "90")
         os.environ.setdefault("COVERAGE_BRANCHES_MIN", "85")
+    else:
+        # Explicitly disable thresholds even though scripts/python/run_dotnet.py has defaults.
+        # Empty values make the gate a no-op while keeping tests running.
+        os.environ["COVERAGE_LINES_MIN"] = ""
+        os.environ["COVERAGE_BRANCHES_MIN"] = ""
 
     cmd = ["py", "-3", "scripts/python/run_dotnet.py", "--solution", solution, "--configuration", configuration]
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=1_800)

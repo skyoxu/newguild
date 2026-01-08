@@ -21,9 +21,9 @@ from pathlib import Path
 from godot_cli import build_userdir_args, default_user_dir
 
 
-def run_cmd(args, cwd=None, timeout=600_000):
+def run_cmd(args, cwd=None, timeout=600_000, env=None):
     p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         text=True, encoding='utf-8', errors='ignore')
+                         text=True, encoding='utf-8', errors='ignore', env=env)
     try:
         out, _ = p.communicate(timeout=timeout/1000.0)
     except subprocess.TimeoutExpired:
@@ -33,28 +33,32 @@ def run_cmd(args, cwd=None, timeout=600_000):
     return p.returncode, out
 
 
-def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None):
-    """Run a process and stream stdout; if any line contains a break marker, kill early.
+def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None, env=None):
+    """Run a process and stream stdout; kill early only for known hang conditions.
 
     In Godot headless/script mode, a Debugger Break (for example GdUnit4 failing
     to preload a script and printing `Debugger Break, Reason: 'Parser Error: ...'`)
     will block waiting for interactive input and never exit by itself.
 
-    To avoid long CI timeouts we treat the following patterns as hard failures
-    and terminate the process early:
-    - SCRIPT ERROR
+    To avoid long CI timeouts we terminate early only for known hang patterns:
     - Debugger Break
     - Parser Error:
+
+    For regular `SCRIPT ERROR` we keep streaming output so the full backtrace
+    can be captured in CI logs (it usually exits by itself).
     """
-    break_markers = break_markers or [
-        'SCRIPT ERROR',
+    kill_markers = break_markers or [
         'Debugger Break',
         'Parser Error:',
     ]
+    failure_markers = [
+        'SCRIPT ERROR',
+    ]
     p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         text=True, encoding='utf-8', errors='ignore')
+                         text=True, encoding='utf-8', errors='ignore', env=env)
     buf_lines = []
-    hit_break = False
+    hit_kill = False
+    hit_failure = False
     try:
         # Poll line-by-line up to timeout
         end_ts = dt.datetime.now().timestamp() + (timeout/1000.0)
@@ -63,8 +67,10 @@ def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None):
             if line:
                 buf_lines.append(line)
                 low = line.lower()
-                if any(m.lower() in low for m in break_markers):
-                    hit_break = True
+                if any(m.lower() in low for m in failure_markers):
+                    hit_failure = True
+                if any(m.lower() in low for m in kill_markers):
+                    hit_kill = True
                     p.kill()
                     break
             else:
@@ -74,9 +80,12 @@ def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None):
                 p.kill()
                 return 124, ''.join(buf_lines)
         out = ''.join(buf_lines)
-        if hit_break:
+        if hit_kill:
             return 1, out
-        return (p.returncode or 0), out
+        rc = p.returncode or 0
+        if rc == 0 and hit_failure:
+            rc = 1
+        return rc, out
     except Exception:
         try:
             p.kill()
@@ -89,6 +98,20 @@ def write_text(path: str, content: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
+
+
+def read_project_name(project_dir: Path) -> str | None:
+    project_godot = project_dir / "project.godot"
+    if not project_godot.is_file():
+        return None
+    try:
+        for raw in project_godot.read_text(encoding="utf-8", errors="ignore").splitlines():
+            line = raw.strip()
+            if line.startswith("config/name=") and "\"" in line:
+                return line.split("\"", 2)[1]
+    except Exception:
+        return None
+    return None
 
 
 def main():
@@ -116,6 +139,15 @@ def main():
     out_dir = os.path.join(root, 'logs', 'e2e', date)
     os.makedirs(out_dir, exist_ok=True)
 
+    # GdUnit4 writes reports to res://reports by default (i.e., <project>/reports).
+    # In clean CI checkouts this folder may not exist and can cause GdUnit4 to crash
+    # with "Cannot call method 'seek' on a null value." when opening report files.
+    try:
+        os.makedirs(os.path.join(proj, 'reports'), exist_ok=True)
+    except Exception:
+        # Best-effort; do not fail the run just because report pre-creation failed.
+        pass
+
     # Redirect Godot user:// to a repo-local directory (default under logs/).
     user_dir = None
     userdir_flag_used = None
@@ -129,12 +161,38 @@ def main():
             user_dir = None
         userdir_args, userdir_flag_used = build_userdir_args(args.godot_bin, user_dir, preferred_flag=args.userdir_flag)
 
+    # Godot 4.5 editor builds do not expose a CLI flag to redirect user data.
+    # In sandboxed environments, writes to %APPDATA% can be blocked. As a fallback,
+    # override APPDATA for the child process to keep user:// writes under the repo.
+    env = os.environ.copy()
+    appdata_override = None
+    project_name = read_project_name(Path(proj)) or Path(proj).name
+    if user_dir and userdir_flag_used is None:
+        try:
+            appdata_override = str((Path(user_dir).resolve() / "_appdata").resolve())
+            Path(appdata_override).mkdir(parents=True, exist_ok=True)
+            env["APPDATA"] = appdata_override
+            # Ensure user://logs exists to avoid engine startup crashes when file logging is enabled.
+            (Path(appdata_override) / "Godot" / "app_userdata" / project_name / "logs").mkdir(parents=True, exist_ok=True)
+        except Exception:
+            appdata_override = None
+
     # Optional prewarm with fallback
     prewarm_rc = None
     prewarm_note = None
     if args.prewarm:
-        pre_cmd = [args.godot_bin] + userdir_args + ['--headless', '--path', proj, '--build-solutions', '--quit']
-        _rcp, _outp = run_cmd(pre_cmd, cwd=proj, timeout=300_000)
+        pre_cmd = [
+            args.godot_bin,
+            *userdir_args,
+            '--headless',
+            '--path',
+            proj,
+            '--log-file',
+            str((Path(out_dir) / 'prewarm-godot.log').resolve()),
+            '--build-solutions',
+            '--quit',
+        ]
+        _rcp, _outp = run_cmd(pre_cmd, cwd=proj, timeout=300_000, env=env)
         prewarm_attempts = 1
         prewarm_rc = _rcp
         # Write first attempt
@@ -142,7 +200,7 @@ def main():
         if _rcp != 0:
             # Wait and retry once to mitigate transient C# load issues
             time.sleep(3)
-            _rcp2, _outp2 = run_cmd(pre_cmd, cwd=proj, timeout=360_000)
+            _rcp2, _outp2 = run_cmd(pre_cmd, cwd=proj, timeout=360_000, env=env)
             prewarm_attempts = 2
             prewarm_rc = _rcp2
             # Append retry log to same file
@@ -176,20 +234,47 @@ def main():
 
     # Run tests (Debugger Break fail-fast)
     # Build command with optional -a filters
-    cmd = [args.godot_bin] + userdir_args + ['--headless', '--path', proj, '-s', '-d', 'res://addons/gdUnit4/bin/GdUnitCmdTool.gd', '--ignoreHeadlessMode']
+    cmd = [
+        args.godot_bin,
+        *userdir_args,
+        '--headless',
+        '--path',
+        proj,
+        '--log-file',
+        str((Path(out_dir) / 'gdunit-godot.log').resolve()),
+        '-s',
+        '-d',
+        'res://addons/gdUnit4/bin/GdUnitCmdTool.gd',
+        '--ignoreHeadlessMode',
+    ]
     for a in args.add:
         apath = a
         if not apath.startswith('res://'):
             # normalize relative tests path to res://
             apath = 'res://' + apath.replace('\\', '/').lstrip('/')
         cmd += ['-a', apath]
-    rc, out = run_cmd_failfast(cmd, cwd=proj, timeout=args.timeout_sec*1000)
+    rc, out = run_cmd_failfast(cmd, cwd=proj, timeout=args.timeout_sec*1000, env=env)
     console_path = os.path.join(out_dir, 'gdunit-console.txt')
     with open(console_path, 'w', encoding='utf-8') as f:
         f.write(out)
 
     # Generate HTML log frame (optional)
-    _rc2, _out2 = run_cmd([args.godot_bin] + userdir_args + ['--headless', '--path', proj, '--quiet', '-s', 'res://addons/gdUnit4/bin/GdUnitCopyLog.gd'], cwd=proj)
+    _rc2, _out2 = run_cmd(
+        [
+            args.godot_bin,
+            *userdir_args,
+            '--headless',
+            '--path',
+            proj,
+            '--log-file',
+            str((Path(out_dir) / 'gdunit-copylog-godot.log').resolve()),
+            '--quiet',
+            '-s',
+            'res://addons/gdUnit4/bin/GdUnitCopyLog.gd',
+        ],
+        cwd=proj,
+        env=env,
+    )
 
     # Archive reports
     reports_dir = os.path.join(proj, 'reports')
@@ -220,6 +305,7 @@ def main():
         'timeout_sec': args.timeout_sec,
         'user_dir': user_dir,
         'userdir_flag_used': userdir_flag_used,
+        'appdata_override': appdata_override,
     }
     if prewarm_rc is not None:
         summary['prewarm_rc'] = prewarm_rc
@@ -246,6 +332,12 @@ def main():
             if userdir_flag_used and user_dir:
                 # When userdir redirection is active, Godot logs are expected under <user_dir>/logs.
                 source_logs_dir = (Path(user_dir).resolve() / 'logs')
+            elif appdata_override:
+                # When APPDATA is overridden (sandbox fallback), Godot logs live under:
+                # <APPDATA>/Godot/app_userdata/<ProjectName>/logs
+                logs_dir = Path(appdata_override) / 'Godot' / 'app_userdata' / project_name / 'logs'
+                if logs_dir.exists():
+                    source_logs_dir = logs_dir
             userlogs_summary = archive_and_prune_user_logs(
                 project_dir=Path(proj),
                 dest_dir=userlogs_dest,

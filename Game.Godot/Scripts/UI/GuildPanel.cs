@@ -11,6 +11,11 @@ namespace Game.Godot.Scripts.UI;
 /// </summary>
 public partial class GuildPanel : Control
 {
+    private static readonly JsonDocumentOptions JsonOptions = new()
+    {
+        MaxDepth = 32,
+    };
+
     private Label _guildNameLabel = default!;
     private Label _memberCountLabel = default!;
     private Button _createGuildButton = default!;
@@ -18,6 +23,8 @@ public partial class GuildPanel : Control
     private ItemList _membersList = default!;
 
     private string? _currentGuildId;
+    private EventBusAdapter? _eventBus;
+    private Callable _domainEventCallable;
 
     public override void _Ready()
     {
@@ -33,14 +40,23 @@ public partial class GuildPanel : Control
         _disbandGuildButton.Pressed += OnDisbandGuildPressed;
 
         // Subscribe to domain events via EventBusAdapter
-        var bus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
-        if (bus != null)
+        _eventBus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
+        if (_eventBus != null)
         {
-            bus.Connect(EventBusAdapter.SignalName.DomainEventEmitted, new Callable(this, nameof(OnDomainEventEmitted)));
+            _domainEventCallable = new Callable(this, nameof(OnDomainEventEmitted));
+            _eventBus.Connect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
         }
 
         // Initial UI state
         UpdateUIState(hasGuild: false);
+    }
+
+    public override void _ExitTree()
+    {
+        if (_eventBus == null)
+            return;
+        if (_eventBus.IsConnected(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable))
+            _eventBus.Disconnect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
     }
 
     private void OnDomainEventEmitted(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso)
@@ -69,7 +85,7 @@ public partial class GuildPanel : Control
     {
         try
         {
-            var doc = JsonDocument.Parse(dataJson);
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
             var root = doc.RootElement;
 
             if (root.TryGetProperty("guildId", out var guildId))
@@ -100,7 +116,7 @@ public partial class GuildPanel : Control
     {
         try
         {
-            var doc = JsonDocument.Parse(dataJson);
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
             if (doc.RootElement.TryGetProperty("guildId", out var guildId) &&
                 guildId.GetString() == _currentGuildId)
             {
@@ -121,7 +137,7 @@ public partial class GuildPanel : Control
     {
         try
         {
-            var doc = JsonDocument.Parse(dataJson);
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
             var root = doc.RootElement;
 
             if (root.TryGetProperty("guildId", out var guildId) &&
@@ -143,7 +159,7 @@ public partial class GuildPanel : Control
     {
         try
         {
-            var doc = JsonDocument.Parse(dataJson);
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
             var root = doc.RootElement;
 
             if (root.TryGetProperty("guildId", out var guildId) &&
@@ -172,7 +188,7 @@ public partial class GuildPanel : Control
     {
         try
         {
-            var doc = JsonDocument.Parse(dataJson);
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
             var root = doc.RootElement;
 
             if (root.TryGetProperty("guildId", out var guildId) &&

@@ -1,6 +1,6 @@
 using System;
 using FluentAssertions;
-using Game.Core.Contracts.GameLoop;
+using Game.Contracts.GameLoop;
 using Game.Core.Domain.Turn;
 using Xunit;
 

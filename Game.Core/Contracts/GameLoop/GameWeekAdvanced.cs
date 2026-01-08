@@ -1,6 +1,6 @@
 using Game.Core.Domain.Turn;
 
-namespace Game.Core.Contracts.GameLoop;
+namespace Game.Contracts.GameLoop;
 
 /// <summary>
 /// Domain event: core.game_turn.week_advanced

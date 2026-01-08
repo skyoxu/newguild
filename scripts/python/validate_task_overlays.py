@@ -1,203 +1,233 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-验证任务 overlay 字段与 ACCEPTANCE_CHECKLIST.md 格式
+Validate task overlay references and ACCEPTANCE_CHECKLIST.md front matter.
 
-检查项：
-1. overlay 路径文件是否存在
-2. ACCEPTANCE_CHECKLIST.md 格式是否正确（Front-Matter、必需字段）
-3. ADR-Refs 引用的 ADR 是否存在
+Checks:
+1) Overlay paths exist (for `overlay` or `overlay_refs`).
+2) If an overlay file is ACCEPTANCE_CHECKLIST.md:
+   - YAML front matter exists.
+   - Required fields exist: PRD-ID, Title, Status, ADR-Refs, Test-Refs.
+   - ADR-Refs point to existing ADRs under docs/adr.
+   - Required section headings exist (kept in Chinese in the checklist, but encoded here via \\u escapes).
 
-使用方法:
-    py -3 scripts/python/validate_task_overlays.py
-    py -3 scripts/python/validate_task_overlays.py --task-file .taskmaster/tasks/tasks_gameplay.json
+Usage:
+  py -3 scripts/python/validate_task_overlays.py
+  py -3 scripts/python/validate_task_overlays.py --task-file .taskmaster/tasks/tasks_gameplay.json
 """
 
-import json
-from pathlib import Path
-import re
-from typing import Optional
+from __future__ import annotations
+
 import argparse
+import json
+import os
+import re
+from pathlib import Path
+from typing import Any, Optional
 
 
-def extract_front_matter(content: str) -> Optional[dict]:
-    """
-    从 Markdown 文件提取 YAML Front-Matter
+FRONT_MATTER_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
+OVERLAY_DIR_RE = re.compile(r"^(docs/architecture/overlays/[^/]+/08)/", re.IGNORECASE)
 
-    返回: {PRD-ID, Title, Status, ADR-Refs, Test-Refs} 或 None
-    """
-    # 匹配 YAML Front-Matter (--- 开头和结尾)
-    match = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+
+def safe_resolve_overlay_path(root: Path, overlay_path: str) -> tuple[Path | None, str | None]:
+    """Resolve overlay path under repo root and enforce sandbox-safe constraints."""
+
+    raw = str(overlay_path or "").strip()
+    if not raw:
+        return None, "empty overlay path"
+
+    # Normalize to forward slashes for policy checks.
+    rel = raw.replace("\\", "/")
+
+    # Reject absolute or device paths.
+    if rel.startswith(("/", "\\\\")) or re.match(r"^[A-Za-z]:", rel):
+        return None, f"overlay path must be repo-relative (got: {raw})"
+
+    parts = Path(rel).parts
+    if any(p == ".." for p in parts):
+        return None, f"overlay path must not contain '..' (got: {raw})"
+
+    # Overlays are SSoT acceptance artifacts; restrict to overlays subtree.
+    if not rel.lower().startswith("docs/architecture/overlays/"):
+        return None, f"overlay path must live under docs/architecture/overlays/ (got: {raw})"
+
+    candidate = (root / rel).resolve()
+    try:
+        # Python 3.9+: Path.is_relative_to
+        if not candidate.is_relative_to(root.resolve()):  # type: ignore[attr-defined]
+            return None, f"overlay path escapes repo root (got: {raw})"
+    except Exception:
+        # Best-effort fallback for older runtimes
+        try:
+            root_resolved = str(root.resolve())
+            cand_resolved = str(candidate)
+            common = os.path.commonpath([root_resolved, cand_resolved])
+            if common.lower() != root_resolved.lower():
+                return None, f"overlay path escapes repo root (got: {raw})"
+        except Exception:
+            return None, f"overlay path escapes repo root (got: {raw})"
+
+    return candidate, None
+
+
+def extract_front_matter(content: str) -> Optional[dict[str, Any]]:
+    """Extract a minimal YAML front matter block from a Markdown file."""
+
+    match = FRONT_MATTER_RE.match(content)
     if not match:
         return None
 
     fm_text = match.group(1)
-    result = {
-        'PRD-ID': None,
-        'Title': None,
-        'Status': None,
-        'ADR-Refs': [],
-        'Test-Refs': []
+    result: dict[str, Any] = {
+        "PRD-ID": None,
+        "Title": None,
+        "Status": None,
+        "ADR-Refs": [],
+        "Test-Refs": [],
     }
 
-    # Parse a minimal YAML front-matter subset (single-line values and "- " lists).
-    # Ignore unknown keys so they don't corrupt the parsing state.
-    list_keys = {"ADR-Refs", "Test-Refs"}
     current_key: Optional[str] = None
-    for line in fm_text.split('\n'):
-        line = line.strip()
-
-        # 跳过注释
-        if line.startswith('#'):
+    for raw_line in fm_text.split("\n"):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
             continue
 
-        # 检查是否是新的键
-        if ':' in line and not line.startswith('-'):
-            key, value = line.split(':', 1)
+        if ":" in line and not line.startswith("-"):
+            key, value = line.split(":", 1)
             key = key.strip()
             value = value.strip()
 
-            # Only track keys we care about; reset current_key otherwise.
-            if key not in result:
-                current_key = None
-                continue
-
-            if key in list_keys:
+            if key in result:
                 current_key = key
                 if value:
-                    # Inline list item: "ADR-Refs: ADR-0001"
-                    result[key] = [value]
+                    if key in {"ADR-Refs", "Test-Refs"}:
+                        result[key] = [value]
+                    else:
+                        result[key] = value
                 else:
                     result[key] = []
             else:
-                # Scalar fields should not accept list items.
-                result[key] = value if value else None
+                # Unknown front-matter keys are ignored. Reset the list context so
+                # list items under unknown keys (e.g. Arch-Refs) do not get
+                # mistakenly appended to the previous recognized key.
                 current_key = None
-        # 处理列表项
-        elif line.startswith('-') and current_key:
+            continue
+
+        if line.startswith("-") and current_key:
             value = line[1:].strip()
-            # 移除行内注释
-            if '#' in value:
-                value = value.split('#')[0].strip()
+            if "#" in value:
+                value = value.split("#", 1)[0].strip()
             if value:
-                # Defensive: only append if this key is a list.
-                if isinstance(result.get(current_key), list):
-                    result[current_key].append(value)
+                result[current_key].append(value)
 
     return result
 
 
-def validate_acceptance_checklist(checklist_path: Path, adr_ids: set[str]) -> list[str]:
-    """
-    验证 ACCEPTANCE_CHECKLIST.md 格式
-
-    返回: 错误列表（空列表表示通过）
-    """
-    errors = []
-
-    if not checklist_path.exists():
-        return [f"文件不存在: {checklist_path}"]
-
-    try:
-        content = checklist_path.read_text(encoding='utf-8')
-    except Exception as e:
-        return [f"读取文件失败: {e}"]
-
-    # 提取 Front-Matter
-    fm = extract_front_matter(content)
-    if not fm:
-        errors.append("缺失 YAML Front-Matter (--- 开头和结尾)")
-        return errors
-
-    # 检查必需字段
-    if not fm['PRD-ID']:
-        errors.append("Front-Matter 缺失必需字段: PRD-ID")
-
-    if not fm['Title']:
-        errors.append("Front-Matter 缺失必需字段: Title")
-
-    if not fm['Status']:
-        errors.append("Front-Matter 缺失必需字段: Status")
-
-    if not fm['ADR-Refs']:
-        errors.append("Front-Matter 缺失必需字段: ADR-Refs")
-    else:
-        # 验证 ADR 引用是否存在
-        for adr_ref in fm['ADR-Refs']:
-            if adr_ref not in adr_ids:
-                errors.append(f"ADR-Refs 引用的 ADR 不存在: {adr_ref}")
-
-    if not fm['Test-Refs']:
-        errors.append("Front-Matter 缺失必需字段: Test-Refs")
-
-    # 检查内容结构（可选，检查是否包含关键章节）
-    required_sections = [
-        "一、文档完整性验收",
-        "二、架构设计验收",
-        "三、代码实现验收",
-        "四、测试框架验收"
-    ]
-
-    for section in required_sections:
-        if section not in content:
-            errors.append(f"缺失必需章节: {section}")
-
-    return errors
-
-
 def collect_adr_ids(root: Path) -> set[str]:
-    """收集所有存在的 ADR ID"""
+    """Collect existing ADR ids under docs/adr."""
+
     adr_dir = root / "docs" / "adr"
     ids: set[str] = set()
     if not adr_dir.exists():
         return ids
-    for f in adr_dir.glob("ADR-*.md"):
-        m = re.match(r"ADR-(\d{4})", f.stem)
-        if m:
-            ids.add(f"ADR-{m.group(1)}")
+
+    for file_path in adr_dir.glob("ADR-*.md"):
+        match = re.match(r"ADR-(\d{4})", file_path.stem)
+        if match:
+            ids.add(f"ADR-{match.group(1)}")
     return ids
 
 
-def load_tasks_from_file(task_file: Path) -> list[dict]:
-    """从任务文件加载任务列表"""
+def validate_acceptance_checklist(checklist_path: Path, adr_ids: set[str]) -> list[str]:
+    """Validate ACCEPTANCE_CHECKLIST.md schema and required content."""
+
+    errors: list[str] = []
+
+    if not checklist_path.exists():
+        return [f"File not found: {checklist_path}"]
+
+    try:
+        content = checklist_path.read_text(encoding="utf-8")
+    except Exception as exc:  # noqa: BLE001
+        return [f"Failed to read file: {exc}"]
+
+    fm = extract_front_matter(content)
+    if not fm:
+        return ["Missing YAML front matter block (--- ... ---)."]
+
+    if not fm.get("PRD-ID"):
+        errors.append("Front matter missing required field: PRD-ID")
+    if not fm.get("Title"):
+        errors.append("Front matter missing required field: Title")
+    if not fm.get("Status"):
+        errors.append("Front matter missing required field: Status")
+
+    adr_refs = fm.get("ADR-Refs") or []
+    if not adr_refs:
+        errors.append("Front matter missing required field: ADR-Refs")
+    else:
+        for adr_ref in adr_refs:
+            if adr_ref not in adr_ids:
+                errors.append(f"ADR-Refs points to missing ADR: {adr_ref}")
+
+    test_refs = fm.get("Test-Refs") or []
+    if not test_refs:
+        errors.append("Front matter missing required field: Test-Refs")
+
+    required_sections = [
+        "\u4e00\u3001\u6587\u6863\u5b8c\u6574\u6027\u9a8c\u6536",
+        "\u4e8c\u3001\u67b6\u6784\u8bbe\u8ba1\u9a8c\u6536",
+        "\u4e09\u3001\u4ee3\u7801\u5b9e\u73b0\u9a8c\u6536",
+        "\u56db\u3001\u6d4b\u8bd5\u6846\u67b6\u9a8c\u6536",
+    ]
+
+    for section in required_sections:
+        if section not in content:
+            errors.append(f"Missing required section heading: {section}")
+
+    return errors
+
+
+def load_tasks_from_file(task_file: Path) -> list[dict[str, Any]]:
+    """Load task list from a task JSON file."""
+
     if not task_file.exists():
         return []
-    data = json.loads(task_file.read_text(encoding='utf-8'))
-    # 兼容两种结构：直接数组 [...] 或对象 {"tasks": [...]}
+    data = json.loads(task_file.read_text(encoding="utf-8"))
     if isinstance(data, list):
         return data
-    if isinstance(data, dict) and "tasks" in data:
+    # Taskmaster main format: { "master": { "tasks": [...], "metadata": {...} } }
+    if isinstance(data, dict) and isinstance(data.get("master"), dict):
+        master = data["master"]
+        if isinstance(master.get("tasks"), list):
+            return master["tasks"]
+    if isinstance(data, dict) and isinstance(data.get("tasks"), list):
         return data["tasks"]
     return []
 
 
-def validate_task_file(
-    root: Path,
-    task_file: Path,
-    file_label: str,
-    adr_ids: set[str]
-) -> tuple[int, int]:
-    """
-    验证单个任务文件的 overlay 引用
+def validate_task_file(root: Path, task_file: Path, label: str, adr_ids: set[str]) -> tuple[int, int]:
+    """Validate overlay references for a single task file.
 
-    返回: (总任务数, 通过的任务数)
+    Returns: (tasks_with_overlays, tasks_passed)
     """
+
     tasks = load_tasks_from_file(task_file)
     if not tasks:
-        print(f"\n{file_label}: 未找到任务或文件不存在")
+        print(f"\n{label}: no tasks found or file missing")
         return 0, 0
 
-    print(f"\n{'='*60}")
-    print(f"{file_label}: {len(tasks)} 个任务")
-    print(f"{'='*60}")
+    print("\n" + "=" * 60)
+    print(f"{label}: {len(tasks)} tasks")
+    print("=" * 60)
 
-    passed = 0
     tasks_with_overlays = 0
+    passed = 0
+    forced_errors: list[str] = []
 
-    for task in sorted(tasks, key=lambda x: x.get("id", "")):
+    for task in sorted(tasks, key=lambda x: str(x.get("id", ""))):
         tid = task.get("id")
 
-        # 获取 overlay_refs 或 overlay
         overlay_refs = task.get("overlay_refs")
         if overlay_refs:
             overlays = overlay_refs if isinstance(overlay_refs, list) else [overlay_refs]
@@ -205,100 +235,154 @@ def validate_task_file(
             overlay = task.get("overlay")
             overlays = [overlay] if overlay else []
 
+        # Backlog view policy (tasks_back.json):
+        # tasks_back is the "governance/acceptance/contracts" view. Every task must be anchored to
+        # overlay docs to avoid drift between "task view" and "acceptance/contract" SSoT.
+        #
+        # Rule (hard):
+        # - overlay_refs MUST be a non-empty list of docs/architecture/overlays/<PRD-ID>/08/... files.
+        # - overlay_refs must include BOTH:
+        #     - <overlay_dir>/_index.md
+        #     - <overlay_dir>/ACCEPTANCE_CHECKLIST.md
+        #
+        # overlay_dir is inferred from overlay_refs/overlay using docs/architecture/overlays/<PRD-ID>/08/... patterns.
+        if task_file.name == "tasks_back.json":
+            overlay_refs_list: list[str] = []
+            if isinstance(overlay_refs, list):
+                overlay_refs_list = [str(x) for x in overlay_refs if str(x).strip()]
+            elif isinstance(overlay_refs, str) and overlay_refs.strip():
+                overlay_refs_list = [overlay_refs.strip()]
+
+            if not overlay_refs_list:
+                forced_errors.append(
+                    f"{label} task {tid}: overlay_refs must not be empty; set overlay_refs to include docs/architecture/overlays/<PRD-ID>/08/_index.md and ACCEPTANCE_CHECKLIST.md"
+                )
+            else:
+                overlay_candidate = str(task.get("overlay") or "").strip()
+                overlay_dir = None
+                for cand in overlay_refs_list + ([overlay_candidate] if overlay_candidate else []):
+                    m = OVERLAY_DIR_RE.match(str(cand))
+                    if m:
+                        overlay_dir = m.group(1)
+                        break
+
+                if not overlay_dir:
+                    forced_errors.append(
+                        f"{label} task {tid}: cannot infer overlay_dir from overlay/overlay_refs; set overlay_refs to include docs/architecture/overlays/<PRD-ID>/08/_index.md and ACCEPTANCE_CHECKLIST.md"
+                    )
+                else:
+                    required = [
+                        f"{overlay_dir}/_index.md",
+                        f"{overlay_dir}/ACCEPTANCE_CHECKLIST.md",
+                    ]
+                    missing = [x for x in required if x not in overlay_refs_list]
+                    if missing:
+                        forced_errors.append(f"{label} task {tid}: overlay_refs missing required anchors: {missing}")
+
         if not overlays:
             continue
 
         tasks_with_overlays += 1
         print(f"\n== {tid} ==")
 
-        task_passed = True
+        task_ok = True
         for overlay_path in overlays:
-            full_path = root / overlay_path
-
-            # 检查路径是否存在
+            full_path, err = safe_resolve_overlay_path(root, str(overlay_path))
+            if err:
+                print(f"  ERROR: invalid overlay path: {overlay_path} ({err})")
+                task_ok = False
+                continue
             if not full_path.exists():
-                print(f"  错误: overlay 文件不存在: {overlay_path}")
-                task_passed = False
+                print(f"  ERROR: overlay file does not exist: {overlay_path}")
+                task_ok = False
                 continue
 
-            # 如果是 ACCEPTANCE_CHECKLIST.md，验证格式
             if full_path.name == "ACCEPTANCE_CHECKLIST.md":
                 errors = validate_acceptance_checklist(full_path, adr_ids)
                 if errors:
-                    print(f"  错误: ACCEPTANCE_CHECKLIST.md 格式问题:")
+                    print("  ERROR: ACCEPTANCE_CHECKLIST.md validation failed:")
                     for err in errors:
                         print(f"    - {err}")
-                    task_passed = False
+                    task_ok = False
                 else:
                     print(f"  overlay OK: {overlay_path}")
             else:
                 print(f"  overlay OK: {overlay_path}")
 
-        if task_passed:
+        if task_ok:
             passed += 1
 
     if tasks_with_overlays == 0:
-        print("\n(无任务包含 overlay 字段)")
+        print("\n(no tasks contain overlay fields)")
+
+    if forced_errors:
+        print("\n" + "-" * 60)
+        print("ERROR: tasks_back overlay_refs policy violations")
+        print("-" * 60)
+        for err in forced_errors[:200]:
+            print(f"- {err}")
+        if len(forced_errors) > 200:
+            print(f"- (+{len(forced_errors) - 200} more)")
+
+        # Count these as hard failures of the overlay validation step.
+        # We keep the (tasks_with_overlays, passed) counters for compatibility with callers,
+        # but still force a non-zero exit code via total_passed < total_checked at the end.
+        # Add them to totals by treating each violation as an extra checked task.
+        tasks_with_overlays += len(forced_errors)
 
     return tasks_with_overlays, passed
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser(
-        description="验证任务 overlay 字段与 ACCEPTANCE_CHECKLIST.md 格式",
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        description="Validate task overlay references and ACCEPTANCE_CHECKLIST.md front matter.",
     )
     parser.add_argument(
         "--task-file",
         type=str,
-        help="指定要验证的任务文件路径（默认验证所有 .taskmaster/tasks/*.json）"
+        help="Task file path to validate (default: all .taskmaster/tasks/*.json).",
     )
 
     args = parser.parse_args()
-
     root = Path(__file__).resolve().parents[2]
 
-    # 收集 ADR IDs
     adr_ids = collect_adr_ids(root)
-    print(f"发现 {len(adr_ids)} 个 ADR ID: {sorted(list(adr_ids)[:10])} ...")
-    print()
+    preview = sorted(list(adr_ids))[:10]
+    print(f"Found {len(adr_ids)} ADR ids. Preview: {preview} ...")
 
-    # 确定要处理的任务文件
     if args.task_file:
         task_files = [Path(args.task_file)]
     else:
-        tasks_dir = root / ".taskmaster" / "tasks"
-        task_files = list(tasks_dir.glob("*.json"))
+        task_files = list((root / ".taskmaster" / "tasks").glob("*.json"))
 
     if not task_files:
-        print("错误: 未找到任何任务文件")
-        return
+        print("ERROR: no task files found")
+        return 1
 
-    # 处理每个任务文件
     total_checked = 0
     total_passed = 0
-
     for task_file in task_files:
         checked, passed = validate_task_file(root, task_file, task_file.name, adr_ids)
         total_checked += checked
         total_passed += passed
 
-    # 汇总
-    print(f"\n{'='*60}")
-    print("汇总")
-    print(f"{'='*60}")
-    print(f"检查的任务数（有 overlay 的）: {total_checked}")
-    print(f"通过的任务数: {total_passed}")
+    print("\n" + "=" * 60)
+    print("Summary")
+    print("=" * 60)
+    print(f"Tasks checked (with overlays): {total_checked}")
+    print(f"Tasks passed: {total_passed}")
 
     if total_checked == 0:
-        print("\n提示: 未找到任何包含 overlay 字段的任务")
-    elif total_passed < total_checked:
+        print("NOTE: no tasks contain overlay fields")
+        return 0
+    if total_passed < total_checked:
         failed = total_checked - total_passed
-        print(f"\n错误: {failed} 个任务未通过验证")
-        raise SystemExit(1)
-    else:
-        print("\n所有 overlay 验证通过!")
+        print(f"ERROR: {failed} tasks failed overlay validation")
+        return 1
+
+    print("All overlay validations passed.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
