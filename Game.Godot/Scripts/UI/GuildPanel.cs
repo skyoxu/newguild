@@ -75,7 +75,7 @@ public partial class GuildPanel : Control
             case "core.guild.member.left":
                 HandleMemberLeft(dataJson);
                 break;
-            case "core.guild.member.role.changed":
+            case "core.guild.member.role_changed":
                 HandleMemberRoleChanged(dataJson);
                 break;
         }

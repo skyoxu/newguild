@@ -6,16 +6,19 @@ namespace Game.Godot.Scripts.UI;
 public partial class MainMenu : Control
 {
     private Button _btnPlay = default!;
+    private Button _btnGuild = default!;
     private Button _btnSettings = default!;
     private Button _btnQuit = default!;
 
     public override void _Ready()
     {
         _btnPlay = GetNode<Button>("VBox/BtnPlay");
+        _btnGuild = GetNode<Button>("VBox/BtnGuild");
         _btnSettings = GetNode<Button>("VBox/BtnSettings");
         _btnQuit = GetNode<Button>("VBox/BtnQuit");
 
         _btnPlay.Pressed += OnPlayPressed;
+        _btnGuild.Pressed += OnGuildPressed;
         _btnSettings.Pressed += OnSettingsPressed;
         _btnQuit.Pressed += OnQuitPressed;
     }
@@ -35,6 +38,12 @@ public partial class MainMenu : Control
         HideMenu();
     }
 
+    private void OnGuildPressed()
+    {
+        Publish("ui.menu.guild", "ui");
+        HideMenu();
+    }
+
     private void OnSettingsPressed()
     {
         Publish("ui.menu.settings", "ui");
@@ -46,4 +55,3 @@ public partial class MainMenu : Control
         GetTree().Quit();
     }
 }
-
