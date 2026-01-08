@@ -6,9 +6,10 @@ func test_configfile_utf8_roundtrip() -> void:
     # the UTF-8 roundtrip test stable across environments.
     await get_tree().process_frame
 
-    var dir_path = "user://config-tests"
-    DirAccess.make_dir_recursive(dir_path)
-    var file_path = "%s/settings_%d.cfg" % [dir_path, int(Time.get_unix_time_from_system())]
+    var dir_user = "user://config-tests"
+    var dir_abs = ProjectSettings.globalize_path(dir_user).replace("\\", "/")
+    DirAccess.make_dir_recursive_absolute(dir_abs)
+    var file_path = dir_abs.path_join("settings_%d.cfg" % int(Time.get_unix_time_from_system()))
 
     var cfg := ConfigFile.new()
     var note := "Hello, world! äöü ✓"
