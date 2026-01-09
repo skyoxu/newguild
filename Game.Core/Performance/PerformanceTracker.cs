@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Game.Core.Performance;
 
@@ -112,9 +113,9 @@ public sealed class PerformanceTracker
         return (long)Math.Round(p, MidpointRounding.AwayFromZero);
     }
 
-    private bool TryGetSamples(string metricName, out Queue<long> samples)
+    private bool TryGetSamples(string metricName, [NotNullWhen(true)] out Queue<long>? samples)
     {
-        samples = null!;
+        samples = null;
         if (string.IsNullOrWhiteSpace(metricName))
             return false;
 
