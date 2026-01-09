@@ -250,6 +250,10 @@ def main():
     for idx, target in enumerate(targets, 1):
         safe_name = os.path.basename(target).replace('.csproj', '').replace('.', '_')
         results_dir = os.path.join(test_results_root, safe_name)
+        # Important: do not accumulate previous runs under the same logs/unit/<date>/testresults/<project> dir.
+        # Accumulation causes coverage union to mix different source versions and can falsely fail gates.
+        if os.path.isdir(results_dir):
+            shutil.rmtree(results_dir, ignore_errors=True)
         ensure_dir(results_dir)
         trx_name = f'{safe_name}.trx' if test_projects else 'tests.trx'
 

@@ -111,14 +111,14 @@ func _on_domain_event(type: String, source: String, data_json: String, id: Strin
                     return
             if ResourceLoader.exists("res://Game.Godot/Scenes/Screens/StartScreen.tscn"):
                 nav.SwitchTo("res://Game.Godot/Scenes/Screens/StartScreen.tscn")
-	elif type == "ui.menu.settings":
-		var sp = get_node_or_null("/root/Main/SettingsPanel")
-		if sp != null and sp.has_method("ShowPanel"):
-			sp.ShowPanel()
-	elif type == "ui.menu.guild":
-		var nav = get_node_or_null("/root/Main/ScreenNavigator")
-		if nav != null and nav.has_method("SwitchTo"):
-			if ResourceLoader.exists("res://Game.Godot/Scenes/Screens/GuildScreen.tscn"):
-				nav.SwitchTo("res://Game.Godot/Scenes/Screens/GuildScreen.tscn")
-	elif type == "ui.menu.quit":
-		get_tree().quit()
+    elif type == "ui.menu.settings":
+        var sp = get_node_or_null("/root/Main/SettingsPanel")
+        if sp != null and sp.has_method("ShowPanel"):
+            sp.ShowPanel()
+    elif type == "ui.menu.guild":
+        var nav = get_node_or_null("/root/Main/ScreenNavigator")
+        if nav != null and nav.has_method("SwitchTo"):
+            if ResourceLoader.exists("res://Game.Godot/Scenes/Screens/GuildScreen.tscn"):
+                nav.SwitchTo("res://Game.Godot/Scenes/Screens/GuildScreen.tscn")
+    elif type == "ui.menu.quit":
+        get_tree().quit()

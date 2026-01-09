@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import shlex
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +23,6 @@ from _util import ci_dir, repo_root, run_cmd, write_json, write_text
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="sc-git (git shim)")
     ap.add_argument("operation", nargs="?", default="status")
-    ap.add_argument("args", nargs=argparse.REMAINDER, help="args for git operation (use -- to separate)")
     ap.add_argument("--smart-commit", action="store_true")
     ap.add_argument("--interactive", action="store_true")
     ap.add_argument("--yes", action="store_true", help="confirm potentially destructive operations")
@@ -132,13 +132,35 @@ def render_commit_message(
     return msg
 
 
+def split_sc_and_git_args(argv: list[str]) -> tuple[list[str], list[str]]:
+    """
+    Split CLI args into:
+      - sc_args: args parsed by sc-git itself (supports flags after operation)
+      - git_args: args forwarded to git (everything after '--')
+
+    Example:
+      py -3 scripts/sc/git.py diff -- --stat
+        sc_args  = ["diff"]
+        git_args = ["--stat"]
+
+      py -3 scripts/sc/git.py commit --smart-commit --task-ref "#20.1"
+        sc_args  = ["commit", "--smart-commit", "--task-ref", "#20.1"]
+        git_args = []
+
+    This avoids argparse's REMAINDER swallowing sc-git flags as git flags.
+    """
+    if "--" not in argv:
+        return argv, []
+    idx = argv.index("--")
+    return argv[:idx], argv[idx + 1 :]
+
+
 def main() -> int:
-    args = build_parser().parse_args()
+    sc_argv, git_extra = split_sc_and_git_args(sys.argv[1:])
+    args = build_parser().parse_args(sc_argv)
 
     op = args.operation
-    extra = list(args.args)
-    if extra and extra[0] == "--":
-        extra = extra[1:]
+    extra = list(git_extra)
 
     if requires_yes(op, extra) and not args.yes:
         print(f"[sc-git] ERROR: operation '{op}' requires --yes for confirmation.")
