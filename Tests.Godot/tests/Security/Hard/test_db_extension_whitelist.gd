@@ -1,5 +1,4 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
-
 func _new_db(name: String) -> Node:
     if not ClassDB.class_exists("SqliteDataStore"):
         push_warning("SqliteDataStore C# class not available; skipping DB extension hard tests.")
@@ -52,6 +51,7 @@ func _audit_contains_action(audit_path: String, expected_action: String) -> bool
     return false
 
 
+# ACC:T11.2
 func test_try_open_invalid_extension_is_rejected_and_audited() -> void:
     var original_ci: String = OS.get_environment("CI")
     OS.set_environment("CI", "1")

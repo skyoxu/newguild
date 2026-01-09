@@ -35,11 +35,13 @@
       "architecture"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Tasks/Task1DocLinkingTests.cs"
+    ],
     "acceptance": [
-      "存在一份针对 newguild 的最小 PRD 片段（含输入/输出/状态/存储与非功能约束），并显式引用 ADR-0018/0004/0005/0023/0011。",
-      "在 overlays/PRD-*/08 下新增或调整功能纵切文档，严格遵守 08 章只引用 01/02/03 口径的规则（不复制阈值）。",
-      "每个 Story 至少关联一条 Test-Ref（xUnit 或 GdUnit4），并在文档脚注中列出。"
+      "存在一份针对 newguild 的最小 PRD 片段（含输入/输出/状态/存储与非功能约束），并显式引用 ADR-0018/0004/0005/0023/0011。 Refs: Game.Core.Tests/Tasks/Task1DocLinkingTests.cs",
+      "在 overlays/PRD-*/08 下新增或调整功能纵切文档，严格遵守 08 章只引用 01/02/03 口径的规则（不复制阈值）。 Refs: Game.Core.Tests/Tasks/Task1DocLinkingTests.cs",
+      "每个 Story 至少关联一条 Test-Ref（xUnit 或 GdUnit4），并在文档脚注中列出。 Refs: Game.Core.Tests/Tasks/Task1DocLinkingTests.cs"
     ],
     "test_strategy": [
       "文档审阅：由架构负责人确认 PRD 与 ADR/Phase 一致性。",
@@ -85,12 +87,17 @@
       "headless"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/CI/SmokeHeadlessCliArgsTests.cs",
+      "Game.Core.Tests/CI/SmokeHeadlessNonStrictModeTests.cs",
+      "Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
+      "Game.Core.Tests/CI/WorkflowStrictModeExampleTests.cs"
+    ],
     "acceptance": [
-      "新增 scripts/python/smoke_headless.py（或等价脚本），支持 --godot-bin/--scene/--timeout-sec/--project-path 参数，并在 Windows 上可直接运行。",
-      "非 strict 模式下，脚本行为与现有 PowerShell 版本等价，输出写入 logs/ci/<date>/smoke/**，并保留宽松判定。",
-      "strict 模式下，仅当日志包含 [TEMPLATE_SMOKE_READY] 或 [DB] opened 时返回 0，否则返回非零并在日志中标记为 strict-failed。",
-      "ci-windows.yml 或 windows-quality-gate.yml 至少提供一条注释示例，展示如何在受保护分支启用 strict 模式。"
+      "新增 scripts/python/smoke_headless.py（或等价脚本），支持 --godot-bin/--scene/--timeout-sec/--project-path 参数，并在 Windows 上可直接运行。 Refs: Game.Core.Tests/CI/SmokeHeadlessCliArgsTests.cs",
+      "非 strict 模式下，脚本行为与现有 PowerShell 版本等价，输出写入 logs/ci/<date>/smoke/**，并保留宽松判定。 Refs: Game.Core.Tests/CI/SmokeHeadlessNonStrictModeTests.cs",
+      "strict 模式下，仅当日志包含 [TEMPLATE_SMOKE_READY] 或 [DB] opened 时返回 0，否则返回非零并在日志中标记为 strict-failed。 Refs: Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
+      "ci-windows.yml 或 windows-quality-gate.yml 至少提供一条注释示例，展示如何在受保护分支启用 strict 模式。 Refs: Game.Core.Tests/CI/WorkflowStrictModeExampleTests.cs"
     ],
     "test_strategy": [
       "本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。",
@@ -138,12 +145,17 @@
       "gdunit"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Tasks/Task7QualityGatesDotnetCoverageSummaryTests.cs",
+      "Game.Core.Tests/Tasks/Task7QualityGatesCoverageThresholdGateModeTests.cs",
+      "Game.Core.Tests/Tasks/Task7QualityGatesGdUnitAggregationTests.cs",
+      "Game.Core.Tests/Tasks/Task7QualityGatesStepSummaryTests.cs"
+    ],
     "acceptance": [
-      "scripts/python/run_dotnet.py 读取覆盖率结果并在 summary.json 中写入 lines/branches 与阈值配置（默认 90/85，可由环境变量覆盖）。",
-      "当覆盖率低于阈值时，quality_gates.py 在 summary 中标记为 failed，并可配置为软/硬门禁（至少支持硬门禁）。",
-      "quality_gates.py 能调用 run_gdunit.py 或等价封装，执行 Adapters+Security 硬门禁集合，并在 quality-gates-summary.json 中汇总结果。",
-      "Windows Quality Gate 工作流调用 quality_gates.py all 时，能在 Step Summary 中清晰展示 dotnet 覆盖率与 GdUnit4 集合结果。"
+      "scripts/python/run_dotnet.py 读取覆盖率结果并在 summary.json 中写入 lines/branches 与阈值配置（默认 90/85，可由环境变量覆盖）。 Refs: Game.Core.Tests/Tasks/Task7QualityGatesDotnetCoverageSummaryTests.cs",
+      "当覆盖率低于阈值时，quality_gates.py 在 summary 中标记为 failed，并可配置为软/硬门禁（至少支持硬门禁）。 Refs: Game.Core.Tests/Tasks/Task7QualityGatesCoverageThresholdGateModeTests.cs",
+      "quality_gates.py 能调用 run_gdunit.py 或等价封装，执行 Adapters+Security 硬门禁集合，并在 quality-gates-summary.json 中汇总结果。 Refs: Game.Core.Tests/Tasks/Task7QualityGatesGdUnitAggregationTests.cs",
+      "Windows Quality Gate 工作流调用 quality_gates.py all 时，能在 Step Summary 中清晰展示 dotnet 覆盖率与 GdUnit4 集合结果。 Refs: Game.Core.Tests/Tasks/Task7QualityGatesStepSummaryTests.cs"
     ],
     "test_strategy": [
       "本地模拟：手工降低测试覆盖率，验证 quality_gates.py 将其标记为 failed，并按配置返回非零 exit code。",
@@ -199,15 +211,20 @@
     "owner": "architecture",
     "test_refs": [
       "Tests.Godot/tests/Security/Hard/test_db_path_rejection.gd",
-      "Tests.Godot/tests/Security/Hard/test_settings_config_security.gd"
+      "Tests.Godot/tests/Security/Hard/test_settings_config_security.gd",
+      "Tests.Godot/tests/Security/Hard/test_url_security_adapter.gd",
+      "Game.Core.Tests/Services/SecurityAdapterTests.cs",
+      "Tests.Godot/tests/Security/Hard/test_file_security_adapter.gd",
+      "Tests.Godot/tests/Security/Hard/test_process_security_adapter.gd",
+      "Tests.Godot/tests/Integration/Security/test_security_http_audit.gd"
     ],
     "acceptance": [
-      "外链访问统一通过 SecurityUrlAdapter（或等价组件）完成，强制 https scheme + ALLOWED_EXTERNAL_HOSTS 白名单，禁止 file://、javascript: 等高危 scheme。",
-      "SecurityUrlAdapter 在引入 ALLOWED_EXTERNAL_HOSTS 白名单（可通过环境变量或配置）时，默认开启安全收敛：当 allowedDomains == null 时不会在生产环境下“全部放行”，而是保持本地/测试环境明确配置或显式 opt-in，符合 ADR-0019 对外链白名单的防御性要求。",
-      "文件访问统一通过 SecurityFileAdapter（或等价组件）封装 FileAccess/DirAccess：仅允许 res:// 读取与 user:// 读写，拒绝绝对路径与 .. 越权访问，并将拒绝写入 security-audit.jsonl。",
-      "OS.execute 默认在运行时禁用，或仅在开发/CI 模式通过 SecurityProcessAdapter 白名单执行，并记录审计日志。",
-      "安全审计 JSONL（logs/ci/<date>/security-audit.jsonl 与 user://logs/security/**）均通过验证脚本检查：每行合法 JSON，至少包含 {ts, action, reason, target, caller} 字段。",
-      "相关 GdUnit4 Hard 测试覆盖允许/拒绝/非法三态场景，并在 CI 中作为硬门禁的一部分。"
+      "外链访问统一通过 SecurityUrlAdapter（或等价组件）完成，强制 https scheme + ALLOWED_EXTERNAL_HOSTS 白名单，禁止 file://、javascript: 等高危 scheme。 Refs: Tests.Godot/tests/Security/Hard/test_url_security_adapter.gd",
+      "SecurityUrlAdapter 在引入 ALLOWED_EXTERNAL_HOSTS 白名单（可通过环境变量或配置）时，默认开启安全收敛：当 allowedDomains == null 时不会在生产环境下“全部放行”，而是保持本地/测试环境明确配置或显式 opt-in，符合 ADR-0019 对外链白名单的防御性要求。 Refs: Game.Core.Tests/Services/SecurityAdapterTests.cs",
+      "文件访问统一通过 SecurityFileAdapter（或等价组件）封装 FileAccess/DirAccess：仅允许 res:// 读取与 user:// 读写，拒绝绝对路径与 .. 越权访问，并将拒绝写入 security-audit.jsonl。 Refs: Tests.Godot/tests/Security/Hard/test_file_security_adapter.gd",
+      "OS.execute 默认在运行时禁用，或仅在开发/CI 模式通过 SecurityProcessAdapter 白名单执行，并记录审计日志。 Refs: Tests.Godot/tests/Security/Hard/test_process_security_adapter.gd",
+      "安全审计 JSONL（logs/ci/<date>/security-audit.jsonl 与 user://logs/security/**）均通过验证脚本检查：每行合法 JSON，至少包含 {ts, action, reason, target, caller} 字段。 Refs: Tests.Godot/tests/Integration/Security/test_security_http_audit.gd",
+      "相关 GdUnit4 Hard 测试覆盖允许/拒绝/非法三态场景，并在 CI 中作为硬门禁的一部分。 Refs: Tests.Godot/tests/Security/Hard/test_url_security_adapter.gd Tests.Godot/tests/Security/Hard/test_file_security_adapter.gd"
     ],
     "test_strategy": [
       "GdUnit4 安全用例：编写/扩展 Hard 集测试外链、文件、进程三类接口的 allow/deny/invalid 行为。",
@@ -258,13 +275,15 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Core.Tests/Performance/PerformanceTrackerTests.cs"
+      "Game.Core.Tests/Performance/PerformanceTrackerTests.cs",
+      "Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd",
+      "Game.Core.Tests/Performance/PerformanceGatesEvaluatorTests.cs"
     ],
     "acceptance": [
-      "Game.Core/Performance/** 下存在 PerformanceTracker/PerformanceMetrics/QueryPerformanceTracker 等类型，API 与 Phase-15 文档保持一致且不依赖 Godot API。",
-      "xUnit 测试覆盖性能库的关键统计逻辑（P50/P95/平均值/最大值），并生成覆盖率报告。",
-      "Godot 侧 PerfTracker 使用或适配 Game.Core 性能库的输出，将帧时间/关键路径指标写入 user://logs/perf/perf.json。",
-      "新增 scripts/python/performance_gates.py（或等价脚本），读取 PerfTracker JSON 与预算阈值（环境变量），在 logs/perf/<date>/summary.json 与 logs/ci/<date>/perf/** 中生成结果，并通过 exit code 暴露软/硬门禁。"
+      "Game.Core/Performance/** 下存在 PerformanceTracker/PerformanceMetrics/QueryPerformanceTracker 等类型，API 与 Phase-15 文档保持一致且不依赖 Godot API。 Refs: Game.Core.Tests/Performance/PerformanceTrackerTests.cs",
+      "xUnit 测试覆盖性能库的关键统计逻辑（P50/P95/平均值/最大值），并生成覆盖率报告。 Refs: Game.Core.Tests/Performance/PerformanceTrackerTests.cs",
+      "Godot 侧 PerfTracker 使用或适配 Game.Core 性能库的输出，将帧时间/关键路径指标写入 user://logs/perf/perf.json。 Refs: Game.Core.Tests/Performance/PerformanceTrackerTests.cs Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd",
+      "新增 scripts/python/performance_gates.py（或等价脚本），读取 PerfTracker JSON 与预算阈值（环境变量），在 logs/perf/<date>/summary.json 与 logs/ci/<date>/perf/** 中生成结果，并通过 exit code 暴露软/硬门禁。 Refs: Game.Core.Tests/Performance/PerformanceGatesEvaluatorTests.cs"
     ],
     "test_strategy": [
       "单元测试：为性能库编写 xUnit 基准级测试，验证统计函数在不同样本上的正确性。",
@@ -322,13 +341,16 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Core.Tests/Observability/ObservabilityClientTests.cs"
+      "Game.Core.Tests/Observability/ObservabilityClientTests.cs",
+      "Tests.Godot/tests/Scenes/Sanguo/test_sanguo_boot_observability_autoload.gd",
+      "Game.Core.Tests/Utilities/ReleaseHealthGateScriptTests.cs",
+      "Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs"
     ],
     "acceptance": [
-      "Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期初始化 Sentry Godot SDK，并设置 Release/Environment。",
-      "Game.Core 中存在 ObservabilityClient/StructuredLogger（或等价实现），通过接口注入到核心服务，避免直接依赖 Godot 或 Sentry。",
-      "新增 scripts/python/release_health_gate.py，支持配置 SENTRY_* 环境变量与阈值 JSON，生成 logs/ci/<date>/release-health.json 并根据阈值返回 exit code。",
-      "CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），在配置正确的情况下能拉取 Sentry 数据并给出清晰的通过/失败原因。"
+      "Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期初始化 Sentry Godot SDK，并设置 Release/Environment。 Refs: Tests.Godot/tests/Scenes/Sanguo/test_sanguo_boot_observability_autoload.gd",
+      "Game.Core 中存在 ObservabilityClient/StructuredLogger（或等价实现），通过接口注入到核心服务，避免直接依赖 Godot 或 Sentry。 Refs: Game.Core.Tests/Observability/ObservabilityClientTests.cs",
+      "新增 scripts/python/release_health_gate.py，支持配置 SENTRY_* 环境变量与阈值 JSON，生成 logs/ci/<date>/release-health.json 并根据阈值返回 exit code。 Refs: Game.Core.Tests/Utilities/ReleaseHealthGateScriptTests.cs",
+      "CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），在配置正确的情况下能拉取 Sentry 数据并给出清晰的通过/失败原因。 Refs: Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs"
     ],
     "test_strategy": [
       "核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。",
@@ -543,15 +565,16 @@
       "Game.Core.Tests/Domain/GuildCoreTests.cs",
       "Game.Core.Tests/Domain/EventEngineTests.cs",
       "Tests.Godot/tests/Scenes/test_guild_main_scene.gd",
-      "Tests.Godot/tests/Integration/test_guild_workflow.gd"
+      "Tests.Godot/tests/Integration/test_guild_workflow.gd",
+      "Game.Core.Tests/Contracts/Guild/GuildDomainEventContractsTests.cs"
     ],
     "acceptance": [
-      "Game.Core 中存在 Guild、GuildMember、Raid、Event 等核心域模型与服务，且不依赖 Godot API。",
-      "Game.Godot 中存在与 08-FeatureSlice-Guild-Manager.md 一致的主场景与公会管理 UI 节点结构，并通过 Adapters 调用 Game.Core 服务。",
-      "Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。",
-      "Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。",
-      "上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。",
-      "完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。"
+      "Game.Core 中存在 Guild、GuildMember、Raid、Event 等核心域模型与服务，且不依赖 Godot API。 Refs: Game.Core.Tests/Domain/GuildCoreTests.cs Game.Core.Tests/Domain/EventEngineTests.cs",
+      "Game.Godot 中存在与 08-FeatureSlice-Guild-Manager.md 一致的主场景与公会管理 UI 节点结构，并通过 Adapters 调用 Game.Core 服务。 Refs: Tests.Godot/tests/Scenes/test_guild_main_scene.gd Tests.Godot/tests/Integration/test_guild_workflow.gd",
+      "Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。 Refs: Tests.Godot/tests/Integration/test_guild_workflow.gd",
+      "Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。 Refs: Game.Core.Tests/Domain/GuildCoreTests.cs Game.Core.Tests/Domain/EventEngineTests.cs",
+      "上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。 Refs: Game.Core.Tests/Domain/GuildCoreTests.cs",
+      "完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。 Refs: Game.Core.Tests/Contracts/Guild/GuildDomainEventContractsTests.cs"
     ],
     "test_strategy": [
       "单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。",
@@ -611,15 +634,16 @@
       "Tests.Godot/tests/Scenes/test_guild_main_scene.gd",
       "Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
       "Game.Core.Tests/Domain/GameLoopTests.cs",
-      "Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd"
+      "Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "Game.Core.Tests/Services/LogArtifactsWriterTests.cs"
     ],
     "acceptance": [
-      "dev_cli.py run-ci-basic 在本地 Windows 环境下能成功运行，并至少执行一次 dotnet test 与一次 headless smoke。",
-      "Windows CI 工作流（ci-windows.yml 或 windows-quality-gate.yml）中包含对 Game.Core.Tests 与 Tests.Godot 的执行步骤，且在首个垂直切片落地后仍然全部通过。",
-      "headless smoke 用例能够在不依赖交互的情况下启动游戏主场景，并输出 [TEMPLATE_SMOKE_READY] 或 [DB] opened 标记。",
-      "至少存在一条覆盖 PRD 3.0.3 T2 可玩性场景流的端到端测试路径：Game.Core.Tests/Domain/GameTurnSystemTests.cs（或等价用例）验证三阶段一周循环的状态推进，Tests.Godot/tests/Scenes/test_main_scene_smoke.gd（或等价用例）验证从启动主场景进入首周公会管理界面并完成一次“推进一周”的 UI 流程。",
-      "失败的测试或 smoke 能在 logs/ci 与 logs/e2e 目录下生成可用于排查的 JSON/文本日志，与 AGENTS.md 中的日志规范一致。",
-      "Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd 已作为 PRD 3.0.3 T2 可玩性场景流的最小测试入口，分别覆盖 Core 回合状态与场景可玩闭环，并挂接在 NG-0021 与 GM-0103 的 Test-Refs 中。"
+      "dev_cli.py run-ci-basic 在本地 Windows 环境下能成功运行，并至少执行一次 dotnet test 与一次 headless smoke。 Refs: Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
+      "Windows CI 工作流（ci-windows.yml 或 windows-quality-gate.yml）中包含对 Game.Core.Tests 与 Tests.Godot 的执行步骤，且在首个垂直切片落地后仍然全部通过。 Refs: Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
+      "headless smoke 用例能够在不依赖交互的情况下启动游戏主场景，并输出 [TEMPLATE_SMOKE_READY] 或 [DB] opened 标记。 Refs: Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
+      "至少存在一条覆盖 PRD 3.0.3 T2 可玩性场景流的端到端测试路径：Game.Core.Tests/Domain/GameTurnSystemTests.cs（或等价用例）验证三阶段一周循环的状态推进，Tests.Godot/tests/Scenes/test_main_scene_smoke.gd（或等价用例）验证从启动主场景进入首周公会管理界面并完成一次“推进一周”的 UI 流程。 Refs: Tests.Godot/tests/Scenes/test_main_scene_smoke.gd",
+      "失败的测试或 smoke 能在 logs/ci 与 logs/e2e 目录下生成可用于排查的 JSON/文本日志，与 AGENTS.md 中的日志规范一致。 Refs: Game.Core.Tests/Services/LogArtifactsWriterTests.cs",
+      "Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd 已作为 PRD 3.0.3 T2 可玩性场景流的最小测试入口，分别覆盖 Core 回合状态与场景可玩闭环，并挂接在 NG-0021 与 GM-0103 的 Test-Refs 中。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd"
     ],
     "test_strategy": [
       "本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。",
@@ -673,13 +697,16 @@
       "docs/prd.txt",
       "docs/architecture/base/01-introduction-and-goals-v2.md",
       "docs/adr/ADR-0018-godot-csharp-tech-stack.md",
-      "docs/adr/ADR-0019-godot-security-baseline.md"
+      "docs/adr/ADR-0019-godot-security-baseline.md",
+      "Game.Core.Tests/Tasks/TaskLinksDocsBacklinksTests.cs",
+      "Game.Core.Tests/Tasks/TaskLinksAdrRefsConsistencyTests.cs",
+      "Game.Core.Tests/Tasks/TaskLinksValidatorTests.cs"
     ],
     "acceptance": [
-      "docs/prd.txt 中与公会管理器相关的章节在 Overlay/08 中都有对应条目或引用。",
-      "与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-FeatureSlice-Guild-Manager.md 与本验收清单的 Front-Matter 中有一致引用。",
-      "Taskmaster 任务（NG-0001/NG-0020/NG-0021 以及后续玩法任务）在 story_id/adr_refs/chapter_refs/overlay_refs 上与 PRD/Base/ADR/Overlay 建立清晰回链。",
-      "task-links-validate（或等价脚本）能够在 CI 中验证上述回链关系并生成报告。"
+      "docs/prd.txt 中与公会管理器相关的章节在 Overlay/08 中都有对应条目或引用。 Refs: Game.Core.Tests/Tasks/TaskLinksDocsBacklinksTests.cs",
+      "与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-FeatureSlice-Guild-Manager.md 与本验收清单的 Front-Matter 中有一致引用。 Refs: Game.Core.Tests/Tasks/TaskLinksAdrRefsConsistencyTests.cs",
+      "Taskmaster 任务（NG-0001/NG-0020/NG-0021 以及后续玩法任务）在 story_id/adr_refs/chapter_refs/overlay_refs 上与 PRD/Base/ADR/Overlay 建立清晰回链。 Refs: Game.Core.Tests/Tasks/TaskLinksValidatorTests.cs",
+      "task-links-validate（或等价脚本）能够在 CI 中验证上述回链关系并生成报告。 Refs: Game.Core.Tests/Tasks/TaskLinksValidatorTests.cs"
     ],
     "test_strategy": [
       "文档审阅：由架构/产品共同检查 PRD/Base/ADR/Overlay 是否互相引用、无矛盾口径。",
@@ -791,13 +818,16 @@
     "owner": "architecture",
     "test_refs": [
       "Game.Core/Observability/ObservabilityClient.cs",
-      "Game.Core.Tests/Observability/ObservabilityClientTests.cs"
+      "Game.Core.Tests/Observability/ObservabilityClientTests.cs",
+      "Game.Core.Tests/Observability/ObservabilityCoreIsolationTests.cs",
+      "Game.Core.Tests/Observability/ObservabilityDependencyInjectionTests.cs",
+      "Game.Core.Tests/Observability/PiiDataScrubberTests.cs"
     ],
     "acceptance": [
-      "Game.Core/Observability 下存在 ObservabilityClient/StructuredLogger/PiiDataScrubber 等类型，且不引用任何 Godot API。",
-      "核心服务通过依赖注入使用 ILogger/ObservabilityClient 接口，而不是直接依赖 Sentry 或具体实现。",
-      "ObservabilityClient 能够生成包含 logger、level、tags、extra、breadcrumbs 的结构化日志对象，并在单元测试中可被验证。",
-      "至少一组 xUnit 测试验证 PII 字段在过滤逻辑中被正确脱敏或丢弃。"
+      "Game.Core/Observability 下存在 ObservabilityClient/StructuredLogger/PiiDataScrubber 等类型，且不引用任何 Godot API。 Refs: Game.Core.Tests/Observability/ObservabilityClientTests.cs Game.Core.Tests/Observability/ObservabilityCoreIsolationTests.cs",
+      "核心服务通过依赖注入使用 ILogger/ObservabilityClient 接口，而不是直接依赖 Sentry 或具体实现。 Refs: Game.Core.Tests/Observability/ObservabilityDependencyInjectionTests.cs",
+      "ObservabilityClient 能够生成包含 logger、level、tags、extra、breadcrumbs 的结构化日志对象，并在单元测试中可被验证。 Refs: Game.Core.Tests/Observability/ObservabilityClientTests.cs",
+      "至少一组 xUnit 测试验证 PII 字段在过滤逻辑中被正确脱敏或丢弃。 Refs: Game.Core.Tests/Observability/PiiDataScrubberTests.cs Game.Core.Tests/Observability/ObservabilityClientTests.cs"
     ],
     "test_strategy": [
       "本地：为 ObservabilityClient 编写 xUnit 测试，使用 fake/spy 对象捕获日志与事件上报行为。",
@@ -1004,11 +1034,16 @@
       "quality-gates"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Tasks/Task23PerfBudgetValidationScriptTests.cs",
+      "Game.Core.Tests/Tasks/Task23SecurityAuditJsonlValidationScriptTests.cs",
+      "Game.Core.Tests/Tasks/Task23QualityGatesAllModeTests.cs",
+      "Tests.Godot/tests/Performance/test_frame_time_p95.gd"
+    ],
     "acceptance": [
-      "新增 scripts/python/validate_perf.py 与 scripts/python/validate_audit_logs.py，能够检查 P95 是否在预算内，以及 security-audit.jsonl 每行为合法 JSON 且包含必需字段。",
-      "quality_gates.py 支持在 all 模式下调用上述校验脚本，并在失败时返回非零退出码。",
-      "CI 日志中可以看到 P95 与审计 JSONL 校验的摘要输出，并产生对应 JSON 摘要文件。"
+      "新增 scripts/python/validate_perf.py 与 scripts/python/validate_audit_logs.py，能够检查 P95 是否在预算内，以及 security-audit.jsonl 每行为合法 JSON 且包含必需字段。 Refs: Game.Core.Tests/Tasks/Task23PerfBudgetValidationScriptTests.cs Game.Core.Tests/Tasks/Task23SecurityAuditJsonlValidationScriptTests.cs",
+      "quality_gates.py 支持在 all 模式下调用上述校验脚本，并在失败时返回非零退出码。 Refs: Game.Core.Tests/Tasks/Task23QualityGatesAllModeTests.cs",
+      "CI 日志中可以看到 P95 与审计 JSONL 校验的摘要输出，并产生对应 JSON 摘要文件。 Refs: Tests.Godot/tests/Performance/test_frame_time_p95.gd"
     ],
     "test_strategy": [
       "单元：为 validate_perf 与 validate_audit_logs 编写测试，验证边界条件与错误路径。",
@@ -1593,12 +1628,15 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "cifix.txt"
+      "cifix.txt",
+      "Game.Core.Tests/Services/GameLoopSecurityAuditReportTests.cs",
+      "Game.Core.Tests/Services/GameLoopFindingTaskMappingTests.cs",
+      "Game.Core.Tests/Services/TaskLinksValidatorGameLoopTests.cs"
     ],
     "acceptance": [
-      "SECURITY_AUDIT_GAMELOOP_REPORT.md 以 ADR-0019 为基线，明确区分 T2_BLOCKING 与 NG_BACKLOG 安全问题，并与 cifix.txt 中的技术债记录一致。",
-      "F001/F002/F005 至少映射到一条 T2 相关 NG/GM 任务，F003/F004/F006/F007 映射到 NG 安全或架构 backlog 任务，且在 tasks_back.json / tasks_gameplay.json 中补齐 adr_refs/chapter_refs/overlay_refs/test_refs。",
-      "运行 py -3 scripts/python/task_links_validate.py 时，GameLoop 相关任务不再因为 ADR/Chapter 映射或缺失 Test-Refs 报错。"
+      "SECURITY_AUDIT_GAMELOOP_REPORT.md 以 ADR-0019 为基线，明确区分 T2_BLOCKING 与 NG_BACKLOG 安全问题，并与 cifix.txt 中的技术债记录一致。 Refs: Game.Core.Tests/Services/GameLoopSecurityAuditReportTests.cs",
+      "F001/F002/F005 至少映射到一条 T2 相关 NG/GM 任务，F003/F004/F006/F007 映射到 NG 安全或架构 backlog 任务，且在 tasks_back.json / tasks_gameplay.json 中补齐 adr_refs/chapter_refs/overlay_refs/test_refs。 Refs: Game.Core.Tests/Services/GameLoopFindingTaskMappingTests.cs Game.Core.Tests/Services/TaskLinksValidatorGameLoopTests.cs",
+      "运行 py -3 scripts/python/task_links_validate.py 时，GameLoop 相关任务不再因为 ADR/Chapter 映射或缺失 Test-Refs 报错。 Refs: Game.Core.Tests/Services/TaskLinksValidatorGameLoopTests.cs"
     ],
     "test_strategy": [
       "人工对比 logs/security-audit-gameloop.* 与 tasks_back.json / tasks_gameplay.json，确认每条 F00x 至少有一条对应任务可追踪。",
@@ -1658,13 +1696,14 @@
       "Game.Core/Domain/Turn/SaveIdValue.cs",
       "Game.Core.Tests/Domain/SaveIdValueTests.cs",
       "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
-      "Game.Core.Tests/Domain/GameLoopTests.cs"
+      "Game.Core.Tests/Domain/GameLoopTests.cs",
+      "Game.Core.Tests/Domain/GameLoopContractsTests.cs"
     ],
     "acceptance": [
-      "Game.Core/Domain/Turn 下新增 SaveIdValue（或等价类型），实现 [a-zA-Z0-9_-]{1,64} 的白名单校验，非法输入抛出 ArgumentException。",
-      "GameTurnState / GameTurnSystem 在内部使用 SaveIdValue 作为 SaveId 的入口类型，确保后续事件与存储只接受经过校验的值。",
-      "Game.Core.Tests 中新增 SaveIdValueTests 与针对无效 SaveId 的 GameTurnSystem / GameLoop 测试，覆盖空字符串、超长、SQL 片段、路径遍历等典型攻击向量。",
-      "dotnet test Game.Core.Tests 在本地与 CI 均可通过，且与 PRD 3.0.3 T2 可玩性场景流描述一致。"
+      "Game.Core/Domain/Turn 下新增 SaveIdValue（或等价类型），实现 [a-zA-Z0-9_-]{1,64} 的白名单校验，非法输入抛出 ArgumentException。 Refs: Game.Core.Tests/Domain/SaveIdValueTests.cs",
+      "GameTurnState / GameTurnSystem 在内部使用 SaveIdValue 作为 SaveId 的入口类型，确保后续事件与存储只接受经过校验的值。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs",
+      "Game.Core.Tests 中新增 SaveIdValueTests 与针对无效 SaveId 的 GameTurnSystem / GameLoop 测试，覆盖空字符串、超长、SQL 片段、路径遍历等典型攻击向量。 Refs: Game.Core.Tests/Domain/SaveIdValueTests.cs Game.Core.Tests/Domain/GameLoopTests.cs",
+      "dotnet test Game.Core.Tests 在本地与 CI 均可通过，且与 PRD 3.0.3 T2 可玩性场景流描述一致。 Refs: Game.Core.Tests/Domain/GameLoopTests.cs Game.Core.Tests/Domain/GameLoopContractsTests.cs"
     ],
     "test_strategy": [
       "单元测试：在 SaveIdValueTests 中穷举典型非法/合法输入，验证构造/工厂方法的行为与异常信息。",
@@ -1769,13 +1808,16 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Godot/Adapters/SqliteDataStore.cs"
+      "Game.Core.Tests/Domain/SafeResourcePathTests.cs",
+      "Tests.Godot/tests/Security/Hard/test_db_extension_whitelist.gd",
+      "Tests.Godot/tests/Security/Hard/test_db_size_limit.gd",
+      "Tests.Godot/tests/Security/Hard/test_db_backend_plugin_policy.gd"
     ],
     "acceptance": [
-      "SqliteDataStore 对传入路径在检查前统一规范化分隔符，严格限制为 user:// 前缀并拒绝任何包含 .. 或 ..\\\\ 的路径。",
-      "SqliteDataStore 增加数据库文件扩展名白名单（如 .db/.sqlite/.sqlite3），非法扩展名会被拒绝并记录审计日志。",
-      "针对已有数据库文件增加简单的大小上限检查（防 DoS），超限时抛出安全异常并写入 security-audit.jsonl。",
-      "通过环境变量（例如 ALLOW_PLUGIN_BACKEND）或等价方案，将 plugin backend 限定在开发/实验环境，生产默认使用 managed backend，并在文档中明确记录。"
+      "SqliteDataStore 对传入路径在检查前统一规范化分隔符，严格限制为 user:// 前缀并拒绝任何包含 .. 或 ..\\\\ 的路径。 Refs: Game.Core.Tests/Domain/SafeResourcePathTests.cs",
+      "SqliteDataStore 增加数据库文件扩展名白名单（如 .db/.sqlite/.sqlite3），非法扩展名会被拒绝并记录审计日志。 Refs: Tests.Godot/tests/Security/Hard/test_db_extension_whitelist.gd",
+      "针对已有数据库文件增加简单的大小上限检查（防 DoS），超限时抛出安全异常并写入 security-audit.jsonl。 Refs: Tests.Godot/tests/Security/Hard/test_db_size_limit.gd",
+      "通过环境变量（例如 ALLOW_PLUGIN_BACKEND）或等价方案，将 plugin backend 限定在开发/实验环境，生产默认使用 managed backend，并在文档中明确记录。 Refs: Tests.Godot/tests/Security/Hard/test_db_backend_plugin_policy.gd"
     ],
     "test_strategy": [
       "单元/集成测试：为 SqliteDataStore 增加路径与扩展名相关的测试用例，覆盖非法前缀、..、非法扩展名、超大文件等场景。",
@@ -1825,12 +1867,14 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Godot/Adapters/Db/GodotSQLiteDatabase.cs"
+      "Game.Godot/Adapters/Db/GodotSQLiteDatabase.cs",
+      "Game.Core.Tests/Services/DatabaseErrorHandlingTests.cs",
+      "Tests.Godot/tests/Security/Hard/test_godot_sqlite_database_error_sanitization.gd"
     ],
     "acceptance": [
-      "GodotSQLiteDatabase 在 DEBUG 构建下仍然抛出包含路径/SQL 的详细异常，方便开发调试。",
-      "在 Release/CI 环境下，同一代码路径仅向调用方暴露脱敏后的通用错误消息，详细路径与 SQL 片段被写入受控的审计/诊断日志。",
-      "新增或扩展现有 smoke/集成测试，验证在数据库打开失败、SQL 执行失败等典型失败场景下，错误信息不会直接泄露敏感实现细节。"
+      "GodotSQLiteDatabase 在 DEBUG 构建下仍然抛出包含路径/SQL 的详细异常，方便开发调试。 Refs: Game.Core.Tests/Services/DatabaseErrorHandlingTests.cs",
+      "在 Release/CI 环境下，同一代码路径仅向调用方暴露脱敏后的通用错误消息，详细路径与 SQL 片段被写入受控的审计/诊断日志。 Refs: Game.Core.Tests/Services/DatabaseErrorHandlingTests.cs Tests.Godot/tests/Security/Hard/test_godot_sqlite_database_error_sanitization.gd",
+      "新增或扩展现有 smoke/集成测试，验证在数据库打开失败、SQL 执行失败等典型失败场景下，错误信息不会直接泄露敏感实现细节。 Refs: Game.Core.Tests/Services/DatabaseErrorHandlingTests.cs"
     ],
     "test_strategy": [
       "环境对比测试：在 DEBUG 与 Release 配置下分别触发数据库异常，验证对调用方的异常消息差异以及 security-audit.jsonl 中的记录行为。",
@@ -2012,13 +2056,17 @@
     "test_refs": [
       "Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
       "Game.Core.Tests/Persistence/Migrations/SchemaMigrationTests.cs",
-      "Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd"
+      "Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd",
+      "Game.Core.Tests/Contracts/SaveLoadContractsTests.cs",
+      "Game.Core.Tests/Services/SQLiteSchemaMigrationRunnerTests.cs",
+      "Game.Core.Tests/Services/SensitiveDetailsPolicyTests.cs",
+      "Game.Core.Tests/Domain/SafeResourcePathTests.cs"
     ],
     "acceptance": [
-      "定义 Save/Load 的最小契约与事件类型（contractRefs），并在 master 任务实现中落盘到 Game.Core/Contracts（纯 C#，不依赖 Godot API）。",
-      "定义 SQLite schema 版本机制：至少包含 SchemaVersion 表（或等价元数据）与迁移 runner，支持从旧版本升级到新版本。",
-      "迁移必须是幂等且可审计：失败时写入 security-audit.jsonl（五字段 JSONL），且错误信息在 Release/secure 模式下脱敏（不泄露路径/SQL）。",
-      "Save/Load 必须限制在 user:// 且拒绝路径穿越与非白名单扩展名；文件大小上限与 DoS 防护策略在验收中明确。"
+      "定义 Save/Load 的最小契约与事件类型（contractRefs），并在 master 任务实现中落盘到 Game.Core/Contracts（纯 C#，不依赖 Godot API）。 Refs: Game.Core.Tests/Contracts/SaveLoadContractsTests.cs",
+      "定义 SQLite schema 版本机制：至少包含 SchemaVersion 表（或等价元数据）与迁移 runner，支持从旧版本升级到新版本。 Refs: Game.Core.Tests/Services/SQLiteSchemaMigrationRunnerTests.cs",
+      "迁移必须是幂等且可审计：失败时写入 security-audit.jsonl（五字段 JSONL），且错误信息在 Release/secure 模式下脱敏（不泄露路径/SQL）。 Refs: Game.Core.Tests/Services/SensitiveDetailsPolicyTests.cs",
+      "Save/Load 必须限制在 user:// 且拒绝路径穿越与非白名单扩展名；文件大小上限与 DoS 防护策略在验收中明确。 Refs: Game.Core.Tests/Domain/SafeResourcePathTests.cs"
     ],
     "test_strategy": [
       "xUnit：覆盖 schema version 迁移（升级路径 + 失败路径），以及 Save/Load 的 round-trip（最小模型）与错误脱敏。",

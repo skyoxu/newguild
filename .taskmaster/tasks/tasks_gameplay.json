@@ -45,15 +45,17 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Core.Tests/Domain/EventEngineTests.cs"
+      "Game.Core.Tests/Domain/EventEngineTests.cs",
+      "Game.Core.Tests/Domain/GuildContractsTests.cs",
+      "Game.Core.Tests/Architecture/CoreGodotDependencyTests.cs"
     ],
     "acceptance": [
-      "Game.Core 中存在 EventEngine 类（或等价聚合根），负责驱动回合/周循环并对外暴露明确的 API（如 ExecuteResolutionPhase/ExecutePlayerPhase/ExecuteAiPhase）。",
-      "事件引擎能够接受一组领域事件定义（来自 Contracts 或 Domain 类型），根据当前游戏状态评估触发条件，并执行对应效果。",
-      "事件冲突解决规则在 EventEngine 中有清晰实现（如优先级、排他性、合并策略），并在 xUnit 测试中覆盖。",
-      "Game.Core.Tests/Domain/EventEngineTests.cs 中存在针对回合循环、条件评估、事件执行、冲突解决的单元测试，全部通过。",
-      "EventEngine 不直接依赖 Godot API；与 Godot 的集成通过适配层/Signals 完成（见 NG-0020/NG-0014）。",
-      "EventEngine 至少支持上述三类 Guild 领域事件的基本调度：在 Resolution/Player/AI Simulation 周期内能够消费和发布 GuildCreated、GuildMemberJoined、GuildMemberLeft 等事件，对应的行为由 Game.Core.Tests/Domain/EventEngineTests.cs 及相关用例覆盖。"
+      "Game.Core 中存在 EventEngine 类（或等价聚合根），负责驱动回合/周循环并对外暴露明确的 API（如 ExecuteResolutionPhase/ExecutePlayerPhase/ExecuteAiPhase）。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs",
+      "事件引擎能够接受一组领域事件定义（来自 Contracts 或 Domain 类型），根据当前游戏状态评估触发条件，并执行对应效果。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs Game.Core.Tests/Domain/GuildContractsTests.cs",
+      "事件冲突解决规则在 EventEngine 中有清晰实现（如优先级、排他性、合并策略），并在 xUnit 测试中覆盖。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs",
+      "Game.Core.Tests/Domain/EventEngineTests.cs 中存在针对回合循环、条件评估、事件执行、冲突解决的单元测试，全部通过。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs",
+      "EventEngine 不直接依赖 Godot API；与 Godot 的集成通过适配层/Signals 完成（见 NG-0020/NG-0014）。 Refs: Game.Core.Tests/Architecture/CoreGodotDependencyTests.cs",
+      "EventEngine 至少支持上述三类 Guild 领域事件的基本调度：在 Resolution/Player/AI Simulation 周期内能够消费和发布 GuildCreated、GuildMemberJoined、GuildMemberLeft 等事件，对应的行为由 Game.Core.Tests/Domain/EventEngineTests.cs 及相关用例覆盖。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs Game.Core.Tests/Domain/GuildContractsTests.cs"
     ],
     "test_strategy": [
       "按 PRD 中定义的核心循环（Resolution/Player/AI Simulation）为 EventEngine 设计一组最小测试场景，用 xUnit 验证每个阶段的状态变更是否符合预期。",
@@ -121,12 +123,12 @@
       "Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd"
     ],
     "acceptance": [
-      "Game.Core 中存在表示游戏周次/阶段/时间的核心类型与服务（例如 GameTurnSystem 或等价接口），并实现 PRD 中定义的三阶段回合循环。",
-      "游戏时间推进逻辑能够驱动 EventEngine 与 AICoordinator，在至少一个简单场景中完成从 Resolution → Player → AI Simulation 的完整一周循环。",
-      "Godot 主场景 UI 能够显示当前周次/阶段/时间状态，并在回合推进时实时更新。",
-      "Game.Core.Tests 中存在 GameLoopTests（或等价），覆盖时间推进、阶段切换以及回合边界条件；Tests.Godot 中有用例验证 UI 与 Core 状态同步。",
-      "Game.Core 与 Godot 场景的组合至少能够完成 PRD 3.0.3 T2 可玩性场景流中描述的一次完整循环：从启动主场景进入首周公会管理界面，执行一次完整的 Resolution→Player→AI Simulation 一周循环，并安全返回主菜单或结束会话；对应的 xUnit 和 GdUnit4/headless 用例挂接在 NG-0021 的 test_refs 中并在 CI 中保持绿灯。",
-      "GM-0103 所需的 T2 流程最小测试入口已经落在 Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd；后续扩展测试应在此基础上补充，而不是新建平行入口文件。"
+      "Game.Core 中存在表示游戏周次/阶段/时间的核心类型与服务（例如 GameTurnSystem 或等价接口），并实现 PRD 中定义的三阶段回合循环。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs Game.Core.Tests/Domain/GameLoopTests.cs",
+      "游戏时间推进逻辑能够驱动 EventEngine 与 AICoordinator，在至少一个简单场景中完成从 Resolution → Player → AI Simulation 的完整一周循环。 Refs: Game.Core.Tests/Domain/GameLoopTests.cs Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "Godot 主场景 UI 能够显示当前周次/阶段/时间状态，并在回合推进时实时更新。 Refs: Tests.Godot/tests/Scenes/test_guild_main_scene.gd",
+      "Game.Core.Tests 中存在 GameLoopTests（或等价），覆盖时间推进、阶段切换以及回合边界条件；Tests.Godot 中有用例验证 UI 与 Core 状态同步。 Refs: Game.Core.Tests/Domain/GameLoopTests.cs",
+      "Game.Core 与 Godot 场景的组合至少能够完成 PRD 3.0.3 T2 可玩性场景流中描述的一次完整循环：从启动主场景进入首周公会管理界面，执行一次完整的 Resolution→Player→AI Simulation 一周循环，并安全返回主菜单或结束会话；对应的 xUnit 和 GdUnit4/headless 用例挂接在 NG-0021 的 test_refs 中并在 CI 中保持绿灯。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "GM-0103 所需的 T2 流程最小测试入口已经落在 Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd；后续扩展测试应在此基础上补充，而不是新建平行入口文件。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd"
     ],
     "test_strategy": [
       "在 xUnit 中为 GameLoop 设计一组“单周循环”用例，验证每个阶段的调用顺序与状态变化是否符合 PRD 描述。",
@@ -186,12 +188,18 @@
       "roster"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Domain/GuildCoreTests.cs",
+      "Game.Core.Tests/Domain/GuildMemberTests.cs",
+      "Game.Core.Tests/Domain/GuildContractsTests.cs",
+      "Tests.Godot/tests/UI/test_guild_panel_scene.gd",
+      "Tests.Godot/tests/UI/test_guild_panel_events.gd"
+    ],
     "acceptance": [
-      "Game.Core 提供成员 roster 的模型与操作（至少包含：加入/退出、角色变更、踢出），并包含必要的边界校验（例如：重复成员、无效角色、无权限变更）。",
-      "成员变更通过领域事件对外发布（例如 core.guild.member.joined / left / role_changed），事件类型常量与字段定义落盘到 Game.Core/Contracts 并遵循 ADR-0004。",
-      "Game.Godot 的 GuildScreen 能展示 roster，并在收到事件后更新 UI；UI 操作通过适配层调用核心命令，不直接修改核心状态。",
-      "至少提供一组 xUnit 单测覆盖 roster 关键状态迁移与事件生成；如有 GdUnit4，则补一条 UI 冒烟验证“事件驱动刷新”。"
+      "Game.Core 提供成员 roster 的模型与操作（至少包含：加入/退出、角色变更、踢出），并包含必要的边界校验（例如：重复成员、无效角色、无权限变更）。 Refs: Game.Core.Tests/Domain/GuildCoreTests.cs Game.Core.Tests/Domain/GuildMemberTests.cs",
+      "成员变更通过领域事件对外发布（例如 core.guild.member.joined / left / role_changed），事件类型常量与字段定义落盘到 Game.Core/Contracts 并遵循 ADR-0004。 Refs: Game.Core.Tests/Domain/GuildContractsTests.cs",
+      "Game.Godot 的 GuildScreen 能展示 roster，并在收到事件后更新 UI；UI 操作通过适配层调用核心命令，不直接修改核心状态。 Refs: Tests.Godot/tests/UI/test_guild_panel_scene.gd Tests.Godot/tests/UI/test_guild_panel_events.gd",
+      "至少提供一组 xUnit 单测覆盖 roster 关键状态迁移与事件生成；如有 GdUnit4，则补一条 UI 冒烟验证“事件驱动刷新”。 Refs: Tests.Godot/tests/UI/test_guild_panel_events.gd"
     ],
     "test_strategy": [
       "xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。",
@@ -254,12 +262,16 @@
       "simulation"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+      "Game.Core.Tests/Domain/GuildContractsTests.cs",
+      "Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+    ],
     "acceptance": [
-      "Game.Core 提供 RecruitmentSystem（或等价服务），支持“申请加入/审批/拒绝/撤回”并能驱动成员变更。",
-      "流程关键节点产生领域事件（例如 core.guild.recruitment.applied / approved / rejected 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。",
-      "Game.Godot 提供最小 UI 或调试入口以驱动招募流程（至少覆盖：发起申请与审批一次）。",
-      "xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。"
+      "Game.Core 提供 RecruitmentSystem（或等价服务），支持“申请加入/审批/拒绝/撤回”并能驱动成员变更。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+      "流程关键节点产生领域事件（例如 core.guild.recruitment.applied / approved / rejected 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。 Refs: Game.Core.Tests/Domain/GuildContractsTests.cs",
+      "Game.Godot 提供最小 UI 或调试入口以驱动招募流程（至少覆盖：发起申请与审批一次）。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+      "xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
     ],
     "test_strategy": [
       "xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。",
@@ -320,12 +332,15 @@
       "guild"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
+      "Game.Core.Tests/Contracts/DomainEventTests.cs"
+    ],
     "acceptance": [
-      "Game.Core 提供 AIEcosystem（或等价模块），在 GameTurn/时间推进下驱动 NPC 行为生成，并能稳定复现实例（可通过种子或确定性输入）。",
-      "至少实现 3 类可观测行为并以领域事件发布（例如 core.guild.recruitment.posted、core.guild.member.joined、core.guild.member.left），事件类型与字段遵循 ADR-0004。",
-      "AIEcosystem 的输入/输出与存储边界清晰：核心逻辑不依赖 Godot API，适配层负责时间/随机源注入。",
-      "xUnit 覆盖：确定性推进、事件数量/类型、边界条件（空 guild、满员、无候选等）。"
+      "Game.Core 提供 AIEcosystem（或等价模块），在 GameTurn/时间推进下驱动 NPC 行为生成，并能稳定复现实例（可通过种子或确定性输入）。 Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
+      "至少实现 3 类可观测行为并以领域事件发布（例如 core.guild.recruitment.posted、core.guild.member.joined、core.guild.member.left），事件类型与字段遵循 ADR-0004。 Refs: Game.Core.Tests/Contracts/DomainEventTests.cs",
+      "AIEcosystem 的输入/输出与存储边界清晰：核心逻辑不依赖 Godot API，适配层负责时间/随机源注入。 Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
+      "xUnit 覆盖：确定性推进、事件数量/类型、边界条件（空 guild、满员、无候选等）。 Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs"
     ],
     "test_strategy": [
       "xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。",
@@ -385,13 +400,16 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Core.Tests/Domain/AICoordinatorTests.cs"
+      "Game.Core.Tests/Domain/AICoordinatorTests.cs",
+      "Game.Core.Tests/Domain/EventEngineTests.cs",
+      "Game.Core.Tests/Domain/AICoordinatorPerformanceTests.cs",
+      "Game.Core.Tests/Services/AICoordinatorConcurrencyTests.cs"
     ],
     "acceptance": [
-      "Game.Core 中存在 AICoordinator 类（或等价服务），负责在每个 AI 周期内驱动 NPC 公会与成员行为（决策、关系更新、事件生成）。",
-      "AICoordinator 对外暴露用于集成的接口（如 StepAiCycle/GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。",
-      "xUnit 测试涵盖基本 AI 行为（例如简单策略下的成员状态变化）、冲突场景（多个 NPC 目标冲突）以及性能边界（在模拟大量 NPC 时仍保持可接受性能）。",
-      "如采用多线程/ThreadPool 优化 AI 计算，AICoordinator 提供线程安全保证，并在测试中验证无竞态条件。"
+      "Game.Core 中存在 AICoordinator 类（或等价服务），负责在每个 AI 周期内驱动 NPC 公会与成员行为（决策、关系更新、事件生成）。 Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs",
+      "AICoordinator 对外暴露用于集成的接口（如 StepAiCycle/GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs",
+      "xUnit 测试涵盖基本 AI 行为（例如简单策略下的成员状态变化）、冲突场景（多个 NPC 目标冲突）以及性能边界（在模拟大量 NPC 时仍保持可接受性能）。 Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs Game.Core.Tests/Domain/AICoordinatorPerformanceTests.cs",
+      "如采用多线程/ThreadPool 优化 AI 计算，AICoordinator 提供线程安全保证，并在测试中验证无竞态条件。 Refs: Game.Core.Tests/Services/AICoordinatorConcurrencyTests.cs Game.Core.Tests/Domain/AICoordinatorTests.cs"
     ],
     "test_strategy": [
       "为小规模 NPC 集合设计 AI 周期测试，用 xUnit 验证行为决策与状态更新是否符合 PRD 中定义的规则。",
@@ -454,12 +472,17 @@
       "simulation"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+      "Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "Game.Core.Tests/Domain/RaidEncounterEventContractsTests.cs",
+      "Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd"
+    ],
     "acceptance": [
-      "Game.Core 提供 RaidDungeon/Encounter 的最小状态机（至少包含：进入->战斗->结算/失败），并能在回合推进中演化。",
-      "关键状态变化发布领域事件（例如 core.raid.encounter.started / resolved / failed），事件契约落盘到 Game.Core/Contracts。",
-      "Game.Godot 提供最小演示入口（按钮或调试命令）可触发一次遭遇并在 UI 或日志中呈现结果。",
-      "xUnit 覆盖：成功/失败两条路径与边界条件；如有 GdUnit4，补一个端到端冒烟（触发->看到结果->退出）。"
+      "Game.Core 提供 RaidDungeon/Encounter 的最小状态机（至少包含：进入->战斗->结算/失败），并能在回合推进中演化。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+      "关键状态变化发布领域事件（例如 core.raid.encounter.started / resolved / failed），事件契约落盘到 Game.Core/Contracts。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs Game.Core.Tests/Domain/RaidEncounterEventContractsTests.cs",
+      "Game.Godot 提供最小演示入口（按钮或调试命令）可触发一次遭遇并在 UI 或日志中呈现结果。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
+      "xUnit 覆盖：成功/失败两条路径与边界条件；如有 GdUnit4，补一个端到端冒烟（触发->看到结果->退出）。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd"
     ],
     "test_strategy": [
       "xUnit：覆盖 Encounter 结算与状态迁移（包含异常输入/非法状态转换的负例）。",
@@ -516,12 +539,17 @@
       "events"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Services/IntimacySystemTests.cs",
+      "Game.Core.Tests/Domain/IntimacyChangedDomainEventTests.cs",
+      "Tests.Godot/tests/UI/test_hud_intimacy_value_updates.gd",
+      "Game.Core.Tests/Domain/IntimacyRulesBoundaryTests.cs"
+    ],
     "acceptance": [
-      "Game.Core 提供 IntimacySystem（或等价模块），能在成员交互或回合推进下更新亲密度/关系状态。",
-      "关系变化通过领域事件发布（例如 core.guild.social.intimacy.changed），契约落盘到 Game.Core/Contracts 并遵循 ADR-0004。",
-      "Game.Godot 提供最小展示（列表或详情面板）能看到关系值变化，且不直接修改核心状态。",
-      "xUnit 覆盖：关系变化规则、上下限边界、无效成员对等错误路径。"
+      "Game.Core 提供 IntimacySystem（或等价模块），能在成员交互或回合推进下更新亲密度/关系状态。 Refs: Game.Core.Tests/Services/IntimacySystemTests.cs",
+      "关系变化通过领域事件发布（例如 core.guild.social.intimacy.changed），契约落盘到 Game.Core/Contracts 并遵循 ADR-0004。 Refs: Game.Core.Tests/Domain/IntimacyChangedDomainEventTests.cs",
+      "Game.Godot 提供最小展示（列表或详情面板）能看到关系值变化，且不直接修改核心状态。 Refs: Tests.Godot/tests/UI/test_hud_intimacy_value_updates.gd",
+      "xUnit 覆盖：关系变化规则、上下限边界、无效成员对等错误路径。 Refs: Game.Core.Tests/Services/IntimacySystemTests.cs Game.Core.Tests/Domain/IntimacyRulesBoundaryTests.cs"
     ],
     "test_strategy": [
       "xUnit：覆盖 IntimacySystem 的规则与边界（上下限/重复输入/不存在成员）。",
@@ -580,12 +608,17 @@
       "events"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Domain/ReputationTests.cs",
+      "Game.Core.Tests/Domain/ReputationDomainEventsTests.cs",
+      "Tests.Godot/tests/UI/test_hud_reputation_display.gd",
+      "Game.Core.Tests/Domain/ReputationSourceAggregationTests.cs"
+    ],
     "acceptance": [
-      "Game.Core 提供 Reputation（或等价模块），支持声望值变更与来源记录（例如：战斗胜利/负面事件）。",
-      "声望/曝光变化发布领域事件（例如 core.guild.reputation.changed / core.guild.media.exposure.created），契约落盘到 Game.Core/Contracts。",
-      "至少一个系统能读取声望并产生可观测影响（例如：招募成功率/候选数量的变化，或 UI 显示声望等级）。",
-      "xUnit 覆盖：声望变更累积、上下限、来源合并/去重（如适用）与事件生成。"
+      "Game.Core 提供 Reputation（或等价模块），支持声望值变更与来源记录（例如：战斗胜利/负面事件）。 Refs: Game.Core.Tests/Domain/ReputationTests.cs",
+      "声望/曝光变化发布领域事件（例如 core.guild.reputation.changed / core.guild.media.exposure.created），契约落盘到 Game.Core/Contracts。 Refs: Game.Core.Tests/Domain/ReputationDomainEventsTests.cs",
+      "至少一个系统能读取声望并产生可观测影响（例如：招募成功率/候选数量的变化，或 UI 显示声望等级）。 Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd",
+      "xUnit 覆盖：声望变更累积、上下限、来源合并/去重（如适用）与事件生成。 Refs: Game.Core.Tests/Domain/ReputationTests.cs Game.Core.Tests/Domain/ReputationSourceAggregationTests.cs"
     ],
     "test_strategy": [
       "xUnit：覆盖 Reputation 的数值规则、来源记录与事件生成；对非法输入给出负例。",
@@ -646,12 +679,15 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Tests.Godot/tests/UI/test_save_load_entry_smoke.gd"
+      "Tests.Godot/tests/UI/test_save_load_entry_smoke.gd",
+      "Tests.Godot/tests/UI/test_hud_save_load_entry_triggers_save_and_load.gd",
+      "Tests.Godot/tests/Integration/Security/test_security_save_load_failure_audit_and_sanitization.gd",
+      "Tests.Godot/tests/UI/test_hud_save_load_status_from_contract_events.gd"
     ],
     "acceptance": [
-      "在 Godot 中提供 Save/Load 入口（主菜单按钮或 Debug 面板均可），能触发一次保存与一次读取。",
-      "读取失败/写入失败时，UI 展示通用错误信息（Release/secure 模式不泄露路径/SQL），并确保审计条目落盘。",
-      "Save/Load 过程通过核心契约事件可观测（contractRefs），UI 通过订阅/回调展示状态，不直接操作数据库。"
+      "在 Godot 中提供 Save/Load 入口（主菜单按钮或 Debug 面板均可），能触发一次保存与一次读取。 Refs: Tests.Godot/tests/UI/test_hud_save_load_entry_triggers_save_and_load.gd",
+      "读取失败/写入失败时，UI 展示通用错误信息（Release/secure 模式不泄露路径/SQL），并确保审计条目落盘。 Refs: Tests.Godot/tests/Integration/Security/test_security_save_load_failure_audit_and_sanitization.gd",
+      "Save/Load 过程通过核心契约事件可观测（contractRefs），UI 通过订阅/回调展示状态，不直接操作数据库。 Refs: Tests.Godot/tests/UI/test_hud_save_load_status_from_contract_events.gd"
     ],
     "test_strategy": [
       "GdUnit4：headless 冒烟验证按钮/入口可用，触发保存与读取后能看到状态变化（可通过日志或 UI 文本断言）。"

@@ -1,5 +1,4 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
-
 var _original_ci: String = ""
 var _original_max_bytes: String = ""
 var _test_db_path: String = ""
@@ -83,6 +82,7 @@ func after_test() -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(_test_db_path))
 
 
+# ACC:T11.3
 func test_try_open_existing_db_over_size_limit_is_rejected_and_audited() -> void:
 	_remove_audit_file()
 

@@ -1,5 +1,4 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
-
 var _original_ci: String = ""
 var _original_secure_mode: String = ""
 var _original_backend: String = ""
@@ -91,6 +90,7 @@ func after_test() -> void:
 		OS.set_environment("GD_DB_ALLOW_PLUGIN_BACKEND", "")
 
 
+# ACC:T11.4
 func test_plugin_backend_is_denied_in_ci_even_when_explicitly_allowed() -> void:
 	_remove_audit_file()
 
