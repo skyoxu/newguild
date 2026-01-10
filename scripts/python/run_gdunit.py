@@ -34,6 +34,19 @@ def run_cmd(args, cwd=None, timeout=600_000, env=None):
     return p.returncode, out
 
 
+def tail_text(path: str, max_chars: int = 12_000) -> str:
+    try:
+        p = Path(path)
+        if not p.is_file():
+            return f"(missing) {path}"
+        txt = p.read_text(encoding='utf-8', errors='ignore')
+        if len(txt) <= max_chars:
+            return txt
+        return txt[-max_chars:]
+    except Exception as e:
+        return f"(failed to read) {path}: {e}"
+
+
 def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None, env=None):
     """Run a process and stream stdout; kill early only for known hang conditions.
 
@@ -258,9 +271,14 @@ def main():
                     dotnet_projects.append(tests_csproj)
                 # Also try solution at repo root if present
                 sln = os.path.join(root, 'GodotGame.sln')
-                # Prefer project build; if solution exists, add as secondary
+                # Prefer project build; otherwise fall back to solution if present
+                dotnet_targets = []
+                if dotnet_projects:
+                    dotnet_targets = dotnet_projects
+                elif os.path.isfile(sln):
+                    dotnet_targets = [sln]
                 build_logs = []
-                for item in (dotnet_projects or [sln] if os.path.isfile(sln) else []):
+                for item in dotnet_targets:
                     rc_b, out_b = run_cmd(['dotnet', 'build', item, '-c', 'Debug', '-v', 'minimal'], cwd=root, timeout=600_000)
                     build_logs.append((item, rc_b, out_b))
                 prewarm_fallback_dotnet_ok = (len(build_logs) > 0) and all(rc_b == 0 for _, rc_b, _ in build_logs)
@@ -299,6 +317,25 @@ def main():
                 json.dump(summary, f, ensure_ascii=False)
         except Exception:
             pass
+        if rc != 0:
+            # Print diagnostics into stdout so CI logs show the real root cause.
+            prewarm_txt = os.path.join(out_dir, 'prewarm-godot.txt')
+            prewarm_log = os.path.join(out_dir, 'prewarm-godot.log')
+            prewarm_dotnet = os.path.join(out_dir, 'prewarm-dotnet.txt')
+            print('GDUNIT_PREWARM status=fail')
+            print(f'  prewarm_rc={prewarm_rc} prewarm_note={prewarm_note} prewarm_fallback_dotnet_ok={prewarm_fallback_dotnet_ok}')
+            print(f'  out_dir={out_dir}')
+            print(f'  prewarm_txt={prewarm_txt}')
+            print(f'  prewarm_log={prewarm_log}')
+            if os.path.isfile(prewarm_dotnet):
+                print(f'  prewarm_dotnet={prewarm_dotnet}')
+            print('--- prewarm-godot.txt (tail) ---')
+            print(tail_text(prewarm_txt))
+            print('--- prewarm-godot.log (tail) ---')
+            print(tail_text(prewarm_log))
+            if os.path.isfile(prewarm_dotnet):
+                print('--- prewarm-dotnet.txt (tail) ---')
+                print(tail_text(prewarm_dotnet))
         print(f'GDUNIT_DONE rc={rc} out={out_dir}')
         return 0 if rc == 0 else rc
 
