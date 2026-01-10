@@ -28,9 +28,9 @@ public partial class SecurityUrlAdapterFactory : RefCounted
     /// Optional path to security audit JSONL file. Defaults to logs/ci/{date}/security-audit.jsonl.
     /// </param>
     /// <returns>Configured SecurityUrlAdapter instance</returns>
-    public SecurityUrlAdapter CreateWithWhitelist(string[] allowedHosts, string? auditLogPath = null)
+    public SecurityUrlAdapter CreateWithWhitelist(global::Godot.Collections.Array allowedHosts, string? auditLogPath = null)
     {
-        return new SecurityUrlAdapter(allowedHosts, auditLogPath);
+        return CreateFromGodotArray(allowedHosts, auditLogPath);
     }
 
     /// <summary>
