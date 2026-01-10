@@ -45,6 +45,9 @@ def _iter_cs_files(root: Path) -> Iterable[Path]:
     for p in root.rglob("*.cs"):
         if not p.is_file():
             continue
+        # Avoid scanning generated/junction-mounted runtime copy under Tests.Godot to prevent double counting.
+        if "Tests.Godot" in p.parts and "Game.Godot" in p.parts:
+            continue
         if any(seg in {".git", ".godot", "bin", "obj", "logs", "TestResults"} for seg in p.parts):
             continue
         yield p
@@ -60,8 +63,6 @@ def _is_blocking_wait_hard_scope(rel: str) -> bool:
     if r.startswith("Game.Core/") and "/Services/" in r:
         return True
     if r.startswith("Game.Godot/") and "/Scripts/" in r and "/Examples/" not in r:
-        return True
-    if r.startswith("Tests.Godot/Game.Godot/") and "/Scripts/" in r and "/Examples/" not in r:
         return True
     return False
 

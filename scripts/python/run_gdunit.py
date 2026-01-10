@@ -17,6 +17,7 @@ import subprocess
 import json
 import time
 from pathlib import Path
+import sys
 
 from godot_cli import build_userdir_args, default_user_dir
 
@@ -114,6 +115,33 @@ def read_project_name(project_dir: Path) -> str | None:
     return None
 
 
+def repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def ensure_test_runtime_mount(project: str, runtime_dir: str = "Game.Godot") -> tuple[int, str]:
+    """Ensure Tests.Godot/<runtime_dir> is a junction to repo_root/<runtime_dir>.
+
+    This prevents drift between test runtime scripts/resources and the real runtime folder.
+    """
+    root = repo_root()
+    proj = (root / project).resolve()
+    runtime = (root / runtime_dir).resolve()
+    if not proj.is_dir() or not runtime.is_dir():
+        return 0, "SKIP_PREPARE: project/runtime not found\n"
+
+    cmd = [
+        sys.executable,
+        str(root / "scripts" / "python" / "prepare_gd_tests.py"),
+        "--project",
+        project,
+        "--runtime",
+        runtime_dir,
+    ]
+    rc, out = run_cmd(cmd, cwd=str(root), timeout=60_000, env=os.environ.copy())
+    return rc, out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--godot-bin', required=True)
@@ -126,12 +154,21 @@ def main():
     ap.add_argument('--userdir-flag', default=os.environ.get('GODOT_USERDIR_FLAG', 'auto'),
                     help='Godot CLI flag for user dir (auto|--user-dir|--user-data-dir); env: GODOT_USERDIR_FLAG')
     ap.add_argument('--no-userdir', action='store_true', help='Disable user dir redirection (writes to default OS location)')
+    ap.add_argument('--no-prepare-runtime', action='store_true', help='Disable preparing Tests.Godot runtime mount (not recommended)')
     ap.add_argument('--skip-userlogs', action='store_true', help='Skip archiving/pruning Godot user:// logs (not recommended)')
     ap.add_argument('--userlog-retention-days', type=int, default=int(os.environ.get('GODOT_USERLOG_RETENTION_DAYS', '7')))
     ap.add_argument('--userlog-max-file-mb', type=int, default=int(os.environ.get('GODOT_USERLOG_MAX_FILE_MB', '256')))
     ap.add_argument('--userlog-tail-mb', type=int, default=int(os.environ.get('GODOT_USERLOG_TAIL_MB', '4')))
     ap.add_argument('--userlog-max-full-copy-mb', type=int, default=int(os.environ.get('GODOT_USERLOG_MAX_FULL_COPY_MB', '16')))
     args = ap.parse_args()
+
+    if not args.no_prepare_runtime:
+        prc, pout = ensure_test_runtime_mount(args.project, runtime_dir="Game.Godot")
+        if pout:
+            print(pout.rstrip())
+        if prc != 0:
+            print(f"GDUNIT_PREPARE status=fail rc={prc}")
+            return prc
 
     root = os.getcwd()
     proj = os.path.abspath(args.project)
