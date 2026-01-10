@@ -127,3 +127,7 @@ node_modules/
 # Task files
 # tasks.json
 # tasks/ 
+
+# Generated runtime mount for Tests.Godot (junction to ../Game.Godot)
+Tests.Godot/Game.Godot/
+

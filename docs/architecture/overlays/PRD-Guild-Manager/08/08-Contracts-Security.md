@@ -23,8 +23,8 @@ Contracts-Refs:
   - Game.Core/Services/SecurityUrlAdapter.cs
   - Game.Core/Services/SecurityProcessAdapter.cs
   - Game.Godot/Adapters/Security/SecurityUrlAdapter.cs
-  - Tests.Godot/Game.Godot/Adapters/Security/SecurityFileAdapter.cs
-  - Tests.Godot/Game.Godot/Adapters/Security/SecurityProcessAdapter.cs
+  - Game.Godot/Adapters/Security/SecurityFileAdapter.cs
+  - Game.Godot/Adapters/Security/SecurityProcessAdapter.cs
 Status: Proposed
 ---
 

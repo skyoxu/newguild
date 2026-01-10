@@ -17,8 +17,8 @@ Contracts-Refs:
   - Game.Core/Interfaces/ISecurityUrlValidator.cs
   - Game.Core/Services/SecurityUrlAdapter.cs
   - Game.Godot/Adapters/Security/SecurityUrlAdapter.cs
-  - Tests.Godot/Game.Godot/Adapters/Security/SecurityUrlAdapterFactory.cs
-  - Tests.Godot/Game.Godot/Adapters/Security/security_url_adapter_factory.gd
+  - Game.Godot/Adapters/Security/SecurityUrlAdapterFactory.cs
+  - Game.Godot/Adapters/Security/security_url_adapter_factory.gd
 Status: Proposed
 ---
 
