@@ -32,6 +32,9 @@ from _deterministic_review import DETERMINISTIC_AGENTS, build_deterministic_revi
 from _taskmaster import TaskmasterTriplet, resolve_triplet
 from _util import ci_dir, repo_root, run_cmd, split_csv, today_str, write_json, write_text
 
+_REVIEW_TEMPLATE_REL = "scripts/sc/templates/llm_review/bmad-godot-review-template.txt"
+_REVIEW_TEMPLATE_CACHE: str | None = None
+
 
 @dataclass(frozen=True)
 class ReviewResult:
@@ -53,6 +56,18 @@ def _truncate(text: str, *, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max_chars - 3] + "..."
+
+def _load_required_review_template() -> str:
+    global _REVIEW_TEMPLATE_CACHE
+    if _REVIEW_TEMPLATE_CACHE is not None:
+        return _REVIEW_TEMPLATE_CACHE
+
+    p = repo_root() / _REVIEW_TEMPLATE_REL
+    if not p.is_file():
+        raise FileNotFoundError(str(p))
+
+    _REVIEW_TEMPLATE_CACHE = _read_text(p).strip()
+    return _REVIEW_TEMPLATE_CACHE
 
 
 def _build_task_context(triplet: TaskmasterTriplet | None) -> str:
@@ -166,13 +181,17 @@ def _agent_prompt(agent: str, *, claude_agents_root: Path) -> tuple[str, dict[st
         "performance-slo-validator": ".claude/agents/performance-slo-validator.md",
     }
     base = _default_agent_prompt(agent)
+    template = _truncate(_load_required_review_template(), max_chars=12_000)
     extra, source = _load_agent_prompt_blob(agent, claude_agents_root=claude_agents_root)
     if not extra or not source:
         extra = _load_optional_agent_prompt(project_specific.get(agent, ""))
         if not extra:
-            return base, {"agent_prompt_source": None}
+            return "\n\n".join([base, "Review template:", template]), {"agent_prompt_source": None}
         extra_trim = _truncate(extra, max_chars=6_000)
-        return "\n\n".join([base, "Project agent prompt (truncated):", extra_trim]), {"agent_prompt_source": project_specific.get(agent)}
+        return (
+            "\n\n".join([base, "Project agent prompt (truncated):", extra_trim, "Review template:", template]),
+            {"agent_prompt_source": project_specific.get(agent)},
+        )
 
     try:
         rel = str(source.relative_to(repo_root())).replace("\\", "/")
@@ -181,7 +200,7 @@ def _agent_prompt(agent: str, *, claude_agents_root: Path) -> tuple[str, dict[st
 
     extra_trim = _truncate(extra, max_chars=6_000)
     header = f"Agent prompt source: {rel}"
-    return "\n\n".join([base, header, extra_trim]), {"agent_prompt_source": rel}
+    return "\n\n".join([base, header, extra_trim, "Review template:", template]), {"agent_prompt_source": rel}
 
 
 def _git_capture(args: list[str], *, timeout_sec: int) -> tuple[int, str]:
@@ -309,6 +328,15 @@ def main() -> int:
         help="Claude agents root (default: env CLAUDE_AGENTS_ROOT or $env:USERPROFILE\\.claude\\agents). Used to load lst97 agent prompts.",
     )
     args = ap.parse_args()
+
+    try:
+        _load_required_review_template()
+    except FileNotFoundError:
+        out_dir = ci_dir() / today_str() / "sc-llm-review"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        write_text(out_dir / "template-missing.txt", f"Missing required template: {_REVIEW_TEMPLATE_REL}\n")
+        print(f"SC_LLM_REVIEW status=fail reason=template_missing out={out_dir}")
+        return 1
 
     if args.uncommitted and args.commit:
         print("[sc-llm-review] ERROR: --uncommitted and --commit are mutually exclusive.")

@@ -6,6 +6,7 @@ namespace Game.Core.Tests.Domain;
 
 public class SafeResourcePathTests
 {
+    // ACC:T11.1
     [Fact]
     public void FromString_WithValidResPath_ReturnsReadOnlyPath()
     {

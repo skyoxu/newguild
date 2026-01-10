@@ -210,6 +210,8 @@ def main() -> int:
             taskdoc_dir=args.taskdoc_dir,
         )
         write_json(out_dir / "task_context.json", triplet.__dict__)
+        # Task-scoped alias for TDD gates (sanguo-compatible).
+        write_json(out_dir / f"task_context.{triplet.task_id}.json", triplet.__dict__)
         task_md_lines = [
             "# sc-analyze task context",
             "",
@@ -232,6 +234,7 @@ def main() -> int:
             except Exception:
                 pass
         write_text(out_dir / "task_context.md", "\n".join(task_md_lines))
+        write_text(out_dir / f"task_context.{triplet.task_id}.md", "\n".join(task_md_lines))
     except Exception as e:
         # Keep analyze usable for general audits even when task mapping is broken.
         write_text(out_dir / "task_context.error.txt", f"{type(e).__name__}: {e}\n")

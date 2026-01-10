@@ -49,7 +49,15 @@ public partial class PerformanceTracker : Node
         {
             var dir = ProjectSettings.GlobalizePath("user://logs/perf");
             Directory.CreateDirectory(dir);
-            var json = JsonSerializer.Serialize(metrics);
+            var payload = new Dictionary<string, object>
+            {
+                ["frames"] = metrics.frames,
+                ["avg_ms"] = metrics.avg_ms,
+                ["p50_ms"] = metrics.p50_ms,
+                ["p95_ms"] = metrics.p95_ms,
+                ["p99_ms"] = metrics.p99_ms,
+            };
+            var json = JsonSerializer.Serialize(payload);
             File.WriteAllText(Path.Combine(dir, "perf.json"), json);
         }
         catch { }
