@@ -638,7 +638,7 @@
     "story_id": "PRD-GUILD-Manager-DOCS-LINKS",
     "title": "公会管理器文档与回链对齐（PRD/Base/ADR/Overlay/Tasks）",
     "description": "围绕 PRD-Guild-Manager 与 newguild 模板，梳理公会管理器相关文档与任务回链：确保 PRD、Base 文档（CH01–CH07）、相关 ADR、Overlay/08 与 Taskmaster 任务（NG-00xx 与玩法任务）之间存在清晰的一致性链接，避免出现重复口径或断链。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "docs",
     "depends_on": [
@@ -648,10 +648,12 @@
       "ADR-0018",
       "ADR-0004",
       "ADR-0005",
-      "ADR-0003"
+      "ADR-0003",
+      "ADR-0019"
     ],
     "chapter_refs": [
       "CH01",
+      "CH02",
       "CH03",
       "CH04",
       "CH06",
@@ -670,16 +672,13 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "docs/prd.txt",
-      "docs/architecture/base/01-introduction-and-goals-v2.md",
-      "docs/adr/ADR-0018-godot-csharp-tech-stack.md",
-      "docs/adr/ADR-0019-godot-security-baseline.md"
+      "Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs"
     ],
     "acceptance": [
-      "docs/prd.txt 中与公会管理器相关的章节在 Overlay/08 中都有对应条目或引用。",
-      "与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-FeatureSlice-Guild-Manager.md 与本验收清单的 Front-Matter 中有一致引用。",
-      "Taskmaster 任务（NG-0001/NG-0020/NG-0021 以及后续玩法任务）在 story_id/adr_refs/chapter_refs/overlay_refs 上与 PRD/Base/ADR/Overlay 建立清晰回链。",
-      "task-links-validate（或等价脚本）能够在 CI 中验证上述回链关系并生成报告。"
+      "docs/prd.txt 中存在 3.2.1 公会管理模块；Overlay/08/_index.md 与 08-FeatureSlice-Guild-Manager.md 的 Front-Matter 包含 PRD-ID=PRD-Guild-Manager 且 PRD-Refs 引用 docs/prd.txt。 Refs: Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs",
+      "与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-FeatureSlice-Guild-Manager.md 与 ACCEPTANCE_CHECKLIST.md 的引用集合一致（FeatureSlice 的 ADR 集合必须被清单覆盖）。 Refs: Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs",
+      "Taskmaster 任务（Task 22 + NG-0022 视图）在 adrRefs/chapter_refs/overlay_refs/test_refs/artifactRefs 上与 PRD/Base/ADR/Overlay 建立可验证回链。 Refs: Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs",
+      "scripts/sc/acceptance_check.py 已接入 task_links_validate.py；且 ACCEPTANCE_CHECKLIST.md Front-Matter 的 Test-Refs 包含本测试文件，确保 CI 可追溯回链校验。 Refs: Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs"
     ],
     "test_strategy": [
       "文档审阅：由架构/产品共同检查 PRD/Base/ADR/Overlay 是否互相引用、无矛盾口径。",

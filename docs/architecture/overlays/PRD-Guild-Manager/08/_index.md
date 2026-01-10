@@ -1,5 +1,7 @@
 ---
 PRD-ID: PRD-Guild-Manager
+PRD-Refs:
+  - docs/prd.txt
 Title: 08 章功能纵切索引（契约与测试对齐）
 Updated: true
 Arch-Refs:

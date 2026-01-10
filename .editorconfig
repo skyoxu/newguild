@@ -2,6 +2,8 @@ root = true
 
 [*]
 charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
 
 # Treat third-party GdUnit4 C# API as external code and
 # relax analyzer rules there. We keep project-owned code
