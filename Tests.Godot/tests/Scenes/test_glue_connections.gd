@@ -13,8 +13,20 @@ func before() -> void:
         return
     _bus = preload("res://Game.Godot/Adapters/EventBusAdapter.cs").new()
     _bus.name = "EventBus"
-    get_tree().get_root().add_child(auto_free(_bus))
+    get_tree().get_root().add_child(_bus)
+    auto_free(_bus)
     _bus.connect("DomainEventEmitted", Callable(self, "_on_evt"))
+
+func after() -> void:
+    if _bus != null and is_instance_valid(_bus):
+        _bus.queue_free()
+    await get_tree().process_frame
+    await get_tree().process_frame
+
+func after_test() -> void:
+    # Allow queued frees from auto_free() to be processed before orphan detection.
+    await get_tree().process_frame
+    await get_tree().process_frame
 
 func _on_evt(type, _source, _data_json, _id, _spec, _ct, _ts) -> void:
     _etype = str(type)
@@ -24,7 +36,8 @@ func test_main_scene_glue_publishes_on_menu_start() -> void:
     if _bus == null:
         return
     var main = preload("res://Game.Godot/Scenes/Main.tscn").instantiate()
-    add_child(auto_free(main))
+    add_child(main)
+    auto_free(main)
     await get_tree().process_frame
     var menu := main.get_node_or_null("MainMenu")
     assert_object(menu).is_not_null()

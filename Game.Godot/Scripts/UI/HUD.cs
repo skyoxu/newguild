@@ -58,14 +58,14 @@ public partial class HUD : Control
 
         if (root != null)
         {
-            timePort = root.Time ?? new TimeAdapter();
+            timePort = root.Time ?? new FixedTimePort();
             var busNode = root.EventBus ?? _eventBus;
             eventBus = busNode ?? new InMemoryEventBus();
         }
         else
         {
             // Defensive: still allow HUD to demonstrate turn system even if CompositionRoot is not available.
-            timePort = new TimeAdapter();
+            timePort = new FixedTimePort();
             eventBus = new InMemoryEventBus();
         }
 
@@ -150,5 +150,10 @@ public partial class HUD : Control
     private sealed class NoopAICoordinator : IAICoordinator
     {
         public GameTurnState StepAiCycle(GameTurnState state) => state;
+    }
+
+    private sealed class FixedTimePort : ITime
+    {
+        public double DeltaSeconds => 1.0 / 60.0;
     }
 }

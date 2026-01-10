@@ -1,15 +1,22 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
+func after_test() -> void:
+    # Allow queued frees from auto_free() to be processed before orphan detection.
+    await get_tree().process_frame
+    await get_tree().process_frame
+
 func test_main_scene_instantiates_and_visible() -> void:
     var scene := preload("res://Game.Godot/Scenes/Main.tscn").instantiate()
-    add_child(auto_free(scene))
+    add_child(scene)
+    auto_free(scene)
     await get_tree().process_frame
     assert_bool(scene.visible).is_true()
 
 func test_settings_screen_can_load() -> void:
     var packed : PackedScene = preload("res://Game.Godot/Scenes/Screens/SettingsScreen.tscn")
     var inst := packed.instantiate()
-    add_child(auto_free(inst))
+    add_child(inst)
+    auto_free(inst)
     await get_tree().process_frame
     assert_bool(inst.is_inside_tree()).is_true()
 
@@ -22,7 +29,8 @@ func test_settings_screen_can_load() -> void:
 func test_t2_minimal_loop_from_main_scene() -> void:
     # Arrange: load main scene
     var scene := preload("res://Game.Godot/Scenes/Main.tscn").instantiate()
-    add_child(auto_free(scene))
+    add_child(scene)
+    auto_free(scene)
     await get_tree().process_frame
 
     # Assert: main is visible
