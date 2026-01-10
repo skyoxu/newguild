@@ -1,10 +1,13 @@
 ---
 PRD-ID: PRD-Guild-Manager
+PRD-Refs:
+  - docs/prd.txt
 Story-ID: PRD-NEWGUILD-VS-0001
 Title: Feature Slice — Guild Manager（功能纵切）
 Status: Active
 ADR-Refs:
   - ADR-0018
+  - ADR-0019
   - ADR-0004
   - ADR-0005
   - ADR-0023

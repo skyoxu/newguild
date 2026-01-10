@@ -1,5 +1,7 @@
 ---
 PRD-ID: PRD-Guild-Manager
+PRD-Refs:
+  - docs/prd.txt
 Title: PRD-Guild-Manager 功能纵切实现验收清单（Godot + C# 变体）
 Status: Template
 Arch-Refs:
@@ -12,8 +14,12 @@ ADR-Refs:
   - ADR-0005  # 质量门禁
   - ADR-0003  # 可观测性与发布健康
   - ADR-0015  # 性能预算
+  - ADR-0011  # Windows-only 平台策略
+  - ADR-0020  # Contracts SSoT 位置标准化
+  - ADR-0023  # Settings SSoT = ConfigFile（user://）
 Test-Refs:
   # 具体项目应将占位路径替换为真实测试文件
+  - Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs
   - Game.Core.Tests/Domain/GuildCoreTests.cs
   - Game.Core.Tests/Domain/EventEngineTests.cs
   - Game.Core.Tests/Domain/GameTurnSystemTests.cs
@@ -93,8 +99,8 @@ Test-Refs:
   - 扫描脚本：`py -3 scripts/python/godot_selfcheck.py`
   - 代码禁用检查：`py -3 scripts/python/scan_code_disables.py`
   - 乱码检测：`py -3 scripts/python/scan_garbled.py`
-  - 绝对路径检测：`grep -rn ":\\\\" Game.Core Game.Godot --include="*.cs"`
-  - HTTP 外链检测：`grep -rn "http://" Game.Core Game.Godot --include="*.cs"`
+  - 绝对路径检测（PowerShell）：`Get-ChildItem -Recurse Game.Core,Game.Godot -Include *.cs | Select-String -Pattern "[A-Za-z]:\\\\"`
+  - HTTP 外链检测（PowerShell）：`Get-ChildItem -Recurse Game.Core,Game.Godot -Include *.cs | Select-String -Pattern "http://"`
 - [ ] 配置开关验证：
   - GD_SECURE_MODE=1 已设置
   - ALLOWED_EXTERNAL_HOSTS 白名单已定义
