@@ -22,7 +22,7 @@ namespace Game.Godot.Adapters.Security;
 /// This adapter isolates Godot-specific security enforcement from Core business logic,
 /// following ADR-0007 Ports and Adapters pattern.
 /// </remarks>
-public sealed class SecurityUrlAdapter : ISecurityUrlValidator
+public sealed partial class SecurityUrlAdapter : RefCounted, ISecurityUrlValidator
 {
     private readonly IReadOnlyList<string>? _allowedHosts;
     private readonly string _auditLogPath;
@@ -79,7 +79,25 @@ public sealed class SecurityUrlAdapter : ISecurityUrlValidator
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<string>? AllowedHosts => _allowedHosts;
+    public global::Godot.Collections.Array? AllowedHosts
+    {
+        get
+        {
+            if (_allowedHosts == null)
+            {
+                return null;
+            }
+
+            var arr = new global::Godot.Collections.Array();
+            foreach (var host in _allowedHosts)
+            {
+                arr.Add(host);
+            }
+            return arr;
+        }
+    }
+
+    IReadOnlyList<string>? ISecurityUrlValidator.AllowedHosts => _allowedHosts;
 
     /// <inheritdoc />
     public bool IsUrlAllowed(string url)
@@ -89,7 +107,21 @@ public sealed class SecurityUrlAdapter : ISecurityUrlValidator
     }
 
     /// <inheritdoc />
-    public (bool IsAllowed, string? RejectionReason) ValidateAndAudit(string url, string caller)
+    public UrlValidationResult ValidateAndAudit(string url, string caller)
+    {
+        var (isAllowed, rejectionReason) = ValidateAndAuditCore(url, caller);
+        return new UrlValidationResult(isAllowed, rejectionReason);
+    }
+
+    /// <summary>
+    /// Explicit interface implementation for Core (tuple-based API).
+    /// </summary>
+    (bool IsAllowed, string? RejectionReason) ISecurityUrlValidator.ValidateAndAudit(string url, string caller)
+    {
+        return ValidateAndAuditCore(url, caller);
+    }
+
+    private (bool IsAllowed, string? RejectionReason) ValidateAndAuditCore(string url, string caller)
     {
         // Perform validation with detailed reason
         bool isAllowed = ValidateCore(url, out string? rejectionReason);
