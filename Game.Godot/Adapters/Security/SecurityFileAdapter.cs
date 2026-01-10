@@ -113,7 +113,7 @@ public partial class SecurityFileAdapter : RefCounted, ISecurityFileValidator
     /// <summary>
     /// Public method for GDScript access.
     /// </summary>
-    public new string NormalizePath(string path)
+    public string NormalizePath(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
             return string.Empty;
