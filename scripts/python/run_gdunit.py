@@ -217,6 +217,7 @@ def main():
     # Optional prewarm with fallback
     prewarm_rc = None
     prewarm_note = None
+    prewarm_fallback_dotnet_ok = None
     if args.prewarm:
         pre_cmd = [
             args.godot_bin,
@@ -262,12 +263,44 @@ def main():
                 for item in (dotnet_projects or [sln] if os.path.isfile(sln) else []):
                     rc_b, out_b = run_cmd(['dotnet', 'build', item, '-c', 'Debug', '-v', 'minimal'], cwd=root, timeout=600_000)
                     build_logs.append((item, rc_b, out_b))
+                prewarm_fallback_dotnet_ok = (len(build_logs) > 0) and all(rc_b == 0 for _, rc_b, _ in build_logs)
                 # Persist build logs
                 agg = []
                 for item, rc_b, out_b in build_logs:
                     agg.append(f'=== {item} rc={rc_b} ===\n{out_b}\n')
                 write_text(os.path.join(out_dir, 'prewarm-dotnet.txt'), '\n'.join(agg) if agg else 'NO_DOTNET_BUILD_TARGETS')
                 prewarm_note = 'fallback-dotnet'
+
+    # Prewarm-only mode: if no suites were provided, do not run the full GdUnit suite.
+    # This is used by CI to warm up/build C# solutions and validate the project starts.
+    if args.prewarm and not args.add:
+        rc = prewarm_rc or 0
+        if prewarm_note == 'fallback-dotnet' and prewarm_fallback_dotnet_ok is True:
+            rc = 0
+        # Write a small summary json for CI to archive.
+        dest = args.report_dir if args.report_dir else os.path.join(out_dir, 'gdunit-reports')
+        if os.path.isdir(dest):
+            shutil.rmtree(dest, ignore_errors=True)
+        os.makedirs(dest, exist_ok=True)
+        summary = {
+            'rc': rc,
+            'project': proj,
+            'added': args.add,
+            'timeout_sec': args.timeout_sec,
+            'user_dir': user_dir,
+            'userdir_flag_used': userdir_flag_used,
+            'appdata_override': appdata_override,
+            'prewarm_rc': prewarm_rc,
+            'prewarm_note': prewarm_note,
+            'prewarm_fallback_dotnet_ok': prewarm_fallback_dotnet_ok,
+        }
+        try:
+            with open(os.path.join(dest, 'run-summary.json'), 'w', encoding='utf-8') as f:
+                json.dump(summary, f, ensure_ascii=False)
+        except Exception:
+            pass
+        print(f'GDUNIT_DONE rc={rc} out={out_dir}')
+        return 0 if rc == 0 else rc
 
     # Run tests (Debugger Break fail-fast)
     # Build command with optional -a filters
