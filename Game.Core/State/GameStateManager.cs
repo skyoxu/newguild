@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Game.Core.Contracts;
+using Game.Core.Contracts.Persistence;
 using Game.Core.Domain;
 using Game.Core.Ports;
 
@@ -62,6 +63,7 @@ public class GameStateManager
         var saveId = $"{_options.StorageKey}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{nonce}";
         var checksum = CalculateChecksum(_currentState);
         var now = DateTime.UtcNow;
+        var nowOffset = DateTimeOffset.UtcNow;
 
         var save = new SaveData(
             Id: saveId,
@@ -72,40 +74,84 @@ public class GameStateManager
             Title: name
         );
 
-        await SaveToStoreAsync(saveId, save);
-        await UpdateIndexAsync(add: saveId);
-        await CleanupOldSavesAsync();
-
         Publish(new DomainEvent(
-            Type: "game.save.created",
+            Type: SaveRequested.EventType,
             Source: nameof(GameStateManager),
-            Data: new { saveId },
+            Data: new SaveRequested(saveId, nowOffset),
             Timestamp: now,
-            Id: $"save-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            Id: $"save-request-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
         ));
 
-        return saveId;
+        try
+        {
+            await SaveToStoreAsync(saveId, save);
+            await UpdateIndexAsync(add: saveId);
+            await CleanupOldSavesAsync();
+
+            Publish(new DomainEvent(
+                Type: SaveCompleted.EventType,
+                Source: nameof(GameStateManager),
+                Data: new SaveCompleted(saveId, DateTimeOffset.UtcNow),
+                Timestamp: DateTime.UtcNow,
+                Id: $"save-completed-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            ));
+
+            return saveId;
+        }
+        catch (Exception ex)
+        {
+            Publish(new DomainEvent(
+                Type: SaveFailed.EventType,
+                Source: nameof(GameStateManager),
+                Data: new SaveFailed(saveId, DateTimeOffset.UtcNow, ex.GetType().Name),
+                Timestamp: DateTime.UtcNow,
+                Id: $"save-failed-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            ));
+            throw;
+        }
     }
 
     public async Task<(GameState state, GameConfig config)> LoadGameAsync(string saveId)
     {
-        var save = await LoadFromStoreAsync(saveId);
-        var checksum = CalculateChecksum(save.State);
-        if (!string.Equals(checksum, save.Metadata.Checksum, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Save file is corrupted");
-
-        _currentState = save.State with { };
-        _currentConfig = save.Config with { };
-
         Publish(new DomainEvent(
-            Type: "game.save.loaded",
+            Type: LoadRequested.EventType,
             Source: nameof(GameStateManager),
-            Data: new { saveId },
+            Data: new LoadRequested(saveId, DateTimeOffset.UtcNow),
             Timestamp: DateTime.UtcNow,
-            Id: $"load-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            Id: $"load-request-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
         ));
 
-        return (_currentState, _currentConfig);
+        try
+        {
+            var save = await LoadFromStoreAsync(saveId);
+            var checksum = CalculateChecksum(save.State);
+            if (!string.Equals(checksum, save.Metadata.Checksum, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Save file is corrupted");
+
+            _currentState = save.State with { };
+            _currentConfig = save.Config with { };
+
+            Publish(new DomainEvent(
+                Type: LoadCompleted.EventType,
+                Source: nameof(GameStateManager),
+                Data: new LoadCompleted(saveId, DateTimeOffset.UtcNow),
+                Timestamp: DateTime.UtcNow,
+                Id: $"load-completed-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            ));
+
+            return (_currentState, _currentConfig);
+        }
+        catch (Exception ex)
+        {
+            Publish(new DomainEvent(
+                Type: LoadFailed.EventType,
+                Source: nameof(GameStateManager),
+                Data: new LoadFailed(saveId, DateTimeOffset.UtcNow, ex.GetType().Name),
+                Timestamp: DateTime.UtcNow,
+                Id: $"load-failed-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            ));
+            throw;
+        }
     }
 
     public async Task DeleteSaveAsync(string saveId)
