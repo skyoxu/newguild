@@ -971,7 +971,7 @@
     "story_id": "PH13-BACKLOG-B4",
     "title": "性能 P95 与审计 JSONL 校验",
     "description": "根据 Phase-13-Quality-Gates-Backlog.md B4，将性能 P95 阈值与 security-audit.jsonl 的结构校验纳入 quality_gates.py，实现对 logs/perf/summary.json 与logs/ci/<date>/security-audit.jsonl 的自动化检查。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "ci",
     "depends_on": [
@@ -1003,11 +1003,13 @@
       "quality-gates"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+    ],
     "acceptance": [
-      "新增 scripts/python/validate_perf.py 与 scripts/python/validate_audit_logs.py，能够检查 P95 是否在预算内，以及 security-audit.jsonl 每行为合法 JSON 且包含必需字段。",
-      "quality_gates.py 支持在 all 模式下调用上述校验脚本，并在失败时返回非零退出码。",
-      "CI 日志中可以看到 P95 与审计 JSONL 校验的摘要输出，并产生对应 JSON 摘要文件。"
+      "新增 scripts/python/validate_perf.py 与 scripts/python/validate_audit_logs.py，能够检查 P95 是否在预算内，以及 security-audit.jsonl 每行为合法 JSON 且包含必需字段。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "quality_gates.py 支持在 all 模式下调用上述校验脚本，并在失败时返回非零退出码。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "CI 日志中可以看到 P95 与审计 JSONL 校验的摘要输出，并产生对应 JSON 摘要文件。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
     ],
     "test_strategy": [
       "单元：为 validate_perf 与 validate_audit_logs 编写测试，验证边界条件与错误路径。",
@@ -1019,6 +1021,7 @@
     "artifactRefs": [
       "scripts/python/perf_smoke_db.py",
       "scripts/python/validate_audit_logs.py",
+      "scripts/python/validate_perf.py",
       "scripts/python/quality_gates.py",
       "logs/ci/<YYYY-MM-DD>/security-audit.jsonl",
       "logs/perf/<YYYY-MM-DD>/db/db-perf-summary.json",

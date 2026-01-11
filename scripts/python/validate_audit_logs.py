@@ -5,7 +5,7 @@ Validates JSONL audit logs according to ADR-0019 Security Baseline:
 - Format: One JSON object per line (no arrays)
 - Required fields: {ts, action, reason, target, caller}
 - ISO 8601 timestamp format
-- ADR-0004 action naming: domain.entity.verb
+- ADR-0004 action naming: dot-separated segments (>=3), e.g. domain.entity.verb or core.guild.member.joined
 - Optional sensitive data detection
 - Configurable strictness and reporting
 """
@@ -20,13 +20,14 @@ from typing import List, Dict, Any, Optional
 
 
 # Validation patterns
-ACTION_PATTERN = re.compile(r'^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$')
+# Allow 3+ segments to support both audit actions (e.g. db.open.failed) and domain event types (e.g. core.guild.member.joined).
+ACTION_PATTERN = re.compile(r'^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*){2,}$')
 ISO8601_PATTERN = re.compile(
     r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,7})?(?:Z|[+-]\d{2}:\d{2})$'
 )
 
 # Sensitive data patterns (detect unmasked secrets)
-# Note: Excludes already sanitized forms (***、[REDACTED])
+# Note: Excludes already sanitized forms (***, [REDACTED])
 SENSITIVE_PATTERNS = [
     (r'password', re.compile(
         r'(?<![*\[])(password["\s:=]+)(?!(\*+|\[REDACTED\]))([^\s,}"\']+)',
@@ -183,7 +184,7 @@ class AuditLogValidator:
         return True
 
     def _validate_action(self, action: Any, line_num: int) -> bool:
-        """Validate ADR-0004 action naming: domain.entity.verb"""
+        """Validate ADR-0004 action naming: dot-separated segments (>=3)."""
         if not isinstance(action, str):
             self.errors.append(ValidationError(
                 line_num, 'action', f'Expected string, got {type(action).__name__}', 'error'
@@ -193,7 +194,7 @@ class AuditLogValidator:
         if not ACTION_PATTERN.match(action):
             self.errors.append(ValidationError(
                 line_num, 'action',
-                f'Invalid action naming (expected domain.entity.verb): {action}', 'error'
+                f'Invalid action naming (expected >=3 dot-separated segments): {action}', 'error'
             ))
             return False
 
@@ -377,6 +378,28 @@ Examples:
 
     if not log_files:
         print(f"Error: No audit log files found matching pattern: {args.log_path}")
+        if args.report:
+            report_path = Path(args.report)
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(report_path, 'w', encoding='utf-8') as f:
+                json.dump(
+                    {
+                        'files': [],
+                        'summary': {
+                            'total_files': 0,
+                            'valid_files': 0,
+                            'failed_files': 0,
+                            'total_errors': 1,
+                            'total_warnings': 0,
+                        },
+                        'error': 'no_audit_log_files',
+                        'pattern': args.log_path,
+                    },
+                    f,
+                    indent=2,
+                    ensure_ascii=False,
+                )
+            print(f"Validation report saved to: {report_path}")
         return 2
 
     print(f"Found {len(log_files)} audit log file(s) to validate\n")
