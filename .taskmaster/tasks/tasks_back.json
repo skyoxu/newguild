@@ -290,8 +290,8 @@
     "taskmaster_id": 24,
     "story_id": "PH16-BACKLOG-B1-B3",
     "title": "Observability Autoload 与 Sentry Release Health Gate",
-    "description": "按照 Phase-16-Observability-Sentry-Integration.md 与 Backlog，在 Game.Godot 中引入 Observability Autoload（初始化 Sentry Godot SDK、统一日志接口），并实现 Python 版 release_health_gate 脚本：从 Sentry API 读取 Crash-Free Sessions/Users 指标，与 ADR-0003/0015 定义的阈值对齐，在 CI 中生成 release-health.json 并支持作为发布门禁。",
-    "status": "pending",
+    "description": "按照 Phase-16-Observability-Sentry-Integration.md 与 Backlog，将本项目的观测能力明确定位为“模板默认离线安全 + 本地观测占位 + CI gate 脚本就位”：在 Game.Godot 中引入 Observability Autoload（读取并暴露 Release/Environment、统一日志接口；默认仅本地 JSONL sink，不默认集成 Sentry SDK），并实现 Python 版 release_health_gate 脚本：在离线模式下使用假数据验证门禁契约；在配置正确且主机白名单通过时可从 Sentry API 读取 Crash-Free Sessions/Users 指标，与 ADR-0003/0015 阈值对齐，在 CI 中生成 release-health.json 并支持作为发布门禁。",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -322,13 +322,16 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Core.Tests/Observability/ObservabilityClientTests.cs"
+      "Tests.Godot/tests/Obs/test_observability_autoload.gd",
+      "Game.Core.Tests/Observability/ObservabilityClientTests.cs",
+      "Game.Core.Tests/CI/ReleaseHealthGateTests.cs",
+      "Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs"
     ],
     "acceptance": [
-      "Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期初始化 Sentry Godot SDK，并设置 Release/Environment。",
-      "Game.Core 中存在 ObservabilityClient/StructuredLogger（或等价实现），通过接口注入到核心服务，避免直接依赖 Godot 或 Sentry。",
-      "新增 scripts/python/release_health_gate.py，支持配置 SENTRY_* 环境变量与阈值 JSON，生成 logs/ci/<date>/release-health.json 并根据阈值返回 exit code。",
-      "CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），在配置正确的情况下能拉取 Sentry 数据并给出清晰的通过/失败原因。"
+      "Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期读取并暴露 Release/Environment，并在显式启用时通过 SentryClient（本地 JSONL sink）记录事件。 Refs: Tests.Godot/tests/Obs/test_observability_autoload.gd",
+      "Game.Core 中存在 ObservabilityClient/StructuredLogger（或等价实现），通过接口注入到核心服务，避免直接依赖 Godot 或 Sentry。 Refs: Game.Core.Tests/Observability/ObservabilityClientTests.cs",
+      "新增 scripts/python/release_health_gate.py，支持配置 SENTRY_* 环境变量与阈值 JSON；GD_OFFLINE_MODE=1 时禁止出网并使用注入的指标；在线模式下必须通过主机白名单校验；生成 logs/ci/<date>/release-health.json 并根据阈值返回 exit code。 Refs: Game.Core.Tests/CI/ReleaseHealthGateTests.cs",
+      "CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），仅在非 PR 事件且 secrets 配置正确时才运行；在线模式下能拉取 Sentry 数据并给出清晰的通过/失败原因。 Refs: Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs"
     ],
     "test_strategy": [
       "核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。",
@@ -2037,5 +2040,54 @@
       "core.storage.migration.applied"
     ],
     "artifactRefs": []
+  },
+  {
+    "id": "NG-0047",
+    "story_id": "PH16-BACKLOG-B4",
+    "title": "真实 Sentry Godot SDK 初始化与 Sessions 上报",
+    "description": "在模板默认“本地 JSONL sink + CI release-health gate 脚本就位”的基础上，补齐真实的 Sentry Godot SDK 集成：在最早 Autoload 初始化 SDK，设置 Release/Environment 并启用 Sessions 统计，从而为 release_health_gate 提供真实数据来源。该任务为后续阶段的可选增强，不应在未准备 secrets/白名单/隐私脱敏策略前强行落地。",
+    "status": "pending",
+    "priority": "P3",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0016"
+    ],
+    "adr_refs": [
+      "ADR-0002",
+      "ADR-0003",
+      "ADR-0005"
+    ],
+    "chapter_refs": [
+      "CH02",
+      "CH03",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "labels": [
+      "observability",
+      "sentry",
+      "release-health",
+      "privacy"
+    ],
+    "owner": "architecture",
+    "test_refs": [],
+    "acceptance": [
+      "Game.Godot 的最早 Autoload 能初始化真实 Sentry SDK，并设置 Release/Environment；GD_OFFLINE_MODE=1 时必须拒绝出网并记录审计。",
+      "Sentry SDK 的上报必须默认脱敏：至少对 res://、user:// 与 Windows 绝对路径做统一清洗，且不得把 secrets 写入日志或本地文件。",
+      "CI 中的 release-health 门禁在 secrets/白名单配置正确时能从 Sentry 拉取 Sessions 指标；在未配置 secrets 时必须跳过而非失败。"
+    ],
+    "test_strategy": [
+      "GdUnit4：启动冒烟验证 Autoload 初始化顺序（Observability/SentryClient）、Release/Environment 可见，以及 GD_OFFLINE_MODE=1 时不会触发网络行为。",
+      "xUnit：对脱敏/白名单策略做纯 C# 单测覆盖，确保路径/敏感字段不会进入上报 payload。"
+    ],
+    "taskmaster_exported": false,
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<date>/release-health.json",
+      "logs/ci/<date>/security-audit.jsonl"
+    ]
   }
 ]

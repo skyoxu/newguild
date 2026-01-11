@@ -2,9 +2,16 @@ using Godot;
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text;
+using Game.Core.Observability;
+using Game.Core.Services;
 
 namespace Game.Godot.Scripts.Obs;
 
+/// <summary>
+/// Local JSONL event sink for Sentry-like diagnostics.
+/// This project template does not ship a Sentry SDK integration by default.
+/// </summary>
 public partial class SentryClient : Node
 {
     [Export] public bool Enabled { get; set; } = false;
@@ -18,8 +25,8 @@ public partial class SentryClient : Node
             if (!string.IsNullOrWhiteSpace(env))
             {
                 Dsn = env;
-                // 注意：模板默认不进行网络发送，仅作为启用占位标记
-                if (!Enabled) Enabled = false;
+                // Template default: no network reporting; local JSONL only unless explicitly enabled.
+                Enabled = Enabled && !string.IsNullOrWhiteSpace(Dsn);
             }
         }
     }
@@ -28,13 +35,17 @@ public partial class SentryClient : Node
     {
         try
         {
+            if (!Enabled)
+                return false;
+
+            var includeSensitiveDetails = IncludeSensitiveDetails();
             var evt = new
             {
                 ts = DateTime.UtcNow.ToString("O"),
                 type = "message",
                 level = level,
-                message = message,
-                context = context ?? new System.Collections.Generic.Dictionary<string, object>(),
+                message = includeSensitiveDetails ? message : PiiDataScrubber.Scrub(message),
+                context = SanitizeContext(context, includeSensitiveDetails),
                 dsn_present = !string.IsNullOrWhiteSpace(Dsn),
                 enabled = Enabled
             };
@@ -43,7 +54,7 @@ public partial class SentryClient : Node
         }
         catch (Exception ex)
         {
-            GD.PushWarning($"[SentryClient] CaptureMessage failed: {ex.Message}");
+            GD.PushWarning($"[SentryClient] CaptureMessage failed ({ex.GetType().Name}).");
             return false;
         }
     }
@@ -52,12 +63,16 @@ public partial class SentryClient : Node
     {
         try
         {
+            if (!Enabled)
+                return false;
+
+            var includeSensitiveDetails = IncludeSensitiveDetails();
             var evt = new
             {
                 ts = DateTime.UtcNow.ToString("O"),
                 type = "exception",
-                message = exceptionMessage,
-                context = context ?? new System.Collections.Generic.Dictionary<string, object>(),
+                message = includeSensitiveDetails ? exceptionMessage : PiiDataScrubber.Scrub(exceptionMessage),
+                context = SanitizeContext(context, includeSensitiveDetails),
                 dsn_present = !string.IsNullOrWhiteSpace(Dsn),
                 enabled = Enabled
             };
@@ -66,7 +81,7 @@ public partial class SentryClient : Node
         }
         catch (Exception ex)
         {
-            GD.PushWarning($"[SentryClient] CaptureException failed: {ex.Message}");
+            GD.PushWarning($"[SentryClient] CaptureException failed ({ex.GetType().Name}).");
             return false;
         }
     }
@@ -77,6 +92,37 @@ public partial class SentryClient : Node
         Directory.CreateDirectory(dir);
         var path = Path.Combine(dir, $"events-{DateTime.UtcNow:yyyyMMdd}.jsonl");
         var json = JsonSerializer.Serialize(evt);
-        File.AppendAllText(path, json + System.Environment.NewLine);
+        File.AppendAllText(path, json + System.Environment.NewLine, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    }
+
+    private static bool IncludeSensitiveDetails()
+    {
+#if DEBUG
+        const bool isDebugBuild = true;
+#else
+        const bool isDebugBuild = false;
+#endif
+        return SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild);
+    }
+
+    private static System.Collections.Generic.Dictionary<string, object> SanitizeContext(
+        System.Collections.Generic.Dictionary<string, object>? context,
+        bool includeSensitiveDetails)
+    {
+        var sanitized = new System.Collections.Generic.Dictionary<string, object>();
+        if (context == null)
+            return sanitized;
+
+        foreach (var kvp in context)
+        {
+            var key = kvp.Key ?? string.Empty;
+            var value = kvp.Value;
+            if (!includeSensitiveDetails && value is string s)
+                sanitized[key] = PiiDataScrubber.Scrub(s);
+            else
+                sanitized[key] = value ?? string.Empty;
+        }
+
+        return sanitized;
     }
 }
