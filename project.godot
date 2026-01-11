@@ -8,11 +8,9 @@
 
 config_version=5
 
-"ï»¿config_version"=5
-
 [application]
 
-config/name="鏂板缓娓告垙椤圭洰"
+config/name="NewGuild"
 run/main_scene="res://Game.Godot/Scenes/Main.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
@@ -29,6 +27,7 @@ SqlDb="res://Game.Godot/Adapters/SqliteDataStore.cs"
 SecurityAudit="res://Game.Godot/Scripts/Security/SecurityAudit.cs"
 PerformanceTracker="res://Game.Godot/Scripts/Perf/PerformanceTracker.cs"
 SentryClient="res://Game.Godot/Scripts/Obs/SentryClient.cs"
+Observability="res://Game.Godot/Scripts/Obs/Observability.cs"
 FeatureFlags="res://Game.Godot/Scripts/Config/FeatureFlags.cs"
 GuildManager="res://Game.Godot/Scripts/Autoload/GuildManager.cs"
 CompositionRoot="*res://Game.Godot/Autoloads/CompositionRoot.cs"

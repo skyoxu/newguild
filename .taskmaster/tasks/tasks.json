@@ -705,7 +705,7 @@
         "id": "20",
         "title": "在 Game.Core 落地性能追踪库并接入 CI 性能门禁",
         "description": "根据 Phase-15-Performance-Budgets-and-Gates.md 与 ADR-0015，在 Game.Core 中实现纯 C# 性能追踪库（PerformanceTracker/PerformanceMetrics/QueryPerformanceTracker），计算 P50/P95 等指标并生成 JSON 报告；在脚本层新增性能门禁聚合脚本，将 PerfTracker 输出与预算阈值（环境变量可配置）联动，写入 logs/perf 与 logs/ci。",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "7"
@@ -734,7 +734,7 @@
         "id": "21",
         "title": "Game.Core Observability 客户端与结构化日志",
         "description": "根据 Phase-16-Observability-Backlog.md B2，在 Game.Core 层实现可复用的 ObservabilityClient/StructuredLogger/PiiDataScrubber，使核心逻辑能够在不直接依赖 Godot 或 Sentry SDK 的前提下输出结构化日志并上报事件。",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "9"
@@ -830,13 +830,13 @@
       {
         "id": "24",
         "title": "Observability Autoload 与 Sentry Release Health Gate",
-        "description": "按照 Phase-16-Observability-Sentry-Integration.md 与 Backlog，在 Game.Godot 中引入 Observability Autoload（初始化 Sentry Godot SDK、统一日志接口），并实现 Python 版 release_health_gate 脚本：从 Sentry API 读取 Crash-Free Sessions/Users 指标，与 ADR-0003/0015 定义的阈值对齐，在 CI 中生成 release-health.json 并支持作为发布门禁。",
-        "status": "pending",
+        "description": "按照 Phase-16-Observability-Sentry-Integration.md 与 Backlog，在 Game.Godot 中引入 Observability Autoload（读取 Release/Environment、统一日志接口；默认仅本地 JSONL sink），并实现 Python 版 release_health_gate 脚本：从 Sentry API 读取 Crash-Free Sessions/Users 指标，与 ADR-0003/0015 定义的阈值对齐，在 CI 中生成 release-health.json 并支持作为发布门禁。",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "21"
         ],
-        "details": "Story: PH16-BACKLOG-B1-B3\nADR Refs: ADR-0003; ADR-0005; ADR-0015; ADR-0018\nChapters: CH01; CH03; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Observability/ObservabilityClientTests.cs; logs/ci/<date>/release-health.json\nAcceptance: Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期初始化 Sentry Godot SDK，并设置 Release/Environment。; Game.Core 中存在 ObservabilityClient/StructuredLogger（或等价实现），通过接口注入到核心服务，避免直接依赖 Godot 或 Sentry。; 新增 scripts/python/release_health_gate.py，支持配置 SENTRY_* 环境变量与阈值 JSON，生成 logs/ci/<date>/release-health.json 并根据阈值返回 exit code。; CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），在配置正确的情况下能拉取 Sentry 数据并给出清晰的通过/失败原因。\nTest Strategy: 核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。; 脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。\nLabels: observability; sentry; release-health; godot\nOwner: architecture\nLayer: adapter",
+        "details": "Story: PH16-BACKLOG-B1-B3\nADR Refs: ADR-0003; ADR-0005; ADR-0015; ADR-0018\nChapters: CH01; CH03; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Obs/test_observability_autoload.gd; Game.Core.Tests/Observability/ObservabilityClientTests.cs; Game.Core.Tests/CI/ReleaseHealthGateTests.cs; Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs\nAcceptance: Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期读取并暴露 Release/Environment；默认仅本地 JSONL sink（不默认集成 Sentry SDK）。; Game.Core 中存在 ObservabilityClient/StructuredLogger/PiiDataScrubber（或等价实现），通过接口注入到核心服务，避免直接依赖 Godot 或 Sentry。; 新增 scripts/python/release_health_gate.py，支持配置 SENTRY_* 环境变量与阈值 JSON；GD_OFFLINE_MODE=1 时禁止出网并使用注入的指标；在线模式需通过主机白名单校验；生成 logs/ci/<date>/release-health.json 并根据阈值返回 exit code。; CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），仅在非 PR 事件且 secrets 配置正确时才运行；在线模式下能拉取 Sentry 数据并给出清晰的通过/失败原因。\nTest Strategy: 核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。; 脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。\nLabels: observability; sentry; release-health; godot\nOwner: architecture\nLayer: adapter",
         "testStrategy": "核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。\n脚本测试：使用假数据或 Mock Sentry API 响应运行 release_health_gate.py，验证阈值判定与 JSON 输出格式。",
         "subtasks": [],
         "adrRefs": [
