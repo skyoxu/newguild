@@ -47,7 +47,7 @@ CORE_CONTRACT_REFS = [
     "core.load.requested",
     "core.load.completed",
     "core.load.failed",
-    "core.storage.migration.applied",
+    "core.save.format.migration.applied",
 ]
 
 UI_CONTRACT_REFS = [

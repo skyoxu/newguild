@@ -31,9 +31,18 @@ CREATE TABLE IF NOT EXISTS statistics (
 );
 
 CREATE TABLE IF NOT EXISTS schema_version (
-    version INTEGER PRIMARY KEY,
-    applied_at INTEGER NOT NULL,
-    description TEXT
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    version INTEGER NOT NULL
+);
+
+-- Ensure the single-row metadata exists (id=1).
+INSERT OR IGNORE INTO schema_version(id, version) VALUES(1, 1);
+
+-- Key-value storage for Core IDataStore (Save/Load snapshots, indexes, etc.).
+CREATE TABLE IF NOT EXISTS kv_store (
+    k TEXT PRIMARY KEY,
+    v TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
 );
 
 -- Extensions in newguild

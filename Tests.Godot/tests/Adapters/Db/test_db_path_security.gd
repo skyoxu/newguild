@@ -46,3 +46,12 @@ func test_try_open_traversal_should_fail() -> void:
     assert_bool(ok).is_false()
     # lower-case the source string before assertion, avoid calling to_lower() on assertion object
     assert_str(str(db.LastError).to_lower()).contains("not allowed")
+
+func test_try_open_encoded_traversal_should_fail() -> void:
+    var db = _db()
+    if db == null:
+        push_warning("SKIP: missing C# instantiate, skip test")
+        return
+    var p = "user://%2e%2e/evil.db"
+    var ok = db.TryOpen(p)
+    assert_bool(ok).is_false()

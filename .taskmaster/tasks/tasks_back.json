@@ -1972,7 +1972,7 @@
     "story_id": "PRD-GUILD-MANAGER-T3-SAVELOAD-SSOT",
     "title": "T3 Save/Load + Schema Migration（SSoT）",
     "description": "为 T3 提供跨会话可玩性：定义 Save/Load 的领域契约、SQLite schema 版本与迁移策略，以及错误脱敏与审计要求。该任务是“验收/契约视图”，实现任务应在 master/tasks.json 中完成。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -2015,15 +2015,16 @@
     ],
     "owner": "architecture",
     "test_refs": [
+      "Game.Core.Tests/Domain/PersistenceContractsTests.cs",
       "Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
       "Game.Core.Tests/Persistence/Migrations/SchemaMigrationTests.cs",
       "Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd"
     ],
     "acceptance": [
-      "定义 Save/Load 的最小契约与事件类型（contractRefs），并在 master 任务实现中落盘到 Game.Core/Contracts（纯 C#，不依赖 Godot API）。",
-      "定义 SQLite schema 版本机制：至少包含 SchemaVersion 表（或等价元数据）与迁移 runner，支持从旧版本升级到新版本。",
-      "迁移必须是幂等且可审计：失败时写入 security-audit.jsonl（五字段 JSONL），且错误信息在 Release/secure 模式下脱敏（不泄露路径/SQL）。",
-      "Save/Load 必须限制在 user:// 且拒绝路径穿越与非白名单扩展名；文件大小上限与 DoS 防护策略在验收中明确。"
+      "定义 Save/Load 的最小契约与事件类型（contractRefs），并在 master 任务实现中落盘到 Game.Core/Contracts（纯 C#，不依赖 Godot API）。\nRefs: Game.Core.Tests/Domain/PersistenceContractsTests.cs Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+      "定义 SQLite schema 版本机制：至少包含 SchemaVersion 表（或等价元数据）与迁移 runner，支持从旧版本升级到新版本。\nRefs: Game.Core.Tests/Persistence/Migrations/SchemaMigrationTests.cs",
+      "迁移必须是幂等且可审计：失败时写入 security-audit.jsonl（五字段 JSONL），且错误信息在 Release/secure 模式下脱敏（不泄露路径/SQL）。\nRefs: Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd",
+      "Save/Load 必须限制在 user:// 且拒绝路径穿越与非白名单扩展名；文件大小上限与 DoS 防护策略在验收中明确。\nRefs: Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd"
     ],
     "test_strategy": [
       "xUnit：覆盖 schema version 迁移（升级路径 + 失败路径），以及 Save/Load 的 round-trip（最小模型）与错误脱敏。",
@@ -2037,7 +2038,7 @@
       "core.load.requested",
       "core.load.completed",
       "core.load.failed",
-      "core.storage.migration.applied"
+      "core.save.format.migration.applied"
     ],
     "artifactRefs": []
   },

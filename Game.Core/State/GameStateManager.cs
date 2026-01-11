@@ -18,6 +18,7 @@ public class GameStateManager
     private bool _autoSaveEnabled;
 
     private const string IndexSuffix = ":index";
+    private const string CurrentSaveFormatVersion = "1.0.0";
 
     public GameStateManager(IDataStore store, GameStateManagerOptions? options = null, ILogger? logger = null)
     {
@@ -46,6 +47,7 @@ public class GameStateManager
 
     private const int MaxTitleLength = 100;
     private const int MaxScreenshotChars = 2_000_000; // ~>1.5MB base64
+    private const int MaxVersionForEventLength = 64;
 
     public async Task<string> SaveGameAsync(string? name = null, string? screenshot = null)
     {
@@ -69,7 +71,7 @@ public class GameStateManager
             Id: saveId,
             State: _currentState,
             Config: _currentConfig,
-            Metadata: new SaveMetadata(now, now, "1.0.0", checksum),
+            Metadata: new SaveMetadata(now, now, CurrentSaveFormatVersion, checksum),
             Screenshot: screenshot,
             Title: name
         );
@@ -127,6 +129,8 @@ public class GameStateManager
             var checksum = CalculateChecksum(save.State);
             if (!string.Equals(checksum, save.Metadata.Checksum, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Save file is corrupted");
+
+            save = await MaybeMigrateSaveFormatAsync(saveId, save);
 
             _currentState = save.State with { };
             _currentConfig = save.Config with { };
@@ -269,6 +273,63 @@ public class GameStateManager
             json = raw;
         }
         return JsonSerializer.Deserialize<SaveData>(json)!;
+    }
+
+    private async Task<SaveData> MaybeMigrateSaveFormatAsync(string saveId, SaveData save)
+    {
+        var from = NormalizeVersionForEvent(save.Metadata.Version);
+        var to = NormalizeVersionForEvent(CurrentSaveFormatVersion);
+        if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase))
+            return save;
+
+        var migrated = save with
+        {
+            Metadata = new SaveMetadata(
+                CreatedAt: save.Metadata.CreatedAt,
+                UpdatedAt: DateTime.UtcNow,
+                Version: to,
+                Checksum: save.Metadata.Checksum
+            )
+        };
+
+        await SaveToStoreAsync(saveId, migrated);
+
+        Publish(new DomainEvent(
+            Type: SaveFormatMigrationApplied.EventType,
+            Source: nameof(GameStateManager),
+            Data: new SaveFormatMigrationApplied(
+                SaveId: saveId,
+                FromVersion: from,
+                ToVersion: to,
+                AppliedAt: DateTimeOffset.UtcNow
+            ),
+            Timestamp: DateTime.UtcNow,
+            Id: $"save-format-migration-applied-{Guid.NewGuid():N}"
+        ));
+
+        return migrated;
+    }
+
+    private static string NormalizeVersionForEvent(string? version)
+    {
+        if (string.IsNullOrWhiteSpace(version))
+            return string.Empty;
+
+        var trimmed = version.Trim();
+        if (trimmed.Length > MaxVersionForEventLength)
+            trimmed = trimmed[..MaxVersionForEventLength];
+
+        var buffer = new char[trimmed.Length];
+        var count = 0;
+        foreach (var ch in trimmed)
+        {
+            if (ch < 0x20 || ch > 0x7E)
+                continue;
+
+            buffer[count++] = ch == ' ' ? '_' : ch;
+        }
+
+        return count == 0 ? string.Empty : new string(buffer, 0, count);
     }
 
     private async Task UpdateIndexAsync(string? add = null, string? remove = null)

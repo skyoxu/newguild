@@ -44,9 +44,9 @@ public class PersistenceContractsTests
     }
 
     [Fact]
-    public void StorageMigrationApplied_EventType_Should_Match_Expected()
+    public void SaveFormatMigrationApplied_EventType_Should_Match_Expected()
     {
-        StorageMigrationApplied.EventType.Should().Be("core.storage.migration.applied");
+        SaveFormatMigrationApplied.EventType.Should().Be("core.save.format.migration.applied");
     }
 
     [Fact]
@@ -69,13 +69,13 @@ public class PersistenceContractsTests
     }
 
     [Fact]
-    public void StorageMigrationApplied_Should_Accept_Valid_Fields()
+    public void SaveFormatMigrationApplied_Should_Accept_Valid_Fields()
     {
         var now = DateTimeOffset.UtcNow;
-        var evt = new StorageMigrationApplied(FromVersion: 1, ToVersion: 2, AppliedAt: now, Description: "init");
-        evt.FromVersion.Should().Be(1);
-        evt.ToVersion.Should().Be(2);
+        var evt = new SaveFormatMigrationApplied(SaveId: "save-1", FromVersion: "0.9.0", ToVersion: "1.0.0", AppliedAt: now);
+        evt.SaveId.Should().Be("save-1");
+        evt.FromVersion.Should().Be("0.9.0");
+        evt.ToVersion.Should().Be("1.0.0");
         evt.AppliedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
-        evt.Description.Should().Be("init");
     }
 }

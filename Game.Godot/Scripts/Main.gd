@@ -8,11 +8,12 @@ func _ready() -> void:
     print("[TEMPLATE_SMOKE_READY] Main scene initialized")
     var db = get_node_or_null("/root/SqlDb")
     if db != null:
-        var ok = db.TryOpen("user://data/game.db")
-        if not ok:
-            print("[DB] open failed: ", str(db.LastError))
-        else:
-            print("[DB] opened at user://data/game.db")
+        if not db.IsOpen():
+            var ok = db.TryOpen("user://data/game.db")
+            if not ok:
+                print("[DB] open failed: ", str(db.LastError))
+            else:
+                print("[DB] opened at user://data/game.db")
     $VBox/PublishBtn.pressed.connect(_on_publish)
     $VBox/SaveLoadBtn.pressed.connect(_on_save_load)
     $VBox/LogBtn.pressed.connect(_on_log)

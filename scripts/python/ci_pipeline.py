@@ -67,6 +67,7 @@ def main():
         'selfcheck': {},
         'perf_db': {},
         'sql_scan': {},
+        'task_links': {},
         'encoding': {},
         'status': 'ok'
     }
@@ -193,6 +194,18 @@ def main():
     if rc_content != 0:
         hard_fail = True
 
+    # 7) Task links / view semantics (hard gate)
+    rc_links, out_links = run_cmd(['py', '-3', 'scripts/python/task_links_validate.py'], cwd=root)
+    with io.open(os.path.join('logs', 'ci', date, 'task-links-stdout.txt'), 'w', encoding='utf-8') as f:
+        f.write(out_links)
+    summary['task_links'] = {
+        'rc': rc_links,
+        'status': 'ok' if rc_links == 0 else 'fail',
+        'out': os.path.join('logs', 'ci', date, 'task-links-stdout.txt'),
+    }
+    if rc_links != 0:
+        hard_fail = True
+
     summary['status'] = 'ok' if not hard_fail else 'fail'
     with io.open(os.path.join(ci_dir, 'ci-pipeline-summary.json'), 'w', encoding='utf-8') as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
@@ -204,6 +217,7 @@ def main():
         f"sql_scan={summary['sql_scan'].get('status')} "
         f"perf_db={summary['perf_db'].get('status')} "
         f"content={summary.get('content_validation', {}).get('status')} "
+        f"task_links={summary.get('task_links', {}).get('status')} "
         f"encoding_bad={summary['encoding'].get('bad', 'n/a')}"
     )
     return 0 if not hard_fail else 1
