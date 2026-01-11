@@ -13,6 +13,7 @@ jobs:
     env:
       GODOT_VERSION: '4.5.1'
       GD_DB_COMMAND_TIMEOUT_SEC: '30'
+      PERF_P95_THRESHOLD_MS: '20'
       PYTHONIOENCODING: 'utf-8'
       PYTHONUTF8: '1'
     steps:
@@ -134,6 +135,22 @@ jobs:
         shell: pwsh
         run: |
           py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debug --godot-bin "$env:GODOT_BIN" --build-solutions
+
+      - name: Validate perf summary (hard gate)
+        if: always()
+        shell: pwsh
+        run: |
+          $date = Get-Date -Format 'yyyy-MM-dd'
+          $ciDir = "logs/ci/$date"
+          $perfDir = "logs/perf/$date"
+          New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
+
+          $summary = Join-Path $perfDir "summary.json"
+          $dbSummary = Join-Path $perfDir "db/db-perf-summary.json"
+          $summaryPath = $summary
+          if (-not (Test-Path $summaryPath)) { $summaryPath = $dbSummary }
+
+          py -3 scripts/python/validate_perf.py --summary-path "$summaryPath" --metric "DB_QUERY_P95" --threshold-ms "$env:PERF_P95_THRESHOLD_MS" --report "$ciDir/quality-gates-perf.json" --strict
 
       - name: Upload CI logs (always)
         if: always()

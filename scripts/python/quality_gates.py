@@ -7,12 +7,18 @@ Current minimal implementation:
   * dotnet tests + coverage (soft gate on coverage)
   * Godot self-check (hard gate)
   * encoding scan (soft gate)
+  * SQL static scan (hard gate)
+  * DB perf smoke (hard gate)
 
 Usage (Windows):
   py -3 scripts/python/quality_gates.py all \
     --solution Game.sln --configuration Debug \
     --godot-bin "C:\\Godot\\Godot_v4.5.1-stable_mono_win64_console.exe" \
     --build-solutions
+
+Optional gates (Task 23):
+  - --validate-audit: validate logs/ci/<date>/security-audit.jsonl (hard gate when enabled)
+  - --validate-perf: validate logs/perf/<date> perf summaries (hard gate when enabled)
 
 Exit codes:
   0  all hard gates passed
@@ -134,6 +140,57 @@ def validate_security_audit_logs() -> int:
     return proc.returncode
 
 
+def validate_perf_logs() -> int:
+    """Validate perf summary P95 thresholds and emit a JSON report.
+
+    Default behavior:
+    - Prefer logs/perf/<date>/summary.json when present.
+    - Fall back to logs/perf/<date>/db/db-perf-summary.json.
+    - Emit logs/ci/<date>/quality-gates-perf.json.
+    """
+
+    date = dt.date.today().strftime("%Y-%m-%d")
+    ci_dir = os.path.join("logs", "ci", date)
+    perf_dir = os.environ.get("PERF_LOG_ROOT") or os.path.join("logs", "perf", date)
+
+    summary_candidates = [
+        os.path.join(perf_dir, "summary.json"),
+        os.path.join(perf_dir, "db", "db-perf-summary.json"),
+    ]
+    summary_path = None
+    for p in summary_candidates:
+        if os.path.isfile(p):
+            summary_path = p
+            break
+
+    if not summary_path:
+        # Still call the validator to ensure a JSON report is produced (for CI evidence).
+        summary_path = summary_candidates[0]
+
+    report_path = os.path.join(ci_dir, "quality-gates-perf.json")
+
+    # Default: 20ms budget (override via env).
+    threshold_ms = os.environ.get("PERF_P95_THRESHOLD_MS") or os.environ.get("PERF_DB_P95_THRESHOLD_MS") or "20"
+    metric = os.environ.get("PERF_P95_METRIC") or "DB_QUERY_P95"
+
+    args = [
+        "py",
+        "-3",
+        "scripts/python/validate_perf.py",
+        "--summary-path",
+        summary_path,
+        "--metric",
+        metric,
+        "--threshold-ms",
+        str(threshold_ms),
+        "--report",
+        report_path,
+        "--strict",
+    ]
+    proc = subprocess.run(args, text=True)
+    return proc.returncode
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -146,6 +203,7 @@ def main() -> int:
     p_all.add_argument("--gdunit-hard", action="store_true", help="run hard GdUnit set (Adapters/Config + Security)")
     p_all.add_argument("--smoke", action="store_true", help="run headless smoke (strict marker/DB check)")
     p_all.add_argument("--validate-audit", action="store_true", help="validate security-audit.jsonl format")
+    p_all.add_argument("--validate-perf", action="store_true", help="validate perf summary (P95 thresholds)")
 
     args = parser.parse_args()
 
@@ -170,9 +228,15 @@ def main() -> int:
         if args.validate_audit:
             audit_rc = validate_security_audit_logs()
             if audit_rc != 0:
-                print("[WARNING] Security audit log validation failed (non-blocking)", file=sys.stderr)
-                # Soft gate for now (non-blocking).
-                # hard_failed = True  # Can be promoted to hard gate later.
+                print("[ERROR] Security audit log validation failed", file=sys.stderr)
+                hard_failed = True
+
+        # 5) Optional gate: perf summary validation (hard gate)
+        if args.validate_perf:
+            perf_rc = validate_perf_logs()
+            if perf_rc != 0:
+                print("[ERROR] Perf validation failed", file=sys.stderr)
+                hard_failed = True
 
         return 0 if not hard_failed else 1
 

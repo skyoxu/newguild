@@ -798,7 +798,7 @@
         "id": "23",
         "title": "性能 P95 与审计 JSONL 校验",
         "description": "根据 Phase-13-Quality-Gates-Backlog.md B4，将性能 P95 阈值与 security-audit.jsonl 的结构校验纳入 quality_gates.py，实现对 logs/perf/summary.json 与logs/ci/<date>/security-audit.jsonl 的自动化检查。",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "7",
