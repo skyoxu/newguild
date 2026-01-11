@@ -64,7 +64,8 @@ public class GameStateManagerTests
 
         mgr.SetState(MakeState(level:2), MakeConfig());
         var id1 = await mgr.SaveGameAsync("slot1");
-        Assert.Contains("game.save.created", seen);
+        Assert.Contains("core.save.requested", seen);
+        Assert.Contains("core.save.completed", seen);
         Assert.True(store.Snapshot.ContainsKey(id1));
         Assert.StartsWith("gz:", store.Snapshot[id1]);
 

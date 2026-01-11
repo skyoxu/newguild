@@ -9,8 +9,16 @@ ADR-Refs:
   - ADR-0005
 Test-Refs:
   - Game.Core.Tests/Contracts/DomainEventTests.cs
+  - Game.Core.Tests/Domain/PersistenceContractsTests.cs
 Contracts-Refs:
   - Game.Core/Contracts/DomainEvent.cs
+  - Game.Core/Contracts/Persistence/SaveRequested.cs
+  - Game.Core/Contracts/Persistence/SaveCompleted.cs
+  - Game.Core/Contracts/Persistence/SaveFailed.cs
+  - Game.Core/Contracts/Persistence/LoadRequested.cs
+  - Game.Core/Contracts/Persistence/LoadCompleted.cs
+  - Game.Core/Contracts/Persistence/LoadFailed.cs
+  - Game.Core/Contracts/Persistence/StorageMigrationApplied.cs
 Status: Proposed
 ---
 
@@ -33,3 +41,13 @@ Status: Proposed
 示例：当前 Godot+C# 契约引用
 
 - 公会成员加入事件契约：`Game.Core/Contracts/Guild/GuildMemberJoined.cs`（per ADR-0020）
+
+示例：存档/读档（Save/Load）事件契约（per ADR-0004）
+
+- **SaveRequested** (`core.save.requested`)：`Game.Core/Contracts/Persistence/SaveRequested.cs`
+- **SaveCompleted** (`core.save.completed`)：`Game.Core/Contracts/Persistence/SaveCompleted.cs`
+- **SaveFailed** (`core.save.failed`)：`Game.Core/Contracts/Persistence/SaveFailed.cs`
+- **LoadRequested** (`core.load.requested`)：`Game.Core/Contracts/Persistence/LoadRequested.cs`
+- **LoadCompleted** (`core.load.completed`)：`Game.Core/Contracts/Persistence/LoadCompleted.cs`
+- **LoadFailed** (`core.load.failed`)：`Game.Core/Contracts/Persistence/LoadFailed.cs`
+- **StorageMigrationApplied** (`core.storage.migration.applied`)：`Game.Core/Contracts/Persistence/StorageMigrationApplied.cs`
