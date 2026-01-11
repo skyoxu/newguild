@@ -487,9 +487,34 @@
         "details": "Story: PRD-GUILD-MANAGER-T3-MEMBER-MANAGEMENT\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供成员 roster 的模型与操作（至少包含：加入/退出、角色变更、踢出），并包含必要的边界校验（例如：重复成员、无效角色、无权限变更）。; 成员变更通过领域事件对外发布（例如 core.guild.member.joined / left / role_changed），事件类型常量与字段定义落盘到 Game.Core/Contracts 并遵循 ADR-0004。; Game.Godot 的 GuildScreen 能展示 roster，并在收到事件后更新 UI；UI 操作通过适配层调用核心命令，不直接修改核心状态。; 至少提供一组 xUnit 单测覆盖 roster 关键状态迁移与事件生成；如有 GdUnit4，则补一条 UI 冒烟验证“事件驱动刷新”。\nTest Strategy: xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。; GdUnit4（可选）：启动 GuildScreen 场景，模拟成员变更事件并断言 UI 列表刷新与关键按钮可用性。\nLabels: ui; guild; member; roster\nOwner: architecture\nLayer: adapter",
         "testStrategy": "xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。\nGdUnit4（可选）：启动 GuildScreen 场景，模拟成员变更事件并断言 UI 列表刷新与关键按钮可用性。",
         "complexity": 6,
-        "recommendedSubtasks": 0,
+        "recommendedSubtasks": 2,
         "expansionPrompt": "Break down this task into small, testable slices focused on playable loops.",
-        "subtasks": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Persist roster state to SQLite (schema + mapping)",
+            "description": "Introduce/extend SQLite tables needed for roster/member management and define deterministic mapping from Core models to storage.",
+            "dependencies": [],
+            "details": "When roster storage schema changes, bump schema_version (id=1) and keep migrations idempotent. Security baseline per ADR-0019.",
+            "status": "pending",
+            "testStrategy": "xUnit: roster persistence round-trip; negative cases; migration bump verified via schema_version.",
+            "parentId": "13",
+            "updatedAt": "2026-01-07T18:25:01.169Z"
+          },
+          {
+            "id": 2,
+            "title": "Add migration notes for roster schema evolution",
+            "description": "Define ordered migration steps for roster-related schema evolution and validate replay-safety.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use existing SchemaMigrationRunner as the SSoT mechanism; ensure upgrade path is deterministic and safe to re-run.",
+            "status": "pending",
+            "testStrategy": "xUnit: upgrade path from old schema version to latest; verify schema_version updated correctly.",
+            "parentId": "13",
+            "updatedAt": "2026-01-07T18:25:01.169Z"
+          }
+        ],
         "adrRefs": [
           "ADR-0004",
           "ADR-0005",
@@ -518,9 +543,34 @@
         "details": "Story: PRD-GUILD-MANAGER-T3-RECRUITMENT\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供 RecruitmentSystem（或等价服务），支持“申请加入/审批/拒绝/撤回”并能驱动成员变更。; 流程关键节点产生领域事件（例如 core.guild.recruitment.applied / approved / rejected 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。; Game.Godot 提供最小 UI 或调试入口以驱动招募流程（至少覆盖：发起申请与审批一次）。; xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。\nTest Strategy: xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。; GdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。\nLabels: ui; guild; recruitment; simulation\nOwner: architecture\nLayer: adapter",
         "testStrategy": "xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。\nGdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。",
         "complexity": 6,
-        "recommendedSubtasks": 0,
+        "recommendedSubtasks": 2,
         "expansionPrompt": "Break down this task into small, testable slices focused on playable loops.",
-        "subtasks": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Persist recruitment state to SQLite (schema + mapping)",
+            "description": "Introduce/extend SQLite tables needed for recruitment workflow and define deterministic mapping from Core services/state to storage.",
+            "dependencies": [],
+            "details": "When recruitment storage schema changes, bump schema_version (id=1) and keep migrations idempotent. Security baseline per ADR-0019.",
+            "status": "pending",
+            "testStrategy": "xUnit: recruitment persistence round-trip; main flow + error flow; migration bump verified via schema_version.",
+            "parentId": "14",
+            "updatedAt": "2026-01-07T18:25:01.169Z"
+          },
+          {
+            "id": 2,
+            "title": "Add migration notes for recruitment schema evolution",
+            "description": "Define ordered migration steps for recruitment-related schema evolution and validate replay-safety.",
+            "dependencies": [
+              1
+            ],
+            "details": "Use existing SchemaMigrationRunner as the SSoT mechanism; ensure upgrade path is deterministic and safe to re-run.",
+            "status": "pending",
+            "testStrategy": "xUnit: upgrade path from old schema version to latest; verify schema_version updated correctly.",
+            "parentId": "14",
+            "updatedAt": "2026-01-07T18:25:01.169Z"
+          }
+        ],
         "adrRefs": [
           "ADR-0004",
           "ADR-0005",
@@ -862,7 +912,7 @@
         "id": "25",
         "title": "T3 Save/Load + Schema Migration（Core + SQLite）",
         "description": "实现跨会话可玩性：在 Game.Core 建立 Save/Load 与 schema version/migration 机制，并通过 SqliteDataStore 落地到 user:// SQLite；错误脱敏与审计遵循 ADR-0019。",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "10",
@@ -870,10 +920,10 @@
           "12",
           "20"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-DataSchema.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.storage.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contractRefs.\n",
+        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-DataSchema.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.save.format.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contractRefs.\n",
         "testStrategy": "Use TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/*.",
         "complexity": 8,
-        "recommendedSubtasks": 7,
+        "recommendedSubtasks": 5,
         "expansionPrompt": "Break down into small, testable slices focused on persistent playable loops.",
         "subtasks": [
           {
@@ -882,85 +932,59 @@
             "description": "Define minimal DTOs/interfaces and event type constants for save/load and migrations in Game.Core/Contracts (no Godot deps).",
             "dependencies": [],
             "details": "Add contract files and align event naming to ADR-0004. Update overlay references only, do not duplicate thresholds.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "xUnit compile-level tests for contracts + event type constants.",
             "parentId": "25",
             "updatedAt": "2026-01-08T17:13:31"
           },
           {
             "id": 2,
-            "title": "Implement schema version table and migration runner",
-            "description": "Add migration runner that can detect current schema version and apply ordered, idempotent migrations.",
-            "dependencies": [
-              1
-            ],
-            "details": "Store schema version in SQLite. Migrations must be replay-safe and produce audit entries on failure.",
-            "status": "pending",
-            "testStrategy": "xUnit migration tests: fresh DB, upgrade path, failure path, idempotency.",
-            "parentId": "25",
-            "updatedAt": "2026-01-08T17:13:31"
-          },
-          {
-            "id": 3,
-            "title": "Persist core T3 models (roster + recruitment)",
-            "description": "Define minimal persistence mapping for roster/recruitment state required by Tasks 13/14.",
-            "dependencies": [
-              2
-            ],
-            "details": "Keep mapping deterministic. Avoid leaking SQL/path details in exceptions in secure mode.",
-            "status": "pending",
-            "testStrategy": "xUnit round-trip tests for minimal dataset.",
-            "parentId": "25",
-            "updatedAt": "2026-01-08T17:13:31"
-          },
-          {
-            "id": 4,
             "title": "Implement Save operation via SqliteDataStore",
             "description": "Implement save snapshot writing (transactional) and emit save events.",
             "dependencies": [
-              3
+              1
             ],
             "details": "Only user:// paths. Enforce extension whitelist + size limit. Audit on rejection/failure.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "xUnit: save success/failure; verify audit jsonl format on failures.",
             "parentId": "25",
             "updatedAt": "2026-01-08T17:13:31"
           },
           {
-            "id": 5,
+            "id": 3,
             "title": "Implement Load operation and recovery behavior",
             "description": "Implement load snapshot reading and apply to core state; handle corrupted DB gracefully.",
             "dependencies": [
-              4
+              2
             ],
             "details": "Recovery path must not crash game loop; emit load.failed with sanitized reason.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "xUnit: corrupted/missing db; ensure sanitized errors in secure mode.",
             "parentId": "25",
             "updatedAt": "2026-01-08T17:13:31"
           },
           {
-            "id": 6,
+            "id": 4,
             "title": "Integrate security + audit logging requirements",
             "description": "Ensure all reject/failure paths produce ADR-0019 compliant audit lines and never leak sensitive info in Release/secure.",
             "dependencies": [
-              5
+              3
             ],
             "details": "Validate file path normalization, traversal reject, percent-encoding edge cases, and JSONL format.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "xUnit: decision table coverage for sanitization and audit event generation.",
             "parentId": "25",
             "updatedAt": "2026-01-08T17:13:31"
           },
           {
-            "id": 7,
+            "id": 5,
             "title": "Add GdUnit4 smoke for save/load entry points",
             "description": "Add headless Godot smoke that writes and reads a save in user:// and verifies non-empty audit trail.",
             "dependencies": [
-              6
+              4
             ],
             "details": "Use scripts/python/run_gdunit.py and ensure reports/logs are archived under logs/e2e.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "GdUnit4: one suite under Tests.Godot/tests/Adapters/Db.",
             "parentId": "25",
             "updatedAt": "2026-01-08T17:13:31"
@@ -994,7 +1018,7 @@
         "dependencies": [
           "25"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.storage.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contractRefs.\n",
+        "details": "Story: PRD-GUILD-MANAGER-T3-SAVELOAD\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018; ADR-0019\nChapters: CH01; CH02; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nContract Refs: core.save.requested; core.save.completed; core.save.failed; core.load.requested; core.load.completed; core.load.failed; core.save.format.migration.applied\nAcceptance: See view tasks (tasks_back/tasks_gameplay) for SSoT acceptance and contractRefs.\n",
         "testStrategy": "Use TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/*.",
         "complexity": 6,
         "recommendedSubtasks": 0,

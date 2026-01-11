@@ -36,6 +36,13 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         _ = GetSecurityFileAdapter();
     }
 
+    public bool IsOpen()
+    {
+        if (_backend == Backend.Plugin)
+            return _pluginDb != null;
+        return _conn != null;
+    }
+
     private SecurityFileAdapter? GetSecurityFileAdapter()
     {
         if (_securityFileAdapter != null) return _securityFileAdapter;
@@ -149,6 +156,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         {
             _backend = Backend.Plugin;
             if (isNew) TryInitSchema();
+            EnsureSchemaVersionMetaBestEffort();
             return;
         }
 
@@ -173,6 +181,44 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         cmd.ExecuteNonQuery();
         GD.Print("[DB] backend=managed (Microsoft.Data.Sqlite)");
         if (isNew) TryInitSchema();
+        EnsureSchemaVersionMetaBestEffort();
+    }
+
+    private void EnsureSchemaVersionMetaBestEffort()
+    {
+        try
+        {
+            if (!TableExists("schema_version"))
+                return;
+
+            var cols = Query(SqlStatement.NoParameters("PRAGMA table_info(schema_version);"));
+            var hasId = cols.Any(r =>
+            {
+                if (!r.TryGetValue("name", out var n) || n is null) return false;
+                return string.Equals(n.ToString(), "id", StringComparison.OrdinalIgnoreCase);
+            });
+            if (hasId)
+                return;
+
+            // Legacy schema_version: version INTEGER PRIMARY KEY (and optional extra columns).
+            var rows = Query(SqlStatement.NoParameters("SELECT MAX(version) AS v FROM schema_version;"));
+            var vObj = rows.Count > 0 && rows[0].TryGetValue("v", out var v) ? v : null;
+            var maxVersion = 1;
+            if (vObj != null)
+            {
+                try { maxVersion = Convert.ToInt32(vObj); } catch { maxVersion = 1; }
+            }
+            if (maxVersion < 1) maxVersion = 1;
+
+            Execute(SqlStatement.NoParameters("ALTER TABLE schema_version RENAME TO schema_version_legacy;"));
+            Execute(SqlStatement.NoParameters("CREATE TABLE schema_version (id INTEGER PRIMARY KEY CHECK (id = 1), version INTEGER NOT NULL);"));
+            Execute(SqlStatement.Positional("INSERT INTO schema_version(id, version) VALUES(1, @0);", maxVersion));
+            Execute(SqlStatement.NoParameters("DROP TABLE schema_version_legacy;"));
+        }
+        catch
+        {
+            // Best-effort: schema meta normalization should never block DB open.
+        }
     }
 
     public void Close()

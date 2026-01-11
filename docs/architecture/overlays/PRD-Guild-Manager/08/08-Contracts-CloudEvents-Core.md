@@ -18,7 +18,7 @@ Contracts-Refs:
   - Game.Core/Contracts/Persistence/LoadRequested.cs
   - Game.Core/Contracts/Persistence/LoadCompleted.cs
   - Game.Core/Contracts/Persistence/LoadFailed.cs
-  - Game.Core/Contracts/Persistence/StorageMigrationApplied.cs
+  - Game.Core/Contracts/Persistence/SaveFormatMigrationApplied.cs
 Status: Proposed
 ---
 
@@ -50,4 +50,4 @@ Status: Proposed
 - **LoadRequested** (`core.load.requested`)：`Game.Core/Contracts/Persistence/LoadRequested.cs`
 - **LoadCompleted** (`core.load.completed`)：`Game.Core/Contracts/Persistence/LoadCompleted.cs`
 - **LoadFailed** (`core.load.failed`)：`Game.Core/Contracts/Persistence/LoadFailed.cs`
-- **StorageMigrationApplied** (`core.storage.migration.applied`)：`Game.Core/Contracts/Persistence/StorageMigrationApplied.cs`
+- **SaveFormatMigrationApplied** (`core.save.format.migration.applied`)：`Game.Core/Contracts/Persistence/SaveFormatMigrationApplied.cs`
