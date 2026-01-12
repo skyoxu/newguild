@@ -130,4 +130,5 @@ node_modules/
 
 # Generated runtime mount for Tests.Godot (junction to ../Game.Godot)
 Tests.Godot/Game.Godot/
+Tests.Godot/Game.Core/
 

@@ -47,6 +47,9 @@ public partial class DataStoreAdapter : Node, IDataStore
     private static string GetSavePath() => "user://saves";
     private static string PathFor(string key) => $"{GetSavePath()}/{MakeSafe(key)}.json";
 
+    private static bool IsSecureMode() =>
+        (System.Environment.GetEnvironmentVariable("GD_SECURE_MODE") ?? string.Empty).Trim() == "1";
+
     private static string GetConfiguredDbPath()
     {
         var raw = System.Environment.GetEnvironmentVariable(DataStoreDbPathEnv);
@@ -145,42 +148,74 @@ public partial class DataStoreAdapter : Node, IDataStore
     }
 
     // Synchronous helpers for GDScript tests
-    public void SaveSync(string key, string json) => SaveAsync(key, json).Wait();
-    public string? LoadSync(string key) => LoadAsync(key).Result;
-    public void DeleteSync(string key) => DeleteAsync(key).Wait();
+    public void SaveSync(string key, string json) => SaveAsync(key, json).GetAwaiter().GetResult();
+    public string? LoadSync(string key) => LoadAsync(key).GetAwaiter().GetResult();
+    public void DeleteSync(string key) => DeleteAsync(key).GetAwaiter().GetResult();
+
+    public bool TrySaveSync(string key, string json)
+    {
+        try
+        {
+            SaveSync(key, json);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"[DataStoreAdapter] Save failed: {ex.GetType().Name}");
+            return false;
+        }
+    }
+
+    public string? TryLoadSync(string key)
+    {
+        try
+        {
+            return LoadSync(key);
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"[DataStoreAdapter] Load failed: {ex.GetType().Name}");
+            return null;
+        }
+    }
 
     private Task SaveFileAsync(string key, string json)
     {
         var sec = GetSecurityFileAdapter();
         if (sec == null)
         {
-            GD.PrintErr("[DataStoreAdapter] SecurityFileAdapter not initialized");
-            return Task.CompletedTask;
+            throw new InvalidOperationException("SecurityFileAdapter not initialized");
         }
 
-        var saveDirPath = sec.ValidateWritePath(GetSavePath());
-        if (saveDirPath == null)
+        // Validate a file path under the save directory to keep allowlist checks consistent.
+        // Then create the directory (best-effort but not silent) to avoid implicit failures.
+        var probePath = PathFor("__dir_probe__");
+        var validatedProbePath = sec.ValidateWritePath(probePath);
+        if (validatedProbePath == null)
         {
-            GD.PrintErr($"[DataStoreAdapter] Invalid save directory path: {GetSavePath()}");
-            return Task.CompletedTask;
+            var msg = IsSecureMode() ? "Save path not allowed." : $"Save path not allowed: {probePath}";
+            throw new InvalidOperationException(msg);
         }
 
-        DirAccess.MakeDirRecursiveAbsolute(saveDirPath.Value);
+        var saveDirAbs = ProjectSettings.GlobalizePath(GetSavePath());
+        var mkErr = DirAccess.MakeDirRecursiveAbsolute(saveDirAbs);
+        if (mkErr != Error.Ok)
+            throw new InvalidOperationException("Save directory creation failed.");
 
         var path = PathFor(key);
         var validatedPath = sec.ValidateWritePath(path);
         if (validatedPath == null)
         {
-            GD.PrintErr($"[DataStoreAdapter] Write access denied: {path}");
-            return Task.CompletedTask;
+            var msg = IsSecureMode() ? "Save path not allowed." : $"Save path not allowed: {path}";
+            throw new InvalidOperationException(msg);
         }
 
         using var f = FileAccess.Open(validatedPath.Value, FileAccess.ModeFlags.Write);
-        if (f != null)
-        {
-            f.StoreString(json);
-            f.Flush();
-        }
+        if (f == null)
+            throw new InvalidOperationException("Save write failed.");
+
+        f.StoreString(json);
+        f.Flush();
         return Task.CompletedTask;
     }
 
@@ -190,22 +225,21 @@ public partial class DataStoreAdapter : Node, IDataStore
         var sec = GetSecurityFileAdapter();
         if (sec == null)
         {
-            GD.PrintErr("[DataStoreAdapter] SecurityFileAdapter not initialized");
-            return Task.FromResult<string?>(null);
+            throw new InvalidOperationException("SecurityFileAdapter not initialized");
         }
 
         var validatedPath = sec.ValidateReadPath(path);
         if (validatedPath == null)
         {
-            GD.PrintErr($"[DataStoreAdapter] Read access denied: {path}");
-            return Task.FromResult<string?>(null);
+            var msg = IsSecureMode() ? "Load path not allowed." : $"Load path not allowed: {path}";
+            throw new InvalidOperationException(msg);
         }
 
         if (!FileAccess.FileExists(validatedPath.Value))
             return Task.FromResult<string?>(null);
 
         using var f = FileAccess.Open(validatedPath.Value, FileAccess.ModeFlags.Read);
-        if (f == null) return Task.FromResult<string?>(null);
+        if (f == null) throw new InvalidOperationException("Load read failed.");
         return Task.FromResult<string?>(f.GetAsText());
     }
 
@@ -215,15 +249,14 @@ public partial class DataStoreAdapter : Node, IDataStore
         var sec = GetSecurityFileAdapter();
         if (sec == null)
         {
-            GD.PrintErr("[DataStoreAdapter] SecurityFileAdapter not initialized");
-            return Task.CompletedTask;
+            throw new InvalidOperationException("SecurityFileAdapter not initialized");
         }
 
         var validatedPath = sec.ValidateWritePath(path);
         if (validatedPath == null)
         {
-            GD.PrintErr($"[DataStoreAdapter] Delete access denied: {path}");
-            return Task.CompletedTask;
+            var msg = IsSecureMode() ? "Delete path not allowed." : $"Delete path not allowed: {path}";
+            throw new InvalidOperationException(msg);
         }
 
         if (FileAccess.FileExists(validatedPath.Value))
