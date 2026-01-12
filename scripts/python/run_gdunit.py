@@ -136,23 +136,32 @@ def ensure_test_runtime_mount(project: str, runtime_dir: str = "Game.Godot") -> 
     """Ensure Tests.Godot/<runtime_dir> is a junction to repo_root/<runtime_dir>.
 
     This prevents drift between test runtime scripts/resources and the real runtime folder.
+    We also mount Game.Core into Tests.Godot so GdUnit tests can reference res://Game.Core/**.
     """
     root = repo_root()
     proj = (root / project).resolve()
     runtime = (root / runtime_dir).resolve()
+    core = (root / "Game.Core").resolve()
     if not proj.is_dir() or not runtime.is_dir():
         return 0, "SKIP_PREPARE: project/runtime not found\n"
+    if not core.is_dir():
+        return 0, "SKIP_PREPARE: Game.Core not found\n"
 
-    cmd = [
-        sys.executable,
-        str(root / "scripts" / "python" / "prepare_gd_tests.py"),
-        "--project",
-        project,
-        "--runtime",
-        runtime_dir,
-    ]
-    rc, out = run_cmd(cmd, cwd=str(root), timeout=60_000, env=os.environ.copy())
-    return rc, out
+    outs = []
+    for rt in (runtime_dir, "Game.Core"):
+        cmd = [
+            sys.executable,
+            str(root / "scripts" / "python" / "prepare_gd_tests.py"),
+            "--project",
+            project,
+            "--runtime",
+            rt,
+        ]
+        rc, out = run_cmd(cmd, cwd=str(root), timeout=60_000, env=os.environ.copy())
+        outs.append(out)
+        if rc != 0:
+            return rc, "".join(outs)
+    return 0, "".join(outs)
 
 
 def main():

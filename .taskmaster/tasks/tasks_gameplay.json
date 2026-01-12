@@ -679,7 +679,6 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Tests.Godot/tests/UI/test_save_load_entry_smoke.gd",
       "Tests.Godot/tests/UI/test_hud_save_load_entry_triggers_save_and_load.gd",
       "Tests.Godot/tests/Integration/Security/test_security_save_load_failure_audit_and_sanitization.gd",
       "Tests.Godot/tests/UI/test_hud_save_load_status_from_contract_events.gd"

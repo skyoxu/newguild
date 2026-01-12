@@ -49,10 +49,40 @@ func _on_save_load() -> void:
     if ds == null:
         _label.text = "DataStore not found"
         return
+    var bus = get_node_or_null("/root/EventBus")
     var key = "demo_save"
     var json = "{\"ts\":" + str(Time.get_unix_time_from_system()) + "}"
-    ds.SaveSync(key, json)
-    var loaded = ds.LoadSync(key)
+    var payload := JSON.stringify({"saveId": key})
+    if bus != null and bus.has_method("PublishSimple"):
+        bus.PublishSimple("core.save.requested", "ui", payload)
+
+    var saved_ok := false
+    if ds.has_method("TrySaveSync"):
+        saved_ok = bool(ds.TrySaveSync(key, json))
+    else:
+        ds.SaveSync(key, json)
+        saved_ok = true
+
+    if bus != null and bus.has_method("PublishSimple"):
+        if saved_ok:
+            bus.PublishSimple("core.save.completed", "ui", payload)
+        else:
+            bus.PublishSimple("core.save.failed", "ui", payload)
+
+    if bus != null and bus.has_method("PublishSimple"):
+        bus.PublishSimple("core.load.requested", "ui", payload)
+
+    var loaded = null
+    if ds.has_method("TryLoadSync"):
+        loaded = ds.TryLoadSync(key)
+    else:
+        loaded = ds.LoadSync(key)
+
+    if bus != null and bus.has_method("PublishSimple"):
+        if loaded != null:
+            bus.PublishSimple("core.load.completed", "ui", payload)
+        else:
+            bus.PublishSimple("core.load.failed", "ui", payload)
     _label.text = "Loaded: " + str(loaded)
 
 func _on_log() -> void:
