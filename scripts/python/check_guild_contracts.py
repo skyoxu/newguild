@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 class ContractExpectation:
     path: str
     event_type: str
-    namespace: str = "Game.Contracts.Guild"
+    namespace: str = "Game.Core.Contracts.Guild"
 
 
 EXPECTED: List[ContractExpectation] = [

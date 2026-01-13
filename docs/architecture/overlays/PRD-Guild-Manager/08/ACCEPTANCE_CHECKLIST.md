@@ -18,16 +18,18 @@ ADR-Refs:
   - ADR-0020  # Contracts SSoT 位置标准化
   - ADR-0023  # Settings SSoT = ConfigFile（user://）
 Test-Refs:
-  # 具体项目应将占位路径替换为真实测试文件
+  # 当前仓库真实存在的测试文件（用于存在性校验）
   - Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs
   - Game.Core.Tests/Domain/GuildCoreTests.cs
   - Game.Core.Tests/Domain/EventEngineTests.cs
   - Game.Core.Tests/Domain/GameTurnSystemTests.cs
-  - Tests.Godot/tests/Scenes/test_guild_main_scene.gd
   - Tests.Godot/tests/Scenes/test_main_scene_smoke.gd
-  - Tests.Godot/tests/Integration/test_guild_workflow.gd
-  - logs/ci/<date>/ci-pipeline-summary.json
-  - logs/e2e/<date>/smoke/selfcheck-summary.json
+  - Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd
+  - Tests.Godot/tests/Integration/test_guild_vertical_slice.gd
+Artifact-Refs:
+  # 产物/门禁锚点：允许占位；不参与“测试文件必须存在”的硬规则
+  - logs/ci/<YYYY-MM-DD>/ci-pipeline-summary.json
+  - logs/e2e/<YYYY-MM-DD>/smoke/selfcheck-summary.json
 ---
 
 > 说明：本清单用于 **newguild（Godot 4.5 + C# 模板）** 下的 “PRD-Guild-Manager 公会管理器” 功能纵切验收骨架。
@@ -41,6 +43,25 @@ Test-Refs:
 不在本清单中重复具体数值或策略，避免与 Base/ADR 口径漂移。
 
 ---
+
+## Test-Refs（当前仓库真实存在）
+
+> 说明：此处列出的路径应 **真实存在于仓库**（例如 `.cs`/`.gd`），用于门禁做“存在性”校验；不要把 `logs/**` 这类运行产物写进 Test-Refs。
+
+- `Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs`
+- `Game.Core.Tests/Domain/GuildCoreTests.cs`
+- `Game.Core.Tests/Domain/EventEngineTests.cs`
+- `Game.Core.Tests/Domain/GameTurnSystemTests.cs`
+- `Tests.Godot/tests/Scenes/test_main_scene_smoke.gd`
+- `Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd`
+- `Tests.Godot/tests/Integration/test_guild_vertical_slice.gd`
+
+## Artifact-Refs（允许占位，不参与存在性校验）
+
+> 说明：产物/门禁锚点允许占位（例如 `<YYYY-MM-DD>`），用于帮助定位 CI 输出与取证归档；不参与“测试文件必须存在”的硬规则。
+
+- `logs/ci/<YYYY-MM-DD>/ci-pipeline-summary.json`
+- `logs/e2e/<YYYY-MM-DD>/smoke/selfcheck-summary.json`
 
 ## 一、文档完整性验收
 
