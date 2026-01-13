@@ -2,8 +2,8 @@
 PRD-ID: PRD-Guild-Manager
 PRD-Refs:
   - docs/prd.txt
-Story-ID: PRD-NEWGUILD-VS-0001
-Title: Feature Slice — Guild Manager（功能纵切）
+Story-ID: PRD-GUILD-MANAGER
+Title: Feature Slice - Guild Manager（功能纵切总览）
 Status: Active
 ADR-Refs:
   - ADR-0018
@@ -21,39 +21,51 @@ Test-Refs:
   - Game.Core.Tests/Domain/GameLoopTests.cs
   # 场景与公会 UI（GdUnit4）
   - Tests.Godot/tests/Scenes/test_main_scene_smoke.gd
-  - Tests.Godot/tests/Scenes/test_guild_main_scene.gd
   - Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd
-  - Tests.Godot/tests/Integration/test_guild_workflow.gd
-  # CI / Smoke 汇总
-  - logs/ci/<date>/ci-pipeline-summary.json
-  - logs/e2e/<date>/smoke/selfcheck-summary.json
+  - Tests.Godot/tests/Integration/test_guild_vertical_slice.gd
+Artifact-Refs:
+  # 产物/门禁锚点：允许占位；不参与“测试文件必须存在”的硬规则
+  - logs/ci/<YYYY-MM-DD>/ci-pipeline-summary.json
+  - logs/e2e/<YYYY-MM-DD>/smoke/selfcheck-summary.json
 ---
 
-本页仅作为“功能纵切（08 章）”对“公会管理器”模块的实现约束与测试挂钩索引：
+本页为 PRD-Guild-Manager 的“功能纵切总览”审计锚点，用于约束：
 
-- 阈值/策略/门禁等跨切面口径仅"引用"Base 与 ADR，不在 08 复制：
-  - 安全与 Godot 基线：参见 CH02 与 ADR‑0019
-  - 事件/契约统一：参见 CH01/CH03 与 ADR‑0004
-  - 质量门禁/发布健康与性能预算：参见 CH03 与 ADR‑0005、ADR‑0015
-- 具体事件/DTO 与端口定义一律以 `Game.Core/Contracts/<Module>/` 为 SSoT（per ADR-0020）；08 仅登记功能影响与测试范围。
-- 测试入口按 Test‑Refs 落地（xUnit + GdUnit4），CI 会据此做就地验收与追溯。
+- 纵切页面如何落盘到 `docs/architecture/overlays/PRD-Guild-Manager/08/`
+- 契约（领域事件/DTO/接口）如何落盘到 `Game.Core/Contracts/**`（per ADR-0020）
+- 视图任务（`tasks_back.json`/`tasks_gameplay.json`）如何引用 Overlay（不把 `.taskmaster/tasks/tasks_newguild.json` 当门禁输入）
 
-示例：当前 Godot+C# 契约引用
+## 跨切面口径（只引用，不复制）
 
-- 公会成员加入事件契约：`Game.Core/Contracts/Guild/GuildMemberJoined.cs`
+- 安全：Base/CH02 + ADR-0019
+- 事件与契约：Base/CH01/CH03 + ADR-0004
+- 质量门禁：ADR-0005
+- 性能预算：ADR-0015（如涉及）
 
-当前 T2 最小事件集合（规划）：
+## 纵切拆分建议（与视图任务 story_id 对齐）
 
-- 公会生命周期事件：
-  - `core.guild.created`（GuildCreated，契约位置规划：Game.Core/Contracts/Guild/GuildCreated.cs）
-  - `core.guild.member.joined`（GuildMemberJoined，契约位置：Game.Core/Contracts/Guild/GuildMemberJoined.cs）
-  - `core.guild.member.left`（GuildMemberLeft，契约位置规划：Game.Core/Contracts/Guild/GuildMemberLeft.cs）
+为避免所有任务都指向同一个页面导致审计失真，建议按 story_id 拆页（本目录已预置索引页）：
 
-功能范围要点（示例）：
+- Core
+  - `08-FeatureSlice-Core-Event-Engine.md`（PRD-GUILD-MANAGER-CORE-EVENT-ENGINE）
+  - `08-FeatureSlice-Core-Game-Loop.md`（PRD-GUILD-MANAGER-CORE-GAME-LOOP）
+  - `08-FeatureSlice-Core-AI-Coordinator.md`（PRD-GUILD-MANAGER-CORE-AI-COORDINATOR）
+- T3
+  - `08-FeatureSlice-T3-Member-Management.md`（PRD-GUILD-MANAGER-T3-MEMBER-MANAGEMENT）
+  - `08-FeatureSlice-T3-Recruitment.md`（PRD-GUILD-MANAGER-T3-RECRUITMENT）
+  - `08-FeatureSlice-T3-AI-Ecosystem.md`（PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM）
+  - `08-FeatureSlice-T3-PVE-Raid.md`（PRD-GUILD-MANAGER-T3-PVE-RAID）
+  - `08-FeatureSlice-T3-Social.md`（PRD-GUILD-MANAGER-T3-SOCIAL）
+  - `08-FeatureSlice-T3-Media-Reputation.md`（PRD-GUILD-MANAGER-T3-MEDIA）
+  - `08-FeatureSlice-T3-SaveLoad-UI.md`（PRD-GUILD-MANAGER-T3-SAVELOAD-UI）
 
-- 公会核心：建团/解散/权限角色
-- 活动系统：团队副本/匹配与结算流程
-- 成员管理：邀请/审批/踢出与日志
-- 世界生成：关卡种子与资源刷新（如有）
+## 契约引用示例（已存在）
 
-注：如本模块引入新的事件或契约，请先更新 `Game.Core/Contracts/<Module>/`（per ADR-0020），再在 Overlay/08 以"引用"方式登记变更，并补充/更新 Test‑Refs。
+- `Game.Core/Contracts/Guild/GuildMemberJoined.cs`
+
+## 变更规则（止损）
+
+如本模块引入新的领域事件/DTO/接口：
+
+1. 先落盘到 `Game.Core/Contracts/<Module>/**`（强类型，禁止 Godot 依赖）。
+2. 再在 Overlay/08 对应纵切页登记“影响范围 + 验收/Test-Refs 挂钩”，并通过 `validate_contracts.py` 校验回链。

@@ -28,6 +28,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
@@ -35,7 +36,8 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Event-Engine.md"
     ],
     "labels": [
       "core",
@@ -99,6 +101,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
@@ -106,7 +109,8 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md"
     ],
     "labels": [
       "core",
@@ -172,6 +176,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
@@ -179,7 +184,8 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md"
     ],
     "labels": [
       "ui",
@@ -243,6 +249,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
@@ -250,7 +257,8 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
     ],
     "labels": [
       "ui",
@@ -312,6 +320,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
@@ -319,7 +328,8 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-AI-Ecosystem.md"
     ],
     "labels": [
       "core",
@@ -380,6 +390,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
@@ -387,7 +398,8 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-AI-Coordinator.md"
     ],
     "labels": [
       "core",
@@ -453,6 +465,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
@@ -460,7 +473,8 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
     ],
     "labels": [
       "core",
@@ -520,6 +534,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
@@ -527,7 +542,8 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md"
     ],
     "labels": [
       "core",
@@ -589,6 +605,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
@@ -596,7 +613,8 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md"
     ],
     "labels": [
       "core",
@@ -661,11 +679,13 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-SaveLoad-UI.md"
     ],
     "labels": [
       "ui",

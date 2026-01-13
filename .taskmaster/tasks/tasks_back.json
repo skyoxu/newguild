@@ -187,6 +187,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -532,6 +533,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
@@ -727,6 +729,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
@@ -1588,6 +1591,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1650,6 +1654,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1708,6 +1713,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1764,6 +1770,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1820,6 +1827,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1877,6 +1885,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1937,6 +1946,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1998,12 +2008,14 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-DataSchema.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-DataSchema.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-SaveLoad-UI.md"
     ],
     "labels": [
       "save",

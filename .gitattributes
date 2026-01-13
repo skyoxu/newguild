@@ -1,7 +1,7 @@
 * text=auto eol=crlf
 
 # Text files (force as text with CRLF in working tree)
-*.md      text eol=crlf
+*.md      text eol=lf
 *.txt     text eol=crlf
 *.cs      text diff=csharp eol=crlf
 *.csproj  text eol=crlf
@@ -9,7 +9,7 @@
 *.gd      text eol=crlf
 *.tscn    text eol=crlf
 *.tres    text eol=crlf
-*.json    text eol=crlf
+*.json    text eol=lf
 *.yml     text eol=crlf
 *.yaml    text eol=crlf
 *.xml     text eol=crlf
