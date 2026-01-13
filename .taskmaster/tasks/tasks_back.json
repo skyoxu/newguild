@@ -217,9 +217,10 @@
     "taskmaster_exported": true,
     "taskmaster_id": 8,
     "contractRefs": [
-      "security.url_access.denied",
       "security.file_access.denied",
-      "security.process.denied"
+      "security.process.approved",
+      "security.process.denied",
+      "security.url_access.denied"
     ],
     "artifactRefs": [
       "logs/ci/<date>/security-audit.jsonl"
@@ -1616,10 +1617,11 @@
     "taskmaster_exported": true,
     "taskmaster_id": 9,
     "contractRefs": [
-      "core.game_turn.started",
       "core.game_turn.phase_changed",
+      "core.game_turn.started",
       "core.game_turn.week_advanced",
       "security.file_access.denied",
+      "security.process.approved",
       "security.process.denied",
       "security.url_access.denied"
     ],
@@ -1683,8 +1685,8 @@
     "taskmaster_exported": true,
     "taskmaster_id": 10,
     "contractRefs": [
-      "core.game_turn.started",
       "core.game_turn.phase_changed",
+      "core.game_turn.started",
       "core.game_turn.week_advanced"
     ],
     "artifactRefs": []
@@ -1909,10 +1911,11 @@
     ],
     "taskmaster_exported": false,
     "contractRefs": [
-      "core.game_turn.started",
       "core.game_turn.phase_changed",
+      "core.game_turn.started",
       "core.game_turn.week_advanced",
       "security.file_access.denied",
+      "security.process.approved",
       "security.process.denied",
       "security.url_access.denied"
     ],
@@ -2044,13 +2047,13 @@
     ],
     "taskmaster_exported": false,
     "contractRefs": [
-      "core.save.requested",
-      "core.save.completed",
-      "core.save.failed",
-      "core.load.requested",
       "core.load.completed",
       "core.load.failed",
-      "core.save.format.migration.applied"
+      "core.load.requested",
+      "core.save.completed",
+      "core.save.failed",
+      "core.save.format.migration.applied",
+      "core.save.requested"
     ],
     "artifactRefs": []
   },
