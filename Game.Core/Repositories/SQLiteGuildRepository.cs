@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Game.Core.Domain;
+using Game.Core.Persistence.Migrations;
 using Game.Core.Ports;
 
 namespace Game.Core.Repositories;
@@ -16,6 +17,15 @@ namespace Game.Core.Repositories;
 /// </summary>
 public class SQLiteGuildRepository : IGuildRepository
 {
+    /// <summary>
+    /// Schema version for the Guilds/GuildMembers tables managed by this repository.
+    /// Version strategy:
+    /// - Bump this number whenever the table structure or column semantics change.
+    /// - Add deterministic, idempotent migration steps before updating schema_version.
+    /// - Keep the migration path safe to re-run (ADR-0005/quality gates).
+    /// </summary>
+    private const int LatestGuildSchemaVersion = 1;
+
     private readonly ISQLiteDatabase _db;
     private bool _initialized;
 
@@ -50,6 +60,8 @@ public class SQLiteGuildRepository : IGuildRepository
                 FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE
             )
         "));
+
+        await SchemaMigrationRunner.EnsureLatestAsync(_db, LatestGuildSchemaVersion);
 
         _initialized = true;
     }
