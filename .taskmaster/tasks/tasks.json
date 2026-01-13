@@ -496,7 +496,7 @@
             "description": "Introduce/extend SQLite tables needed for roster/member management and define deterministic mapping from Core models to storage.",
             "dependencies": [],
             "details": "When roster storage schema changes, bump schema_version (id=1) and keep migrations idempotent. Security baseline per ADR-0019.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "xUnit: roster persistence round-trip; negative cases; migration bump verified via schema_version.",
             "parentId": "13",
             "updatedAt": "2026-01-07T18:25:01.169Z"
@@ -508,8 +508,8 @@
             "dependencies": [
               1
             ],
-            "details": "Use existing SchemaMigrationRunner as the SSoT mechanism; ensure upgrade path is deterministic and safe to re-run.",
-            "status": "pending",
+            "details": "Use SchemaMigrationRunner as the schema_version SSoT mechanism. Version strategy documented in docs/architecture/overlays/PRD-Guild-Manager/08/08-Migrations-Guild-Roster.md.",
+            "status": "done",
             "testStrategy": "xUnit: upgrade path from old schema version to latest; verify schema_version updated correctly.",
             "parentId": "13",
             "updatedAt": "2026-01-07T18:25:01.169Z"

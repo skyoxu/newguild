@@ -26,9 +26,10 @@ public static class SchemaMigrationRunner
         if (scalar is null)
         {
             await db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
-                "INSERT INTO schema_version(id, version) VALUES(1,@version)",
+                "INSERT INTO schema_version(id, version) VALUES(@id,@version)",
                 new Dictionary<string, object?>
                 {
+                    ["@id"] = 1,
                     ["@version"] = latestVersion,
                 }
             ));
