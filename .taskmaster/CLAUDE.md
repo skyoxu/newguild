@@ -55,7 +55,7 @@ task-master generate                                         # Update task markd
 - `CLAUDE.md` - Auto-loaded context for Claude Code (this file)
 - `.claude/settings.json` - Claude Code tool allowlist and preferences
 - `.claude/commands/` - Custom slash commands for repeated workflows
-- `.mcp.json` - MCP server configuration (project-specific)
+- `mcp.example.json` - MCP server configuration example (copy into your user-level MCP config)
 
 ### Directory Structure
 
@@ -77,13 +77,13 @@ project/
 │   ├── settings.json      # Claude Code configuration
 │   └── commands/         # Custom slash commands
 ├── .env                  # API keys
-├── .mcp.json            # MCP configuration
+├── mcp.example.json     # MCP configuration example (user-level config is the SSoT)
 └── CLAUDE.md            # This file - auto-loaded by Claude Code
 ```
 
 ## MCP Integration
 
-Task Master provides an MCP server that Claude Code can connect to. Configure in `.mcp.json`:
+Task Master provides an MCP server that Claude Code can connect to. Add this configuration to your **user-level** MCP config (example in `mcp.example.json`):
 
 ```json
 {
@@ -358,7 +358,7 @@ task-master models --set-fallback gpt-4o-mini
 
 ### MCP Connection Issues
 
-- Check `.mcp.json` configuration
+- Check your user-level MCP configuration
 - Verify Node.js installation
 - Use `--mcp-debug` flag when starting Claude Code
 - Use CLI as fallback if MCP unavailable

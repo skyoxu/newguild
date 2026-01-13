@@ -95,6 +95,9 @@ __pycache__/
 
 # Local AI / analysis artifacts (do not version)
 claudedocs/
+.mcp.json
+.claude/mcp.json
+.codex/config.toml
 .mcp-server-context.md
 .serena/
 taskdoc/

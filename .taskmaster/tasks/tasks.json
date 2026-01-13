@@ -476,7 +476,7 @@
         "id": "13",
         "title": "T3 成员管理 UI（Roster / Member Management）",
         "description": "实现公会成员管理与 roster 展示的核心能力：在 Game.Core 建模成员列表、角色与变更命令，在 Game.Godot 提供可操作的 GuildScreen UI（查看成员、提升/降级、踢出/退出等）。事件发布遵循 ADR-0004，避免 UI 直接耦合核心状态。",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "2",
