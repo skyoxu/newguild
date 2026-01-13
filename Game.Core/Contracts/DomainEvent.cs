@@ -54,6 +54,26 @@ namespace Game.Core.Contracts.Security
     }
 
     /// <summary>
+    /// Domain event: security.process.approved
+    /// Description: Emitted when a process execution request is approved (development/CI only).
+    /// </summary>
+    /// <remarks>
+    /// Follows ADR-0004 event contracts for the security domain.
+    /// </remarks>
+    public sealed record SecurityProcessApproved(
+        string Target,
+        int ExitCode,
+        System.DateTimeOffset OccurredAt,
+        string Caller
+    )
+    {
+        /// <summary>
+        /// CloudEvents 1.0 type field for this event.
+        /// </summary>
+        public const string EventType = "security.process.approved";
+    }
+
+    /// <summary>
     /// Domain event: security.url_access.denied
     /// Description: Emitted when URL validation denies access.
     /// </summary>
