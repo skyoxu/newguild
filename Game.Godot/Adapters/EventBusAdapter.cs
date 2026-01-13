@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Godot;
 using Game.Core.Contracts;
@@ -10,6 +11,13 @@ namespace Game.Godot.Adapters;
 
 public partial class EventBusAdapter : Node, IEventBus
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false,
+    };
+
     [Signal]
     public delegate void DomainEventEmittedEventHandler(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso);
 
@@ -20,7 +28,7 @@ public partial class EventBusAdapter : Node, IEventBus
     {
         // Emit Godot signal for scene-level listeners
         var dataJson = evt.Data is string s ? (string.IsNullOrWhiteSpace(s) ? "{}" : s)
-                                            : System.Text.Json.JsonSerializer.Serialize(evt.Data);
+                                            : JsonSerializer.Serialize(evt.Data, JsonOptions);
         EmitSignal(SignalName.DomainEventEmitted, evt.Type, evt.Source, dataJson, evt.Id, evt.SpecVersion, evt.DataContentType, evt.Timestamp.ToString("o"));
 
         // Notify in-process subscribers

@@ -271,7 +271,7 @@ adr_refs: [ADR-0001, ADR-0002]
 
 ### 8.1 MCP Server 配置
 
-**.mcp.json 最小配置**：
+**用户级 MCP 配置最小示例**（仓库提供 `mcp.example.json` 作为模板；不再提交项目级 `.mcp.json`）：
 
 ```json
 {

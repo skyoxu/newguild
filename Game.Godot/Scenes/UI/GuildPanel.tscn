@@ -58,6 +58,44 @@ layout_mode = 2
 [node name="HSeparator3" type="HSeparator" parent="VBox"]
 layout_mode = 2
 
+[node name="RosterActions" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="UserIdRow" type="HBoxContainer" parent="VBox/RosterActions"]
+layout_mode = 2
+
+[node name="UserIdLabel" type="Label" parent="VBox/RosterActions/UserIdRow"]
+layout_mode = 2
+text = "User ID:"
+
+[node name="UserIdInput" type="LineEdit" parent="VBox/RosterActions/UserIdRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "u2"
+
+[node name="MemberActionsRow" type="HBoxContainer" parent="VBox/RosterActions"]
+layout_mode = 2
+
+[node name="JoinButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+layout_mode = 2
+text = "Join"
+
+[node name="LeaveButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+layout_mode = 2
+text = "Leave"
+
+[node name="PromoteButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+layout_mode = 2
+text = "Promote"
+
+[node name="DemoteButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+layout_mode = 2
+text = "Demote"
+
+[node name="KickButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+layout_mode = 2
+text = "Kick"
+
 [node name="Actions" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
 

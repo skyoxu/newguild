@@ -1,5 +1,8 @@
 using Godot;
+using Game.Core.Contracts.Guild;
 using Game.Godot.Adapters;
+using Game.Godot.Scripts.Autoload;
+using System;
 using System.Text.Json;
 
 namespace Game.Godot.Scripts.UI;
@@ -11,6 +14,12 @@ namespace Game.Godot.Scripts.UI;
 /// </summary>
 public partial class GuildPanel : Control
 {
+    [Export]
+    public NodePath GuildManagerPath { get; set; } = new NodePath("/root/GuildManager");
+
+    [Export]
+    public NodePath EventBusPath { get; set; } = new NodePath("/root/EventBus");
+
     private static readonly JsonDocumentOptions JsonOptions = new()
     {
         MaxDepth = 32,
@@ -21,6 +30,12 @@ public partial class GuildPanel : Control
     private Button _createGuildButton = default!;
     private Button _disbandGuildButton = default!;
     private ItemList _membersList = default!;
+    private LineEdit _userIdInput = default!;
+    private Button _joinButton = default!;
+    private Button _leaveButton = default!;
+    private Button _promoteButton = default!;
+    private Button _demoteButton = default!;
+    private Button _kickButton = default!;
 
     private string? _currentGuildId;
     private EventBusAdapter? _eventBus;
@@ -34,13 +49,24 @@ public partial class GuildPanel : Control
         _createGuildButton = GetNode<Button>("VBox/Actions/CreateGuildButton");
         _disbandGuildButton = GetNode<Button>("VBox/Actions/DisbandGuildButton");
         _membersList = GetNode<ItemList>("VBox/MembersList");
+        _userIdInput = GetNode<LineEdit>("VBox/RosterActions/UserIdRow/UserIdInput");
+        _joinButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/JoinButton");
+        _leaveButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/LeaveButton");
+        _promoteButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/PromoteButton");
+        _demoteButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/DemoteButton");
+        _kickButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/KickButton");
 
         // Connect button signals
         _createGuildButton.Pressed += OnCreateGuildPressed;
         _disbandGuildButton.Pressed += OnDisbandGuildPressed;
+        _joinButton.Pressed += OnJoinPressed;
+        _leaveButton.Pressed += OnLeavePressed;
+        _promoteButton.Pressed += OnPromotePressed;
+        _demoteButton.Pressed += OnDemotePressed;
+        _kickButton.Pressed += OnKickPressed;
 
         // Subscribe to domain events via EventBusAdapter
-        _eventBus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
+        _eventBus = GetNodeOrNull<EventBusAdapter>(EventBusPath);
         if (_eventBus != null)
         {
             _domainEventCallable = new Callable(this, nameof(OnDomainEventEmitted));
@@ -63,19 +89,19 @@ public partial class GuildPanel : Control
     {
         switch (type)
         {
-            case "core.guild.created":
+            case GuildCreated.EventType:
                 HandleGuildCreated(dataJson);
                 break;
-            case "core.guild.disbanded":
+            case GuildDisbanded.EventType:
                 HandleGuildDisbanded(dataJson);
                 break;
-            case "core.guild.member.joined":
+            case GuildMemberJoined.EventType:
                 HandleMemberJoined(dataJson);
                 break;
-            case "core.guild.member.left":
+            case GuildMemberLeft.EventType:
                 HandleMemberLeft(dataJson);
                 break;
-            case "core.guild.member.role_changed":
+            case GuildMemberRoleChanged.EventType:
                 HandleMemberRoleChanged(dataJson);
                 break;
         }
@@ -144,8 +170,8 @@ public partial class GuildPanel : Control
                 guildId.GetString() == _currentGuildId &&
                 root.TryGetProperty("userId", out var userId))
             {
-                string role = root.TryGetProperty("role", out var r) ? r.GetString() ?? "Member" : "Member";
-                _membersList.AddItem($"{userId.GetString()} ({role})", null, true);
+                string role = root.TryGetProperty("role", out var r) ? r.GetString() ?? "member" : "member";
+                _membersList.AddItem($"{userId.GetString()} ({FormatRoleDisplay(role)})", null, true);
                 _memberCountLabel.Text = $"Members: {_membersList.ItemCount}";
             }
         }
@@ -196,13 +222,13 @@ public partial class GuildPanel : Control
                 root.TryGetProperty("userId", out var userId))
             {
                 string userIdStr = userId.GetString() ?? "";
-                string newRole = root.TryGetProperty("newRole", out var r) ? r.GetString() ?? "Member" : "Member";
+                string newRole = root.TryGetProperty("newRole", out var r) ? r.GetString() ?? "member" : "member";
 
                 for (int i = 0; i < _membersList.ItemCount; i++)
                 {
                     if (_membersList.GetItemText(i).StartsWith(userIdStr))
                     {
-                        _membersList.SetItemText(i, $"{userIdStr} ({newRole})");
+                        _membersList.SetItemText(i, $"{userIdStr} ({FormatRoleDisplay(newRole)})");
                         break;
                     }
                 }
@@ -216,9 +242,9 @@ public partial class GuildPanel : Control
 
     private void OnCreateGuildPressed()
     {
-        // Call GuildManager singleton
-        var guildManager = GetNode("/root/GuildManager");
-        string userId = "player1"; // TODO: Get from actual player/session
+        var guildManager = GetNode(GuildManagerPath);
+        var session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
+        string userId = session?.CurrentUserId ?? "player1";
         string guildName = $"Guild_{System.Guid.NewGuid().ToString("N").Substring(0, 6)}";
 
         guildManager.Call("CreateGuild", userId, guildName);
@@ -228,17 +254,92 @@ public partial class GuildPanel : Control
     {
         if (_currentGuildId == null) return;
 
-        // Call GuildManager singleton
-        var guildManager = GetNode("/root/GuildManager");
-        string userId = "player1"; // TODO: Get from actual player/session
+        var guildManager = GetNode(GuildManagerPath);
+        var session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
+        string userId = session?.CurrentUserId ?? "player1";
 
         guildManager.Call("DisbandGuild", _currentGuildId, userId);
     }
+
+    private void OnJoinPressed()
+    {
+        if (_currentGuildId == null) return;
+        var userId = GetTargetUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return;
+
+        var guildManager = GetNode(GuildManagerPath);
+        guildManager.Call("AddMember", _currentGuildId, userId);
+    }
+
+    private void OnLeavePressed()
+    {
+        if (_currentGuildId == null) return;
+        var guildManager = GetNode(GuildManagerPath);
+        guildManager.Call("LeaveCurrentUser", _currentGuildId);
+    }
+
+    private void OnPromotePressed()
+    {
+        if (_currentGuildId == null) return;
+        var userId = GetTargetUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return;
+
+        var guildManager = GetNode(GuildManagerPath);
+        guildManager.Call("PromoteMember", _currentGuildId, userId);
+    }
+
+    private void OnDemotePressed()
+    {
+        if (_currentGuildId == null) return;
+        var userId = GetTargetUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return;
+
+        var guildManager = GetNode(GuildManagerPath);
+        guildManager.Call("DemoteMember", _currentGuildId, userId);
+    }
+
+    private void OnKickPressed()
+    {
+        if (_currentGuildId == null) return;
+        var userId = GetTargetUserId();
+        if (string.IsNullOrWhiteSpace(userId)) return;
+
+        var guildManager = GetNode(GuildManagerPath);
+        guildManager.Call("RemoveMember", _currentGuildId, userId);
+    }
+
+    private string GetTargetUserId()
+    {
+        var raw = _userIdInput.Text?.Trim() ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(raw))
+            return raw;
+
+        var selected = _membersList.GetSelectedItems();
+        if (selected.Length == 0)
+            return string.Empty;
+
+        var text = _membersList.GetItemText(selected[0]);
+        var idx = text.IndexOf(" (", StringComparison.Ordinal);
+        return idx > 0 ? text[..idx].Trim() : text.Trim();
+    }
+
+    private static string FormatRoleDisplay(string role) =>
+        role.Trim().ToLowerInvariant() switch
+        {
+            "admin" => "Admin",
+            "member" => "Member",
+            _ => role,
+        };
 
     private void UpdateUIState(bool hasGuild)
     {
         _createGuildButton.Disabled = hasGuild;
         _disbandGuildButton.Disabled = !hasGuild;
+        _joinButton.Disabled = !hasGuild;
+        _leaveButton.Disabled = !hasGuild;
+        _promoteButton.Disabled = !hasGuild;
+        _demoteButton.Disabled = !hasGuild;
+        _kickButton.Disabled = !hasGuild;
     }
 
     [Signal]

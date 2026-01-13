@@ -149,7 +149,7 @@
     "story_id": "PRD-GUILD-MANAGER-T3-MEMBER-MANAGEMENT",
     "title": "T3 成员管理 UI（Roster / Member Management）",
     "description": "实现公会成员管理与 roster 展示的核心能力：在 Game.Core 建模成员列表、角色与变更命令，在 Game.Godot 提供可操作的 GuildScreen UI（查看成员、提升/降级、踢出/退出等）。事件发布遵循 ADR-0004，避免 UI 直接耦合核心状态。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -189,17 +189,14 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Core.Tests/Domain/GuildCoreTests.cs",
-      "Game.Core.Tests/Domain/GuildMemberTests.cs",
-      "Game.Core.Tests/Domain/GuildContractsTests.cs",
-      "Tests.Godot/tests/UI/test_guild_panel_scene.gd",
-      "Tests.Godot/tests/UI/test_guild_panel_events.gd"
+      "Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs",
+      "Tests.Godot/tests/UI/test_guild_panel_roster_actions_integration.gd"
     ],
     "acceptance": [
-      "Game.Core 提供成员 roster 的模型与操作（至少包含：加入/退出、角色变更、踢出），并包含必要的边界校验（例如：重复成员、无效角色、无权限变更）。 Refs: Game.Core.Tests/Domain/GuildCoreTests.cs Game.Core.Tests/Domain/GuildMemberTests.cs",
-      "成员变更通过领域事件对外发布（例如 core.guild.member.joined / left / role_changed），事件类型常量与字段定义落盘到 Game.Core/Contracts 并遵循 ADR-0004。 Refs: Game.Core.Tests/Domain/GuildContractsTests.cs",
-      "Game.Godot 的 GuildScreen 能展示 roster，并在收到事件后更新 UI；UI 操作通过适配层调用核心命令，不直接修改核心状态。 Refs: Tests.Godot/tests/UI/test_guild_panel_scene.gd Tests.Godot/tests/UI/test_guild_panel_events.gd",
-      "至少提供一组 xUnit 单测覆盖 roster 关键状态迁移与事件生成；如有 GdUnit4，则补一条 UI 冒烟验证“事件驱动刷新”。 Refs: Tests.Godot/tests/UI/test_guild_panel_events.gd"
+      "Game.Core 提供成员 roster 的模型与操作（至少包含：加入/退出、角色变更、踢出），并包含必要的边界校验（例如：重复成员、无效角色、无权限变更）。 Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs",
+      "成员变更通过领域事件对外发布（例如 core.guild.member.joined / left / role_changed），事件类型常量与字段定义落盘到 Game.Core/Contracts 并遵循 ADR-0004。 Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs",
+      "Game.Godot 的 GuildScreen 能展示 roster，并在收到事件后更新 UI；UI 操作通过适配层调用核心命令，不直接修改核心状态。 Refs: Tests.Godot/tests/UI/test_guild_panel_roster_actions_integration.gd",
+      "至少提供一组 xUnit 单测覆盖 roster 关键状态迁移与事件生成；如有 GdUnit4，则补一条 UI 冒烟验证“事件驱动刷新”。 Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs Tests.Godot/tests/UI/test_guild_panel_roster_actions_integration.gd"
     ],
     "test_strategy": [
       "xUnit：用 Given/When/Then 或 Should_ 风格覆盖 roster 操作的状态迁移与事件生成；对无效输入与权限边界给出负例。",

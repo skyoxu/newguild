@@ -13,6 +13,7 @@ namespace Game.Core.Domain;
 public class Guild
 {
     private readonly object _memberLock = new object();
+    private static bool IsValidRole(GuildRole role) => role is GuildRole.Member or GuildRole.Admin;
 
     public string GuildId { get; private set; }
     public string CreatorId { get; private set; }
@@ -44,11 +45,11 @@ public class Guild
     public Guild(string guildId, string creatorId, string name)
     {
         if (string.IsNullOrWhiteSpace(guildId))
-            throw new ArgumentException("公会ID不能为空", nameof(guildId));
+            throw new ArgumentException("GuildId cannot be empty.", nameof(guildId));
         if (string.IsNullOrWhiteSpace(creatorId))
-            throw new ArgumentException("创建者ID不能为空", nameof(creatorId));
+            throw new ArgumentException("CreatorId cannot be empty.", nameof(creatorId));
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("公会名称不能为空", nameof(name));
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
 
         GuildId = guildId;
         CreatorId = creatorId;
@@ -79,13 +80,13 @@ public class Guild
         IReadOnlyList<GuildMember> members)
     {
         if (string.IsNullOrWhiteSpace(guildId))
-            throw new ArgumentException("公会ID不能为空", nameof(guildId));
+            throw new ArgumentException("GuildId cannot be empty.", nameof(guildId));
         if (string.IsNullOrWhiteSpace(creatorId))
-            throw new ArgumentException("创建者ID不能为空", nameof(creatorId));
+            throw new ArgumentException("CreatorId cannot be empty.", nameof(creatorId));
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("公会名称不能为空", nameof(name));
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
         if (members == null || members.Count == 0)
-            throw new ArgumentException("成员列表不能为空", nameof(members));
+            throw new ArgumentException("Members cannot be empty.", nameof(members));
 
         return new Guild
         {
@@ -108,7 +109,10 @@ public class Guild
     public bool AddMember(string userId, GuildRole role)
     {
         if (string.IsNullOrWhiteSpace(userId))
-            throw new ArgumentException("用户ID不能为空", nameof(userId));
+            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
+
+        if (!IsValidRole(role))
+            return false;
 
         lock (_memberLock)
         {
@@ -131,7 +135,7 @@ public class Guild
     public bool RemoveMember(string userId)
     {
         if (string.IsNullOrWhiteSpace(userId))
-            throw new ArgumentException("用户ID不能为空", nameof(userId));
+            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
 
         // Creator cannot be removed
         if (userId == CreatorId)
@@ -159,7 +163,10 @@ public class Guild
     public bool ChangeRole(string userId, GuildRole newRole)
     {
         if (string.IsNullOrWhiteSpace(userId))
-            throw new ArgumentException("用户ID不能为空", nameof(userId));
+            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
+
+        if (!IsValidRole(newRole))
+            return false;
 
         lock (_memberLock)
         {

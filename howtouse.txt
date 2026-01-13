@@ -5,7 +5,8 @@
   1. 顶层协作约定（AI 行为规则）
       - CLAUDE.md
       - AGENTS.md
-      - （如果有）mcpuse.md、.codex/config.toml
+      - （如果有）mcpuse.md
+      - MCP 配置示例：mcp.example.json、.claude/mcp.example.json（不要提交项目级配置，用户级配置为准）
         作用：
       - 定义多助手协作方式、语言要求（中文文档、英文代码）、安全约束、Windows-only 等；
       - 告诉 BMAD / task-master-ai / Claude Code / Codex 应该怎么遵守 ADR / Phase / Backlog 的规则。
