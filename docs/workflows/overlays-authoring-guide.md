@@ -99,7 +99,12 @@ Test-Refs:
 - `Status`
 - `ADR-Refs`（至少 1 条 Accepted ADR）
 - `Arch-Refs`（至少 1 个 CH）
-- `Test-Refs`（若验收条款需要引用测试文件）
+- `Test-Refs`（仅当本页被用作“验收证据锚点”时需要；纯规划/模板页可省略）
+
+补充规则（止损）：
+
+- 若本页被 `.taskmaster/tasks/tasks_back.json` 或 `.taskmaster/tasks/tasks_gameplay.json` 的 `acceptance[].refs` / `test_refs` 引用，则必须补齐 `Test-Refs`，且路径必须为仓库内真实存在的测试文件（例如 `.cs` / `.gd`）。
+- 若本页仅用于规划或作为索引的补充说明（`Status: Draft/Template`，且不承载验收证据链），可不写 `Test-Refs`，避免为了“凑路径”而编造测试文件。
 
 ## 3. overlays 08 应该写什么（写作边界）
 
@@ -197,4 +202,3 @@ overlays 只做引用：
 取证要求：
 
 - 所有输出统一落到 `logs/ci/<YYYY-MM-DD>/`（详见 `AGENTS.md` 6.3）。
-

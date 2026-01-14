@@ -3,7 +3,7 @@ PRD-ID: PRD-Guild-Manager
 PRD-Refs:
   - docs/prd.txt
 Title: PRD-Guild-Manager 功能纵切实现验收清单（Godot + C# 变体）
-Status: Template
+Status: Active
 Arch-Refs:
   - CH01
   - CH03
@@ -86,30 +86,30 @@ Artifact-Refs:
   - Tests.Godot：GdUnit4 场景与集成测试工程
 - [ ] 事件与契约：
   - 领域事件与 UI 事件命名遵循 `${DOMAIN_PREFIX}.<entity>.<action>`（见 ADR‑0004）
-  - Contracts SSoT 存在于 `Game.Core` 或专门的 Contracts 项目（不依赖 Godot）
+  - Contracts SSoT 位于 `Game.Core/Contracts/**`（纯 C#，不依赖 Godot）
   - 示例契约文件：`Game.Core/Contracts/Guild/GuildMemberJoined.cs`（per ADR-0020）
-  - 当前 T2 最小事件集合（规划）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并计划分别落盘到 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs
+  - 当前 T2 最小事件集合（已落盘）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并已落盘到 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs
 - [ ] 事件命名规范验证（ADR-0004）：
-  - 所有事件常量必须匹配正则：`^[a-z]+\.[a-z_]+\.[a-z_]+$`
+  - 所有事件常量必须匹配正则：`^(core|security|ui|screen)\.[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$`
   - 验证命令（扫描所有 EventType 常量定义）：
     ```bash
     # Windows PowerShell
     Get-ChildItem -Recurse -Include *.cs Game.Core/Contracts |
     Select-String 'EventType\s*=\s*"([^"]+)"' |
     ForEach-Object {
-      if ($_.Matches.Groups[1].Value -notmatch '^[a-z]+\.[a-z_]+\.[a-z_]+$') {
+      if ($_.Matches.Groups[1].Value -notmatch '^(core|security|ui|screen)\.[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$') {
         Write-Host "FAIL: Invalid event name: $($_.Matches.Groups[1].Value) in $($_.Path)"
         exit 1
       }
     }
     Write-Host "PASS: All event names valid"
     ```
-  - 前缀一致性：所有事件必须以项目定义的 `DOMAIN_PREFIX` 开头（当前为 `core.`）
+  - 前缀一致性：领域事件必须以 `core.` 开头；安全/审计事件以 `security.` 开头；`ui.` / `screen.` 仅在明确作为跨层契约时使用
   - 禁止模式示例：
     - [FAIL] CamelCase：`Core.GuildCreated`
     - [FAIL] 混合分隔符：`core.guild-created`
     - [FAIL] 缺少前缀：`member.joined`
-    - [PASS] 正确格式：`core.guild.created`、`core.guild_member.joined`
+    - [PASS] 正确格式：`core.guild.created`、`core.guild.member.joined`
 - [ ] 数据与存储：
   - SQLite 访问通过适配层封装（SqliteDataStore 或等价组件），仅使用 `user://` 路径，符合 ADR‑0006/0019 要求
   - Settings SSoT 为 ConfigFile（`user://settings.cfg`，见 ADR‑0023），DB 不再承载设置 SSoT 职责
