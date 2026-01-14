@@ -1,3 +1,18 @@
+---
+PRD-ID: PRD-Guild-Manager
+PRD-Refs:
+  - docs/prd.txt
+Title: 08 Data Schema（T3 前置：数据字典与 Schema 规范）
+Status: Draft
+Arch-Refs:
+  - CH05
+  - CH07
+ADR-Refs:
+  - ADR-0006
+  - ADR-0005
+  - ADR-0019
+---
+
 # 08-DataSchema（T3 前置：数据字典与 Schema 规范）
 
 > 说明：本文件按“Schema.txt”模板的结构做了本项目适配，目标是让数据与内容在进入 T3 前先可被自动化校验，避免后期返工。

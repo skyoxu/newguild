@@ -28,9 +28,6 @@ Arch-Refs:
 - `core.guild.member.joined`
 - `core.guild.member.left`
 - `core.guild.member.role_changed`
-- `core.game_turn.started`
-- `core.game_turn.phase_changed`
-- `core.game_turn.week_advanced`
 
 契约索引与定义位置：`08-Contracts-Index.md`、`08-Contracts-Guild-Manager-Events.md`。
 

@@ -33,8 +33,9 @@ ADR-Refs:
 
 迁移实现规则：
 
-1. 先执行迁移步骤（必须可重放、幂等，允许重复执行而不破坏数据）。
-2. 再调用 `SchemaMigrationRunner.EnsureLatestAsync(db, LatestGuildSchemaVersion)` 更新 `schema_version.version`。
+1. 定义迁移步骤映射 `migrations`：键为**目标版本号**（`>= 1`），值为执行迁移的函数；每一步必须可重放/幂等（允许重复执行而不破坏数据）。
+2. 调用 `SchemaMigrationRunner.EnsureLatestAsync(db, LatestGuildSchemaVersion, migrations)`；Runner 负责创建 `schema_version`、按版本顺序执行缺失迁移并更新 `schema_version.version`。
+   - 缺失任何版本的迁移步骤必须 **fail-fast**（避免“版本号已提升但数据未迁移”的不可回退状态）。
 3. 必须配套 xUnit 覆盖：旧版本→新版本升级路径、升级后 `schema_version` 与关键数据一致性校验（ADR-0005）。
 
 备注：当前版本为 v1，尚不存在历史版本升级路径；本页用于固化后续演进规则。
