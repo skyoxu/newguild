@@ -18,7 +18,12 @@ public sealed class SchemaMigrationTests
     {
         var db = new RecordingSQLiteDatabase(schemaVersionTableExists: false, schemaVersionRowExists: false, schemaVersion: 0);
 
-        await SchemaMigrationRunner.EnsureLatestAsync(db, 1);
+        var migrations = new Dictionary<int, Func<ISQLiteDatabase, Task>>
+        {
+            [1] = database => database.ExecuteNonQueryAsync(SqlStatement.NoParameters("CREATE TABLE IF NOT EXISTS test_table_v1 (id INTEGER PRIMARY KEY)"))
+        };
+
+        await SchemaMigrationRunner.EnsureLatestAsync(db, 1, migrations);
 
         db.SchemaVersionTableExists.Should().BeTrue("migration runner must ensure schema_version metadata exists");
         db.SchemaVersionRowExists.Should().BeTrue("migration runner must insert the schema_version row when it does not exist");
@@ -29,6 +34,9 @@ public sealed class SchemaMigrationTests
         db.ExecutedNonQuerySql.Should().Contain(
             sql => NormalizeSql(sql).Contains("insert") && NormalizeSql(sql).Contains("schema_version"),
             "migration runner must insert the single-row schema_version record");
+        db.ExecutedNonQuerySql.Should().Contain(
+            sql => NormalizeSql(sql).Contains("create table if not exists test_table_v1"),
+            "migration runner must execute the migration step for version 1");
     }
 
     [Fact]
@@ -36,7 +44,13 @@ public sealed class SchemaMigrationTests
     {
         var db = new RecordingSQLiteDatabase(schemaVersionTableExists: true, schemaVersionRowExists: true, schemaVersion: 0);
 
-        await SchemaMigrationRunner.EnsureLatestAsync(db, 2);
+        var migrations = new Dictionary<int, Func<ISQLiteDatabase, Task>>
+        {
+            [1] = database => database.ExecuteNonQueryAsync(SqlStatement.NoParameters("CREATE TABLE IF NOT EXISTS test_table_v1 (id INTEGER PRIMARY KEY)")),
+            [2] = database => database.ExecuteNonQueryAsync(SqlStatement.NoParameters("ALTER TABLE test_table_v1 ADD COLUMN name TEXT"))
+        };
+
+        await SchemaMigrationRunner.EnsureLatestAsync(db, 2, migrations);
 
         db.SchemaVersion.Should().Be(2, "migration runner must upgrade schema version when database is older than latest");
         db.ExecutedNonQuerySql.Should().Contain(
@@ -55,11 +69,33 @@ public sealed class SchemaMigrationTests
     {
         var db = new RecordingSQLiteDatabase(schemaVersionTableExists: true, schemaVersionRowExists: true, schemaVersion: 2);
 
-        await SchemaMigrationRunner.EnsureLatestAsync(db, 2);
+        var migrations = new Dictionary<int, Func<ISQLiteDatabase, Task>>
+        {
+            [1] = database => database.ExecuteNonQueryAsync(SqlStatement.NoParameters("CREATE TABLE IF NOT EXISTS test_table_v1 (id INTEGER PRIMARY KEY)")),
+            [2] = database => database.ExecuteNonQueryAsync(SqlStatement.NoParameters("ALTER TABLE test_table_v1 ADD COLUMN name TEXT"))
+        };
+
+        await SchemaMigrationRunner.EnsureLatestAsync(db, 2, migrations);
 
         db.SchemaVersion.Should().Be(2, "migration runner must be a no-op when database schema is already at latest");
         db.ExecutedNonQuerySql.Should().NotContain(sql => NormalizeSql(sql).StartsWith("insert", StringComparison.Ordinal));
         db.ExecutedNonQuerySql.Should().NotContain(sql => NormalizeSql(sql).StartsWith("update", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task EnsureLatestAsync_Should_Fail_When_Migration_Step_Is_Missing()
+    {
+        var db = new RecordingSQLiteDatabase(schemaVersionTableExists: true, schemaVersionRowExists: true, schemaVersion: 0);
+
+        var migrations = new Dictionary<int, Func<ISQLiteDatabase, Task>>
+        {
+            [1] = database => database.ExecuteNonQueryAsync(SqlStatement.NoParameters("CREATE TABLE IF NOT EXISTS test_table_v1 (id INTEGER PRIMARY KEY)"))
+        };
+
+        var act = async () => await SchemaMigrationRunner.EnsureLatestAsync(db, 2, migrations);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*Missing schema migration step for version 2*");
     }
 
     private static string NormalizeSql(string sql)

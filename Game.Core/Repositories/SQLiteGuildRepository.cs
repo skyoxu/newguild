@@ -40,28 +40,32 @@ public class SQLiteGuildRepository : IGuildRepository
 
         await _db.OpenAsync();
 
-        // Create Guilds table
-        await _db.ExecuteNonQueryAsync(SqlStatement.NoParameters(@"
-            CREATE TABLE IF NOT EXISTS Guilds (
-                GuildId TEXT PRIMARY KEY,
-                CreatorId TEXT NOT NULL,
-                Name TEXT NOT NULL,
-                CreatedAt TEXT NOT NULL
-            )
-        "));
+        var migrations = new Dictionary<int, Func<ISQLiteDatabase, Task>>
+        {
+            [1] = async database =>
+            {
+                // Guilds table
+                await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
+                    "CREATE TABLE IF NOT EXISTS Guilds (" +
+                    " GuildId TEXT PRIMARY KEY," +
+                    " CreatorId TEXT NOT NULL," +
+                    " Name TEXT NOT NULL," +
+                    " CreatedAt TEXT NOT NULL" +
+                    " )"));
 
-        // Create GuildMembers table
-        await _db.ExecuteNonQueryAsync(SqlStatement.NoParameters(@"
-            CREATE TABLE IF NOT EXISTS GuildMembers (
-                GuildId TEXT NOT NULL,
-                UserId TEXT NOT NULL,
-                Role INTEGER NOT NULL,
-                PRIMARY KEY (GuildId, UserId),
-                FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE
-            )
-        "));
+                // GuildMembers table
+                await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
+                    "CREATE TABLE IF NOT EXISTS GuildMembers (" +
+                    " GuildId TEXT NOT NULL," +
+                    " UserId TEXT NOT NULL," +
+                    " Role INTEGER NOT NULL," +
+                    " PRIMARY KEY (GuildId, UserId)," +
+                    " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
+                    " )"));
+            }
+        };
 
-        await SchemaMigrationRunner.EnsureLatestAsync(_db, LatestGuildSchemaVersion);
+        await SchemaMigrationRunner.EnsureLatestAsync(_db, LatestGuildSchemaVersion, migrations);
 
         _initialized = true;
     }
