@@ -29,6 +29,9 @@ Arch-Refs:
 - 公会管理器事件（Guild Manager Events）：`08-Contracts-Guild-Manager-Events.md`
 - 质量指标（Quality Metrics）：`08-Contracts-Quality-Metrics.md`
 - 安全契约：`08-Contracts-Security.md`
+- 数据库迁移（schema_version）
+  - Roster：`08-Migrations-Guild-Roster.md`
+  - Recruitment：`08-Migrations-Guild-Recruitment.md`
 - 纵切总览（当前 SSoT）：`08-FeatureSlice-Guild-Manager.md`
 - 纵切验收清单：`ACCEPTANCE_CHECKLIST.md`
 

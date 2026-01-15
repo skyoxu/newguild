@@ -4,7 +4,7 @@ PRD-Refs:
   - docs/prd.txt
 Story-ID: PRD-GUILD-MANAGER-T3-RECRUITMENT
 Title: Feature Slice - T3 Recruitment（招募系统）
-Status: Planned
+Status: Implemented
 ADR-Refs:
   - ADR-0004
   - ADR-0005
@@ -25,7 +25,6 @@ Arch-Refs:
 - `core.recruitment.offer.presented`
 - `core.recruitment.offer.resolved`
 - `core.guild.member.joined`
-- `core.game_turn.week_advanced`
 
 契约索引与定义位置：`08-Contracts-Index.md`、`08-Contracts-CloudEvents-Core.md`。
 
@@ -46,3 +45,8 @@ Arch-Refs:
 
 - Offer 的呈现/决议必须可重放（相同输入不应产生不可测的漂移）。
 - 当进入交付阶段时，必须补齐对应的 `Game.Core/Contracts/Recruitment/**` 与 xUnit 测试挂钩。
+
+## 持久化与迁移（SQLite）
+
+- Pending offer 状态必须可恢复（重启后仍可审批/拒绝/撤回），落盘表：`RecruitmentOffers`
+- 数据库 schema_version 由 `GuildDbSchema` 统一维护，迁移策略见：`08-Migrations-Guild-Recruitment.md`

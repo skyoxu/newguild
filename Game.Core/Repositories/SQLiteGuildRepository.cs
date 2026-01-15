@@ -18,13 +18,10 @@ namespace Game.Core.Repositories;
 public class SQLiteGuildRepository : IGuildRepository
 {
     /// <summary>
-    /// Schema version for the Guilds/GuildMembers tables managed by this repository.
-    /// Version strategy:
-    /// - Bump this number whenever the table structure or column semantics change.
-    /// - Add deterministic, idempotent migration steps before updating schema_version.
-    /// - Keep the migration path safe to re-run (ADR-0005/quality gates).
+    /// Latest schema_version for the Guild DB file.
+    /// The schema is shared by all repositories operating on the same DB (see GuildDbSchema).
     /// </summary>
-    private const int LatestGuildSchemaVersion = 1;
+    private const int LatestGuildSchemaVersion = GuildDbSchema.LatestVersion;
 
     private readonly ISQLiteDatabase _db;
     private bool _initialized;
@@ -39,33 +36,7 @@ public class SQLiteGuildRepository : IGuildRepository
         if (_initialized) return;
 
         await _db.OpenAsync();
-
-        var migrations = new Dictionary<int, Func<ISQLiteDatabase, Task>>
-        {
-            [1] = async database =>
-            {
-                // Guilds table
-                await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
-                    "CREATE TABLE IF NOT EXISTS Guilds (" +
-                    " GuildId TEXT PRIMARY KEY," +
-                    " CreatorId TEXT NOT NULL," +
-                    " Name TEXT NOT NULL," +
-                    " CreatedAt TEXT NOT NULL" +
-                    " )"));
-
-                // GuildMembers table
-                await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
-                    "CREATE TABLE IF NOT EXISTS GuildMembers (" +
-                    " GuildId TEXT NOT NULL," +
-                    " UserId TEXT NOT NULL," +
-                    " Role INTEGER NOT NULL," +
-                    " PRIMARY KEY (GuildId, UserId)," +
-                    " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
-                    " )"));
-            }
-        };
-
-        await SchemaMigrationRunner.EnsureLatestAsync(_db, LatestGuildSchemaVersion, migrations);
+        await SchemaMigrationRunner.EnsureLatestAsync(_db, LatestGuildSchemaVersion, GuildDbSchema.CreateMigrations());
 
         _initialized = true;
     }

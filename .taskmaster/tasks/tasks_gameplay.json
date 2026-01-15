@@ -224,7 +224,7 @@
     "story_id": "PRD-GUILD-MANAGER-T3-RECRUITMENT",
     "title": "T3 招募系统（Recruitment System）",
     "description": "实现公会招募与入会流程：支持发布招募信息、申请加入、审批/拒绝、自动入会等路径。核心逻辑在 Game.Core，UI/输入在 Game.Godot 适配；事件发布遵循 ADR-0004。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -271,9 +271,9 @@
     ],
     "acceptance": [
       "Game.Core 提供 RecruitmentSystem（或等价服务），支持“申请加入/审批/拒绝/撤回”并能驱动成员变更。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
-      "流程关键节点产生领域事件（例如 core.guild.recruitment.applied / approved / rejected 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。 Refs: Game.Core.Tests/Domain/GuildContractsTests.cs",
+      "流程关键节点产生领域事件（例如 core.recruitment.offer.presented / core.recruitment.offer.resolved 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。 Refs: Game.Core.Tests/Domain/GuildContractsTests.cs",
       "Game.Godot 提供最小 UI 或调试入口以驱动招募流程（至少覆盖：发起申请与审批一次）。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
-      "xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+      "xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs, Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
     ],
     "test_strategy": [
       "xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。",
@@ -282,7 +282,6 @@
     "taskmaster_id": 14,
     "taskmaster_exported": true,
     "contractRefs": [
-      "core.game_turn.week_advanced",
       "core.guild.member.joined",
       "core.recruitment.offer.presented",
       "core.recruitment.offer.resolved"

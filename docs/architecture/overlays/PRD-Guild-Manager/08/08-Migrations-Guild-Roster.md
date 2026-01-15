@@ -14,8 +14,9 @@ ADR-Refs:
 
 ## 当前版本
 
-- `LatestGuildSchemaVersion = 1`
 - `schema_version` 为单行元数据表，固定 `id = 1`
+- Guild DB 的 `schema_version` 是**同一个数据库文件的全局版本号**，由 `Game.Core/Persistence/Migrations/GuildDbSchema.cs` 作为单一事实源统一维护
+- `GuildDbSchema.LatestVersion = 2`（其中 v1 覆盖 roster 表结构，v2 新增 recruitment 相关表）
 
 ## v1（当前）表结构
 
@@ -26,7 +27,7 @@ ADR-Refs:
 
 ## 版本策略（可执行）
 
-当且仅当出现以下变化时，必须提升 `LatestGuildSchemaVersion`：
+当且仅当出现以下变化时，必须提升 `GuildDbSchema.LatestVersion` 并补齐迁移步骤：
 
 - 表结构变更：新增/删除列、字段语义变化、主键/外键/约束变化
 - 数据语义变更：同一列存储含义变化（例如 Role 编码规则变化）
@@ -34,7 +35,7 @@ ADR-Refs:
 迁移实现规则：
 
 1. 定义迁移步骤映射 `migrations`：键为**目标版本号**（`>= 1`），值为执行迁移的函数；每一步必须可重放/幂等（允许重复执行而不破坏数据）。
-2. 调用 `SchemaMigrationRunner.EnsureLatestAsync(db, LatestGuildSchemaVersion, migrations)`；Runner 负责创建 `schema_version`、按版本顺序执行缺失迁移并更新 `schema_version.version`。
+2. 调用 `SchemaMigrationRunner.EnsureLatestAsync(db, GuildDbSchema.LatestVersion, GuildDbSchema.CreateMigrations())`；Runner 负责创建 `schema_version`、按版本顺序执行缺失迁移并更新 `schema_version.version`。
    - 缺失任何版本的迁移步骤必须 **fail-fast**（避免“版本号已提升但数据未迁移”的不可回退状态）。
 3. 必须配套 xUnit 覆盖：旧版本→新版本升级路径、升级后 `schema_version` 与关键数据一致性校验（ADR-0005）。
 

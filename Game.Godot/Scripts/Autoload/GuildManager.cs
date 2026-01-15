@@ -1,6 +1,7 @@
 using Godot;
 using Game.Core.Domain;
 using Game.Core.Contracts.Guild;
+using Game.Core.Ports;
 using Game.Core.Repositories;
 using Game.Core.Services;
 using Game.Godot.Adapters;
@@ -21,6 +22,7 @@ public partial class GuildManager : Node
     private EventBusAdapter _eventBus = default!;
     private Guild? _currentGuild;
     private GuildRosterService _roster = default!;
+    private GuildRecruitmentService _recruitment = default!;
     private PlayerSession? _session;
     private LoggerAdapter? _logger;
 
@@ -31,12 +33,23 @@ public partial class GuildManager : Node
         var dbPath = SafeResourcePath.UserPath(dbRel) ?? throw new InvalidOperationException("Invalid database path (ADR-0019)");
         var db = new GodotSQLiteDatabase(dbPath);
         _repository = new SQLiteGuildRepository(db);
+        var recruitmentOffers = new SQLiteRecruitmentOfferRepository(db);
 
         // Get EventBus reference
         _eventBus = GetNode<EventBusAdapter>("/root/EventBus");
         _roster = new GuildRosterService(_repository, _eventBus);
         _session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
         _logger = GetNodeOrNull<LoggerAdapter>("/root/Logger");
+
+        var loggerPort = (ILogger?)_logger ?? new DevNullLogger();
+        _recruitment = new GuildRecruitmentService(
+            _repository,
+            recruitmentOffers,
+            _eventBus,
+            _roster,
+            new NoopTimePort(),
+            loggerPort,
+            new AlwaysEnabledEventCatalog());
 
         GD.Print("[GuildManager] Initialized with SQLite repository");
     }
@@ -63,6 +76,96 @@ public partial class GuildManager : Node
         if (_logger != null) _logger.Error(msg);
         else GD.PrintErr(msg);
 #endif
+    }
+
+    public async void ApplyForGuild(string guildId, string candidateId, string role)
+    {
+        try
+        {
+            if (_currentGuild == null || _currentGuild.GuildId != guildId)
+            {
+                DebugWarn($"ApplyForGuild denied: guild not current guildId={guildId}");
+                return;
+            }
+
+            await _recruitment
+                .ApplyAsync(_currentGuild, candidateId, role, DateTimeOffset.UtcNow)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            DebugError("ApplyForGuild failed", ex);
+        }
+    }
+
+    public async void ApproveOffer(string guildId, string offerId)
+    {
+        try
+        {
+            if (_currentGuild == null || _currentGuild.GuildId != guildId)
+            {
+                DebugWarn($"ApproveOffer denied: guild not current guildId={guildId}");
+                return;
+            }
+
+            if (!TryGetCurrentUserId(out var approvedByUserId))
+            {
+                DebugWarn("ApproveOffer denied: PlayerSession.CurrentUserId missing");
+                return;
+            }
+
+            await _recruitment
+                .ApproveAsync(_currentGuild, offerId, approvedByUserId, DateTimeOffset.UtcNow)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            DebugError("ApproveOffer failed", ex);
+        }
+    }
+
+    public async void RejectOffer(string guildId, string offerId, string reason)
+    {
+        try
+        {
+            if (_currentGuild == null || _currentGuild.GuildId != guildId)
+            {
+                DebugWarn($"RejectOffer denied: guild not current guildId={guildId}");
+                return;
+            }
+
+            if (!TryGetCurrentUserId(out var rejectedByUserId))
+            {
+                DebugWarn("RejectOffer denied: PlayerSession.CurrentUserId missing");
+                return;
+            }
+
+            await _recruitment
+                .RejectAsync(_currentGuild, offerId, rejectedByUserId, reason, DateTimeOffset.UtcNow)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            DebugError("RejectOffer failed", ex);
+        }
+    }
+
+    private sealed class AlwaysEnabledEventCatalog : IEventCatalog
+    {
+        public bool IsEventEnabled(string eventType) => true;
+    }
+
+    private sealed class NoopTimePort : ITime
+    {
+        public double DeltaSeconds => 0.0;
+    }
+
+    private sealed class DevNullLogger : ILogger
+    {
+        public void Info(string message) { }
+        public void Warn(string message) { }
+        public void Error(string message) { }
+        public void Error(string message, Exception ex) { }
     }
 
     public async void CreateGuild(string creatorId, string guildName)
