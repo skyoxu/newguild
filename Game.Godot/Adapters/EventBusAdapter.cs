@@ -40,7 +40,11 @@ public partial class EventBusAdapter : Node, IEventBus
     private static async Task SafeInvoke(Func<DomainEvent, Task> h, DomainEvent evt)
     {
         try { await h(evt); }
-        catch { /* ignore to keep bus stable */ }
+        catch (Exception ex)
+        {
+            if (OS.IsDebugBuild())
+                GD.PrintErr($"[EventBusAdapter][DEBUG] handler failed type={evt.Type} exType={ex.GetType().Name}");
+        }
     }
 
     public IDisposable Subscribe(Func<DomainEvent, Task> handler)
@@ -52,8 +56,35 @@ public partial class EventBusAdapter : Node, IEventBus
     // Simple publish for GDScript tests without needing DomainEvent construction
     public void PublishSimple(string type, string source, string data_json)
     {
-        var evt = new DomainEvent(type, source, data_json, DateTime.UtcNow, Guid.NewGuid().ToString("N"));
+        if (!IsPublishSimpleAllowed())
+        {
+            if (OS.IsDebugBuild())
+                GD.PushWarning("[EventBusAdapter][DEBUG] PublishSimple denied (not in debug/test mode).");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(type))
+            return;
+
+        if (string.IsNullOrWhiteSpace(source))
+            source = "gdscript";
+
+        if (string.IsNullOrWhiteSpace(data_json))
+            data_json = "{}";
+
+        var evt = new DomainEvent(type.Trim(), source.Trim(), data_json, DateTime.UtcNow, Guid.NewGuid().ToString("N"));
         _ = PublishAsync(evt);
+    }
+
+    private static bool IsPublishSimpleAllowed()
+    {
+        if (OS.IsDebugBuild())
+            return true;
+
+        return string.Equals(
+            System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"),
+            "1",
+            StringComparison.Ordinal);
     }
 
     private sealed class Unsubscriber : IDisposable

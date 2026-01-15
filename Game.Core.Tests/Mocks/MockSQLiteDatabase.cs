@@ -35,6 +35,11 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         var sql = stmt.Text;
         var parameters = stmt.Parameters as IDictionary<string, object?>;
 
+        if (sql.StartsWith("UPDATE schema_version", StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult(ExecuteSchemaVersionUpdate(parameters));
+        }
+
         if (sql.StartsWith("CREATE TABLE IF NOT EXISTS", StringComparison.OrdinalIgnoreCase))
         {
             var tableName = ExtractTableName(sql);
@@ -69,11 +74,28 @@ public class MockSQLiteDatabase : ISQLiteDatabase
 
         var sql = stmt.Text;
         var parameters = stmt.Parameters as IDictionary<string, object?>;
-        var rows = ExecuteQuery(sql, parameters);
-        if (rows.Count == 0 || rows[0].Count == 0)
+
+        if (sql.StartsWith("SELECT version FROM schema_version", StringComparison.OrdinalIgnoreCase))
+        {
+            var id = 1;
+            if (parameters != null && parameters.TryGetValue("@id", out var v) && v != null)
+                id = Convert.ToInt32(v);
+
+            if (!_tables.TryGetValue("schema_version", out var rows) || rows.Count == 0)
+                return Task.FromResult<object?>(null);
+
+            var row = rows.FirstOrDefault(r => r.TryGetValue("id", out var rowId) && Convert.ToInt32(rowId) == id);
+            if (row == null || !row.TryGetValue("version", out var ver))
+                return Task.FromResult<object?>(null);
+
+            return Task.FromResult<object?>(ver);
+        }
+
+        var resultRows = ExecuteQuery(sql, parameters);
+        if (resultRows.Count == 0 || resultRows[0].Count == 0)
             return Task.FromResult<object?>(null);
 
-        return Task.FromResult<object?>(rows[0].Values.First());
+        return Task.FromResult<object?>(resultRows[0].Values.First());
     }
 
     public Task<IReadOnlyList<Dictionary<string, object>>> QueryAsync(SqlStatement stmt)
@@ -147,6 +169,29 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         }
 
         return matchingRows.Count;
+    }
+
+    private int ExecuteSchemaVersionUpdate(IDictionary<string, object?>? parameters)
+    {
+        if (!_tables.TryGetValue("schema_version", out var rows) || rows.Count == 0)
+            return 0;
+
+        if (parameters == null || !parameters.TryGetValue("@version", out var version))
+            return 0;
+
+        var updated = 0;
+        foreach (var row in rows)
+        {
+            if (!row.TryGetValue("id", out var idObj))
+                continue;
+            if (Convert.ToInt32(idObj) != 1)
+                continue;
+
+            row["version"] = version!;
+            updated++;
+        }
+
+        return updated;
     }
 
     private int ExecuteDelete(string sql, IDictionary<string, object?>? parameters)

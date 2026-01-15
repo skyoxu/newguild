@@ -107,3 +107,57 @@ text = "Create Guild"
 layout_mode = 2
 disabled = true
 text = "Disband Guild"
+
+[node name="HSeparator4" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="RecruitmentSection" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="RecruitmentLabel" type="Label" parent="VBox/RecruitmentSection"]
+layout_mode = 2
+text = "Recruitment"
+horizontal_alignment = 1
+
+[node name="CandidateIdRow" type="HBoxContainer" parent="VBox/RecruitmentSection"]
+layout_mode = 2
+
+[node name="CandidateIdLabel" type="Label" parent="VBox/RecruitmentSection/CandidateIdRow"]
+layout_mode = 2
+text = "Candidate ID:"
+
+[node name="CandidateIdInput" type="LineEdit" parent="VBox/RecruitmentSection/CandidateIdRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "u2"
+
+[node name="OfferIdRow" type="HBoxContainer" parent="VBox/RecruitmentSection"]
+layout_mode = 2
+
+[node name="OfferIdLabel" type="Label" parent="VBox/RecruitmentSection/OfferIdRow"]
+layout_mode = 2
+text = "Offer ID:"
+
+[node name="OfferIdInput" type="LineEdit" parent="VBox/RecruitmentSection/OfferIdRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "offer id"
+
+[node name="RecruitmentActionsRow" type="HBoxContainer" parent="VBox/RecruitmentSection"]
+layout_mode = 2
+
+[node name="ApplyButton" type="Button" parent="VBox/RecruitmentSection/RecruitmentActionsRow"]
+layout_mode = 2
+text = "Apply"
+
+[node name="ApproveButton" type="Button" parent="VBox/RecruitmentSection/RecruitmentActionsRow"]
+layout_mode = 2
+text = "Approve"
+
+[node name="RejectButton" type="Button" parent="VBox/RecruitmentSection/RecruitmentActionsRow"]
+layout_mode = 2
+text = "Reject"
+
+[node name="OffersList" type="ItemList" parent="VBox/RecruitmentSection"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2

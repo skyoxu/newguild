@@ -1,5 +1,6 @@
 using Godot;
 using Game.Core.Contracts.Guild;
+using Game.Core.Contracts.Recruitment;
 using Game.Godot.Adapters;
 using Game.Godot.Scripts.Autoload;
 using System;
@@ -36,6 +37,12 @@ public partial class GuildPanel : Control
     private Button _promoteButton = default!;
     private Button _demoteButton = default!;
     private Button _kickButton = default!;
+    private LineEdit _candidateIdInput = default!;
+    private LineEdit _offerIdInput = default!;
+    private ItemList _offersList = default!;
+    private Button _applyButton = default!;
+    private Button _approveButton = default!;
+    private Button _rejectButton = default!;
 
     private string? _currentGuildId;
     private EventBusAdapter? _eventBus;
@@ -55,6 +62,12 @@ public partial class GuildPanel : Control
         _promoteButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/PromoteButton");
         _demoteButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/DemoteButton");
         _kickButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/KickButton");
+        _candidateIdInput = GetNode<LineEdit>("VBox/RecruitmentSection/CandidateIdRow/CandidateIdInput");
+        _offerIdInput = GetNode<LineEdit>("VBox/RecruitmentSection/OfferIdRow/OfferIdInput");
+        _offersList = GetNode<ItemList>("VBox/RecruitmentSection/OffersList");
+        _applyButton = GetNode<Button>("VBox/RecruitmentSection/RecruitmentActionsRow/ApplyButton");
+        _approveButton = GetNode<Button>("VBox/RecruitmentSection/RecruitmentActionsRow/ApproveButton");
+        _rejectButton = GetNode<Button>("VBox/RecruitmentSection/RecruitmentActionsRow/RejectButton");
 
         // Connect button signals
         _createGuildButton.Pressed += OnCreateGuildPressed;
@@ -64,6 +77,9 @@ public partial class GuildPanel : Control
         _promoteButton.Pressed += OnPromotePressed;
         _demoteButton.Pressed += OnDemotePressed;
         _kickButton.Pressed += OnKickPressed;
+        _applyButton.Pressed += OnApplyPressed;
+        _approveButton.Pressed += OnApprovePressed;
+        _rejectButton.Pressed += OnRejectPressed;
 
         // Subscribe to domain events via EventBusAdapter
         _eventBus = GetNodeOrNull<EventBusAdapter>(EventBusPath);
@@ -103,6 +119,12 @@ public partial class GuildPanel : Control
                 break;
             case GuildMemberRoleChanged.EventType:
                 HandleMemberRoleChanged(dataJson);
+                break;
+            case RecruitmentOfferPresented.EventType:
+                HandleRecruitmentOfferPresented(dataJson);
+                break;
+            case RecruitmentOfferResolved.EventType:
+                HandleRecruitmentOfferResolved(dataJson);
                 break;
         }
     }
@@ -240,6 +262,60 @@ public partial class GuildPanel : Control
         }
     }
 
+    private void HandleRecruitmentOfferPresented(string dataJson)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
+            var root = doc.RootElement;
+
+            if (!root.TryGetProperty("guildId", out var guildId) || guildId.GetString() != _currentGuildId)
+                return;
+
+            var offerId = root.TryGetProperty("offerId", out var o) ? o.GetString() ?? "" : "";
+            var candidateId = root.TryGetProperty("candidateId", out var c) ? c.GetString() ?? "" : "";
+            var role = root.TryGetProperty("role", out var r) ? r.GetString() ?? "member" : "member";
+
+            if (string.IsNullOrWhiteSpace(offerId))
+                return;
+
+            _offersList.AddItem($"{offerId} | {candidateId} | {role}", null, true);
+        }
+        catch
+        {
+            // Ignore malformed events
+        }
+    }
+
+    private void HandleRecruitmentOfferResolved(string dataJson)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
+            var root = doc.RootElement;
+
+            if (!root.TryGetProperty("guildId", out var guildId) || guildId.GetString() != _currentGuildId)
+                return;
+
+            var offerId = root.TryGetProperty("offerId", out var o) ? o.GetString() ?? "" : "";
+            if (string.IsNullOrWhiteSpace(offerId))
+                return;
+
+            for (int i = 0; i < _offersList.ItemCount; i++)
+            {
+                if (_offersList.GetItemText(i).StartsWith(offerId, StringComparison.Ordinal))
+                {
+                    _offersList.RemoveItem(i);
+                    break;
+                }
+            }
+        }
+        catch
+        {
+            // Ignore malformed events
+        }
+    }
+
     private void OnCreateGuildPressed()
     {
         var guildManager = GetNode(GuildManagerPath);
@@ -308,6 +384,50 @@ public partial class GuildPanel : Control
         guildManager.Call("RemoveMember", _currentGuildId, userId);
     }
 
+    private void OnApplyPressed()
+    {
+        if (_currentGuildId == null) return;
+        var candidateId = _candidateIdInput.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(candidateId)) return;
+
+        var guildManager = GetNode(GuildManagerPath);
+        guildManager.Call("ApplyForGuild", _currentGuildId, candidateId, "member");
+    }
+
+    private void OnApprovePressed()
+    {
+        if (_currentGuildId == null) return;
+        if (!TryGetOfferId(out var offerId)) return;
+
+        var guildManager = GetNode(GuildManagerPath);
+        guildManager.Call("ApproveOffer", _currentGuildId, offerId);
+    }
+
+    private void OnRejectPressed()
+    {
+        if (_currentGuildId == null) return;
+        if (!TryGetOfferId(out var offerId)) return;
+
+        var guildManager = GetNode(GuildManagerPath);
+        guildManager.Call("RejectOffer", _currentGuildId, offerId, "rejected");
+    }
+
+    private bool TryGetOfferId(out string offerId)
+    {
+        offerId = _offerIdInput.Text?.Trim() ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(offerId))
+            return true;
+
+        var selected = _offersList.GetSelectedItems();
+        if (selected.Length == 0)
+            return false;
+
+        var text = _offersList.GetItemText(selected[0]);
+        var idx = text.IndexOf(" | ", StringComparison.Ordinal);
+        offerId = (idx > 0 ? text[..idx] : text).Trim();
+        return !string.IsNullOrWhiteSpace(offerId);
+    }
+
     private string GetTargetUserId()
     {
         var raw = _userIdInput.Text?.Trim() ?? string.Empty;
@@ -340,6 +460,9 @@ public partial class GuildPanel : Control
         _promoteButton.Disabled = !hasGuild;
         _demoteButton.Disabled = !hasGuild;
         _kickButton.Disabled = !hasGuild;
+        _applyButton.Disabled = !hasGuild;
+        _approveButton.Disabled = !hasGuild;
+        _rejectButton.Disabled = !hasGuild;
     }
 
     [Signal]

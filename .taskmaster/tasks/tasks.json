@@ -535,12 +535,12 @@
         "id": "14",
         "title": "T3 招募系统（Recruitment System）",
         "description": "实现公会招募与入会流程：支持发布招募信息、申请加入、审批/拒绝、自动入会等路径。核心逻辑在 Game.Core，UI/输入在 Game.Godot 适配；事件发布遵循 ADR-0004。",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "13"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-RECRUITMENT\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供 RecruitmentSystem（或等价服务），支持“申请加入/审批/拒绝/撤回”并能驱动成员变更。; 流程关键节点产生领域事件（例如 core.guild.recruitment.applied / approved / rejected 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。; Game.Godot 提供最小 UI 或调试入口以驱动招募流程（至少覆盖：发起申请与审批一次）。; xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。\nTest Strategy: xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。; GdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。\nLabels: ui; guild; recruitment; simulation\nOwner: architecture\nLayer: adapter",
+        "details": "Story: PRD-GUILD-MANAGER-T3-RECRUITMENT\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供 RecruitmentSystem（或等价服务），支持“申请加入/审批/拒绝/撤回”并能驱动成员变更。; 流程关键节点产生领域事件（例如 core.recruitment.offer.presented, core.recruitment.offer.resolved 与 core.guild.member.joined），事件契约落盘到 Game.Core/Contracts 并与 Overlay/08 一致。; Game.Godot 提供最小 UI 或调试入口以驱动招募流程（至少覆盖：发起申请与审批一次）。; xUnit 覆盖：申请重复、审批不存在申请、审批后成员入会等关键分支；如引入 UI 流程则补 GdUnit4 冒烟。\nTest Strategy: xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。; GdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。\nLabels: ui; guild; recruitment; simulation\nOwner: architecture\nLayer: adapter",
         "testStrategy": "xUnit：覆盖招募流程状态机的主路径与错误路径（重复申请/无效审批/撤回后审批等）。\nGdUnit4（可选）：模拟一次端到端招募操作并断言事件触发与 UI 状态变化。",
         "complexity": 6,
         "recommendedSubtasks": 2,
@@ -551,8 +551,8 @@
             "title": "Persist recruitment state to SQLite (schema + mapping)",
             "description": "Introduce/extend SQLite tables needed for recruitment workflow and define deterministic mapping from Core services/state to storage.",
             "dependencies": [],
-            "details": "When recruitment storage schema changes, bump schema_version (id=1) and keep migrations idempotent. Security baseline per ADR-0019.",
-            "status": "pending",
+            "details": "Use GuildDbSchema (SSoT) + SchemaMigrationRunner. Persist pending offers to RecruitmentOffers; ensure mapping is deterministic. Security baseline per ADR-0019.",
+            "status": "done",
             "testStrategy": "xUnit: recruitment persistence round-trip; main flow + error flow; migration bump verified via schema_version.",
             "parentId": "14",
             "updatedAt": "2026-01-07T18:25:01.169Z"
@@ -564,8 +564,8 @@
             "dependencies": [
               1
             ],
-            "details": "Use existing SchemaMigrationRunner as the SSoT mechanism; ensure upgrade path is deterministic and safe to re-run.",
-            "status": "pending",
+            "details": "Document recruitment schema versioning/migration strategy in docs/architecture/overlays/PRD-Guild-Manager/08/08-Migrations-Guild-Recruitment.md; keep upgrades idempotent and replay-safe via SchemaMigrationRunner.",
+            "status": "done",
             "testStrategy": "xUnit: upgrade path from old schema version to latest; verify schema_version updated correctly.",
             "parentId": "14",
             "updatedAt": "2026-01-07T18:25:01.169Z"

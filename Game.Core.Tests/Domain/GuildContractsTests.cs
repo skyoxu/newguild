@@ -1,6 +1,7 @@
 using System;
 using FluentAssertions;
 using Game.Core.Contracts.Guild;
+using Game.Core.Contracts.Recruitment;
 using Xunit;
 
 namespace Game.Core.Tests.Domain;
@@ -197,5 +198,13 @@ public class GuildContractsTests
 
         // Assert
         evt.Reason.Should().BeEmpty();
+    }
+
+    // ACC:T14.2
+    [Fact]
+    public void RecruitmentContracts_EventType_Should_Match_Expected()
+    {
+        RecruitmentOfferPresented.EventType.Should().Be("core.recruitment.offer.presented");
+        RecruitmentOfferResolved.EventType.Should().Be("core.recruitment.offer.resolved");
     }
 }
