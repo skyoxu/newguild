@@ -262,6 +262,10 @@ def main():
                 'dotnet', 'test', target,
                 '-c', args.configuration,
                 '--no-restore',
+                # Keep unit tests strict: fail on new warnings to avoid slow drift in quality.
+                # Stop-loss: MSB3101 is a Windows file-locking warning that can be non-deterministic.
+                '-p:TreatWarningsAsErrors=true',
+                '-p:WarningsNotAsErrors=MSB3101',
                 '--collect:XPlat Code Coverage',
                 '--logger', f'trx;LogFileName={trx_name}',
                 '--results-directory', results_dir,

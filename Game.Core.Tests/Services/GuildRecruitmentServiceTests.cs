@@ -84,6 +84,7 @@ public sealed partial class GuildRecruitmentServiceTests
     {
         public FixedTime(double deltaSeconds = 0.0) => DeltaSeconds = deltaSeconds;
         public double DeltaSeconds { get; }
+        public DateTimeOffset UtcNowOffset => DateTimeOffset.UtcNow;
     }
 
     private sealed class NoopLogger : ILogger

@@ -212,7 +212,6 @@ public class GameStateManagerTests
         var mgr = new GameStateManager(store);
 
         var callback1Called = false;
-        var callback2Called = false;
         var callback3Called = false;
 
         // First callback: succeeds

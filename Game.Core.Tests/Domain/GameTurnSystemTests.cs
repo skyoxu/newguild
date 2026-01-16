@@ -47,6 +47,7 @@ public class GameTurnSystemTests
     private sealed class FakeTime : ITime
     {
         public double DeltaSeconds => 0.016; // Mock 16ms (60 FPS)
+        public DateTimeOffset UtcNowOffset => DateTimeOffset.UtcNow;
     }
 
     private sealed class FaultingEventEngine : IEventEngine

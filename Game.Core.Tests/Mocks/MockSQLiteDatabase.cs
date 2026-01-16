@@ -136,7 +136,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
             foreach (var kvp in parameters)
             {
                 var key = kvp.Key.TrimStart('@');
-                row[key] = kvp.Value!;
+                row[key] = kvp.Value ?? DBNull.Value;
             }
         }
 
@@ -163,7 +163,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
                 {
                     var key = kvp.Key.TrimStart('@');
                     if (row.ContainsKey(key))
-                        row[key] = kvp.Value;
+                        row[key] = kvp.Value ?? DBNull.Value;
                 }
             }
         }
@@ -269,11 +269,11 @@ public class MockSQLiteDatabase : ISQLiteDatabase
             var guilds = _tables.GetValueOrDefault("Guilds") ?? new List<Dictionary<string, object>>();
 
             var matchingGuildIds = guildMembers
-                .Where(m => m["UserId"].ToString() == userId)
-                .Select(m => m["GuildId"].ToString())
+                .Where(m => Convert.ToString(m["UserId"]) == userId)
+                .Select(m => Convert.ToString(m["GuildId"]) ?? string.Empty)
                 .ToHashSet();
 
-            return guilds.Where(g => matchingGuildIds.Contains(g["GuildId"].ToString())).ToList();
+            return guilds.Where(g => matchingGuildIds.Contains(Convert.ToString(g["GuildId"]) ?? string.Empty)).ToList();
         }
 
         return new List<Dictionary<string, object>>();
@@ -288,7 +288,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
 
         foreach (var kvp in parameters)
         {
-            result[kvp.Key.TrimStart('@')] = kvp.Value!;
+            result[kvp.Key.TrimStart('@')] = kvp.Value ?? DBNull.Value;
         }
 
         return result;
@@ -304,7 +304,7 @@ public class MockSQLiteDatabase : ISQLiteDatabase
             if (!row.ContainsKey(kvp.Key))
                 return false;
 
-            if (!row[kvp.Key].ToString()!.Equals(kvp.Value.ToString()))
+            if (!string.Equals(Convert.ToString(row[kvp.Key]), Convert.ToString(kvp.Value), StringComparison.Ordinal))
                 return false;
         }
 

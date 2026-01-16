@@ -18,7 +18,7 @@ $restoreLog = Join-Path $OutDir 'dotnet-restore.log'
 $restoreExit = $LASTEXITCODE
 
 $testLog = Join-Path $OutDir 'dotnet-test-output.txt'
-& dotnet test $Solution --collect:"XPlat Code Coverage" --logger "trx;LogFileName=tests.trx" -c $Configuration 2>&1 | Tee-Object -FilePath $testLog | Out-Null
+& dotnet test $Solution -p:TreatWarningsAsErrors=true -p:WarningsNotAsErrors=MSB3101 --collect:"XPlat Code Coverage" --logger "trx;LogFileName=tests.trx" -c $Configuration 2>&1 | Tee-Object -FilePath $testLog | Out-Null
 $testExit = $LASTEXITCODE
 
 $trx = Get-ChildItem -Recurse -File -Filter *.trx -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notlike "$OutDir*" } | Select-Object -ExpandProperty FullName

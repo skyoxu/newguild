@@ -19,11 +19,22 @@ public sealed class EventEngine : IEventEngine
 {
     private readonly IEventCatalog _eventCatalog;
     private readonly IEventBus _eventBus;
+    private readonly ITime _time;
+    private readonly IIdGenerator _idGenerator;
+    private readonly AIEcosystem _aiEcosystem;
 
-    public EventEngine(IEventCatalog eventCatalog, IEventBus eventBus)
+    public EventEngine(
+        IEventCatalog eventCatalog,
+        IEventBus eventBus,
+        ITime? time = null,
+        IIdGenerator? idGenerator = null,
+        AIEcosystem? aiEcosystem = null)
     {
         _eventCatalog = eventCatalog ?? throw new ArgumentNullException(nameof(eventCatalog));
         _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        _time = time ?? new SystemTime();
+        _idGenerator = idGenerator ?? new GuidIdGenerator();
+        _aiEcosystem = aiEcosystem ?? new AIEcosystem(_time, _idGenerator, seed: 1);
     }
 
     public async Task<GameTurnState> ExecuteResolutionPhaseAsync(GameTurnState state)
@@ -33,15 +44,16 @@ public sealed class EventEngine : IEventEngine
             GuildId: "temp-guild-id",
             CreatorId: "temp-creator-id",
             GuildName: "Temp Guild",
-            CreatedAt: DateTimeOffset.UtcNow
+            CreatedAt: _time.UtcNowOffset
         );
 
+        var now = _time.UtcNowOffset;
         var domainEvent = new DomainEvent(
             Type: GuildCreated.EventType,
             Source: "EventEngine",
             Data: guildCreated,
-            Timestamp: DateTime.UtcNow,
-            Id: Guid.NewGuid().ToString("N")
+            Timestamp: now.UtcDateTime,
+            Id: _idGenerator.NewId()
         );
 
         await _eventBus.PublishAsync(domainEvent);
@@ -54,16 +66,17 @@ public sealed class EventEngine : IEventEngine
         var memberJoined = new GuildMemberJoined(
             UserId: "temp-user-id",
             GuildId: "temp-guild-id",
-            JoinedAt: DateTimeOffset.UtcNow,
+            JoinedAt: _time.UtcNowOffset,
             Role: "member"
         );
 
+        var now = _time.UtcNowOffset;
         var domainEvent = new DomainEvent(
             Type: GuildMemberJoined.EventType,
             Source: "EventEngine",
             Data: memberJoined,
-            Timestamp: DateTime.UtcNow,
-            Id: Guid.NewGuid().ToString("N")
+            Timestamp: now.UtcDateTime,
+            Id: _idGenerator.NewId()
         );
 
         await _eventBus.PublishAsync(domainEvent);
@@ -72,34 +85,21 @@ public sealed class EventEngine : IEventEngine
 
     public async Task<GameTurnState> ExecuteAiPhaseAsync(GameTurnState state)
     {
-        // T2 minimal: Publish GuildMemberLeft event
-        var memberLeft = new GuildMemberLeft(
-            UserId: "temp-user-id",
-            GuildId: "temp-guild-id",
-            LeftAt: DateTimeOffset.UtcNow,
-            Reason: "voluntary"
-        );
-
-        var domainEvent = new DomainEvent(
-            Type: GuildMemberLeft.EventType,
-            Source: "EventEngine",
-            Data: memberLeft,
-            Timestamp: DateTime.UtcNow,
-            Id: Guid.NewGuid().ToString("N")
-        );
-
-        await _eventBus.PublishAsync(domainEvent);
+        var events = _aiEcosystem.Advance(state);
+        foreach (var evt in events)
+            await _eventBus.PublishAsync(evt);
         return state;
     }
 
     private Task PublishAsync(string type, string source, object? data)
     {
+        var now = _time.UtcNowOffset;
         var evt = new DomainEvent(
             Type: type,
             Source: source,
             Data: data,
-            Timestamp: DateTime.UtcNow,
-            Id: Guid.NewGuid().ToString("N")
+            Timestamp: now.UtcDateTime,
+            Id: _idGenerator.NewId()
         );
 
         return _eventBus.PublishAsync(evt);

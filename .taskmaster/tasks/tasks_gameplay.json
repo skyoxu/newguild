@@ -291,9 +291,9 @@
   {
     "id": "GM-0201",
     "story_id": "PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM",
-    "title": "T3 NPC 公会生态（AI Ecosystem）",
-    "description": "为 T3 提供 NPC 公会生态的最小闭环：在 Game.Core 中实现 AIEcosystem（或等价模块），让 NPC 公会/成员在回合推进下产生行为（招募、离开、角色调整等），并通过事件总线对外可观测。",
-    "status": "pending",
+    "title": "T3 NPC Guild Ecosystem (AI Ecosystem)",
+    "description": "Minimal NPC guild ecosystem loop: AIEcosystem generates deterministic behavior under turn progression and emits domain events.",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -340,21 +340,21 @@
       "Game.Core.Tests/Contracts/DomainEventTests.cs"
     ],
     "acceptance": [
-      "Game.Core 提供 AIEcosystem（或等价模块），在 GameTurn/时间推进下驱动 NPC 行为生成，并能稳定复现实例（可通过种子或确定性输入）。 Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
-      "至少实现 3 类可观测行为并以领域事件发布（例如 core.guild.recruitment.posted、core.guild.member.joined、core.guild.member.left），事件类型与字段遵循 ADR-0004。 Refs: Game.Core.Tests/Contracts/DomainEventTests.cs",
-      "AIEcosystem 的输入/输出与存储边界清晰：核心逻辑不依赖 Godot API，适配层负责时间/随机源注入。 Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
-      "xUnit 覆盖：确定性推进、事件数量/类型、边界条件（空 guild、满员、无候选等）。 Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs"
+      "Game.Core provides AIEcosystem driven by turn progression and is reproducible (fixed seed or deterministic input). Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
+      "Emits at least 3 observable behaviors as domain events (core.guild.member.joined / core.guild.member.left / core.ai.ecosystem.step.completed) and complies with ADR-0004. Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs Game.Core.Tests/Contracts/DomainEventTests.cs",
+      "Clear boundaries: core logic does not depend on Godot APIs; time/id sources are injectable. Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
+      "xUnit coverage: determinism, event types/counts, and boundaries (empty/full/no-candidates). Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs"
     ],
     "test_strategy": [
-      "xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。",
-      "如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。"
+      "xUnit: fixed time + fixed id generator + fixed seed; assert deterministic event sequences and positive join/leave cases.",
+      "If a playable demo is needed later: render an event summary in a Godot scene (demo-only, not the sole acceptance)."
     ],
     "taskmaster_id": 15,
     "taskmaster_exported": true,
     "contractRefs": [
       "core.ai.ecosystem.step.completed",
-      "core.game_turn.phase_changed",
-      "core.game_turn.week_advanced"
+      "core.guild.member.joined",
+      "core.guild.member.left"
     ],
     "artifactRefs": []
   },

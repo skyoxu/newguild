@@ -590,17 +590,17 @@
       },
       {
         "id": "15",
-        "title": "T3 NPC 公会生态（AI Ecosystem）",
-        "description": "为 T3 提供 NPC 公会生态的最小闭环：在 Game.Core 中实现 AIEcosystem（或等价模块），让 NPC 公会/成员在回合推进下产生行为（招募、离开、角色调整等），并通过事件总线对外可观测。",
-        "status": "pending",
+        "title": "T3 NPC Guild Ecosystem (AI Ecosystem)",
+        "description": "Provide a minimal NPC guild ecosystem loop: implement AIEcosystem in Game.Core to generate deterministic NPC behavior under turn progression, observable via domain events.",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "14",
           "20",
           "25"
         ],
-        "details": "Story: PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0015; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance: Game.Core 提供 AIEcosystem（或等价模块），在 GameTurn/时间推进下驱动 NPC 行为生成，并能稳定复现实例（可通过种子或确定性输入）。; 至少实现 3 类可观测行为并以领域事件发布（例如 core.guild.recruitment.posted、core.guild.member.joined、core.guild.member.left），事件类型与字段遵循 ADR-0004。; AIEcosystem 的输入/输出与存储边界清晰：核心逻辑不依赖 Godot API，适配层负责时间/随机源注入。; xUnit 覆盖：确定性推进、事件数量/类型、边界条件（空 guild、满员、无候选等）。\nTest Strategy: xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。; 如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。\nLabels: core; ai; simulation; npc; guild\nOwner: architecture\nLayer: core",
-        "testStrategy": "xUnit：用固定随机源/固定时间源驱动 N 回合推进，断言事件序列稳定且符合预期。\n如需要可玩演示：在 Godot 场景中每回合打印/渲染事件摘要（仅作为演示，不作为唯一验收）。",
+        "details": "Story: PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0015; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nAcceptance:\n- Game.Core provides AIEcosystem (or equivalent) driven by GameTurn/time progression, and the output is reproducible via fixed seed or deterministic input.\n- At least 3 observable behaviors are emitted as domain events (e.g. core.guild.member.joined, core.guild.member.left, core.ai.ecosystem.step.completed) and comply with ADR-0004.\n- Clear boundaries: core logic does not depend on Godot APIs; time/id sources are injectable.\n- xUnit coverage: determinism, event types/counts, and boundary cases (empty guild / full guild / no candidates).\nLabels: core; ai; simulation; npc; guild\nOwner: architecture\nLayer: core",
+        "testStrategy": "xUnit: fixed time + fixed id generator + fixed seed; assert deterministic event sequences and positive join/leave/step.completed cases; cover empty/full/no-candidates boundaries.",
         "complexity": 6,
         "recommendedSubtasks": 0,
         "expansionPrompt": "Break down this task into small, testable slices focused on playable loops.",
