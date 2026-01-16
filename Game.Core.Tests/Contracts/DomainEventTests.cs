@@ -1,6 +1,8 @@
 using System;
 using FluentAssertions;
 using Game.Core.Contracts;
+using Game.Core.Contracts.AI;
+using Game.Contracts.GameLoop;
 using Xunit;
 
 namespace Game.Core.Tests.Contracts;
@@ -174,5 +176,14 @@ public class DomainEventTests
         result.Should().Contain("test.event");
         result.Should().Contain("TestSource");
         result.Should().Contain("test-id");
+    }
+
+    // ACC:T15.2
+    [Fact]
+    public void Task15_Contract_EventTypes_Should_Match_Expected()
+    {
+        AiEcosystemStepCompleted.EventType.Should().Be("core.ai.ecosystem.step.completed");
+        GameTurnPhaseChanged.EventType.Should().Be("core.game_turn.phase_changed");
+        GameWeekAdvanced.EventType.Should().Be("core.game_turn.week_advanced");
     }
 }

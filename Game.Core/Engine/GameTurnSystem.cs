@@ -18,18 +18,21 @@ public sealed class GameTurnSystem : IGameTurnSystem
     private readonly IAICoordinator _aiCoordinator;
     private readonly IEventBus _eventBus;
     private readonly ITime _time;
+    private readonly IIdGenerator _idGenerator;
     private bool _firstTurnStarted;
 
     public GameTurnSystem(
         IEventEngine eventEngine,
         IAICoordinator aiCoordinator,
         IEventBus eventBus,
-        ITime time)
+        ITime time,
+        IIdGenerator? idGenerator = null)
     {
         _eventEngine = eventEngine;
         _aiCoordinator = aiCoordinator;
         _eventBus = eventBus;
         _time = time;
+        _idGenerator = idGenerator ?? new GuidIdGenerator();
         _firstTurnStarted = false;
     }
 
@@ -41,7 +44,7 @@ public sealed class GameTurnSystem : IGameTurnSystem
             Week: 1,
             Phase: GameTurnPhase.Resolution,
             SaveId: saveId,
-            CurrentTime: System.DateTimeOffset.UtcNow
+            CurrentTime: _time.UtcNowOffset
         );
     }
 
@@ -55,7 +58,7 @@ public sealed class GameTurnSystem : IGameTurnSystem
                 SaveId: state.SaveId,
                 Week: state.Week,
                 Phase: state.Phase.ToString(),
-                StartedAt: DateTimeOffset.UtcNow
+                StartedAt: _time.UtcNowOffset
             ), GameTurnStarted.EventType);
             await _eventBus.PublishAsync(startedEvent);
         }
@@ -86,7 +89,7 @@ public sealed class GameTurnSystem : IGameTurnSystem
                 Week: state.Week,
                 PreviousPhase: state.Phase.ToString(),
                 CurrentPhase: nextState.Phase.ToString(),
-                ChangedAt: DateTimeOffset.UtcNow
+                ChangedAt: _time.UtcNowOffset
             ), GameTurnPhaseChanged.EventType);
             await _eventBus.PublishAsync(phaseChangedEvent);
         }
@@ -98,7 +101,7 @@ public sealed class GameTurnSystem : IGameTurnSystem
                 SaveId: state.SaveId,
                 PreviousWeek: state.Week,
                 CurrentWeek: nextState.Week,
-                AdvancedAt: DateTimeOffset.UtcNow
+                AdvancedAt: _time.UtcNowOffset
             ), GameWeekAdvanced.EventType);
             await _eventBus.PublishAsync(weekAdvancedEvent);
         }
@@ -106,14 +109,15 @@ public sealed class GameTurnSystem : IGameTurnSystem
         return nextState;
     }
 
-    private static DomainEvent WrapEvent(object data, string eventType)
+    private DomainEvent WrapEvent(object data, string eventType)
     {
+        var now = _time.UtcNowOffset;
         return new DomainEvent(
             Type: eventType,
             Source: "GameTurnSystem",
             Data: data,
-            Timestamp: DateTime.UtcNow,
-            Id: Guid.NewGuid().ToString()
+            Timestamp: now.UtcDateTime,
+            Id: _idGenerator.NewId()
         );
     }
 }

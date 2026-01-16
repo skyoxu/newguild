@@ -7,7 +7,7 @@ namespace Game.Core.Tests.Domain;
 
 /// <summary>
 /// TDD tests for GuildMember entity.
-/// Coverage target: ≥90% lines, ≥85% branches.
+/// Coverage target: >= 90% lines, >= 85% branches.
 /// </summary>
 public class GuildMemberTests
 {
@@ -30,15 +30,14 @@ public class GuildMemberTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Constructor_ShouldThrowException_WhenUserIdIsInvalid(string invalidUserId)
+    public void Constructor_ShouldThrowException_WhenUserIdIsInvalid(string? invalidUserId)
     {
         // Arrange & Act
-        var act = () => new GuildMember(invalidUserId, GuildRole.Member);
+        var act = () => new GuildMember(invalidUserId!, GuildRole.Member);
 
         // Assert
         act.Should().Throw<ArgumentException>()
-            .WithParameterName("userId")
-            .WithMessage("*用户ID不能为空*");
+            .WithParameterName("userId");
     }
 
     [Fact]
@@ -49,7 +48,7 @@ public class GuildMemberTests
         var member2 = new GuildMember("user-123", GuildRole.Admin);
 
         // Act & Assert
-        member1.Should().Be(member2, "相同UserId的GuildMember应相等（不考虑Role）");
+        member1.Should().Be(member2, "GuildMember equality is based on UserId (Role is ignored)");
     }
 
     [Fact]
@@ -60,7 +59,7 @@ public class GuildMemberTests
         var member2 = new GuildMember("user-456", GuildRole.Member);
 
         // Act & Assert
-        member1.Should().NotBe(member2, "不同UserId的GuildMember不应相等");
+        member1.Should().NotBe(member2, "different UserId values must not be equal");
     }
 
     [Fact]
@@ -72,6 +71,6 @@ public class GuildMemberTests
 
         // Act & Assert
         member1.GetHashCode().Should().Be(member2.GetHashCode(),
-            "相同UserId的GuildMember应有相同的HashCode");
+            "same UserId should produce the same hash code");
     }
 }

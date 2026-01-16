@@ -29,7 +29,11 @@ public sealed class GuildRecruitmentServicePersistenceTests
         private sealed class Dummy : IDisposable { public void Dispose() { } }
     }
 
-    private sealed class NoopTime : ITime { public double DeltaSeconds => 0.0; }
+    private sealed class NoopTime : ITime
+    {
+        public double DeltaSeconds => 0.0;
+        public DateTimeOffset UtcNowOffset => DateTimeOffset.UtcNow;
+    }
     private sealed class NoopLogger : ILogger
     {
         public void Info(string message) { }

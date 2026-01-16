@@ -70,10 +70,10 @@ public class GuildCoreTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Constructor_ShouldThrowException_WhenGuildIdIsInvalid(string invalidGuildId)
+    public void Constructor_ShouldThrowException_WhenGuildIdIsInvalid(string? invalidGuildId)
     {
         // Arrange & Act
-        var act = () => new Guild(invalidGuildId, "creator-123", "GuildName");
+        var act = () => new Guild(invalidGuildId!, "creator-123", "GuildName");
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -85,10 +85,10 @@ public class GuildCoreTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Constructor_ShouldThrowException_WhenCreatorIdIsInvalid(string invalidCreatorId)
+    public void Constructor_ShouldThrowException_WhenCreatorIdIsInvalid(string? invalidCreatorId)
     {
         // Arrange & Act
-        var act = () => new Guild("guild-001", invalidCreatorId, "GuildName");
+        var act = () => new Guild("guild-001", invalidCreatorId!, "GuildName");
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -100,10 +100,10 @@ public class GuildCoreTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Constructor_ShouldThrowException_WhenNameIsInvalid(string invalidName)
+    public void Constructor_ShouldThrowException_WhenNameIsInvalid(string? invalidName)
     {
         // Arrange & Act
-        var act = () => new Guild("guild-001", "creator-123", invalidName);
+        var act = () => new Guild("guild-001", "creator-123", invalidName!);
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -151,13 +151,13 @@ public class GuildCoreTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void AddMember_ShouldThrowException_WhenUserIdIsInvalid(string invalidUserId)
+    public void AddMember_ShouldThrowException_WhenUserIdIsInvalid(string? invalidUserId)
     {
         // Arrange
         var guild = new Guild("guild-001", "creator-123", "TestGuild");
 
         // Act
-        var act = () => guild.AddMember(invalidUserId, GuildRole.Member);
+        var act = () => guild.AddMember(invalidUserId!, GuildRole.Member);
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -220,13 +220,13 @@ public class GuildCoreTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void RemoveMember_ShouldThrowException_WhenUserIdIsInvalid(string invalidUserId)
+    public void RemoveMember_ShouldThrowException_WhenUserIdIsInvalid(string? invalidUserId)
     {
         // Arrange
         var guild = new Guild("guild-001", "creator-123", "TestGuild");
 
         // Act
-        var act = () => guild.RemoveMember(invalidUserId);
+        var act = () => guild.RemoveMember(invalidUserId!);
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -271,13 +271,13 @@ public class GuildCoreTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void ChangeRole_ShouldThrowException_WhenUserIdIsInvalid(string invalidUserId)
+    public void ChangeRole_ShouldThrowException_WhenUserIdIsInvalid(string? invalidUserId)
     {
         // Arrange
         var guild = new Guild("guild-001", "creator-123", "TestGuild");
 
         // Act
-        var act = () => guild.ChangeRole(invalidUserId, GuildRole.Admin);
+        var act = () => guild.ChangeRole(invalidUserId!, GuildRole.Admin);
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -496,7 +496,7 @@ public class GuildCoreTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void ReconstructFromDatabase_ShouldThrowException_WhenGuildIdIsInvalid(string invalidGuildId)
+    public void ReconstructFromDatabase_ShouldThrowException_WhenGuildIdIsInvalid(string? invalidGuildId)
     {
         // Arrange
         var members = new List<GuildMember>
@@ -505,7 +505,7 @@ public class GuildCoreTests
         };
 
         // Act
-        var act = () => Guild.ReconstructFromDatabase(invalidGuildId, "creator-123", "GuildName", DateTimeOffset.UtcNow, members);
+        var act = () => Guild.ReconstructFromDatabase(invalidGuildId!, "creator-123", "GuildName", DateTimeOffset.UtcNow, members);
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -517,7 +517,7 @@ public class GuildCoreTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void ReconstructFromDatabase_ShouldThrowException_WhenCreatorIdIsInvalid(string invalidCreatorId)
+    public void ReconstructFromDatabase_ShouldThrowException_WhenCreatorIdIsInvalid(string? invalidCreatorId)
     {
         // Arrange
         var members = new List<GuildMember>
@@ -526,7 +526,7 @@ public class GuildCoreTests
         };
 
         // Act
-        var act = () => Guild.ReconstructFromDatabase("guild-001", invalidCreatorId, "GuildName", DateTimeOffset.UtcNow, members);
+        var act = () => Guild.ReconstructFromDatabase("guild-001", invalidCreatorId!, "GuildName", DateTimeOffset.UtcNow, members);
 
         // Assert
         act.Should().Throw<ArgumentException>()
@@ -538,7 +538,7 @@ public class GuildCoreTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void ReconstructFromDatabase_ShouldThrowException_WhenNameIsInvalid(string invalidName)
+    public void ReconstructFromDatabase_ShouldThrowException_WhenNameIsInvalid(string? invalidName)
     {
         // Arrange
         var members = new List<GuildMember>
@@ -547,7 +547,7 @@ public class GuildCoreTests
         };
 
         // Act
-        var act = () => Guild.ReconstructFromDatabase("guild-001", "creator-123", invalidName, DateTimeOffset.UtcNow, members);
+        var act = () => Guild.ReconstructFromDatabase("guild-001", "creator-123", invalidName!, DateTimeOffset.UtcNow, members);
 
         // Assert
         act.Should().Throw<ArgumentException>()

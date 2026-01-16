@@ -157,5 +157,6 @@ public class GameLoopTests
     private sealed class FakeTime : ITime
     {
         public double DeltaSeconds => 0.016; // Mock 16ms (60 FPS)
+        public DateTimeOffset UtcNowOffset => DateTimeOffset.UtcNow;
     }
 }

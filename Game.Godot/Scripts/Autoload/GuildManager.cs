@@ -158,6 +158,7 @@ public partial class GuildManager : Node
     private sealed class NoopTimePort : ITime
     {
         public double DeltaSeconds => 0.0;
+        public DateTimeOffset UtcNowOffset => DateTimeOffset.UtcNow;
     }
 
     private sealed class DevNullLogger : ILogger

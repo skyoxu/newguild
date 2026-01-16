@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Godot;
 using System.Text.Json;
@@ -71,7 +72,7 @@ public partial class HUD : Control
 
         IEventCatalog catalog = new EmptyEventCatalog();
         IAICoordinator aiCoordinator = new NoopAICoordinator();
-        _turnSystem = new GameTurnSystem(new EventEngine(catalog, eventBus), aiCoordinator, eventBus, timePort);
+        _turnSystem = new GameTurnSystem(new EventEngine(catalog, eventBus, timePort), aiCoordinator, eventBus, timePort);
         _currentTurn = _turnSystem.StartNewWeek(new SaveIdValue("t2-demo"));
         UpdateTurnLabels();
     }
@@ -155,5 +156,6 @@ public partial class HUD : Control
     private sealed class FixedTimePort : ITime
     {
         public double DeltaSeconds => 1.0 / 60.0;
+        public DateTimeOffset UtcNowOffset => DateTimeOffset.UtcNow;
     }
 }
