@@ -8,6 +8,7 @@ using Game.Core.Domain.Turn;
 using Game.Core.Engine;
 using Game.Core.Services;
 using Game.Core.Ports;
+using Game.Core.Ports.AI;
 
 namespace Game.Godot.Scripts.UI;
 
@@ -67,13 +68,18 @@ public partial class HUD : Control
         {
             // Defensive: still allow HUD to demonstrate turn system even if CompositionRoot is not available.
             timePort = new FixedTimePort();
-            eventBus = new InMemoryEventBus();
+            eventBus = (IEventBus?)_eventBus ?? new InMemoryEventBus();
         }
 
         IEventCatalog catalog = new EmptyEventCatalog();
-        IAICoordinator aiCoordinator = new NoopAICoordinator();
-        _turnSystem = new GameTurnSystem(new EventEngine(catalog, eventBus, timePort), aiCoordinator, eventBus, timePort);
-        _currentTurn = _turnSystem.StartNewWeek(new SaveIdValue("t2-demo"));
+        var saveId = new SaveIdValue("t2-demo");
+
+        var world = new InMemoryAiWorldStatePort();
+        world.Seed(saveId, week: 1, CreateDemoWorldSnapshot());
+
+        IAICoordinator aiCoordinator = new AICoordinator(world, new GuidIdGenerator());
+        _turnSystem = new GameTurnSystem(new EventEngine(catalog, eventBus, timePort, aiCoordinator: aiCoordinator), aiCoordinator, eventBus, timePort);
+        _currentTurn = _turnSystem.StartNewWeek(saveId);
         UpdateTurnLabels();
     }
 
@@ -151,6 +157,40 @@ public partial class HUD : Control
     private sealed class NoopAICoordinator : IAICoordinator
     {
         public GameTurnState StepAiCycle(GameTurnState state) => state;
+
+        public System.Collections.Generic.IReadOnlyList<Game.Core.Contracts.DomainEvent> GenerateAiEvents(GameTurnState state) =>
+            Array.Empty<Game.Core.Contracts.DomainEvent>();
+    }
+
+    private static AiWorldSnapshot CreateDemoWorldSnapshot()
+    {
+        var guilds = new System.Collections.Generic.Dictionary<string, AiWorldGuild>(StringComparer.Ordinal)
+        {
+            ["npc-guild-01"] = new AiWorldGuild("npc-guild-01", CurrentMembers: 0, MaxMembers: 5),
+            ["npc-guild-02"] = new AiWorldGuild("npc-guild-02", CurrentMembers: 0, MaxMembers: 5),
+        };
+
+        var members = new System.Collections.Generic.Dictionary<string, AiWorldMember>(StringComparer.Ordinal)
+        {
+            ["npc-0001"] = new AiWorldMember("npc-0001", CurrentGuildId: null),
+            ["npc-0002"] = new AiWorldMember("npc-0002", CurrentGuildId: null),
+        };
+
+        var affinity = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, int>>(StringComparer.Ordinal)
+        {
+            ["npc-0001"] = new System.Collections.Generic.Dictionary<string, int>(StringComparer.Ordinal)
+            {
+                ["npc-guild-01"] = 10,
+                ["npc-guild-02"] = 2,
+            },
+            ["npc-0002"] = new System.Collections.Generic.Dictionary<string, int>(StringComparer.Ordinal)
+            {
+                ["npc-guild-01"] = 10,
+                ["npc-guild-02"] = 9,
+            },
+        };
+
+        return new AiWorldSnapshot(guilds, members, affinity);
     }
 
     private sealed class FixedTimePort : ITime

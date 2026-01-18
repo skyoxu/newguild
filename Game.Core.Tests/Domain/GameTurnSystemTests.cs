@@ -42,6 +42,9 @@ public class GameTurnSystemTests
     private sealed class DummyAICoordinator : IAICoordinator
     {
         public GameTurnState StepAiCycle(GameTurnState state) => state;
+
+        public System.Collections.Generic.IReadOnlyList<DomainEvent> GenerateAiEvents(GameTurnState state) =>
+            Array.Empty<DomainEvent>();
     }
 
     private sealed class FakeTime : ITime
@@ -367,7 +370,7 @@ public class GameTurnSystemTests
         var system = new GameTurnSystem(engine, ai, eventBus, time);
         var startState = system.StartNewWeek(new SaveIdValue("save-t2"));
 
-        // Act - execute complete Resolution → Player → AiSimulation cycle
+        // Act - execute complete Resolution -> Player -> AiSimulation cycle
         var afterResolution = await system.Advance(startState);
         var afterPlayer = await system.Advance(afterResolution);
         var afterAi = await system.Advance(afterPlayer);
@@ -378,19 +381,19 @@ public class GameTurnSystemTests
         // Event 1: GameTurnStarted at beginning
         GetEventType(eventBus.Published[0]).Should().Be("core.game_turn.started");
 
-        // Event 2: PhaseChanged (Resolution → Player)
+        // Event 2: PhaseChanged (Resolution -> Player)
         GetEventType(eventBus.Published[1]).Should().Be("core.game_turn.phase_changed");
         var phaseChange1 = eventBus.Published[1].Data as Game.Contracts.GameLoop.GameTurnPhaseChanged;
         phaseChange1!.PreviousPhase.Should().Be("Resolution");
         phaseChange1.CurrentPhase.Should().Be("Player");
 
-        // Event 3: PhaseChanged (Player → AiSimulation)
+        // Event 3: PhaseChanged (Player -> AiSimulation)
         GetEventType(eventBus.Published[2]).Should().Be("core.game_turn.phase_changed");
         var phaseChange2 = eventBus.Published[2].Data as Game.Contracts.GameLoop.GameTurnPhaseChanged;
         phaseChange2!.PreviousPhase.Should().Be("Player");
         phaseChange2.CurrentPhase.Should().Be("AiSimulation");
 
-        // Event 4: WeekAdvanced (Week 1 → Week 2)
+        // Event 4: WeekAdvanced (Week 1 -> Week 2)
         GetEventType(eventBus.Published[3]).Should().Be("core.game_turn.week_advanced");
         var weekAdvanced = eventBus.Published[3].Data as Game.Contracts.GameLoop.GameWeekAdvanced;
         weekAdvanced!.PreviousWeek.Should().Be(1);

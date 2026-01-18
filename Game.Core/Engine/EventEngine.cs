@@ -22,19 +22,22 @@ public sealed class EventEngine : IEventEngine
     private readonly ITime _time;
     private readonly IIdGenerator _idGenerator;
     private readonly AIEcosystem _aiEcosystem;
+    private readonly IAICoordinator _aiCoordinator;
 
     public EventEngine(
         IEventCatalog eventCatalog,
         IEventBus eventBus,
         ITime? time = null,
         IIdGenerator? idGenerator = null,
-        AIEcosystem? aiEcosystem = null)
+        AIEcosystem? aiEcosystem = null,
+        IAICoordinator? aiCoordinator = null)
     {
         _eventCatalog = eventCatalog ?? throw new ArgumentNullException(nameof(eventCatalog));
         _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
         _time = time ?? new SystemTime();
         _idGenerator = idGenerator ?? new GuidIdGenerator();
         _aiEcosystem = aiEcosystem ?? new AIEcosystem(_time, _idGenerator, seed: 1);
+        _aiCoordinator = aiCoordinator ?? new AICoordinator();
     }
 
     public async Task<GameTurnState> ExecuteResolutionPhaseAsync(GameTurnState state)
@@ -85,6 +88,13 @@ public sealed class EventEngine : IEventEngine
 
     public async Task<GameTurnState> ExecuteAiPhaseAsync(GameTurnState state)
     {
+        if (state is null)
+            return state!;
+
+        var aiCoordinatorEvents = _aiCoordinator.GenerateAiEvents(state);
+        foreach (var evt in aiCoordinatorEvents)
+            await _eventBus.PublishAsync(evt);
+
         var events = _aiEcosystem.Advance(state);
         foreach (var evt in events)
             await _eventBus.PublishAsync(evt);

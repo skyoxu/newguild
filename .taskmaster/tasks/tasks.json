@@ -627,7 +627,7 @@
         "id": "16",
         "title": "实现 AI 协调器（AICoordinator）管理 NPC 公会与成员行为",
         "description": "在 Game.Core 中实现 AICoordinator（或等价组件），负责管理 NPC 公会和成员 AI：处理 AI 周期、关系网络更新、冲突解决与 AI 事件生成，并通过接口向 EventEngine 与 Godot 适配层暴露能力，支撑 PRD-Guild-Manager 中“生态模拟与多主体 AI”要求。",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "15"
@@ -654,7 +654,7 @@
           "CH09"
         ],
         "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-        "updatedAt": "2026-01-07T18:25:01.169Z"
+        "updatedAt": "2026-01-18T11:46:25Z"
       },
       {
         "id": "17",

@@ -193,7 +193,7 @@ public class EventEngineTests
         // Assert
         // T2 minimal implementation: verify EventEngine can publish core.guild.created
         // This test validates event bus integration per ADR-0004 CloudEvents naming
-        // ✓ IMPLEMENTED: EventEngine.ExecuteResolutionPhaseAsync() publishes GuildCreated
+        // IMPLEMENTED: EventEngine.ExecuteResolutionPhaseAsync() publishes GuildCreated
         bus.Published.Should().ContainSingle(e => GetEventType(e) == "core.guild.created");
     }
 
@@ -219,6 +219,7 @@ public class EventEngineTests
         bus.Published.Should().ContainSingle(e => GetEventType(e) == "core.guild.member.joined");
     }
 
+    // ACC:T16.2
     [Fact]
     public async Task ExecuteAiPhase_PublishesGuildMemberLeftEvent_WhenMemberLeaves()
     {
