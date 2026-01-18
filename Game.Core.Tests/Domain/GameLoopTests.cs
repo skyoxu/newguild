@@ -123,6 +123,9 @@ public class GameLoopTests
     private sealed class MinimalAICoordinator : IAICoordinator
     {
         public GameTurnState StepAiCycle(GameTurnState state) => state;
+
+        public System.Collections.Generic.IReadOnlyList<DomainEvent> GenerateAiEvents(GameTurnState state) =>
+            Array.Empty<DomainEvent>();
     }
 
     private sealed class MinimalEventBus : IEventBus
