@@ -235,14 +235,15 @@ def main() -> int:
     md_lines.append(f"- Domain prefix filter: `{_md_escape(','.join(domain_prefixes))}`")
     md_lines.append("")
     md_lines.append("## Sources (SSoT references)")
-    md_lines.append(f"- Contracts (code): `{_md_escape(_to_posix(contracts_dir.relative_to(root)))}**`")
+    contracts_glob = f"{_to_posix(contracts_dir.relative_to(root))}/**" if contracts_dir.exists() else _to_posix(contracts_dir)
+    md_lines.append(f"- Contracts (code): `{_md_escape(contracts_glob)}`")
     md_lines.append(f"- Tasks (views): `{_md_escape(str(args.tasks_back))}`, `{_md_escape(str(args.tasks_gameplay))}`")
     md_lines.append("")
 
     md_lines.append("## Domain Events (EventType)")
     md_lines.append("")
     if not contracts_dir.exists():
-        md_lines.append(f"> Skipped: contracts dir not found: `{_md_escape(_to_posix(contracts_dir.relative_to(root)))}'")
+        md_lines.append(f"> Skipped: contracts dir not found: `{_md_escape(_to_posix(contracts_dir))}`")
     elif not events:
         md_lines.append("> No EventType constants found under Contracts for the selected domain prefixes.")
     else:
@@ -253,7 +254,7 @@ def main() -> int:
             md_lines.append(f"### `{_md_escape(file)}`")
             for e in items:
                 if e.symbol:
-                    md_lines.append(f"- `{_md_escape(e.event_type)}` → `{_md_escape(e.symbol)}`")
+                    md_lines.append(f"- `{_md_escape(e.event_type)}` -> `{_md_escape(e.symbol)}`")
                 else:
                     md_lines.append(f"- `{_md_escape(e.event_type)}`")
             md_lines.append("")
@@ -269,7 +270,7 @@ def main() -> int:
             md_lines.append(f"- `{_md_escape(e.symbol)}` (`{_md_escape(e.file)}`)")
         md_lines.append("")
 
-    _render_iface("Ports (Core → Adapters)", ports)
+    _render_iface("Ports (Core -> Adapters)", ports)
     _render_iface("Services (Core abstractions)", services)
     _render_iface("Repositories (persistence abstractions)", repos)
 
@@ -283,7 +284,7 @@ def main() -> int:
             md_lines.append("### tasks_back.json")
             for t in tasks_back:
                 label = t["id"] or "(no-id)"
-                title = f" — {t['title']}" if t.get("title") else ""
+                title = f" - {t['title']}" if t.get("title") else ""
                 md_lines.append(f"- **{_md_escape(label)}**{_md_escape(title)}")
                 for r in t["contractRefs"]:
                     md_lines.append(f"  - `{_md_escape(r)}`")
@@ -292,7 +293,7 @@ def main() -> int:
             md_lines.append("### tasks_gameplay.json")
             for t in tasks_gameplay:
                 label = t["id"] or "(no-id)"
-                title = f" — {t['title']}" if t.get("title") else ""
+                title = f" - {t['title']}" if t.get("title") else ""
                 md_lines.append(f"- **{_md_escape(label)}**{_md_escape(title)}")
                 for r in t["contractRefs"]:
                     md_lines.append(f"  - `{_md_escape(r)}`")
@@ -308,7 +309,7 @@ def main() -> int:
         md_lines.append("")
         for item in unknown_by_task:
             label = item.get("id") or "(no-id)"
-            title = f" — {item['title']}" if item.get("title") else ""
+            title = f" - {item['title']}" if item.get("title") else ""
             md_lines.append(f"- **{_md_escape(item['view'])}::{_md_escape(str(label))}**{_md_escape(title)}")
             for r in item["unknown"]:
                 md_lines.append(f"  - `{_md_escape(r)}`")
@@ -346,4 +347,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
