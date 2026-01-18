@@ -78,7 +78,7 @@ public partial class HUD : Control
         world.Seed(saveId, week: 1, CreateDemoWorldSnapshot());
 
         IAICoordinator aiCoordinator = new AICoordinator(world, new GuidIdGenerator());
-        _turnSystem = new GameTurnSystem(new EventEngine(catalog, eventBus, timePort, aiCoordinator: aiCoordinator), aiCoordinator, eventBus, timePort);
+        _turnSystem = new GameTurnSystem(new EventEngine(catalog, eventBus, timePort, aiCoordinator: aiCoordinator), eventBus, timePort);
         _currentTurn = _turnSystem.StartNewWeek(saveId);
         UpdateTurnLabels();
     }
@@ -156,8 +156,6 @@ public partial class HUD : Control
 
     private sealed class NoopAICoordinator : IAICoordinator
     {
-        public GameTurnState StepAiCycle(GameTurnState state) => state;
-
         public System.Collections.Generic.IReadOnlyList<Game.Core.Contracts.DomainEvent> GenerateAiEvents(GameTurnState state) =>
             Array.Empty<Game.Core.Contracts.DomainEvent>();
     }

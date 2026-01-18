@@ -15,7 +15,6 @@ public interface IGameTurnSystem
 public sealed class GameTurnSystem : IGameTurnSystem
 {
     private readonly IEventEngine _eventEngine;
-    private readonly IAICoordinator _aiCoordinator;
     private readonly IEventBus _eventBus;
     private readonly ITime _time;
     private readonly IIdGenerator _idGenerator;
@@ -23,13 +22,11 @@ public sealed class GameTurnSystem : IGameTurnSystem
 
     public GameTurnSystem(
         IEventEngine eventEngine,
-        IAICoordinator aiCoordinator,
         IEventBus eventBus,
         ITime time,
         IIdGenerator? idGenerator = null)
     {
         _eventEngine = eventEngine;
-        _aiCoordinator = aiCoordinator;
         _eventBus = eventBus;
         _time = time;
         _idGenerator = idGenerator ?? new GuidIdGenerator();

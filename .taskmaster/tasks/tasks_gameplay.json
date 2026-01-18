@@ -412,7 +412,7 @@
     ],
     "acceptance": [
       "Game.Core 中存在 AICoordinator 类（或等价服务），负责在每个 AI 周期内驱动 NPC 公会与成员行为（决策、关系更新、事件生成）。 Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs",
-      "AICoordinator 对外暴露用于集成的接口（如 StepAiCycle/GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs",
+      "AICoordinator 对外暴露用于集成的接口（如 GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs",
       "xUnit 测试涵盖基本 AI 行为（例如简单策略下的成员状态变化）、冲突场景（多个 NPC 目标冲突）以及性能边界（在模拟大量 NPC 时仍保持可接受性能）。 Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs Game.Core.Tests/Domain/AICoordinatorPerformanceTests.cs",
       "如采用多线程/ThreadPool 优化 AI 计算，AICoordinator 提供线程安全保证，并在测试中验证无竞态条件。 Refs: Game.Core.Tests/Services/AICoordinatorConcurrencyTests.cs Game.Core.Tests/Domain/AICoordinatorTests.cs"
     ],
