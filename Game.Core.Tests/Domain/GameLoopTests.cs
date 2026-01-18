@@ -85,7 +85,6 @@ public class GameLoopTests
         var eventBus = new CapturingEventBus();
         var system = new GameTurnSystem(
             new MinimalEventEngine(),
-            new MinimalAICoordinator(),
             eventBus,
             new FakeTime()
         );
@@ -107,7 +106,6 @@ public class GameLoopTests
     {
         return new GameTurnSystem(
             new MinimalEventEngine(),
-            new MinimalAICoordinator(),
             new MinimalEventBus(),
             new FakeTime()
         );
@@ -118,14 +116,6 @@ public class GameLoopTests
         public Task<GameTurnState> ExecuteResolutionPhaseAsync(GameTurnState state) => Task.FromResult(state);
         public Task<GameTurnState> ExecutePlayerPhaseAsync(GameTurnState state) => Task.FromResult(state);
         public Task<GameTurnState> ExecuteAiPhaseAsync(GameTurnState state) => Task.FromResult(state);
-    }
-
-    private sealed class MinimalAICoordinator : IAICoordinator
-    {
-        public GameTurnState StepAiCycle(GameTurnState state) => state;
-
-        public System.Collections.Generic.IReadOnlyList<DomainEvent> GenerateAiEvents(GameTurnState state) =>
-            Array.Empty<DomainEvent>();
     }
 
     private sealed class MinimalEventBus : IEventBus

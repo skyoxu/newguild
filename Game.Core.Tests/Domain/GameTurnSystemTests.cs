@@ -39,14 +39,6 @@ public class GameTurnSystemTests
         public Task<GameTurnState> ExecuteAiPhaseAsync(GameTurnState state) => Task.FromResult(state);
     }
 
-    private sealed class DummyAICoordinator : IAICoordinator
-    {
-        public GameTurnState StepAiCycle(GameTurnState state) => state;
-
-        public System.Collections.Generic.IReadOnlyList<DomainEvent> GenerateAiEvents(GameTurnState state) =>
-            Array.Empty<DomainEvent>();
-    }
-
     private sealed class FakeTime : ITime
     {
         public double DeltaSeconds => 0.016; // Mock 16ms (60 FPS)
@@ -81,10 +73,9 @@ public class GameTurnSystemTests
     private static GameTurnSystem CreateSystem()
     {
         var engine = new DummyEventEngine();
-        var ai = new DummyAICoordinator();
         var eventBus = new CapturingEventBus();
         var time = new FakeTime();
-        return new GameTurnSystem(engine, ai, eventBus, time);
+        return new GameTurnSystem(engine, eventBus, time);
     }
 
     private static string? GetEventType(DomainEvent e)
@@ -214,10 +205,9 @@ public class GameTurnSystemTests
         // Arrange
         var expectedException = new InvalidOperationException("Resolution phase failed");
         var faultingEngine = new FaultingEventEngine(expectedException);
-        var ai = new DummyAICoordinator();
         var eventBus = new CapturingEventBus();
         var time = new FakeTime();
-        var system = new GameTurnSystem(faultingEngine, ai, eventBus, time);
+        var system = new GameTurnSystem(faultingEngine, eventBus, time);
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
@@ -238,10 +228,9 @@ public class GameTurnSystemTests
         // Arrange
         var expectedException = new InvalidOperationException("Player phase failed");
         var faultingEngine = new FaultingEventEngine(expectedException);
-        var ai = new DummyAICoordinator();
         var eventBus = new CapturingEventBus();
         var time = new FakeTime();
-        var system = new GameTurnSystem(faultingEngine, ai, eventBus, time);
+        var system = new GameTurnSystem(faultingEngine, eventBus, time);
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Player,
@@ -262,10 +251,9 @@ public class GameTurnSystemTests
         // Arrange
         var expectedException = new InvalidOperationException("AI phase failed");
         var faultingEngine = new FaultingEventEngine(expectedException);
-        var ai = new DummyAICoordinator();
         var eventBus = new CapturingEventBus();
         var time = new FakeTime();
-        var system = new GameTurnSystem(faultingEngine, ai, eventBus, time);
+        var system = new GameTurnSystem(faultingEngine, eventBus, time);
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.AiSimulation,
@@ -286,9 +274,8 @@ public class GameTurnSystemTests
         // Arrange
         var eventBus = new CapturingEventBus();
         var engine = new DummyEventEngine();
-        var ai = new DummyAICoordinator();
         var time = new FakeTime();
-        var system = new GameTurnSystem(engine, ai, eventBus, time);
+        var system = new GameTurnSystem(engine, eventBus, time);
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
@@ -309,9 +296,8 @@ public class GameTurnSystemTests
         // Arrange
         var eventBus = new CapturingEventBus();
         var engine = new DummyEventEngine();
-        var ai = new DummyAICoordinator();
         var time = new FakeTime();
-        var system = new GameTurnSystem(engine, ai, eventBus, time);
+        var system = new GameTurnSystem(engine, eventBus, time);
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.Resolution,
@@ -337,9 +323,8 @@ public class GameTurnSystemTests
         // Arrange
         var eventBus = new CapturingEventBus();
         var engine = new DummyEventEngine();
-        var ai = new DummyAICoordinator();
         var time = new FakeTime();
-        var system = new GameTurnSystem(engine, ai, eventBus, time);
+        var system = new GameTurnSystem(engine, eventBus, time);
         var state = new GameTurnState(
             Week: 1,
             Phase: GameTurnPhase.AiSimulation,
@@ -365,9 +350,8 @@ public class GameTurnSystemTests
         // Arrange
         var eventBus = new CapturingEventBus();
         var engine = new DummyEventEngine();
-        var ai = new DummyAICoordinator();
         var time = new FakeTime();
-        var system = new GameTurnSystem(engine, ai, eventBus, time);
+        var system = new GameTurnSystem(engine, eventBus, time);
         var startState = system.StartNewWeek(new SaveIdValue("save-t2"));
 
         // Act - execute complete Resolution -> Player -> AiSimulation cycle

@@ -12,7 +12,6 @@ namespace Game.Core.Engine;
 
 public interface IAICoordinator
 {
-    GameTurnState StepAiCycle(GameTurnState state);
     IReadOnlyList<DomainEvent> GenerateAiEvents(GameTurnState state);
 }
 
@@ -32,12 +31,6 @@ public sealed class AICoordinator : IAICoordinator
     {
         _world = world ?? throw new ArgumentNullException(nameof(world));
         _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
-    }
-
-    public GameTurnState StepAiCycle(GameTurnState state)
-    {
-        _ = GenerateAiEvents(state);
-        return state;
     }
 
     public IReadOnlyList<DomainEvent> GenerateAiEvents(GameTurnState state)

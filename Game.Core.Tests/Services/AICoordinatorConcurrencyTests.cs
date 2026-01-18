@@ -13,21 +13,6 @@ namespace Game.Core.Tests.Services;
 public class AICoordinatorConcurrencyTests
 {
     [Fact]
-    public void Should_Expose_StepAiCycle_With_Stable_Signature()
-    {
-        var method = typeof(AICoordinator).GetMethod(nameof(IAICoordinator.StepAiCycle));
-
-        method.Should().NotBeNull();
-        method!.ReturnType.Should().Be(typeof(GameTurnState));
-
-        var parameters = method.GetParameters();
-        parameters.Should().HaveCount(1);
-        parameters[0].ParameterType.Should().Be(typeof(GameTurnState));
-
-        typeof(IAICoordinator).IsAssignableFrom(typeof(AICoordinator)).Should().BeTrue();
-    }
-
-    [Fact]
     public void Should_Expose_GenerateAiEvents_With_Stable_Signature()
     {
         var method = typeof(AICoordinator).GetMethod(nameof(IAICoordinator.GenerateAiEvents));
@@ -38,11 +23,13 @@ public class AICoordinatorConcurrencyTests
         var parameters = method.GetParameters();
         parameters.Should().HaveCount(1);
         parameters[0].ParameterType.Should().Be(typeof(GameTurnState));
+
+        typeof(IAICoordinator).IsAssignableFrom(typeof(AICoordinator)).Should().BeTrue();
     }
 
     // ACC:T16.4
     [Fact]
-    public async Task Should_Be_Safe_To_Invoke_StepAiCycle_Concurrently()
+    public async Task Should_Be_Safe_To_Invoke_GenerateAiEvents_Concurrently()
     {
         var coordinator = new AICoordinator();
         var now = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
@@ -57,15 +44,15 @@ public class AICoordinatorConcurrencyTests
         const int iterationsPerWorker = 50;
         var expectedCalls = workers * iterationsPerWorker;
 
-        var results = new ConcurrentBag<GameTurnState>();
+        var results = new ConcurrentBag<int>();
 
         var tasks = Enumerable.Range(0, workers)
             .Select(_ => Task.Run(() =>
             {
                 for (var i = 0; i < iterationsPerWorker; i++)
                 {
-                    var next = coordinator.StepAiCycle(input);
-                    results.Add(next);
+                    var events = coordinator.GenerateAiEvents(input);
+                    results.Add(events.Count);
                 }
             }))
             .ToArray();
@@ -73,8 +60,6 @@ public class AICoordinatorConcurrencyTests
         await Task.WhenAll(tasks);
 
         results.Should().HaveCount(expectedCalls);
-        results.Should().OnlyContain(s => s != null);
-        results.Should().OnlyContain(s => s.SaveId == input.SaveId);
-        results.Should().OnlyContain(s => s.Week == input.Week);
+        results.Should().OnlyContain(c => c >= 0);
     }
 }
