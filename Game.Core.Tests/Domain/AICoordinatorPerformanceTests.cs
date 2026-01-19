@@ -17,7 +17,7 @@ public sealed class AICoordinatorPerformanceTests
 {
     // ACC:T16.3
     [Fact]
-    public void GenerateAiEvents_Should_Handle_200Plus_Entities_With_Bounded_Output()
+    public void GenerateAiEvents_WhenHandling200PlusEntities_ShouldHaveBoundedOutput()
     {
         var saveId = new SaveIdValue("save-1");
         var world = new InMemoryAiWorldStatePort();

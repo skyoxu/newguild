@@ -9,6 +9,13 @@ using Game.Core.Services;
 
 namespace Game.Godot.Adapters;
 
+/// <summary>
+/// Godot adapter bridging Core DomainEvent publishing to scene-level signals.
+/// </summary>
+/// <remarks>
+/// When enabled, security audit JSONL files are written under <c>user://logs/</c> and can be archived
+/// into the repo <c>logs/</c> folder by CI/tools (see <c>scripts/python/godot_userlog_manager.py</c>).
+/// </remarks>
 public partial class EventBusAdapter : Node, IEventBus
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -18,11 +25,26 @@ public partial class EventBusAdapter : Node, IEventBus
         WriteIndented = false,
     };
 
+    private SecurityAuditWriter? _securityAudit;
+
     [Signal]
     public delegate void DomainEventEmittedEventHandler(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso);
 
     private readonly List<Func<DomainEvent, Task>> _handlers = new();
     private readonly object _gate = new();
+
+    public override void _Ready()
+    {
+        _securityAudit = new SecurityAuditWriter();
+        _securityAudit.Start();
+    }
+
+    public override void _ExitTree()
+    {
+        if (_securityAudit != null)
+            _ = _securityAudit.DisposeAsync().AsTask();
+        _securityAudit = null;
+    }
 
     public Task PublishAsync(DomainEvent evt)
     {
@@ -30,6 +52,8 @@ public partial class EventBusAdapter : Node, IEventBus
         var dataJson = evt.Data is string s ? (string.IsNullOrWhiteSpace(s) ? "{}" : s)
                                             : JsonSerializer.Serialize(evt.Data, JsonOptions);
         EmitSignal(SignalName.DomainEventEmitted, evt.Type, evt.Source, dataJson, evt.Id, evt.SpecVersion, evt.DataContentType, evt.Timestamp.ToString("o"));
+
+        _securityAudit?.TryEnqueue(evt, dataJson);
 
         // Notify in-process subscribers
         List<Func<DomainEvent, Task>> snapshot;

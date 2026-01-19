@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Any
 
 
-EVENT_RE = re.compile(r"\b(?:core|ui)\.[a-z0-9_]+(?:\.[a-z0-9_]+){1,}\b", re.IGNORECASE)
-PUBLISH_RE = re.compile(r"\bPublishSimple\s*\(\s*\"(core|ui)\.", re.IGNORECASE)
+EVENT_RE = re.compile(r"(?<!\.)\b(?:core|ui|security)\.[a-z0-9_]+(?:\.[a-z0-9_]+){1,}\b", re.IGNORECASE)
+PUBLISH_RE = re.compile(r"\bPublishSimple\s*\(\s*\"(core|ui|security)\.", re.IGNORECASE)
 ASSERT_RE = re.compile(r"\bassert_\w+\b", re.IGNORECASE)
 
 
