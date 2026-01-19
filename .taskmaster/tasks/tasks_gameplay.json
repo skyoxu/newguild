@@ -436,7 +436,7 @@
     "story_id": "PRD-GUILD-MANAGER-T3-PVE-RAID",
     "title": "T3 PVE 副本（Raid Dungeon / Encounter）",
     "description": "实现 T3 的 PVE 副本与遭遇战最小循环：在 Game.Core 定义 RaidDungeon/Encounter 的状态机与结算，通过事件驱动 UI 展示与奖励发放；事件/契约遵循 ADR-0004。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [

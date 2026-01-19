@@ -26,6 +26,7 @@ public partial class EventBusAdapter : Node, IEventBus
     };
 
     private SecurityAuditWriter? _securityAudit;
+    private const int DefaultAuditFlushTimeoutMs = 250;
 
     [Signal]
     public delegate void DomainEventEmittedEventHandler(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso);
@@ -42,7 +43,12 @@ public partial class EventBusAdapter : Node, IEventBus
     public override void _ExitTree()
     {
         if (_securityAudit != null)
-            _ = _securityAudit.DisposeAsync().AsTask();
+        {
+            var timeoutMs = GetAuditFlushTimeoutMs();
+            var ok = _securityAudit.StopAndFlush(TimeSpan.FromMilliseconds(timeoutMs));
+            if (!ok && IsAuditWarningsEnabled())
+                GD.PushWarning($"[EventBusAdapter] security audit flush timed out after {timeoutMs}ms.");
+        }
         _securityAudit = null;
     }
 
@@ -109,6 +115,28 @@ public partial class EventBusAdapter : Node, IEventBus
             System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"),
             "1",
             StringComparison.Ordinal);
+    }
+
+    private static int GetAuditFlushTimeoutMs()
+    {
+        var raw = OS.GetEnvironment("SECURITY_AUDIT_FLUSH_TIMEOUT_MS")
+                  ?? System.Environment.GetEnvironmentVariable("SECURITY_AUDIT_FLUSH_TIMEOUT_MS");
+
+        if (int.TryParse(raw, out var ms))
+            return Math.Clamp(ms, 0, 10_000);
+
+        return DefaultAuditFlushTimeoutMs;
+    }
+
+    private static bool IsAuditWarningsEnabled()
+    {
+        if (OS.IsDebugBuild())
+            return true;
+
+        return string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("CI"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("CI"), "true", StringComparison.OrdinalIgnoreCase);
     }
 
     private sealed class Unsubscriber : IDisposable

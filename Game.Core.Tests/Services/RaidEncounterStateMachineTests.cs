@@ -80,6 +80,7 @@ public sealed class RaidEncounterStateMachineTests
         var events = sm.DequeueEvents();
         var resolvedEvent = events.Should().ContainSingle(e => e.Type == RaidResolved.EventType).Subject;
         resolvedEvent.Id.Should().Be("evt-2");
+        resolvedEvent.Data.Should().BeOfType<RaidResolved>().Which.RewardPoints.Should().Be(10);
     }
 
     // ACC:T17.4
@@ -101,6 +102,7 @@ public sealed class RaidEncounterStateMachineTests
         var resolved = events.Should().ContainSingle(e => e.Type == RaidResolved.EventType).Subject;
         resolved.Id.Should().Be("evt-2");
         resolved.Data.Should().BeOfType<RaidResolved>().Which.Result.Should().Be(RaidResolved.ResultFailed);
+        resolved.Data.Should().BeOfType<RaidResolved>().Which.RewardPoints.Should().Be(0);
     }
 
     [Fact]

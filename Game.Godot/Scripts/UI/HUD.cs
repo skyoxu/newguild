@@ -6,6 +6,8 @@ using System.Text.Json;
 using Game.Godot.Adapters;
 using Game.Godot.Autoloads;
 using Game.Core.Contracts;
+using Game.Core.Contracts.Engine;
+using Game.Core.Contracts.Raid;
 using Game.Core.Contracts.Security;
 using Game.Core.Domain.Turn;
 using Game.Core.Engine;
@@ -42,6 +44,7 @@ public partial class HUD : Control
     private IEventBus? _coreEventBus;
     private ITime? _coreTime;
     private IIdGenerator? _coreIdGenerator;
+    private int _demoScore;
 
     public string RaidEncounterDemoLastResult { get; private set; } = "";
     private int _raidEncounterDemoInFlight;
@@ -92,6 +95,7 @@ public partial class HUD : Control
         _coreEventBus = eventBus;
         _coreTime = timePort;
         _coreIdGenerator = new GuidIdGenerator();
+        _demoScore = 0;
 
         IEventCatalog catalog = new EmptyEventCatalog();
         var saveId = new SaveIdValue("t2-demo");
@@ -115,14 +119,15 @@ public partial class HUD : Control
 
     private void OnDomainEventEmitted(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso)
     {
-        if (type == "core.score.updated" || type == "score.changed")
+        if (type == ScoreChanged.EventType)
         {
             try
             {
                 using var doc = JsonDocument.Parse(dataJson, JsonOptions);
                 int v = 0;
-                if (doc.RootElement.TryGetProperty("value", out var val)) v = val.GetInt32();
-                else if (doc.RootElement.TryGetProperty("score", out var sc)) v = sc.GetInt32();
+                if (doc.RootElement.TryGetProperty("score", out var sc)) v = sc.GetInt32();
+                else if (doc.RootElement.TryGetProperty("value", out var val)) v = val.GetInt32();
+                _demoScore = v;
                 _score.Text = $"Score: {v}";
             }
             catch { }
@@ -152,24 +157,23 @@ public partial class HUD : Control
     {
         if (Interlocked.Exchange(ref _raidEncounterDemoInFlight, 1) == 1)
             return;
-        _ = TriggerRaidEncounterDemoAsync();
-    }
 
-    public async Task<string> TriggerRaidEncounterDemoAsync()
-    {
-        var caller = $"{nameof(HUD)}.{nameof(TriggerRaidEncounterDemoAsync)}";
         try
         {
+            // NOTE: This is a demo/test entrypoint and must be deterministic under headless CI.
+            // Keep all Godot API usage on the main thread; avoid async continuations that may resume on a worker thread.
+            var caller = $"{nameof(HUD)}.{nameof(TriggerRaidEncounterDemo)}";
+
             var (allowed, allowReason) = CheckRaidEncounterDemoAllowed();
             if (!allowed)
             {
                 RaidEncounterDemoLastResult = DemoResultDenied;
-                await TryPublishDemoGateDecisionAsync(
+                _ = TryPublishDemoGateDecisionMainThread(
                     decision: SecurityDemoGateDecision.DecisionDeny,
                     reason: allowReason,
                     target: DemoAuditTarget,
                     caller: caller);
-                return RaidEncounterDemoLastResult;
+                return;
             }
 
             if (_coreEventBus == null || _coreTime == null || _coreIdGenerator == null)
@@ -179,83 +183,96 @@ public partial class HUD : Control
 
                 if (_coreEventBus != null)
                 {
-                    try
-                    {
-                        var data = new SecurityDemoGateDecision(
-                            Target: DemoAuditTarget,
-                            Decision: SecurityDemoGateDecision.DecisionError,
-                            Reason: "missing_core_dependencies",
-                            OccurredAt: DateTimeOffset.UtcNow,
-                            Caller: caller);
-
-                        var evt = new DomainEvent(
-                            Type: SecurityDemoGateDecision.EventType,
-                            Source: DemoAuditSource,
-                            Data: data,
-                            Timestamp: DateTime.UtcNow,
-                            Id: Guid.NewGuid().ToString("N"));
-
-                        await _coreEventBus.PublishAsync(evt);
-                    }
-                    catch (Exception ex)
-                    {
-                        GD.PushWarning($"[HUD] demo gate audit fallback publish failed exType={ex.GetType().Name}");
-                    }
+                    _ = TryPublishDemoGateDecisionMainThread(
+                        decision: SecurityDemoGateDecision.DecisionError,
+                        reason: "missing_core_dependencies",
+                        target: DemoAuditTarget,
+                        caller: caller);
                 }
-                return RaidEncounterDemoLastResult;
+
+                return;
             }
 
             var week = _currentTurn?.Week ?? 1;
             if (week < 1)
                 week = 1;
+
             var runner = new RaidEncounterDemoRunner(_coreEventBus, _coreTime, _coreIdGenerator);
-            RaidEncounterDemoLastResult = await runner.RunAsync(week);
+            var outcome = runner.Run(week);
+            RaidEncounterDemoLastResult = outcome.Result;
             GD.Print($"[RaidEncounterDemo] week={week} result={RaidEncounterDemoLastResult}");
+
+            if (RaidEncounterDemoLastResult == RaidResolved.ResultSuccess && outcome.RewardPoints > 0)
+            {
+                _demoScore += outcome.RewardPoints;
+                _score.Text = $"Score: {_demoScore}";
+                ObserveFireAndForget(PublishScoreChangedAsync(score: _demoScore, added: outcome.RewardPoints), "score_changed");
+            }
+
             var decision = RaidEncounterDemoLastResult == DemoResultError
                 ? SecurityDemoGateDecision.DecisionError
                 : SecurityDemoGateDecision.DecisionAllow;
             var auditReason = decision == SecurityDemoGateDecision.DecisionError
                 ? "runner_error"
                 : allowReason;
-            await TryPublishDemoGateDecisionAsync(
+
+            _ = TryPublishDemoGateDecisionMainThread(
                 decision: decision,
                 reason: auditReason,
                 target: $"{DemoAuditTarget}:week={week}",
                 caller: caller);
-            return RaidEncounterDemoLastResult;
         }
         catch (Exception ex)
         {
             RaidEncounterDemoLastResult = DemoResultError;
             GD.PrintErr($"[RaidEncounterDemo] failed exType={ex.GetType().Name}");
-            if (OS.IsDebugBuild() && string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal))
+            if (OS.IsDebugBuild() && string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal))
                 GD.PrintErr(ex.ToString());
-            await TryPublishDemoGateDecisionAsync(
+
+            _ = TryPublishDemoGateDecisionMainThread(
                 decision: SecurityDemoGateDecision.DecisionError,
                 reason: ex.GetType().Name,
                 target: DemoAuditTarget,
-                caller: caller);
-            return RaidEncounterDemoLastResult;
+                caller: $"{nameof(HUD)}.{nameof(TriggerRaidEncounterDemo)}");
         }
         finally
         {
             Interlocked.Exchange(ref _raidEncounterDemoInFlight, 0);
-            CallDeferred(nameof(EmitRaidEncounterDemoCompleted), RaidEncounterDemoLastResult);
+            EmitSignal(SignalName.RaidEncounterDemoCompleted, RaidEncounterDemoLastResult);
+        }
+    }
+
+    private Task PublishScoreChangedAsync(int score, int added)
+    {
+        try
+        {
+            if (_coreEventBus == null)
+                return Task.CompletedTask;
+
+            var ts = _coreTime?.UtcNowOffset.UtcDateTime ?? DateTime.UtcNow;
+            var id = _coreIdGenerator?.NewId() ?? Guid.NewGuid().ToString("N");
+            var evt = new DomainEvent(
+                Type: ScoreChanged.EventType,
+                Source: DemoAuditSource,
+                Data: new ScoreChanged(Score: score, Added: added),
+                Timestamp: ts,
+                Id: id);
+
+            return _coreEventBus.PublishAsync(evt);
+        }
+        catch
+        {
+            return Task.CompletedTask;
         }
     }
 
     private static (bool Allowed, string Reason) CheckRaidEncounterDemoAllowed()
     {
-        var enabled = System.Environment.GetEnvironmentVariable("GD_ENABLE_PLAYABLE");
+        var enabled = OS.GetEnvironment("GD_ENABLE_PLAYABLE");
         return (string.Equals(enabled, "1", StringComparison.Ordinal), $"GD_ENABLE_PLAYABLE={enabled ?? "(null)"}");
     }
 
-    private void EmitRaidEncounterDemoCompleted(string result)
-    {
-        EmitSignal(SignalName.RaidEncounterDemoCompleted, result);
-    }
-
-    private async Task<bool> TryPublishDemoGateDecisionAsync(string decision, string reason, string target, string caller)
+    private bool TryPublishDemoGateDecisionMainThread(string decision, string reason, string target, string caller)
     {
         try
         {
@@ -280,7 +297,7 @@ public partial class HUD : Control
                 Timestamp: _coreTime.UtcNowOffset.UtcDateTime,
                 Id: _coreIdGenerator.NewId());
 
-            await _coreEventBus.PublishAsync(evt);
+            ObserveFireAndForget(_coreEventBus.PublishAsync(evt), "demo_gate_decision");
             return true;
         }
         catch (Exception ex)
@@ -288,11 +305,41 @@ public partial class HUD : Control
             GD.PushWarning($"[HUD] demo gate audit publish failed exType={ex.GetType().Name}");
             GD.PrintErr($"[HUD] demo_gate_audit_publish_failed decision={decision} target={target} caller={caller} reason={reason} exType={ex.GetType().Name}");
 
-            if (OS.IsDebugBuild() && string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal))
+            if (OS.IsDebugBuild() && string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal))
                 GD.PrintErr(ex.ToString());
 
             return false;
         }
+    }
+
+    private static void ObserveFireAndForget(Task task, string label)
+    {
+        try
+        {
+            _ = task.ContinueWith(
+                t =>
+                {
+                    var ex = t.Exception?.GetBaseException();
+                    if (IsFireAndForgetObservationEnabled())
+                        Console.Error.WriteLine($"[HUD] publish failed label={label} exType={ex?.GetType().Name ?? "unknown"}");
+                },
+                TaskContinuationOptions.OnlyOnFaulted);
+        }
+        catch
+        {
+            // Best-effort only.
+        }
+    }
+
+    private static bool IsFireAndForgetObservationEnabled()
+    {
+        if (OS.IsDebugBuild())
+            return true;
+
+        return string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("CI"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("CI"), "true", StringComparison.OrdinalIgnoreCase);
     }
 
     private async void OnNextTurnPressed()

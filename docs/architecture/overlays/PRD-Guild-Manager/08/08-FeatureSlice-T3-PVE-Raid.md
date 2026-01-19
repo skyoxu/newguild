@@ -4,7 +4,7 @@ PRD-Refs:
   - docs/prd.txt
 Story-ID: PRD-GUILD-MANAGER-T3-PVE-RAID
 Title: Feature Slice - T3 PVE Raid（副本/遭遇）
-Status: Planned
+Status: Delivered
 ADR-Refs:
   - ADR-0004
   - ADR-0005
@@ -44,4 +44,11 @@ Arch-Refs:
 ## 验收与测试（规则）
 
 - 副本调度与结算必须通过事件驱动对外发布，支持 UI/媒体/声望等模块消费。
-- 当进入交付阶段时，必须补齐 `Game.Core/Contracts/Raid/**` 与对应测试用例。
+- 本次纵切已在仓库落地 `Game.Core/Contracts/Raid/**` 与对应测试用例，并通过确定性门禁。
+
+## Test-Refs
+
+- `Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs`
+- `Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs`
+- `Game.Core.Tests/Domain/RaidEncounterEventContractsTests.cs`
+- `Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd`

@@ -660,7 +660,7 @@
         "id": "17",
         "title": "T3 PVE 副本（Raid Dungeon / Encounter）",
         "description": "实现 T3 的 PVE 副本与遭遇战最小循环：在 Game.Core 定义 RaidDungeon/Encounter 的状态机与结算，通过事件驱动 UI 展示与奖励发放；事件/契约遵循 ADR-0004。",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "16"
@@ -686,8 +686,8 @@
           "CH07",
           "CH09"
         ],
-        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-        "updatedAt": "2026-01-07T18:25:01.169Z"
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
+        "updatedAt": "2026-01-19T17:47:34.702Z"
       },
       {
         "id": "18",

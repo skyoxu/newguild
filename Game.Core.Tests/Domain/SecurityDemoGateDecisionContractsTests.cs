@@ -7,7 +7,7 @@ namespace Game.Core.Tests.Domain;
 public sealed class SecurityDemoGateDecisionContractsTests
 {
     [Fact]
-    public void EventType_and_decisions_have_expected_values()
+    public void EventTypeAndDecisions_ShouldHaveExpectedValues()
     {
         SecurityDemoGateDecision.EventType.Should().Be("security.raid_encounter_demo.decision");
         SecurityDemoGateDecision.DecisionAllow.Should().Be("allow");
@@ -15,4 +15,3 @@ public sealed class SecurityDemoGateDecisionContractsTests
         SecurityDemoGateDecision.DecisionError.Should().Be("error");
     }
 }
-

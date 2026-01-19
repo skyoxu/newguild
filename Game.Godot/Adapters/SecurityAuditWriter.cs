@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace Game.Godot.Adapters;
 internal sealed class SecurityAuditWriter : IAsyncDisposable
 {
     private const long DefaultMaxFileBytes = 5_000_000;
+    private const int DefaultMaxTotalBytesMultiplier = 2;
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -25,12 +27,22 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
     private Channel<AuditWriteRequest>? _channel;
     private Task? _worker;
     private readonly long _maxFileBytes;
+    private readonly long _maxTotalBytes;
     private readonly object _fileGate = new();
     private CancellationTokenSource? _cts;
+    private readonly Dictionary<string, string> _lastEntryHashByLogicalPath = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _touchedAuditDirectories = new(StringComparer.OrdinalIgnoreCase);
 
-    public SecurityAuditWriter(long? maxFileBytes = null)
+    private long _enqueued;
+    private long _written;
+    private long _dropped;
+    private long _failed;
+    private long _droppedBySize;
+
+    public SecurityAuditWriter(long? maxFileBytes = null, long? maxTotalBytes = null)
     {
         _maxFileBytes = maxFileBytes ?? DefaultMaxFileBytes;
+        _maxTotalBytes = maxTotalBytes ?? checked(_maxFileBytes * DefaultMaxTotalBytesMultiplier);
     }
 
     public void Start()
@@ -46,36 +58,14 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
                 SingleWriter = false,
             });
             _cts = new CancellationTokenSource();
-            _worker = Task.Run(() => RunAsync(_cts.Token));
+            var channel = _channel;
+            _worker = Task.Run(() => RunAsync(channel, _cts.Token));
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        Channel<AuditWriteRequest>? channel;
-        Task? worker;
-        CancellationTokenSource? cts;
-        lock (_lifecycleGate)
-        {
-            channel = _channel;
-            worker = _worker;
-            cts = _cts;
-            _channel = null;
-            _worker = null;
-            _cts = null;
-        }
-
-        if (channel != null)
-            channel.Writer.TryComplete();
-
-        if (cts != null)
-            cts.Cancel();
-
-        if (worker != null)
-        {
-            try { await worker; }
-            catch { }
-        }
+        await StopAndFlushAsync(timeout: TimeSpan.FromSeconds(2));
     }
 
     public bool TryEnqueue(DomainEvent evt, string dataJson)
@@ -98,30 +88,135 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
         Channel<AuditWriteRequest>? channel;
         lock (_lifecycleGate) channel = _channel;
         if (channel == null)
+        {
+            Interlocked.Increment(ref _dropped);
             return false;
+        }
 
-        return channel.Writer.TryWrite(req);
+        var accepted = channel.Writer.TryWrite(req);
+        if (accepted) Interlocked.Increment(ref _enqueued);
+        else Interlocked.Increment(ref _dropped);
+        return accepted;
     }
 
     private static bool IsEnabled()
     {
-        if (string.Equals(Environment.GetEnvironmentVariable("GD_SECURE_MODE"), "1", StringComparison.Ordinal))
+        // Prefer Godot environment API so GdUnit tests using OS.set_environment are honored.
+        var secureMode = OS.GetEnvironment("GD_SECURE_MODE");
+        if (string.Equals(secureMode, "1", StringComparison.Ordinal))
             return true;
 
-        if (string.Equals(Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal))
+        var securityTestMode = OS.GetEnvironment("SECURITY_TEST_MODE");
+        if (string.Equals(securityTestMode, "1", StringComparison.Ordinal))
             return true;
 
-        var ci = Environment.GetEnvironmentVariable("CI");
+        if (string.Equals(System.Environment.GetEnvironmentVariable("GD_SECURE_MODE"), "1", StringComparison.Ordinal))
+            return true;
+
+        if (string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal))
+            return true;
+
+        var ci = System.Environment.GetEnvironmentVariable("CI");
         return string.Equals(ci, "1", StringComparison.Ordinal) ||
                string.Equals(ci, "true", StringComparison.OrdinalIgnoreCase);
     }
 
-    private async Task RunAsync(CancellationToken ct)
+    public bool StopAndFlush(TimeSpan timeout)
     {
-        var channel = _channel;
-        if (channel == null)
-            return;
+        Channel<AuditWriteRequest>? channel;
+        Task? worker;
+        CancellationTokenSource? cts;
+        lock (_lifecycleGate)
+        {
+            channel = _channel;
+            worker = _worker;
+            cts = _cts;
+            _channel = null;
+            _worker = null;
+            _cts = null;
+        }
 
+        if (channel != null)
+            channel.Writer.TryComplete();
+
+        if (worker == null)
+            return true;
+
+        try
+        {
+            if (timeout == Timeout.InfiniteTimeSpan)
+            {
+                worker.Wait();
+                WriteMetaFilesIfAny();
+                return true;
+            }
+
+            var done = worker.Wait(timeout);
+            if (done)
+            {
+                WriteMetaFilesIfAny();
+                return true;
+            }
+
+            cts?.Cancel();
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private async Task<bool> StopAndFlushAsync(TimeSpan timeout)
+    {
+        Channel<AuditWriteRequest>? channel;
+        Task? worker;
+        CancellationTokenSource? cts;
+        lock (_lifecycleGate)
+        {
+            channel = _channel;
+            worker = _worker;
+            cts = _cts;
+            _channel = null;
+            _worker = null;
+            _cts = null;
+        }
+
+        if (channel != null)
+            channel.Writer.TryComplete();
+
+        if (worker == null)
+            return true;
+
+        try
+        {
+            if (timeout == Timeout.InfiniteTimeSpan)
+            {
+                await worker.ConfigureAwait(false);
+                WriteMetaFilesIfAny();
+                return true;
+            }
+
+            var done = await Task.WhenAny(worker, Task.Delay(timeout)).ConfigureAwait(false) == worker;
+            if (done)
+            {
+                WriteMetaFilesIfAny();
+                return true;
+            }
+
+            if (cts != null)
+                cts.Cancel();
+
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private async Task RunAsync(Channel<AuditWriteRequest> channel, CancellationToken ct)
+    {
         await foreach (var req in channel.Reader.ReadAllAsync(ct))
         {
             try
@@ -130,10 +225,13 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
             }
             catch (Exception ex)
             {
+                Interlocked.Increment(ref _failed);
                 if (IsEnabled())
                     Console.Error.WriteLine($"[SecurityAuditWriter] write failed type={req.Event.Type} exType={ex.GetType().Name}");
             }
         }
+
+        WriteMetaFilesIfAny();
     }
 
     private void WriteOne(AuditWriteRequest req)
@@ -141,28 +239,11 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
         var (dataReason, dataTarget, dataCaller, parseError, parseErrorReason) = TryExtractAuditFields(req.DataJson);
         var dataSha256 = ComputeSha256Hex(req.DataJson);
 
-        var auditEntry = new
-        {
-            ts = req.WrittenAt.ToString("o"),
-            action = req.Event.Type,
-            reason = string.IsNullOrWhiteSpace(dataReason) ? "event" : dataReason,
-            target = string.IsNullOrWhiteSpace(dataTarget) ? req.Event.Source : dataTarget,
-            caller = string.IsNullOrWhiteSpace(dataCaller) ? req.Event.Source : dataCaller,
-            event_id = req.Event.Id,
-            event_timestamp = req.Event.Timestamp.ToString("o"),
-            event_source = req.Event.Source,
-            audit_writer = nameof(EventBusAdapter),
-            data_sha256 = dataSha256,
-            data_bytes = Encoding.UTF8.GetByteCount(req.DataJson),
-            data_reason = dataReason,
-            data_target = dataTarget,
-            data_caller = dataCaller,
-            parse_error = parseError,
-            parse_error_reason = parseErrorReason,
-        };
-
-        var jsonLine = JsonSerializer.Serialize(auditEntry, JsonOptions) + Environment.NewLine;
-        var lineBytes = Encoding.UTF8.GetByteCount(jsonLine);
+        // 2A: trusted fields come from the event envelope. Payload fields are recorded as claims.
+        var eventTs = SecurityAuditFormat.SanitizeEventTimestamp(req.Event.Timestamp, req.WrittenAt);
+        var claimReason = SecurityAuditFormat.ToClaimString(dataReason, fallback: "missing", maxChars: SecurityAuditFormat.MaxReasonChars);
+        var claimTarget = SecurityAuditFormat.ToClaimString(dataTarget, fallback: "missing", maxChars: SecurityAuditFormat.MaxTargetChars);
+        var eventSource = string.IsNullOrWhiteSpace(req.Event.Source) ? "unknown" : req.Event.Source.Trim();
 
         var dir = Path.GetDirectoryName(req.FullPath);
         if (!string.IsNullOrWhiteSpace(dir))
@@ -170,31 +251,177 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
 
         lock (_fileGate)
         {
-            var (writeFullPath, writeLogicalPath) = ResolveWritablePath(req.FullPath, req.LogicalPath, lineBytes);
+            var (writeFullPath, writeLogicalPath) = ResolveWritablePath(req.FullPath, req.LogicalPath, baseJsonOverheadBytes: 2048, payloadBytes: Encoding.UTF8.GetByteCount(req.DataJson));
             if (writeFullPath == null || writeLogicalPath == null)
             {
+                Interlocked.Increment(ref _droppedBySize);
+                _touchedAuditDirectories.Add(Path.GetDirectoryName(req.FullPath) ?? "");
                 Console.Error.WriteLine($"[SecurityAuditWriter] security audit log reached max size; dropping writes path={req.LogicalPath} maxBytes={_maxFileBytes} eventType={req.Event.Type}");
                 return;
             }
 
-            File.AppendAllText(writeFullPath, jsonLine, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            for (var attempt = 0; attempt < 2; attempt++)
+            {
+                var prevHash = _lastEntryHashByLogicalPath.TryGetValue(writeLogicalPath, out var h) ? h : "";
+                var material = new SecurityAuditFormat.AuditEntryMaterial(
+                    ts: eventTs.ToString("o"),
+                    action: req.Event.Type,
+                    reason: claimReason,
+                    target: claimTarget,
+                    caller: eventSource,
+                    event_id: req.Event.Id,
+                    event_timestamp: eventTs.ToString("o"),
+                    event_source: eventSource,
+                    audit_writer: nameof(SecurityAuditWriter),
+                    written_at: req.WrittenAt.ToString("o"),
+                    prev_hash: prevHash,
+                    reason_trust: "claim",
+                    target_trust: "claim",
+                    caller_trust: "event_source",
+                    data_sha256: dataSha256,
+                    data_bytes: Encoding.UTF8.GetByteCount(req.DataJson),
+                    data_reason: dataReason,
+                    data_target: dataTarget,
+                    data_caller: dataCaller,
+                    parse_error: parseError,
+                    parse_error_reason: parseErrorReason
+                );
+
+                var materialJson = JsonSerializer.Serialize(material, JsonOptions);
+                var entrySha256 = ComputeSha256Hex(materialJson);
+                var final = new SecurityAuditFormat.AuditEntryFinal(
+                    ts: material.ts,
+                    action: material.action,
+                    reason: material.reason,
+                    target: material.target,
+                    caller: material.caller,
+                    event_id: material.event_id,
+                    event_timestamp: material.event_timestamp,
+                    event_source: material.event_source,
+                    audit_writer: material.audit_writer,
+                    written_at: material.written_at,
+                    prev_hash: material.prev_hash,
+                    reason_trust: material.reason_trust,
+                    target_trust: material.target_trust,
+                    caller_trust: material.caller_trust,
+                    data_sha256: material.data_sha256,
+                    data_bytes: material.data_bytes,
+                    data_reason: material.data_reason,
+                    data_target: material.data_target,
+                    data_caller: material.data_caller,
+                    parse_error: material.parse_error,
+                    parse_error_reason: material.parse_error_reason,
+                    entry_sha256: entrySha256
+                );
+                var jsonLine = JsonSerializer.Serialize(final, JsonOptions) + System.Environment.NewLine;
+                var lineBytes = Encoding.UTF8.GetByteCount(jsonLine);
+
+                if (CanAppendWithLimits(writeFullPath, lineBytes))
+                {
+                    File.AppendAllText(writeFullPath, jsonLine, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                    _lastEntryHashByLogicalPath[writeLogicalPath] = entrySha256;
+                    _touchedAuditDirectories.Add(Path.GetDirectoryName(writeFullPath) ?? "");
+                    Interlocked.Increment(ref _written);
+                    return;
+                }
+
+                var resolved = ResolveWritablePathExact(req.FullPath, req.LogicalPath, lineBytes);
+                if (resolved.FullPath == null || resolved.LogicalPath == null)
+                {
+                    Interlocked.Increment(ref _droppedBySize);
+                    _touchedAuditDirectories.Add(Path.GetDirectoryName(writeFullPath) ?? "");
+                    Console.Error.WriteLine($"[SecurityAuditWriter] security audit log reached max size; dropping writes path={writeLogicalPath} maxBytes={_maxFileBytes} eventType={req.Event.Type}");
+                    return;
+                }
+
+                writeFullPath = resolved.FullPath;
+                writeLogicalPath = resolved.LogicalPath;
+            }
         }
     }
 
-    private (string? FullPath, string? LogicalPath) ResolveWritablePath(string baseFullPath, string baseLogicalPath, int lineBytes)
+    private (string? FullPath, string? LogicalPath) ResolveWritablePath(string baseFullPath, string baseLogicalPath, int baseJsonOverheadBytes, int payloadBytes)
     {
-        if (CanAppend(baseFullPath, lineBytes))
+        var estimatedLineBytes = baseJsonOverheadBytes + payloadBytes;
+
+        if (CanAppendWithLimits(baseFullPath, estimatedLineBytes))
             return (baseFullPath, baseLogicalPath);
 
         for (int i = 1; i <= 9; i++)
         {
-            var full = baseFullPath.Replace("security-audit.jsonl", $"security-audit-{i}.jsonl", StringComparison.OrdinalIgnoreCase);
-            var logical = baseLogicalPath.Replace("security-audit.jsonl", $"security-audit-{i}.jsonl", StringComparison.OrdinalIgnoreCase);
-            if (CanAppend(full, lineBytes))
+            var full = BuildAuditFilePath(baseFullPath, i);
+            var logical = BuildAuditLogicalPath(baseLogicalPath, i);
+            if (CanAppendWithLimits(full, estimatedLineBytes))
                 return (full, logical);
         }
 
         return (null, null);
+    }
+
+    private (string? FullPath, string? LogicalPath) ResolveWritablePathExact(string baseFullPath, string baseLogicalPath, int lineBytes)
+    {
+        if (CanAppendWithLimits(baseFullPath, lineBytes))
+            return (baseFullPath, baseLogicalPath);
+
+        for (int i = 1; i <= 9; i++)
+        {
+            var full = BuildAuditFilePath(baseFullPath, i);
+            var logical = BuildAuditLogicalPath(baseLogicalPath, i);
+            if (CanAppendWithLimits(full, lineBytes))
+                return (full, logical);
+        }
+
+        return (null, null);
+    }
+
+    private bool CanAppendWithLimits(string fullPath, int lineBytes)
+    {
+        if (!CanAppend(fullPath, lineBytes))
+            return false;
+
+        var dir = Path.GetDirectoryName(fullPath);
+        if (string.IsNullOrWhiteSpace(dir))
+            return false;
+
+        try
+        {
+            if (!Directory.Exists(dir))
+                return true;
+
+            long totalBytes = 0;
+            foreach (var file in Directory.EnumerateFiles(dir, "security-audit*.jsonl"))
+            {
+                try { totalBytes += new FileInfo(file).Length; }
+                catch { }
+            }
+
+            return totalBytes + lineBytes < _maxTotalBytes;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string BuildAuditFilePath(string baseFullPath, int i)
+    {
+        var dir = Path.GetDirectoryName(baseFullPath) ?? "";
+        var name = Path.GetFileNameWithoutExtension(baseFullPath);
+        var ext = Path.GetExtension(baseFullPath);
+        return Path.Combine(dir, $"{name}-{i}{ext}");
+    }
+
+    private static string BuildAuditLogicalPath(string baseLogicalPath, int i)
+    {
+        var idx = baseLogicalPath.LastIndexOf('/');
+        var dir = idx >= 0 ? baseLogicalPath[..(idx + 1)] : "";
+        var file = idx >= 0 ? baseLogicalPath[(idx + 1)..] : baseLogicalPath;
+        var dot = file.LastIndexOf('.');
+        if (dot <= 0)
+            return $"{dir}{file}-{i}";
+        var name = file[..dot];
+        var ext = file[dot..];
+        return $"{dir}{name}-{i}{ext}";
     }
 
     private bool CanAppend(string fullPath, int lineBytes)
@@ -261,4 +488,47 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
     }
 
     private sealed record AuditWriteRequest(DomainEvent Event, string DataJson, string LogicalPath, string FullPath, DateTime WrittenAt);
+
+    private void WriteMetaFilesIfAny()
+    {
+        lock (_fileGate)
+        {
+            if (_touchedAuditDirectories.Count == 0)
+                return;
+
+            foreach (var dir in _touchedAuditDirectories)
+            {
+                if (string.IsNullOrWhiteSpace(dir))
+                    continue;
+
+                try
+                {
+                    Directory.CreateDirectory(dir);
+                    var metaPath = Path.Combine(dir, "security-audit.meta.json");
+                    var meta = new
+                    {
+                        written_at = DateTime.UtcNow.ToString("o"),
+                        audit_writer = nameof(SecurityAuditWriter),
+                        max_file_bytes = _maxFileBytes,
+                        max_total_bytes = _maxTotalBytes,
+                        enqueued = Interlocked.Read(ref _enqueued),
+                        written = Interlocked.Read(ref _written),
+                        dropped = Interlocked.Read(ref _dropped),
+                        failed = Interlocked.Read(ref _failed),
+                        dropped_by_size = Interlocked.Read(ref _droppedBySize),
+                        files_seen = _lastEntryHashByLogicalPath.Count,
+                        last_entry_sha256_by_file = _lastEntryHashByLogicalPath,
+                    };
+                    File.WriteAllText(metaPath, JsonSerializer.Serialize(meta, JsonOptions), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                }
+                catch (Exception ex)
+                {
+                    // Intentionally ignored: audit writer must never crash the game on shutdown.
+                    Interlocked.Increment(ref _failed);
+                    if (IsEnabled())
+                        Console.Error.WriteLine($"[SecurityAuditWriter] meta write failed exType={ex.GetType().Name}");
+                }
+            }
+        }
+    }
 }
