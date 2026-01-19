@@ -18,6 +18,7 @@ public enum RaidEncounterPhase
 public sealed class RaidEncounterStateMachine
 {
     private const string DefaultSource = "game.core/raid-encounter";
+    private const int DefaultSuccessRewardPoints = 10;
 
     private readonly List<DomainEvent> _pendingEvents = new();
     private readonly ITime _time;
@@ -120,6 +121,7 @@ public sealed class RaidEncounterStateMachine
         Phase = RaidEncounterPhase.Completed;
 
         var now = _time.UtcNowOffset;
+        var rewardPoints = ComputeSuccessRewardPoints(week: _week);
         Enqueue(
             RaidResolved.EventType,
             new RaidResolved(
@@ -127,11 +129,21 @@ public sealed class RaidEncounterStateMachine
                 GuildId: _guildId!,
                 Week: _week,
                 Result: RaidResolved.ResultSuccess,
-                RewardPoints: 0,
+                RewardPoints: rewardPoints,
                 ResolvedAt: now
             ));
 
         return Phase;
+    }
+
+    private static int ComputeSuccessRewardPoints(int week)
+    {
+        if (week < 1)
+            week = 1;
+
+        // Minimal deterministic reward rule for T17: always grant a small, fixed amount on success.
+        // Rationale: makes "reward payout" observable and testable without introducing inventory/currency systems yet.
+        return DefaultSuccessRewardPoints;
     }
 
     private void Enqueue(string type, object data)

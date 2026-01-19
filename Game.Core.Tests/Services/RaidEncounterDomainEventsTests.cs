@@ -72,6 +72,7 @@ public sealed class RaidEncounterDomainEventsTests
         evt.Source.Should().Be("game.core/raid-encounter");
         var resolved = evt.Data.Should().BeOfType<RaidResolved>().Subject;
         resolved.Result.Should().Be(expectedResult);
+        resolved.RewardPoints.Should().Be(successPath ? 10 : 0);
         resolved.ResolvedAt.Should().Be(now);
     }
 

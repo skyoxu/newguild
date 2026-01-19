@@ -7,6 +7,34 @@ var _prev_enable_playable: String = ""
 var _prev_secure_mode: String = ""
 var _bus: Node = null
 var _bus_cb: Callable = Callable()
+var _types: Array[String] = []
+var _security_ids: Array[String] = []
+var _raid_resolved_reward_points: Array[int] = []
+var _score_added: Array[int] = []
+var _score_values: Array[int] = []
+
+func _on_evt(type, _source, _data_json, id, _specVersion, _dataContentType, _timestampIso) -> void:
+	var t := str(type)
+	_types.append(t)
+	if t == "security.raid_encounter_demo.decision":
+		_security_ids.append(str(id))
+	if t == "core.raid.resolved":
+		var json := JSON.new()
+		var rc := json.parse(str(_data_json))
+		if rc == OK:
+			var entry = json.get_data()
+			if entry is Dictionary and entry.has("rewardPoints"):
+				_raid_resolved_reward_points.append(int(entry["rewardPoints"]))
+	if t == "core.score.changed":
+		var json2 := JSON.new()
+		var rc2 := json2.parse(str(_data_json))
+		if rc2 == OK:
+			var entry2 = json2.get_data()
+			if entry2 is Dictionary:
+				if entry2.has("added"):
+					_score_added.append(int(entry2["added"]))
+				if entry2.has("score"):
+					_score_values.append(int(entry2["score"]))
 
 func _count_type(types: Array[String], wanted: String) -> int:
 	var c := 0
@@ -38,6 +66,8 @@ func before() -> void:
 	OS.set_environment("SECURITY_TEST_MODE", "1")
 	OS.set_environment("GD_ENABLE_PLAYABLE", "1")
 	OS.set_environment("GD_SECURE_MODE", "0")
+	assert_bool(OS.get_environment("SECURITY_TEST_MODE") == "1").is_true()
+	assert_bool(OS.get_environment("GD_ENABLE_PLAYABLE") == "1").is_true()
 
 	# Best-effort cleanup: avoid cross-run coupling via persistent user:// logs.
 	var date_utc := Time.get_date_string_from_system(true)
@@ -46,11 +76,11 @@ func before() -> void:
 		var d := DirAccess.open(audit_dir)
 		if d != null:
 			d.list_dir_begin()
-			var name := d.get_next()
-			while name != "":
-				if name.begins_with("security-audit") and name.ends_with(".jsonl"):
-					d.remove(name)
-				name = d.get_next()
+			var entry_name := d.get_next()
+			while entry_name != "":
+				if entry_name.begins_with("security-audit") and entry_name.ends_with(".jsonl"):
+					d.remove(entry_name)
+				entry_name = d.get_next()
 			d.list_dir_end()
 
 	var existing = get_node_or_null("/root/EventBus")
@@ -76,19 +106,20 @@ func after() -> void:
 func test_hud_can_trigger_raid_encounter_demo_and_expose_result() -> void:
 	var bus = get_node_or_null("/root/EventBus")
 	assert_object(bus).is_not_null()
+	if bus == null:
+		return
 
-	var types: Array[String] = []
-	var security_ids: Array[String] = []
-	var security_timestamp_iso: String = ""
-	var cb := func(type, _source, _data_json, id, _specVersion, _dataContentType, timestampIso) -> void:
-		var t := str(type)
-		types.append(t)
-		if t == "security.raid_encounter_demo.decision":
-			security_ids.append(str(id))
-			security_timestamp_iso = str(timestampIso)
+	_types.clear()
+	_security_ids.clear()
+	_raid_resolved_reward_points.clear()
+	_score_added.clear()
+	_score_values.clear()
+	var types := _types
+	var security_ids := _security_ids
+	var reward_points := _raid_resolved_reward_points
 
 	_bus = bus
-	_bus_cb = cb
+	_bus_cb = Callable(self, "_on_evt")
 
 	if not bus.is_connected("DomainEventEmitted", _bus_cb):
 		bus.connect("DomainEventEmitted", _bus_cb)
@@ -103,32 +134,56 @@ func test_hud_can_trigger_raid_encounter_demo_and_expose_result() -> void:
 	# Drive the turn system enough to produce core.game_turn.week_advanced
 	var phase_changed_before := _count_type(types, "core.game_turn.phase_changed")
 	hud_scene.AdvanceTurnFromGd()
-	assert_bool(await _wait_for_type_count(types, "core.game_turn.phase_changed", phase_changed_before + 1)).is_true()
+	var ok_phase1 := await _wait_for_type_count(types, "core.game_turn.phase_changed", phase_changed_before + 1)
+	assert_bool(ok_phase1).is_true()
+	if not ok_phase1:
+		return
 
 	phase_changed_before = _count_type(types, "core.game_turn.phase_changed")
 	hud_scene.AdvanceTurnFromGd()
-	assert_bool(await _wait_for_type_count(types, "core.game_turn.phase_changed", phase_changed_before + 1)).is_true()
+	var ok_phase2 := await _wait_for_type_count(types, "core.game_turn.phase_changed", phase_changed_before + 1)
+	assert_bool(ok_phase2).is_true()
+	if not ok_phase2:
+		return
 
 	var week_advanced_before := _count_type(types, "core.game_turn.week_advanced")
 	hud_scene.AdvanceTurnFromGd()
-	assert_bool(await _wait_for_type_count(types, "core.game_turn.week_advanced", week_advanced_before + 1)).is_true()
+	var ok_week := await _wait_for_type_count(types, "core.game_turn.week_advanced", week_advanced_before + 1)
+	assert_bool(ok_week).is_true()
+	if not ok_week:
+		return
 
 	assert_bool(types.has("core.game_turn.week_advanced")).is_true()
 
 	hud_scene.TriggerRaidEncounterDemo()
 	assert_bool(hud_scene.has_signal("RaidEncounterDemoCompleted")).is_true()
-	await hud_scene.RaidEncounterDemoCompleted
+	var ok_security := await _wait_for_type_count(types, "security.raid_encounter_demo.decision", 1)
+	assert_bool(ok_security).is_true()
+	if not ok_security:
+		return
 
 	var result := str(hud_scene.RaidEncounterDemoLastResult)
-	assert_bool(result == "success" or result == "failed").is_true()
+	# The demo runner is deterministic and expected to succeed.
+	assert_bool(result == "success").is_true()
 
 	assert_bool(types.has("core.raid.scheduled")).is_true()
 	assert_bool(types.has("core.raid.resolved")).is_true()
 	assert_bool(types.has("security.raid_encounter_demo.decision")).is_true()
+	assert_bool(reward_points.size() > 0).is_true()
+	if reward_points.size() > 0:
+		assert_bool(reward_points[reward_points.size() - 1] > 0).is_true()
+	assert_bool(types.has("core.score.changed")).is_true()
+	assert_bool(_score_added.size() > 0).is_true()
+	assert_bool(_score_values.size() > 0).is_true()
+	if _score_added.size() > 0 and reward_points.size() > 0:
+		assert_int(_score_added[_score_added.size() - 1]).is_equal(reward_points[reward_points.size() - 1])
+	if _score_values.size() > 0 and _score_added.size() > 0:
+		assert_bool(_score_values[_score_values.size() - 1] >= _score_added[_score_added.size() - 1]).is_true()
 	assert_bool(security_ids.size() > 0).is_true()
-	assert_bool(security_timestamp_iso.length() >= 10).is_true()
+	if security_ids.size() == 0:
+		return
 
-	var date_utc := security_timestamp_iso.substr(0, 10)
+	var date_utc := Time.get_date_string_from_system(true)
 	var audit_path := "user://logs/ci/%s/security-audit.jsonl" % date_utc
 	assert_bool(await _wait_for_audit_contains(audit_path, "security.raid_encounter_demo.decision")).is_true()
 	assert_bool(await _wait_for_audit_contains(audit_path, security_ids[security_ids.size() - 1])).is_true()
@@ -137,22 +192,23 @@ func test_hud_can_trigger_raid_encounter_demo_and_expose_result() -> void:
 # UI smoke: demo gate deny path is observable and auditable.
 func test_hud_demo_gate_denies_when_disabled() -> void:
 	OS.set_environment("GD_ENABLE_PLAYABLE", "0")
+	assert_bool(OS.get_environment("GD_ENABLE_PLAYABLE") == "0").is_true()
 
 	var bus = get_node_or_null("/root/EventBus")
 	assert_object(bus).is_not_null()
+	if bus == null:
+		return
 
-	var types: Array[String] = []
-	var security_ids: Array[String] = []
-	var security_timestamp_iso: String = ""
-	var cb := func(type, _source, _data_json, id, _specVersion, _dataContentType, timestampIso) -> void:
-		var t := str(type)
-		types.append(t)
-		if t == "security.raid_encounter_demo.decision":
-			security_ids.append(str(id))
-			security_timestamp_iso = str(timestampIso)
+	_types.clear()
+	_security_ids.clear()
+	_raid_resolved_reward_points.clear()
+	_score_added.clear()
+	_score_values.clear()
+	var types := _types
+	var security_ids := _security_ids
 
 	_bus = bus
-	_bus_cb = cb
+	_bus_cb = Callable(self, "_on_evt")
 
 	if not bus.is_connected("DomainEventEmitted", _bus_cb):
 		bus.connect("DomainEventEmitted", _bus_cb)
@@ -162,14 +218,18 @@ func test_hud_demo_gate_denies_when_disabled() -> void:
 	await get_tree().process_frame
 
 	hud_scene.TriggerRaidEncounterDemo()
-	await hud_scene.RaidEncounterDemoCompleted
+	var ok_security := await _wait_for_type_count(types, "security.raid_encounter_demo.decision", 1)
+	assert_bool(ok_security).is_true()
+	if not ok_security:
+		return
 
 	var result := str(hud_scene.RaidEncounterDemoLastResult)
 	assert_bool(result == "denied").is_true()
 	assert_bool(types.has("security.raid_encounter_demo.decision")).is_true()
 	assert_bool(security_ids.size() > 0).is_true()
-	assert_bool(security_timestamp_iso.length() >= 10).is_true()
+	if security_ids.size() == 0:
+		return
 
-	var date_utc := security_timestamp_iso.substr(0, 10)
+	var date_utc := Time.get_date_string_from_system(true)
 	var audit_path := "user://logs/ci/%s/security-audit.jsonl" % date_utc
 	assert_bool(await _wait_for_audit_contains(audit_path, security_ids[security_ids.size() - 1])).is_true()

@@ -3,6 +3,7 @@
 @onready var _label: Label = $VBox/Output
 var _score: int = 0
 var _hp: int = 100
+const SCORE_CHANGED_EVENT_TYPE := "core.score.changed"
 
 func _ready() -> void:
     print("[TEMPLATE_SMOKE_READY] Main scene initialized")
@@ -104,7 +105,7 @@ func _on_add_score() -> void:
     else:
         var bus = _bus()
         if bus != null:
-            bus.PublishSimple("core.score.updated", "ui", "{\"value\":%d}" % _score)
+            bus.PublishSimple(SCORE_CHANGED_EVENT_TYPE, "ui", "{\"score\":%d,\"added\":10}" % _score)
     _label.text = "Score = %d" % _score
 
 func _on_lose_hp() -> void:

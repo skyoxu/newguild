@@ -7,6 +7,8 @@ using Godot;
 
 namespace Game.Godot.Scripts.Demo;
 
+public sealed record RaidEncounterDemoOutcome(string Result, int RewardPoints);
+
 public sealed class RaidEncounterDemoRunner
 {
     private const string ErrorResult = "error";
@@ -22,7 +24,7 @@ public sealed class RaidEncounterDemoRunner
         _idGenerator = idGenerator ?? throw new ArgumentNullException(nameof(idGenerator));
     }
 
-    public async Task<string> RunAsync(int week)
+    public RaidEncounterDemoOutcome Run(int week)
     {
         if (week < 1)
             week = 1;
@@ -36,28 +38,62 @@ public sealed class RaidEncounterDemoRunner
 
             stage = "publish_pending";
             foreach (var evt in sm.DequeueEvents())
-                await _eventBus.PublishAsync(evt);
+                ObserveFireAndForget(_eventBus.PublishAsync(evt), "raid_demo_publish_pending");
 
             stage = "advance";
             if (!sm.Advance() || !sm.Advance() || !sm.Advance())
-                return ErrorResult;
+                return new RaidEncounterDemoOutcome(ErrorResult, RewardPoints: 0);
 
             stage = "publish_resolve";
             var events = sm.DequeueEvents();
             foreach (var evt in events)
-                await _eventBus.PublishAsync(evt);
+                ObserveFireAndForget(_eventBus.PublishAsync(evt), "raid_demo_publish_resolve");
 
             stage = "read_result";
             var resolved = events.FindFirstResolved();
-            return resolved?.Result ?? ErrorResult;
+            if (resolved == null)
+                return new RaidEncounterDemoOutcome(ErrorResult, RewardPoints: 0);
+            return new RaidEncounterDemoOutcome(resolved.Result, resolved.RewardPoints);
         }
         catch (Exception ex)
         {
             GD.PrintErr($"[RaidEncounterDemo] failed stage={stage} week={week} exType={ex.GetType().Name}");
             if (OS.IsDebugBuild() && string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal))
                 GD.PrintErr(ex.ToString());
-            return ErrorResult;
+            return new RaidEncounterDemoOutcome(ErrorResult, RewardPoints: 0);
         }
+    }
+
+    public Task<RaidEncounterDemoOutcome> RunAsync(int week) => Task.FromResult(Run(week));
+
+    private static void ObserveFireAndForget(Task task, string label)
+    {
+        try
+        {
+            _ = task.ContinueWith(
+                t =>
+                {
+                    var ex = t.Exception?.GetBaseException();
+                    if (IsFireAndForgetObservationEnabled())
+                        Console.Error.WriteLine($"[RaidEncounterDemoRunner] publish failed label={label} exType={ex?.GetType().Name ?? "unknown"}");
+                },
+                TaskContinuationOptions.OnlyOnFaulted);
+        }
+        catch
+        {
+            // Best-effort only.
+        }
+    }
+
+    private static bool IsFireAndForgetObservationEnabled()
+    {
+        if (OS.IsDebugBuild())
+            return true;
+
+        return string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("CI"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("CI"), "true", StringComparison.OrdinalIgnoreCase);
     }
 }
 
