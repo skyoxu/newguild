@@ -18,8 +18,17 @@ public sealed record RaidResolved(
 )
 {
     /// <summary>
+    /// Encounter resolved successfully.
+    /// </summary>
+    public const string ResultSuccess = "success";
+
+    /// <summary>
+    /// Encounter resolved with failure.
+    /// </summary>
+    public const string ResultFailed = "failed";
+
+    /// <summary>
     /// CloudEvents 1.0 type field for this event.
     /// </summary>
     public const string EventType = "core.raid.resolved";
 }
-

@@ -487,9 +487,9 @@
     ],
     "acceptance": [
       "Game.Core 提供 RaidDungeon/Encounter 的最小状态机（至少包含：进入->战斗->结算/失败），并能在回合推进中演化。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
-      "关键状态变化发布领域事件（例如 core.raid.encounter.started / resolved / failed），事件契约落盘到 Game.Core/Contracts。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs Game.Core.Tests/Domain/RaidEncounterEventContractsTests.cs",
+      "关键状态变化发布领域事件（core.raid.scheduled / core.raid.resolved；success/failed 通过 RaidResolved.Result 区分），事件契约落盘到 Game.Core/Contracts。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs Game.Core.Tests/Domain/RaidEncounterEventContractsTests.cs",
       "Game.Godot 提供最小演示入口（按钮或调试命令）可触发一次遭遇并在 UI 或日志中呈现结果。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
-      "xUnit 覆盖：成功/失败两条路径与边界条件；如有 GdUnit4，补一个端到端冒烟（触发->看到结果->退出）。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd"
+      "xUnit 覆盖：成功/失败两条路径与边界条件；如有 GdUnit4，补一个端到端冒烟（触发->看到结果->退出）。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd"
     ],
     "test_strategy": [
       "xUnit：覆盖 Encounter 结算与状态迁移（包含异常输入/非法状态转换的负例）。",
