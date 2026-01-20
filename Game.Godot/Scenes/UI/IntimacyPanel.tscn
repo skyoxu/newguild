@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Game.Godot/Scripts/UI/IntimacyPanel.cs" id="1"]
+
+[node name="IntimacyPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="IntimacyValueLabel" type="Label" parent="."]
+layout_mode = 2
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 260.0
+offset_bottom = 50.0
+text = "Intimacy: -"
+
