@@ -276,6 +276,7 @@ def step_quality_rules(out_dir: Path, *, strict: bool) -> StepResult:
 
     verdict = str(report.get("verdict") or "OK")
     counts = report.get("counts") if isinstance(report.get("counts"), dict) else {}
+    p0_count = int(counts.get("p0") or 0)
 
     lines: list[str] = []
     lines.append(f"QUALITY_RULES verdict={verdict} total={counts.get('total')} p0={counts.get('p0')} p1={counts.get('p1')}")
@@ -294,7 +295,10 @@ def step_quality_rules(out_dir: Path, *, strict: bool) -> StepResult:
     write_text(log_path, "\n".join(lines) + "\n")
 
     status = "ok"
-    if strict and verdict == "Needs Fix":
+    # Stop-loss hard gate: any P0 must fail regardless of --strict-quality-rules.
+    if p0_count > 0:
+        status = "fail"
+    elif strict and verdict == "Needs Fix":
         status = "fail"
     return StepResult(name="quality-rules", status=status, rc=0 if status == "ok" else 1, log=str(log_path), details=report)
 
