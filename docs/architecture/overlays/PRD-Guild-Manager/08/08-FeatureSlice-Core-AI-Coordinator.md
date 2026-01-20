@@ -4,7 +4,7 @@ PRD-Refs:
   - docs/prd.txt
 Story-ID: PRD-GUILD-MANAGER-CORE-AI-COORDINATOR
 Title: Feature Slice - AI Coordinator（AI 协调器）
-Status: Planned
+Status: Delivered
 ADR-Refs:
   - ADR-0004
   - ADR-0005
@@ -54,4 +54,10 @@ Arch-Refs:
 ## 验收与测试（规则）
 
 - AI 意图必须通过领域事件发布，禁止 Core 内部模块直接相互调用造成隐式依赖。
-- 当进入交付阶段时，必须补齐契约文件与单测挂钩。
+- 本次纵切已在仓库落地对应契约文件与单测挂钩，并通过确定性门禁。
+
+## Test-Refs
+
+- `Game.Core.Tests/Domain/AICoordinatorTests.cs`
+- `Game.Core.Tests/Domain/AICoordinatorPerformanceTests.cs`
+- `Game.Core.Tests/Services/AICoordinatorConcurrencyTests.cs`

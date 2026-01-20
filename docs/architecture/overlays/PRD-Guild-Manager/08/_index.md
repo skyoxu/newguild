@@ -43,6 +43,8 @@ Arch-Refs:
   - `PRD-GUILD-MANAGER-CORE-EVENT-ENGINE` → `08-FeatureSlice-Core-Event-Engine.md`（GM-0101）
   - `PRD-GUILD-MANAGER-CORE-GAME-LOOP` → `08-FeatureSlice-Core-Game-Loop.md`（GM-0103）
   - `PRD-GUILD-MANAGER-CORE-AI-COORDINATOR` → `08-FeatureSlice-Core-AI-Coordinator.md`（GM-0102）
+  - `PH15-BACKLOG-B1-B2` → `08-FeatureSlice-Core-Performance-Tracking.md`（Task 20 / NG-0015）
+  - `PH16-BACKLOG-B2` → `08-FeatureSlice-Core-Observability.md`（Task 21 / NG-0024）
   - `PRD-GUILD-MANAGER-T3-MEMBER-MANAGEMENT` → `08-FeatureSlice-T3-Member-Management.md`（GM-0202）
   - `PRD-GUILD-MANAGER-T3-RECRUITMENT` → `08-FeatureSlice-T3-Recruitment.md`（GM-0203）
   - `PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM` → `08-FeatureSlice-T3-AI-Ecosystem.md`（GM-0201）
@@ -55,6 +57,8 @@ Arch-Refs:
   - `08-FeatureSlice-Core-Event-Engine.md`
   - `08-FeatureSlice-Core-Game-Loop.md`
   - `08-FeatureSlice-Core-AI-Coordinator.md`
+  - `08-FeatureSlice-Core-Performance-Tracking.md`
+  - `08-FeatureSlice-Core-Observability.md`
 - T3
   - `08-FeatureSlice-T3-Member-Management.md`
   - `08-FeatureSlice-T3-Recruitment.md`
