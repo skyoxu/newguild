@@ -44,6 +44,18 @@ text = "Week: -"
 layout_mode = 2
 text = "Phase: -"
 
+[node name="ReputationLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+text = ""
+
+[node name="MediaBeatLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+text = ""
+
+[node name="MediaBeatButton" type="Button" parent="TopBar/HBox"]
+layout_mode = 2
+text = "Media Beat"
+
 [node name="NextTurnButton" type="Button" parent="TopBar/HBox"]
 layout_mode = 2
 text = "Next Turn"

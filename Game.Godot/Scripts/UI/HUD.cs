@@ -7,6 +7,7 @@ using Game.Godot.Adapters;
 using Game.Godot.Autoloads;
 using Game.Core.Contracts;
 using Game.Core.Contracts.Engine;
+using Game.Core.Contracts.Media;
 using Game.Core.Contracts.Raid;
 using Game.Core.Contracts.Security;
 using Game.Core.Domain.Turn;
@@ -22,6 +23,8 @@ public partial class HUD : Control
 {
     public const string DemoResultDenied = "denied";
     public const string DemoResultError = "error";
+    private const string ReputationLabelPrefix = "Reputation";
+    private const string MediaBeatLabelPrefix = "MediaBeat";
     private static readonly JsonDocumentOptions JsonOptions = new()
     {
         MaxDepth = 32,
@@ -33,6 +36,9 @@ public partial class HUD : Control
     private Label _health = default!;
     private Label _week = default!;
     private Label _phase = default!;
+    private Label _reputation = default!;
+    private Label _mediaBeatLabel = default!;
+    private Button _mediaBeatButton = default!;
     private Button _nextTurnButton = default!;
 
     private EventBusAdapter? _eventBus;
@@ -45,6 +51,7 @@ public partial class HUD : Control
     private ITime? _coreTime;
     private IIdGenerator? _coreIdGenerator;
     private int _demoScore;
+    private MediaBeatSystem? _mediaBeatSystem;
 
     public string RaidEncounterDemoLastResult { get; private set; } = "";
     private int _raidEncounterDemoInFlight;
@@ -58,12 +65,30 @@ public partial class HUD : Control
         _health = GetNode<Label>("TopBar/HBox/HealthLabel");
         _week = GetNodeOrNull<Label>("TopBar/HBox/WeekLabel");
         _phase = GetNodeOrNull<Label>("TopBar/HBox/PhaseLabel");
+        _reputation = GetNodeOrNull<Label>("TopBar/HBox/ReputationLabel");
+        _mediaBeatLabel = GetNodeOrNull<Label>("TopBar/HBox/MediaBeatLabel");
+        _mediaBeatButton = GetNodeOrNull<Button>("TopBar/HBox/MediaBeatButton");
         _nextTurnButton = GetNodeOrNull<Button>("TopBar/HBox/NextTurnButton");
 
         if (_week != null)
             _week.Text = "Week: -";
         if (_phase != null)
             _phase.Text = "Phase: -";
+        if (_reputation != null && string.IsNullOrWhiteSpace(_reputation.Text))
+            _reputation.Text = FormatReputationText(0);
+
+        var allowMediaBeatDemo = IsMediaBeatDemoAllowed();
+        if (_mediaBeatLabel != null)
+        {
+            _mediaBeatLabel.Visible = allowMediaBeatDemo;
+            if (string.IsNullOrWhiteSpace(_mediaBeatLabel.Text))
+                _mediaBeatLabel.Text = FormatMediaBeatText("-", "-");
+        }
+        if (_mediaBeatButton != null)
+        {
+            _mediaBeatButton.Visible = allowMediaBeatDemo;
+            _mediaBeatButton.Pressed += TriggerMediaBeatDemo;
+        }
         if (_nextTurnButton != null)
             _nextTurnButton.Pressed += OnNextTurnPressed;
 
@@ -96,6 +121,7 @@ public partial class HUD : Control
         _coreTime = timePort;
         _coreIdGenerator = new GuidIdGenerator();
         _demoScore = 0;
+        _mediaBeatSystem = new MediaBeatSystem(eventBus, timePort, _coreIdGenerator);
 
         IEventCatalog catalog = new EmptyEventCatalog();
         var saveId = new SaveIdValue("t2-demo");
@@ -124,26 +150,107 @@ public partial class HUD : Control
             try
             {
                 using var doc = JsonDocument.Parse(dataJson, JsonOptions);
-                int v = 0;
-                if (doc.RootElement.TryGetProperty("score", out var sc)) v = sc.GetInt32();
-                else if (doc.RootElement.TryGetProperty("value", out var val)) v = val.GetInt32();
+                int v;
+                if (doc.RootElement.TryGetProperty("score", out var sc) && sc.TryGetInt32(out v)) { }
+                else if (doc.RootElement.TryGetProperty("value", out var val) && val.TryGetInt32(out v)) { }
+                else
+                {
+                    GD.PushWarning($"[HUD] invalid payload for {type} (expected int score/value).");
+                    return;
+                }
                 _demoScore = v;
                 _score.Text = $"Score: {v}";
             }
-            catch { }
+            catch (Exception ex)
+            {
+                GD.PushWarning($"[HUD] failed to parse event payload type={type} exType={ex.GetType().Name}");
+            }
         }
         else if (type == "core.health.updated" || type == "player.health.changed")
         {
             try
             {
                 using var doc = JsonDocument.Parse(dataJson, JsonOptions);
-                int v = 0;
-                if (doc.RootElement.TryGetProperty("value", out var val)) v = val.GetInt32();
-                else if (doc.RootElement.TryGetProperty("health", out var hp)) v = hp.GetInt32();
+                int v;
+                if (doc.RootElement.TryGetProperty("value", out var val) && val.TryGetInt32(out v)) { }
+                else if (doc.RootElement.TryGetProperty("health", out var hp) && hp.TryGetInt32(out v)) { }
+                else
+                {
+                    GD.PushWarning($"[HUD] invalid payload for {type} (expected int value/health).");
+                    return;
+                }
                 _health.Text = $"HP: {v}";
             }
-            catch { }
+            catch (Exception ex)
+            {
+                GD.PushWarning($"[HUD] failed to parse event payload type={type} exType={ex.GetType().Name}");
+            }
         }
+        else if (type == ReputationChanged.EventType)
+        {
+            if (_reputation == null)
+                return;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(dataJson, JsonOptions);
+                int v;
+                if (doc.RootElement.TryGetProperty("newValue", out var newValue) && newValue.TryGetInt32(out v)) { }
+                else if (doc.RootElement.TryGetProperty("value", out var value) && value.TryGetInt32(out v)) { }
+                else
+                {
+                    GD.PushWarning($"[HUD] invalid payload for {type} (expected int newValue/value).");
+                    return;
+                }
+
+                _reputation.Text = FormatReputationText(v);
+            }
+            catch (Exception ex)
+            {
+                GD.PushWarning($"[HUD] failed to parse event payload type={type} exType={ex.GetType().Name}");
+            }
+        }
+        else if (type == MediaBeatTriggered.EventType)
+        {
+            if (_mediaBeatLabel == null)
+                return;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(dataJson, JsonOptions);
+                var beatId = doc.RootElement.TryGetProperty("beatId", out var beat) ? beat.GetString() : null;
+                var headline = doc.RootElement.TryGetProperty("headline", out var hl) ? hl.GetString() : null;
+
+                if (string.IsNullOrWhiteSpace(beatId) && string.IsNullOrWhiteSpace(headline))
+                {
+                    GD.PushWarning($"[HUD] invalid payload for {type} (expected string beatId/headline).");
+                    return;
+                }
+
+                _mediaBeatLabel.Text = FormatMediaBeatText(beatId ?? "-", headline ?? "-");
+                GD.Print($"[HUD] observed media beat beatId={beatId ?? "?"}");
+            }
+            catch (Exception ex)
+            {
+                GD.PushWarning($"[HUD] failed to parse event payload type={type} exType={ex.GetType().Name}");
+            }
+        }
+    }
+
+    private static string FormatReputationText(int value) => $"{ReputationLabelPrefix}: {value}";
+
+    private static string FormatMediaBeatText(string beatId, string headline) =>
+        $"{MediaBeatLabelPrefix}: {beatId} {headline}".Trim();
+
+    private static bool IsMediaBeatDemoAllowed()
+    {
+        if (OS.IsDebugBuild())
+            return true;
+
+        return string.Equals(OS.GetEnvironment("GD_ENABLE_PLAYABLE"), "1", StringComparison.Ordinal) ||
+               string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("GD_ENABLE_PLAYABLE"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal);
     }
 
     public void SetScore(int v) => _score.Text = $"Score: {v}";
@@ -151,6 +258,24 @@ public partial class HUD : Control
 
     // Public entry for GDScript debug button to advance turn once.
     public void AdvanceTurnFromGd() => OnNextTurnPressed();
+
+    // Public debug entry for T19 demo: trigger one media beat and expose the result to UI/tests.
+    public void TriggerMediaBeatDemo()
+    {
+        if (!IsMediaBeatDemoAllowed())
+            return;
+        if (_mediaBeatSystem == null)
+            return;
+        if (_coreIdGenerator == null)
+            return;
+
+        var beatId = _coreIdGenerator.NewId();
+        const string guildId = "npc-guild-01";
+        const string sourceEventType = "demo.hud.mediaBeatButton.pressed";
+        var headline = $"Demo media beat {DateTimeOffset.UtcNow:O}";
+
+        ObserveFireAndForget(_mediaBeatSystem.TriggerBeatAsync(beatId, guildId, sourceEventType, headline), "media_beat_demo");
+    }
 
     // Public debug entry for T17 demo: trigger one encounter and expose the result to UI/tests.
     public void TriggerRaidEncounterDemo()
