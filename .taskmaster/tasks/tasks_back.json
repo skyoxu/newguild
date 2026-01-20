@@ -231,7 +231,7 @@
     "story_id": "PH15-BACKLOG-B1-B2",
     "title": "在 Game.Core 落地性能追踪库并接入 CI 性能门禁",
     "description": "根据 Phase-15-Performance-Budgets-and-Gates.md 与 ADR-0015，在 Game.Core 中实现纯 C# 性能追踪库（PerformanceTracker/PerformanceMetrics/QueryPerformanceTracker），计算 P50/P95 等指标并生成 JSON 报告；在脚本层新增性能门禁聚合脚本，将 PerfTracker 输出与预算阈值（环境变量可配置）联动，写入 logs/perf 与 logs/ci。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -765,7 +765,7 @@
     "story_id": "PH16-BACKLOG-B2",
     "title": "Game.Core Observability 客户端与结构化日志",
     "description": "根据 Phase-16-Observability-Backlog.md B2，在 Game.Core 层实现可复用的 ObservabilityClient/StructuredLogger/PiiDataScrubber，使核心逻辑能够在不直接依赖 Godot 或 Sentry SDK 的前提下输出结构化日志并上报事件。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
