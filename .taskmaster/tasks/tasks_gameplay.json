@@ -623,11 +623,14 @@
       "Game.Core.Tests/Domain/ReputationTests.cs",
       "Game.Core.Tests/Domain/ReputationDomainEventsTests.cs",
       "Tests.Godot/tests/UI/test_hud_reputation_display.gd",
-      "Game.Core.Tests/Domain/ReputationSourceAggregationTests.cs"
+      "Game.Core.Tests/Domain/ReputationSourceAggregationTests.cs",
+      "Game.Core.Tests/Domain/MediaBeatSystemTests.cs",
+      "Tests.Godot/tests/UI/test_hud_media_beat_demo.gd"
     ],
     "acceptance": [
       "Game.Core 提供 Reputation（或等价模块），支持声望值变更与来源记录（例如：战斗胜利/负面事件）。 Refs: Game.Core.Tests/Domain/ReputationTests.cs",
       "声望/曝光变化发布领域事件（例如 core.guild.reputation.changed / core.guild.media.exposure.created），契约落盘到 Game.Core/Contracts。 Refs: Game.Core.Tests/Domain/ReputationDomainEventsTests.cs",
+      "媒体节拍 producer 发布 core.media.beat.triggered，并在 HUD demo 可观测。 Refs: Game.Core.Tests/Domain/MediaBeatSystemTests.cs Tests.Godot/tests/UI/test_hud_media_beat_demo.gd",
       "至少一个系统能读取声望并产生可观测影响（例如：招募成功率/候选数量的变化，或 UI 显示声望等级）。 Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd",
       "xUnit 覆盖：声望变更累积、上下限、来源合并/去重（如适用）与事件生成。 Refs: Game.Core.Tests/Domain/ReputationTests.cs Game.Core.Tests/Domain/ReputationSourceAggregationTests.cs"
     ],
