@@ -9,16 +9,21 @@ func before() -> void:
 
 
 # ACC:T18.3
-func test_intimacy_panel_updates_on_relationship_changed_event() -> void:
-	var panel := preload("res://Game.Godot/Scenes/UI/IntimacyPanel.tscn").instantiate()
-	add_child_autofree(panel)
+func test_hud_shows_relationship_value_change_after_advancing_turn() -> void:
+	var hud := preload("res://Game.Godot/Scenes/UI/HUD.tscn").instantiate()
+	add_child_autofree(hud)
 	await get_tree().process_frame
 
-	var label: Label = panel.get_node("IntimacyValueLabel")
+	var label: Label = hud.get_node("IntimacyPanel/IntimacyValueLabel")
 	assert_str(label.text).contains("-")
 
-	var evt := "{\"guildId\":\"g1\",\"subjectId\":\"m1\",\"otherId\":\"m2\",\"oldValue\":0,\"newValue\":42,\"changedAt\":\"2026-01-01T00:00:00Z\"}"
-	_bus.PublishSimple("core.social.relationship.changed", "ut", evt)
+	# StartNewWeek() uses Resolution phase; advance twice to hit Player phase where
+	# the demo core pipeline publishes core.social.relationship.changed.
+	hud.AdvanceTurnFromGd()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	hud.AdvanceTurnFromGd()
+	await get_tree().process_frame
 	await get_tree().process_frame
 
-	assert_str(label.text).contains("42")
+	assert_str(label.text).contains("1")

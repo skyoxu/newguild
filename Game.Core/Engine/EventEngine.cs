@@ -23,6 +23,7 @@ public sealed class EventEngine : IEventEngine
     private readonly IIdGenerator _idGenerator;
     private readonly AIEcosystem _aiEcosystem;
     private readonly IAICoordinator _aiCoordinator;
+    private readonly IntimacySystem _intimacySystem;
 
     public EventEngine(
         IEventCatalog eventCatalog,
@@ -38,6 +39,7 @@ public sealed class EventEngine : IEventEngine
         _idGenerator = idGenerator ?? new GuidIdGenerator();
         _aiEcosystem = aiEcosystem ?? new AIEcosystem(_time, _idGenerator, seed: 1);
         _aiCoordinator = aiCoordinator ?? new AICoordinator();
+        _intimacySystem = new IntimacySystem(_eventBus, _time, _idGenerator);
     }
 
     public async Task<GameTurnState> ExecuteResolutionPhaseAsync(GameTurnState state)
@@ -83,6 +85,16 @@ public sealed class EventEngine : IEventEngine
         );
 
         await _eventBus.PublishAsync(domainEvent);
+
+        // T18 minimal: Each player phase triggers a deterministic "social interaction" effect
+        // between the creator and the joined member, updating relationship value and emitting
+        // core.social.relationship.changed (ADR-0004).
+        await _intimacySystem.ApplyInteractionAsync(
+            guildId: memberJoined.GuildId,
+            subjectId: memberJoined.UserId,
+            otherId: "temp-creator-id",
+            delta: 1);
+
         return state;
     }
 
