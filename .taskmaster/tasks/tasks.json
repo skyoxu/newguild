@@ -724,7 +724,7 @@
         "id": "19",
         "title": "T3 媒体与声望（Media / Reputation）",
         "description": "实现媒体曝光与声望的最小系统：在 Game.Core 建模声望值与曝光事件，并让其对招募/社交产生可观测影响；事件契约遵循 ADR-0004。",
-        "status": "pending",
+        "status": "done",
         "priority": "low",
         "dependencies": [
           "18"
