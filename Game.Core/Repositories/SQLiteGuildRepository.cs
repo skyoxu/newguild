@@ -35,8 +35,10 @@ public class SQLiteGuildRepository : IGuildRepository
     {
         if (_initialized) return;
 
-        await _db.OpenAsync();
-        await SchemaMigrationRunner.EnsureLatestAsync(_db, LatestGuildSchemaVersion, GuildDbSchema.CreateMigrations());
+        await _db.OpenAsync().ConfigureAwait(false);
+        await SchemaMigrationRunner.EnsureLatestAsync(_db, LatestGuildSchemaVersion, GuildDbSchema.CreateMigrations())
+            .ConfigureAwait(false);
+        await GuildDbSchema.EnsureTablesExistAsync(_db).ConfigureAwait(false);
 
         _initialized = true;
     }

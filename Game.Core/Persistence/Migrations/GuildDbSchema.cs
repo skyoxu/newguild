@@ -60,5 +60,44 @@ public static class GuildDbSchema
             },
         };
     }
+
+    /// <summary>
+    /// Stop-loss repair: ensure required tables exist even if schema_version is already at latest.
+    /// This is idempotent (CREATE TABLE IF NOT EXISTS) and does not change schema_version.
+    /// </summary>
+    public static async Task EnsureTablesExistAsync(ISQLiteDatabase database)
+    {
+        if (database is null) throw new ArgumentNullException(nameof(database));
+
+        // Version 1 tables
+        await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
+            "CREATE TABLE IF NOT EXISTS Guilds (" +
+            " GuildId TEXT PRIMARY KEY," +
+            " CreatorId TEXT NOT NULL," +
+            " Name TEXT NOT NULL," +
+            " CreatedAt TEXT NOT NULL" +
+            " )")).ConfigureAwait(false);
+
+        await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
+            "CREATE TABLE IF NOT EXISTS GuildMembers (" +
+            " GuildId TEXT NOT NULL," +
+            " UserId TEXT NOT NULL," +
+            " Role INTEGER NOT NULL," +
+            " PRIMARY KEY (GuildId, UserId)," +
+            " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
+            " )")).ConfigureAwait(false);
+
+        // Version 2 tables
+        await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
+            "CREATE TABLE IF NOT EXISTS RecruitmentOffers (" +
+            " OfferId TEXT PRIMARY KEY," +
+            " GuildId TEXT NOT NULL," +
+            " CandidateId TEXT NOT NULL," +
+            " Role INTEGER NOT NULL," +
+            " PresentedAt TEXT NOT NULL," +
+            " UNIQUE (GuildId, CandidateId)," +
+            " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
+            " )")).ConfigureAwait(false);
+    }
 }
 

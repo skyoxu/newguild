@@ -28,6 +28,7 @@ public sealed class SQLiteRecruitmentOfferRepository : IRecruitmentOfferReposito
         await _db.OpenAsync().ConfigureAwait(false);
         await SchemaMigrationRunner.EnsureLatestAsync(_db, GuildDbSchema.LatestVersion, GuildDbSchema.CreateMigrations())
             .ConfigureAwait(false);
+        await GuildDbSchema.EnsureTablesExistAsync(_db).ConfigureAwait(false);
 
         _initialized = true;
     }

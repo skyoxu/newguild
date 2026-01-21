@@ -26,8 +26,9 @@ public partial class GuildPanel : Control
         MaxDepth = 32,
     };
 
-    private Label _guildNameLabel = default!;
+    private LineEdit? _guildNameInput;
     private Label _memberCountLabel = default!;
+    private Label _statusLabel = default!;
     private Button _createGuildButton = default!;
     private Button _disbandGuildButton = default!;
     private ItemList _membersList = default!;
@@ -48,11 +49,38 @@ public partial class GuildPanel : Control
     private EventBusAdapter? _eventBus;
     private Callable _domainEventCallable;
 
+    private void SetGuildStatus(string message)
+    {
+        try
+        {
+            if (_statusLabel != null)
+                _statusLabel.Text = message;
+        }
+        catch
+        {
+            // Best-effort only.
+        }
+        GD.Print($"[GuildPanel] {message}");
+    }
+
+    private Node? GetGuildManagerOrReport()
+    {
+        var gm = GetNodeOrNull(GuildManagerPath);
+        if (gm == null)
+        {
+            SetGuildStatus("ERROR: GuildManager not found.");
+            GD.PushWarning("[GuildPanel] GuildManager not found. Check autoload /root/GuildManager.");
+            return null;
+        }
+        return gm;
+    }
+
     public override void _Ready()
     {
         // Get node references
-        _guildNameLabel = GetNode<Label>("VBox/GuildInfo/GuildNameLabel");
+        _guildNameInput = GetNodeOrNull<LineEdit>("VBox/GuildInfo/GuildNameRow/GuildNameInput");
         _memberCountLabel = GetNode<Label>("VBox/GuildInfo/MemberCountLabel");
+        _statusLabel = GetNodeOrNull<Label>("VBox/GuildInfo/StatusLabel") ?? new Label();
         _createGuildButton = GetNode<Button>("VBox/Actions/CreateGuildButton");
         _disbandGuildButton = GetNode<Button>("VBox/Actions/DisbandGuildButton");
         _membersList = GetNode<ItemList>("VBox/MembersList");
@@ -83,10 +111,17 @@ public partial class GuildPanel : Control
 
         // Subscribe to domain events via EventBusAdapter
         _eventBus = GetNodeOrNull<EventBusAdapter>(EventBusPath);
+        if (_eventBus == null)
+            _eventBus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
         if (_eventBus != null)
         {
             _domainEventCallable = new Callable(this, nameof(OnDomainEventEmitted));
             _eventBus.Connect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
+        }
+        else
+        {
+            SetGuildStatus("ERROR: EventBus not found.");
+            GD.PushWarning("[GuildPanel] EventBus not found. Check autoload /root/EventBus.");
         }
 
         // Initial UI state
@@ -143,8 +178,10 @@ public partial class GuildPanel : Control
 
             string guildName = root.TryGetProperty("guildName", out var name) ? name.GetString() ?? "Unknown" : "Unknown";
 
-            _guildNameLabel.Text = $"Guild: {guildName}";
+            if (_guildNameInput != null)
+                _guildNameInput.Text = guildName;
             UpdateUIState(hasGuild: true);
+            SetGuildStatus($"Created: {guildName}");
 
             // Add creator as first member
             if (root.TryGetProperty("creatorId", out var creatorId))
@@ -169,10 +206,12 @@ public partial class GuildPanel : Control
                 guildId.GetString() == _currentGuildId)
             {
                 _currentGuildId = null;
-                _guildNameLabel.Text = "Guild: None";
+                if (_guildNameInput != null)
+                    _guildNameInput.Text = string.Empty;
                 _membersList.Clear();
                 _memberCountLabel.Text = "Members: 0";
                 UpdateUIState(hasGuild: false);
+                SetGuildStatus("Disbanded.");
             }
         }
         catch
@@ -318,21 +357,111 @@ public partial class GuildPanel : Control
 
     private void OnCreateGuildPressed()
     {
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
+
+        _guildNameInput ??= GetNodeOrNull<LineEdit>("VBox/GuildInfo/GuildNameRow/GuildNameInput");
+        if (_guildNameInput == null)
+        {
+            SetGuildStatus("ERROR: GuildNameInput missing.");
+            return;
+        }
+
+        if (guildManager.HasMethod("HasCurrentGuild"))
+        {
+            try
+            {
+                var has = (bool)guildManager.Call("HasCurrentGuild");
+                if (has)
+                {
+                    SetGuildStatus("Already has a guild. Syncing UI...");
+                    if (guildManager.HasMethod("GetCurrentGuildSummaryJson"))
+                    {
+                        var json = (string)guildManager.Call("GetCurrentGuildSummaryJson");
+                        if (!string.IsNullOrWhiteSpace(json))
+                            HandleGuildCreated(json);
+                    }
+                    return;
+                }
+            }
+            catch
+            {
+                // Best-effort only.
+            }
+        }
+
         var session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
         string userId = session?.CurrentUserId ?? "player1";
-        string guildName = $"Guild_{System.Guid.NewGuid().ToString("N").Substring(0, 6)}";
+        var inputName = _guildNameInput.Text?.Trim() ?? string.Empty;
+        string guildName = string.IsNullOrWhiteSpace(inputName)
+            ? $"Guild_{System.Guid.NewGuid().ToString("N").Substring(0, 6)}"
+            : inputName;
+        if (string.IsNullOrWhiteSpace(inputName))
+            _guildNameInput.Text = guildName;
 
-        guildManager.Call("CreateGuild", userId, guildName);
+        if (!guildManager.HasMethod("CreateGuild"))
+        {
+            SetGuildStatus("ERROR: GuildManager.CreateGuild missing.");
+            return;
+        }
+
+        SetGuildStatus("Creating...");
+        try
+        {
+            var result = guildManager.Call("CreateGuild", userId, guildName);
+            if (result.VariantType == Variant.Type.String)
+            {
+                var s = result.AsString();
+                if (!string.IsNullOrWhiteSpace(s) && s.StartsWith("ERROR:", StringComparison.Ordinal))
+                {
+                    var details = string.Empty;
+                    try
+                    {
+                        if (guildManager.HasMethod("GetLastError"))
+                            details = (string)guildManager.Call("GetLastError");
+                    }
+                    catch { /* ignore */ }
+
+                    SetGuildStatus(string.IsNullOrWhiteSpace(details) ? s : $"{s} ({details})");
+                }
+            }
+
+            if (guildManager.HasMethod("GetCurrentGuildSummaryJson"))
+            {
+                try
+                {
+                    var json = (string)guildManager.Call("GetCurrentGuildSummaryJson");
+                    if (!string.IsNullOrWhiteSpace(json) && json != "{}")
+                        HandleGuildCreated(json);
+                }
+                catch
+                {
+                    // Best-effort only.
+                }
+            }
+        }
+        catch
+        {
+            // Best-effort only.
+        }
     }
 
     private void OnDisbandGuildPressed()
     {
         if (_currentGuildId == null) return;
 
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
         var session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
         string userId = session?.CurrentUserId ?? "player1";
+
+        if (!guildManager.HasMethod("DisbandGuild"))
+        {
+            SetGuildStatus("ERROR: GuildManager.DisbandGuild missing.");
+            return;
+        }
 
         guildManager.Call("DisbandGuild", _currentGuildId, userId);
     }
@@ -343,14 +472,28 @@ public partial class GuildPanel : Control
         var userId = GetTargetUserId();
         if (string.IsNullOrWhiteSpace(userId)) return;
 
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
+        if (!guildManager.HasMethod("AddMember"))
+        {
+            SetGuildStatus("ERROR: GuildManager.AddMember missing.");
+            return;
+        }
         guildManager.Call("AddMember", _currentGuildId, userId);
     }
 
     private void OnLeavePressed()
     {
         if (_currentGuildId == null) return;
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
+        if (!guildManager.HasMethod("LeaveCurrentUser"))
+        {
+            SetGuildStatus("ERROR: GuildManager.LeaveCurrentUser missing.");
+            return;
+        }
         guildManager.Call("LeaveCurrentUser", _currentGuildId);
     }
 
@@ -360,7 +503,14 @@ public partial class GuildPanel : Control
         var userId = GetTargetUserId();
         if (string.IsNullOrWhiteSpace(userId)) return;
 
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
+        if (!guildManager.HasMethod("PromoteMember"))
+        {
+            SetGuildStatus("ERROR: GuildManager.PromoteMember missing.");
+            return;
+        }
         guildManager.Call("PromoteMember", _currentGuildId, userId);
     }
 
@@ -370,7 +520,14 @@ public partial class GuildPanel : Control
         var userId = GetTargetUserId();
         if (string.IsNullOrWhiteSpace(userId)) return;
 
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
+        if (!guildManager.HasMethod("DemoteMember"))
+        {
+            SetGuildStatus("ERROR: GuildManager.DemoteMember missing.");
+            return;
+        }
         guildManager.Call("DemoteMember", _currentGuildId, userId);
     }
 
@@ -380,7 +537,14 @@ public partial class GuildPanel : Control
         var userId = GetTargetUserId();
         if (string.IsNullOrWhiteSpace(userId)) return;
 
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
+        if (!guildManager.HasMethod("RemoveMember"))
+        {
+            SetGuildStatus("ERROR: GuildManager.RemoveMember missing.");
+            return;
+        }
         guildManager.Call("RemoveMember", _currentGuildId, userId);
     }
 
@@ -390,7 +554,14 @@ public partial class GuildPanel : Control
         var candidateId = _candidateIdInput.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(candidateId)) return;
 
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
+        if (!guildManager.HasMethod("ApplyForGuild"))
+        {
+            SetGuildStatus("ERROR: GuildManager.ApplyForGuild missing.");
+            return;
+        }
         guildManager.Call("ApplyForGuild", _currentGuildId, candidateId, "member");
     }
 
@@ -399,7 +570,14 @@ public partial class GuildPanel : Control
         if (_currentGuildId == null) return;
         if (!TryGetOfferId(out var offerId)) return;
 
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
+        if (!guildManager.HasMethod("ApproveOffer"))
+        {
+            SetGuildStatus("ERROR: GuildManager.ApproveOffer missing.");
+            return;
+        }
         guildManager.Call("ApproveOffer", _currentGuildId, offerId);
     }
 
@@ -408,7 +586,14 @@ public partial class GuildPanel : Control
         if (_currentGuildId == null) return;
         if (!TryGetOfferId(out var offerId)) return;
 
-        var guildManager = GetNode(GuildManagerPath);
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+            return;
+        if (!guildManager.HasMethod("RejectOffer"))
+        {
+            SetGuildStatus("ERROR: GuildManager.RejectOffer missing.");
+            return;
+        }
         guildManager.Call("RejectOffer", _currentGuildId, offerId, "rejected");
     }
 
@@ -463,6 +648,8 @@ public partial class GuildPanel : Control
         _applyButton.Disabled = !hasGuild;
         _approveButton.Disabled = !hasGuild;
         _rejectButton.Disabled = !hasGuild;
+        if (_guildNameInput != null)
+            _guildNameInput.Editable = !hasGuild;
     }
 
     [Signal]

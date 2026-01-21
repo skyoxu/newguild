@@ -15,7 +15,9 @@ public static class DatabaseErrorHandling
         if (includeSensitiveDetails)
         {
             var op = string.IsNullOrWhiteSpace(operation) ? "operation" : operation.Trim();
-            var message = $"Database operation failed ({op}). db={dbPath}; sql={sql}";
+            var causeType = ex.GetType().FullName ?? ex.GetType().Name;
+            var causeMsg = ex.Message ?? string.Empty;
+            var message = $"Database operation failed ({op}). db={dbPath}; sql={sql}; cause={causeType}: {causeMsg}";
             return new InvalidOperationException(message, ex);
         }
 

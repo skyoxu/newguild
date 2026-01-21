@@ -9,6 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("1")
 
 [node name="Center" type="CenterContainer" parent="."]
@@ -18,7 +19,85 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
-[node name="Label" type="Label" parent="Center"]
+[node name="VBox" type="VBoxContainer" parent="Center"]
 layout_mode = 2
-text = "Start Screen"
+
+[node name="Title" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "Start"
+
+[node name="BtnOpenGuild" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Open Guild Screen"
+
+[node name="BtnSaveLoad" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Save + Load (UI Entry)"
+
+[node name="BtnAiLog" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Show AI Event Log"
+
+[node name="BtnDemoRaid" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Demo: Raid Encounter"
+
+[node name="BtnDemoMedia" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Demo: Media Beat"
+
+[node name="BtnDemoReputation" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Demo: Reputation +10"
+
+[node name="BtnBack" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Back to Menu"
+
+[node name="Output" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = ""
+
+[node name="EventLogPopup" type="PopupPanel" parent="."]
+visible = false
+
+[node name="Panel" type="PanelContainer" parent="EventLogPopup"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="EventLogPopup/Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="EventLogPopup/Panel/Margin"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="EventLogPopup/Panel/Margin/VBox"]
+layout_mode = 2
+text = "AI Event Log"
+
+[node name="Log" type="RichTextLabel" parent="EventLogPopup/Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(900, 520)
+bbcode_enabled = true
+scroll_following = true
+
+[node name="BtnClose" type="Button" parent="EventLogPopup/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Close"

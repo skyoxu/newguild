@@ -7,6 +7,7 @@ using Game.Core.Services;
 using Game.Godot.Adapters;
 using Game.Godot.Adapters.Db;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Game.Godot.Scripts.Autoload;
@@ -18,6 +19,13 @@ namespace Game.Godot.Scripts.Autoload;
 /// </summary>
 public partial class GuildManager : Node
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false,
+    };
+
     private IGuildRepository _repository = default!;
     private EventBusAdapter _eventBus = default!;
     private Guild? _currentGuild;
@@ -25,33 +33,60 @@ public partial class GuildManager : Node
     private GuildRecruitmentService _recruitment = default!;
     private PlayerSession? _session;
     private LoggerAdapter? _logger;
+    private string? _lastError;
+    private bool _initializedOk;
 
     public override void _Ready()
     {
-        // Initialize database adapter
-        var dbRel = System.Environment.GetEnvironmentVariable("GD_GUILD_DB_PATH") ?? "data/game.db";
-        var dbPath = SafeResourcePath.UserPath(dbRel) ?? throw new InvalidOperationException("Invalid database path (ADR-0019)");
-        var db = new GodotSQLiteDatabase(dbPath);
-        _repository = new SQLiteGuildRepository(db);
-        var recruitmentOffers = new SQLiteRecruitmentOfferRepository(db);
+        try
+        {
+            _lastError = null;
+            _initializedOk = false;
 
-        // Get EventBus reference
-        _eventBus = GetNode<EventBusAdapter>("/root/EventBus");
-        _roster = new GuildRosterService(_repository, _eventBus);
-        _session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
-        _logger = GetNodeOrNull<LoggerAdapter>("/root/Logger");
+            // Initialize database adapter
+            var rawDbRel = System.Environment.GetEnvironmentVariable("GD_GUILD_DB_PATH") ?? "data/game.db";
+            var dbRel = SanitizeEnvPath(rawDbRel);
+            var dbPath = SafeResourcePath.UserPath(dbRel);
+            if (dbPath == null)
+            {
+                // Stop-loss: ignore invalid env var (often quoted) and fall back to a safe default.
+                _lastError = $"Invalid GD_GUILD_DB_PATH='{rawDbRel}'. Falling back to 'data/game.db'.";
+                dbPath = SafeResourcePath.UserPath("data/game.db");
+            }
+            if (dbPath == null)
+                throw new InvalidOperationException("Invalid database path (ADR-0019)");
 
-        var loggerPort = (ILogger?)_logger ?? new DevNullLogger();
-        _recruitment = new GuildRecruitmentService(
-            _repository,
-            recruitmentOffers,
-            _eventBus,
-            _roster,
-            new NoopTimePort(),
-            loggerPort,
-            new AlwaysEnabledEventCatalog());
+            var db = new GodotSQLiteDatabase(dbPath);
+            _repository = new SQLiteGuildRepository(db);
+            var recruitmentOffers = new SQLiteRecruitmentOfferRepository(db);
 
-        GD.Print("[GuildManager] Initialized with SQLite repository");
+            // Get EventBus reference
+            _eventBus = GetNode<EventBusAdapter>("/root/EventBus");
+            _roster = new GuildRosterService(_repository, _eventBus);
+            _session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
+            _logger = GetNodeOrNull<LoggerAdapter>("/root/Logger");
+
+            var loggerPort = (ILogger?)_logger ?? new DevNullLogger();
+            _recruitment = new GuildRecruitmentService(
+                _repository,
+                recruitmentOffers,
+                _eventBus,
+                _roster,
+                new NoopTimePort(),
+                loggerPort,
+                new AlwaysEnabledEventCatalog());
+
+            _initializedOk = true;
+            if (!string.IsNullOrWhiteSpace(_lastError))
+                GD.PushWarning("[GuildManager] " + _lastError);
+            GD.Print("[GuildManager] Initialized with SQLite repository");
+        }
+        catch (Exception ex)
+        {
+            _lastError = $"GuildManager init failed exType={ex.GetType().Name} msg={ex.Message}";
+            GD.PrintErr("[GuildManager] " + _lastError);
+            _initializedOk = false;
+        }
     }
 
     private bool TryGetCurrentUserId(out string userId)
@@ -72,7 +107,7 @@ public partial class GuildManager : Node
     private void DebugError(string message, Exception ex)
     {
 #if DEBUG
-        var msg = "[DEBUG] " + message + $" exType={ex.GetType().Name}";
+        var msg = "[DEBUG] " + message + $" exType={ex.GetType().Name} msg={ex.Message}";
         if (_logger != null) _logger.Error(msg);
         else GD.PrintErr(msg);
 #endif
@@ -169,14 +204,19 @@ public partial class GuildManager : Node
         public void Error(string message, Exception ex) { }
     }
 
-    public async void CreateGuild(string creatorId, string guildName)
+    public string CreateGuild(string creatorId, string guildName)
     {
         try
         {
+            _lastError = null;
+            if (!_initializedOk)
+                return "ERROR:NOT_READY";
+
             if (_currentGuild != null)
             {
                 GD.PushWarning($"[GuildManager] User {creatorId} already has a guild: {_currentGuild.Name}");
-                return;
+                PublishGuildCreatedSnapshot(_currentGuild);
+                return "ALREADY";
             }
 
             // Create guild via Core domain logic
@@ -184,7 +224,7 @@ public partial class GuildManager : Node
             var guild = new Guild(guildId, creatorId, guildName);
 
             // Persist to database
-            _currentGuild = await _repository.CreateAsync(guild);
+            _currentGuild = _repository.CreateAsync(guild).GetAwaiter().GetResult();
 
             var createdEvt = new GuildCreated(
                 _currentGuild.GuildId,
@@ -192,19 +232,82 @@ public partial class GuildManager : Node
                 _currentGuild.Name,
                 _currentGuild.CreatedAt);
 
-            await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
-                GuildCreated.EventType,
-                nameof(GuildManager),
-                createdEvt,
-                createdEvt.CreatedAt.UtcDateTime,
-                Guid.NewGuid().ToString("N")));
+            _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
+                    GuildCreated.EventType,
+                    nameof(GuildManager),
+                    createdEvt,
+                    createdEvt.CreatedAt.UtcDateTime,
+                    Guid.NewGuid().ToString("N")))
+                .GetAwaiter()
+                .GetResult();
 
             GD.Print($"[GuildManager] Created guild '{guildName}' for user {creatorId}");
+            return "OK";
         }
         catch (Exception ex)
         {
             DebugError("CreateGuild failed", ex);
+            _lastError = $"CreateGuild failed exType={ex.GetType().Name} msg={ex.Message}";
+            return "ERROR:" + ex.GetType().Name;
         }
+    }
+
+    public bool HasCurrentGuild() => _currentGuild != null;
+
+    public string GetCurrentGuildSummaryJson()
+    {
+        if (!_initializedOk || _currentGuild == null)
+            return "{}";
+
+        return JsonSerializer.Serialize(new
+        {
+            guildId = _currentGuild.GuildId,
+            creatorId = _currentGuild.CreatorId,
+            guildName = _currentGuild.Name,
+            createdAt = _currentGuild.CreatedAt,
+        }, JsonOptions);
+    }
+
+    private void PublishGuildCreatedSnapshot(Guild guild)
+    {
+        try
+        {
+            var createdEvt = new GuildCreated(
+                guild.GuildId,
+                guild.CreatorId,
+                guild.Name,
+                guild.CreatedAt);
+
+            _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
+                    GuildCreated.EventType,
+                    nameof(GuildManager),
+                    createdEvt,
+                    createdEvt.CreatedAt.UtcDateTime,
+                    Guid.NewGuid().ToString("N")))
+                .GetAwaiter()
+                .GetResult();
+        }
+        catch (Exception ex)
+        {
+            DebugError("PublishGuildCreatedSnapshot failed", ex);
+            _lastError = $"PublishGuildCreatedSnapshot failed exType={ex.GetType().Name} msg={ex.Message}";
+        }
+    }
+
+    public string GetLastError() => _lastError ?? string.Empty;
+
+    private static string SanitizeEnvPath(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return string.Empty;
+
+        var s = raw.Trim();
+        // Common Windows env var mistake: set GD_GUILD_DB_PATH="data/game.db" includes quotes.
+        if (s.Length >= 2 && ((s.StartsWith("\"", StringComparison.Ordinal) && s.EndsWith("\"", StringComparison.Ordinal)) ||
+                              (s.StartsWith("'", StringComparison.Ordinal) && s.EndsWith("'", StringComparison.Ordinal))))
+            s = s.Substring(1, s.Length - 2);
+
+        return s.Trim();
     }
 
     public async void DisbandGuild(string guildId, string requestingUserId)

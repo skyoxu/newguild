@@ -1,6 +1,7 @@
 ﻿extends Control
 
 @onready var _label: Label = $VBox/Output
+@onready var _debug_vbox: VBoxContainer = $VBox
 var _score: int = 0
 var _hp: int = 100
 const SCORE_CHANGED_EVENT_TYPE := "core.score.changed"
@@ -28,6 +29,17 @@ func _ready() -> void:
     var bus = get_node_or_null("/root/EventBus")
     if bus != null:
         bus.connect("DomainEventEmitted", Callable(self, "_on_domain_event"))
+
+    # Hide template debug panel by default (Publish Event / Save+Load / Print Log / etc.)
+    # Opt-in by setting environment variable: GD_SHOW_DEBUG_PANEL=1
+    var show_debug_panel: bool = OS.get_environment("GD_SHOW_DEBUG_PANEL") == "1"
+    if _debug_vbox != null:
+        _debug_vbox.visible = show_debug_panel
+
+    # Main menu should be visible by default (Play/Guild/Settings/Quit).
+    var menu = get_node_or_null("MainMenu")
+    if menu != null:
+        menu.visible = true
 
 func _exit_tree() -> void:
     var bus = get_node_or_null("/root/EventBus")

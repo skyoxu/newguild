@@ -31,8 +31,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--configuration", default="Debug")
     ap.add_argument("--godot-bin", default=None, help="Godot mono console binary (required for e2e/all)")
     ap.add_argument("--smoke-scene", default="res://Game.Godot/Scenes/Main.tscn", help="Main scene for smoke test")
+    ap.add_argument("--smoke-require-marker", default=None, help="Require this marker for --smoke-scene (strict mode).")
+    ap.add_argument("--wiring-smoke-scene", default="res://Game.Godot/Scenes/CI/WiringSmoke.tscn", help="Wiring smoke scene for deterministic runtime wiring gate")
+    ap.add_argument("--wiring-smoke-require-marker", default="[WIRING_SMOKE_READY]", help="Require this marker for wiring smoke (strict mode).")
     ap.add_argument("--timeout-sec", type=int, default=600)
     ap.add_argument("--skip-smoke", action="store_true")
+    ap.add_argument("--skip-wiring-smoke", action="store_true")
     ap.add_argument("--no-coverage-gate", action="store_true", help="do not enforce default coverage thresholds")
     ap.add_argument("--no-coverage-report", action="store_true", help="skip HTML coverage report generation")
     return ap
@@ -181,7 +185,7 @@ def run_gdunit_hard(out_dir: Path, godot_bin: str, timeout_sec: int) -> dict[str
     return {"name": "gdunit-hard", "cmd": cmd, "rc": rc, "log": str(log_path), "report_dir": str(report_dir)}
 
 
-def run_smoke(out_dir: Path, godot_bin: str, scene: str) -> dict[str, Any]:
+def run_smoke(out_dir: Path, godot_bin: str, scene: str, require_marker: str | None) -> dict[str, Any]:
     if scene.startswith("res://"):
         disk_path = repo_root() / scene[len("res://") :]
         if not disk_path.exists():
@@ -204,10 +208,71 @@ def run_smoke(out_dir: Path, godot_bin: str, scene: str) -> dict[str, Any]:
         "--mode",
         "strict",
     ]
+    if require_marker:
+        cmd += ["--require-marker", str(require_marker)]
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=120)
     log_path = out_dir / "smoke.log"
     write_text(log_path, out)
     return {"name": "smoke", "cmd": cmd, "rc": rc, "log": str(log_path)}
+
+
+def run_wiring_smoke(out_dir: Path, godot_bin: str, scene: str, require_marker: str) -> dict[str, Any]:
+    if scene.startswith("res://"):
+        disk_path = repo_root() / scene[len("res://") :]
+        if not disk_path.exists():
+            msg = f"[sc-test] ERROR: wiring smoke scene not found on disk: {disk_path}\n"
+            log_path = out_dir / "wiring-smoke.log"
+            write_text(log_path, msg)
+            return {"name": "wiring-smoke", "cmd": [], "rc": 2, "log": str(log_path), "error": "wiring_smoke_scene_missing"}
+
+    # Deterministic environment to avoid state drift across runs.
+    suffix = f"{today_str()}-{os.getpid()}"
+    os.environ.setdefault("GD_ENABLE_PLAYABLE", "1")
+    os.environ.setdefault("SECURITY_TEST_MODE", "1")
+    os.environ.setdefault("GD_GUILD_DB_PATH", f"user://wiring/wiring-smoke-{suffix}.db")
+
+    # Godot headless runs do not always rebuild C# scripts. Ensure the project assembly is up-to-date.
+    build_cmd = ["dotnet", "build", "GodotGame.csproj", "-c", "Debug", "-v", "minimal"]
+    build_rc, build_out = run_cmd(build_cmd, cwd=repo_root(), timeout_sec=300)
+    build_log = out_dir / "wiring-smoke-build.log"
+    write_text(build_log, build_out)
+    if build_rc != 0:
+        return {
+            "name": "wiring-smoke-build",
+            "cmd": build_cmd,
+            "rc": build_rc,
+            "log": str(build_log),
+        }
+
+    cmd = [
+        "py",
+        "-3",
+        "scripts/python/smoke_headless.py",
+        "--godot-bin",
+        godot_bin,
+        "--project",
+        ".",
+        "--scene",
+        scene,
+        "--timeout-sec",
+        "10",
+        "--mode",
+        "strict",
+        "--require-marker",
+        require_marker,
+    ]
+    rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=120)
+    log_path = out_dir / "wiring-smoke.log"
+    write_text(log_path, out)
+    return {
+        "name": "wiring-smoke",
+        "cmd": cmd,
+        "rc": rc,
+        "log": str(log_path),
+        "build_cmd": build_cmd,
+        "build_rc": build_rc,
+        "build_log": str(build_log),
+    }
 
 
 def main() -> int:
@@ -254,9 +319,15 @@ def main() -> int:
             hard_fail = True
 
         if not args.skip_smoke:
-            sm = run_smoke(out_dir, godot_bin, args.smoke_scene)
+            sm = run_smoke(out_dir, godot_bin, args.smoke_scene, args.smoke_require_marker)
             summary["steps"].append(sm)
             if sm["rc"] != 0:
+                hard_fail = True
+
+        if not args.skip_wiring_smoke:
+            ws = run_wiring_smoke(out_dir, godot_bin, args.wiring_smoke_scene, args.wiring_smoke_require_marker)
+            summary["steps"].append(ws)
+            if ws["rc"] != 0:
                 hard_fail = True
 
     summary["status"] = "ok" if not hard_fail else "fail"

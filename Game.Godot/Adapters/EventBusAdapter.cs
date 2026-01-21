@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 using Game.Core.Contracts;
@@ -27,6 +30,19 @@ public partial class EventBusAdapter : Node, IEventBus
 
     private SecurityAuditWriter? _securityAudit;
     private const int DefaultAuditFlushTimeoutMs = 250;
+    private int _mainThreadId;
+    private readonly ConcurrentQueue<PendingPublish> _pending = new();
+    private int _flushScheduled;
+
+    private sealed record PendingPublish(
+        string Type,
+        string Source,
+        string DataJson,
+        string Id,
+        string SpecVersion,
+        string DataContentType,
+        string TimestampIso,
+        TaskCompletionSource<bool> Completion);
 
     [Signal]
     public delegate void DomainEventEmittedEventHandler(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso);
@@ -36,6 +52,7 @@ public partial class EventBusAdapter : Node, IEventBus
 
     public override void _Ready()
     {
+        _mainThreadId = System.Environment.CurrentManagedThreadId;
         _securityAudit = new SecurityAuditWriter();
         _securityAudit.Start();
     }
@@ -54,26 +71,93 @@ public partial class EventBusAdapter : Node, IEventBus
 
     public Task PublishAsync(DomainEvent evt)
     {
-        // Emit Godot signal for scene-level listeners
         var dataJson = evt.Data is string s ? (string.IsNullOrWhiteSpace(s) ? "{}" : s)
                                             : JsonSerializer.Serialize(evt.Data, JsonOptions);
-        EmitSignal(SignalName.DomainEventEmitted, evt.Type, evt.Source, dataJson, evt.Id, evt.SpecVersion, evt.DataContentType, evt.Timestamp.ToString("o"));
 
+        if (System.Environment.CurrentManagedThreadId == _mainThreadId)
+            return PublishOnMainThread(evt, dataJson);
+
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _pending.Enqueue(new PendingPublish(
+            Type: evt.Type,
+            Source: evt.Source,
+            DataJson: dataJson,
+            Id: evt.Id,
+            SpecVersion: evt.SpecVersion,
+            DataContentType: evt.DataContentType,
+            TimestampIso: evt.Timestamp.ToString("o"),
+            Completion: tcs));
+
+        if (Interlocked.Exchange(ref _flushScheduled, 1) == 0 && IsInsideTree())
+            CallDeferred(nameof(FlushPending));
+
+        return tcs.Task;
+    }
+
+    private void FlushPending()
+    {
+        Interlocked.Exchange(ref _flushScheduled, 0);
+
+        while (_pending.TryDequeue(out var p))
+        {
+            try
+            {
+                var ts = ParseTimestampOrNow(p.TimestampIso);
+                var evt = new DomainEvent(
+                    Type: p.Type,
+                    Source: p.Source,
+                    Data: p.DataJson,
+                    Timestamp: ts,
+                    Id: p.Id,
+                    SpecVersion: p.SpecVersion,
+                    DataContentType: p.DataContentType);
+
+                var task = PublishOnMainThread(evt, p.DataJson);
+                _ = task.ContinueWith(
+                    t =>
+                    {
+                        if (t.IsFaulted)
+                            p.Completion.TrySetException(t.Exception?.GetBaseException() ?? new Exception("Publish failed."));
+                        else if (t.IsCanceled)
+                            p.Completion.TrySetCanceled();
+                        else
+                            p.Completion.TrySetResult(true);
+                    },
+                    TaskScheduler.Default);
+            }
+            catch (Exception ex)
+            {
+                p.Completion.TrySetException(ex);
+            }
+        }
+
+        if (!_pending.IsEmpty && Interlocked.Exchange(ref _flushScheduled, 1) == 0 && IsInsideTree())
+            CallDeferred(nameof(FlushPending));
+    }
+
+    private Task PublishOnMainThread(DomainEvent evt, string dataJson)
+    {
+        EmitSignal(SignalName.DomainEventEmitted, evt.Type, evt.Source, dataJson, evt.Id, evt.SpecVersion, evt.DataContentType, evt.Timestamp.ToString("o"));
         _securityAudit?.TryEnqueue(evt, dataJson);
 
-        // Notify in-process subscribers
         List<Func<DomainEvent, Task>> snapshot;
         lock (_gate) snapshot = _handlers.ToList();
         return Task.WhenAll(snapshot.Select(h => SafeInvoke(h, evt)));
     }
 
+    private static DateTime ParseTimestampOrNow(string timestampIso)
+    {
+        if (DateTime.TryParse(timestampIso, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var ts))
+            return ts;
+        return DateTime.UtcNow;
+    }
+
     private static async Task SafeInvoke(Func<DomainEvent, Task> h, DomainEvent evt)
     {
-        try { await h(evt); }
+        try { await h(evt).ConfigureAwait(false); }
         catch (Exception ex)
         {
-            if (OS.IsDebugBuild())
-                GD.PrintErr($"[EventBusAdapter][DEBUG] handler failed type={evt.Type} exType={ex.GetType().Name}");
+            Console.Error.WriteLine($"[EventBusAdapter] handler failed type={evt.Type} exType={ex.GetType().Name}");
         }
     }
 
