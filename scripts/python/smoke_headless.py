@@ -59,6 +59,8 @@ def _run_smoke(
     mode: str,
     user_dir: str | None,
     userdir_flag: str,
+    require_marker: str | None,
+    build_solutions: bool,
 ) -> int:
     bin_path = Path(godot_bin)
     if not bin_path.is_file():
@@ -93,7 +95,10 @@ def _run_smoke(
         except Exception:
             appdata_override = None
 
-    cmd = [str(bin_path)] + userdir_args + [
+    cmd = [str(bin_path)] + userdir_args
+    if build_solutions:
+        cmd.append("--build-solutions")
+    cmd += [
         "--headless",
         "--path",
         project,
@@ -134,7 +139,12 @@ def _run_smoke(
     print(f"[smoke_headless] log saved at {log_path} (out={out_path}, err={err_path})")
 
     text = combined or ""
-    has_marker = "[TEMPLATE_SMOKE_READY]" in text
+    default_marker = "[TEMPLATE_SMOKE_READY]"
+    required_marker = str(require_marker).strip() if (require_marker is not None) else ""
+    if not required_marker:
+        required_marker = default_marker
+
+    has_marker = required_marker in text
     has_db_open = "[DB] opened" in text
     has_any = bool(text.strip())
 
@@ -161,8 +171,19 @@ def _run_smoke(
         print(message)
 
     if mode == "strict":
-        # Strict mode requires a marker or DB opened line.
-        if not (has_marker or has_db_open):
+        # Strict mode:
+        # - Default behavior: accept marker OR DB opened.
+        # - If --require-marker is provided, require that marker (do not accept DB opened as a substitute).
+        custom_marker = bool(require_marker and str(require_marker).strip())
+        if custom_marker:
+            if not has_marker:
+                status = "strict-failed"
+                message = f"SMOKE STRICT-FAILED: Required marker ({required_marker}) not found"
+                print(message, file=sys.stderr)
+                exit_code = 1
+            else:
+                exit_code = 0
+        elif not (has_marker or has_db_open):
             status = "strict-failed"
             message = "SMOKE STRICT-FAILED: Required markers ([TEMPLATE_SMOKE_READY] or [DB] opened) not found"
             print(message, file=sys.stderr)
@@ -179,12 +200,14 @@ def _run_smoke(
         "mode": mode,
         "status": status,
         "message": message,
+        "required_marker": required_marker,
         "has_marker": has_marker,
         "has_db_open": has_db_open,
         "has_any_output": has_any,
         "exit_code": exit_code,
         "godot_bin": godot_bin,
         "scene": scene,
+        "build_solutions": build_solutions,
         "timeout_sec": timeout_sec,
         "user_dir": user_dir,
         "userdir_flag_used": userdir_flag_used,
@@ -209,10 +232,12 @@ def main() -> int:
     parser.add_argument("--scene", default="res://Game.Godot/Scenes/Main.tscn", help="Scene to load")
     parser.add_argument("--timeout-sec", type=int, default=5, help="Timeout seconds before kill")
     parser.add_argument("--mode", choices=["loose", "strict"], default="loose", help="Gate mode")
+    parser.add_argument("--require-marker", default=None, help="Require this marker string (strict mode uses it as the only pass condition).")
     parser.add_argument("--user-dir", default=None, help="Redirect Godot user:// to this directory (default: logs/_godot_userdir/<project>/smoke)")
     parser.add_argument("--userdir-flag", default=os.environ.get("GODOT_USERDIR_FLAG", "auto"),
                         help="Godot CLI flag for user dir (auto|--user-dir|--user-data-dir); env: GODOT_USERDIR_FLAG")
     parser.add_argument("--no-userdir", action="store_true", help="Disable user dir redirection (writes to default OS location)")
+    parser.add_argument("--build-solutions", action="store_true", help="Force Godot to build C# solutions before running the scene.")
 
     args = parser.parse_args()
 
@@ -224,7 +249,17 @@ def main() -> int:
         except Exception:
             user_dir = None
 
-    return _run_smoke(args.godot_bin, args.project, args.scene, args.timeout_sec, args.mode, user_dir, args.userdir_flag)
+    return _run_smoke(
+        args.godot_bin,
+        args.project,
+        args.scene,
+        args.timeout_sec,
+        args.mode,
+        user_dir,
+        args.userdir_flag,
+        args.require_marker,
+        build_solutions=bool(args.build_solutions),
+    )
 
 
 if __name__ == "__main__":

@@ -1013,7 +1013,7 @@
         "id": "26",
         "title": "T3 Save/Load UI Entry（Godot）",
         "description": "在 Godot 场景中提供 Save/Load 入口并接入核心存档服务；入口只做调用与展示，不直接写 SQL。",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "25"
