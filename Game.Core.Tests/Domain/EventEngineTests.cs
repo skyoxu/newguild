@@ -36,6 +36,7 @@ public class EventEngineTests
     {
         // Placeholder for future event definitions. For now, this is only
         // used to satisfy EventEngine construction in tests.
+        public bool IsEventEnabled(string eventType) => true;
     }
 
     private sealed class FaultingEventBus : IEventBus

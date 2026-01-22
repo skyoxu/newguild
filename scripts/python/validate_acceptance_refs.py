@@ -125,12 +125,13 @@ def _split_refs_blob(blob: str) -> list[str]:
 
 def _is_allowed_test_path(p: str) -> bool:
     p = p.replace("\\", "/")
-    if not (p.endswith(".cs") or p.endswith(".gd")):
+    if not (p.endswith(".cs") or p.endswith(".gd") or p.endswith(".py")):
         return False
     allowed_prefixes = (
         "Game.Core.Tests/",
         "Tests.Godot/tests/",
         "Tests/",
+        "scripts/python/tests/",
     )
     return p.startswith(allowed_prefixes)
 

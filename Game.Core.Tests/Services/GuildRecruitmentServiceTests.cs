@@ -97,6 +97,7 @@ public sealed partial class GuildRecruitmentServiceTests
 
     private sealed class DummyEventCatalog : IEventCatalog
     {
+        public bool IsEventEnabled(string eventType) => true;
     }
 
     private sealed class InMemoryRecruitmentOfferRepository : IRecruitmentOfferRepository

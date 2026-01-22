@@ -744,21 +744,74 @@
     "owner": "architecture",
     "test_refs": [
       "Game.Core.Tests/Engine/GameEngineCoreEventTests.cs",
-      "Tests.Godot/tests/Scenes/test_main_scene_signals.gd"
+      "Tests.Godot/tests/Scenes/test_main_scene_signals.gd",
+      "Game.Core.Tests/Tasks/Task42EventTypePrefixMigrationTests.cs",
+      "Game.Core.Tests/Docs/OverlayGuildManagerEventExamplesConsistencyTests.cs",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Game.Core.Tests/Domain/GameLoopContractsTests.cs",
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs"
     ],
     "acceptance": [
-      "Game.Core 与 Tests 中不再存在 game.started/score.changed/player.health.changed 等旧事件类型，全部迁移为 core.*.* 命名。",
-      "GameEngineCoreEventTests 覆盖新的事件类型常量，并全部通过。",
-      "Overlay 08-Contracts-Guild-Manager-Events.md 与 08-FeatureSlice-Guild-Manager.md 中的事件示例与实际事件类型保持一致。",
-      "一次 signal 自检（例如全文搜索）可以证明仓库内仅保留 core.*.* 作为事件命名前缀。"
+      "Game.Core 与 Tests 中不再存在旧事件类型（legacy，例如 game/started、score/changed、player.health/changed），全部迁移为 core.*.* 命名。 Refs: Game.Core.Tests/Tasks/Task42EventTypePrefixMigrationTests.cs",
+      "GameEngineCoreEventTests 覆盖新的事件类型常量，并全部通过。 Refs: Game.Core.Tests/Engine/GameEngineCoreEventTests.cs",
+      "Overlay 08-Contracts-Guild-Manager-Events.md 与 08-FeatureSlice-Guild-Manager.md 中的事件示例与实际事件类型保持一致。 Refs: Game.Core.Tests/Docs/OverlayGuildManagerEventExamplesConsistencyTests.cs",
+      "一次 signal 自检（例如全文搜索）可以证明仓库内仅保留 core.*.* 作为事件命名前缀。 Refs: Game.Core.Tests/Tasks/Task42EventTypePrefixMigrationTests.cs",
+      "应完成：事件命名统一迁移（game.* → core.*.*） Refs: Game.Core.Tests/Engine/GameEngineCoreEventTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（2 个）。 Refs: Game.Core.Tests/Engine/GameEngineCoreEventTests.cs",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.ai.cycle.completed, core.ai.cycle.started, core.ai.ecosystem.step.completed, core.ai.intent.issued, core.content.manifest.loaded, core.event_catalog.loaded, core.game.ended, core.game.started ...）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs Game.Core.Tests/Domain/GameLoopContractsTests.cs",
+      "应留证：在 logs/** 下产出最小审计/门禁证据（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.ai.cycle.completed, core.ai.cycle.started, core.ai.ecosystem.step.completed, core.ai.intent.issued, core.content.manifest.loaded, core.event_catalog.loaded, core.game.ended, core.game.started ...）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs Game.Core.Tests/Domain/GameLoopContractsTests.cs"
     ],
     "test_strategy": [
       "本地：运行 GameEngineCoreEventTests，并通过全文搜索核对事件类型常量。",
-      "CI：在质量门禁中增加针对 core.*.* 事件类型前缀的简单字符串检查脚本。"
+      "CI：在质量门禁中增加针对 core.*.* 事件类型前缀的简单字符串检查脚本。",
+      "Optional: TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/**.",
+      "Optional: Rewrite-Intent: Promote backlog task into SSoT to be implemented in the current phase."
     ],
     "taskmaster_exported": false,
-    "contractRefs": [],
-    "artifactRefs": []
+    "contractRefs": [
+      "core.ai.cycle.completed",
+      "core.ai.cycle.started",
+      "core.ai.ecosystem.step.completed",
+      "core.ai.intent.issued",
+      "core.content.manifest.loaded",
+      "core.event_catalog.loaded",
+      "core.game.ended",
+      "core.game.started",
+      "core.game_turn.phase_changed",
+      "core.game_turn.started",
+      "core.game_turn.week_advanced",
+      "core.guild.created",
+      "core.guild.disbanded",
+      "core.guild.member.joined",
+      "core.guild.member.left",
+      "core.guild.member.role_changed",
+      "core.load.completed",
+      "core.load.failed",
+      "core.load.requested",
+      "core.media.beat.triggered",
+      "core.player.damaged",
+      "core.player.health.changed",
+      "core.player.moved",
+      "core.raid.resolved",
+      "core.raid.scheduled",
+      "core.recruitment.offer.presented",
+      "core.recruitment.offer.resolved",
+      "core.reputation.changed",
+      "core.save.completed",
+      "core.save.failed",
+      "core.save.format.migration.applied",
+      "core.save.requested",
+      "core.score.changed",
+      "core.social.interaction.triggered",
+      "core.social.relationship.changed"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/event-type-migration-audit.json",
+      "logs/ci/<YYYY-MM-DD>/event-type-migration-audit-summary.txt"
+    ],
+    "taskmaster_id": 42
   },
   {
     "id": "NG-0024",
@@ -1549,22 +1602,34 @@
       "csharp"
     ],
     "owner": "architecture",
-    "test_refs": [],
+    "test_refs": [
+      "Game.Core.Tests/Architecture/DependencyGuardRulesTests.cs",
+      "Game.Core.Tests/Architecture/DependencyMatrixRulesTests.cs",
+      "Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs",
+      "Game.Core.Tests/Architecture/DependencyGuardArtifactsTests.cs",
+      "Game.Core.Tests/Architecture/DependencyGuardSummaryFormatTests.cs"
+    ],
     "acceptance": [
-      "docs/architecture/base/07-dev-build-and-gates-v2.md 中 7.y 小节明确给出项目级与目录级依赖矩阵（Game.Core/Game.Godot/Tests.* 与 Scripts/Core/Adapters/Scenes 的允许/禁止依赖关系），AGENTS.md 中引用该小节作为架构依赖 SSoT。",
-      "存在 scripts/python/dependency_guard.py 或等价脚本，能够扫描 C# 工程（csproj 与 using 语句）和 Godot Scripts 目录结构，检测是否存在违反依赖矩阵的引用（例如 Game.Core 中出现 Godot 命名空间、Game.Godot 引用 Tests.*、Scripts/Core 引用 Godot API 等），并将结果写入 logs/ci/<date>/dependency-guard.json 与文本摘要。",
-      "在 windows-quality-gate 或等价 CI 工作流中增加依赖护栏脚本的调用步骤（初期可为软门禁），当检测到违规依赖时在 Step Summary 中给出清晰的违规列表，后续可按需要将部分规则提升为硬门禁。"
+      "docs/architecture/base/07-dev-build-and-gates-v2.md 中 7.y 小节明确给出项目级与目录级依赖矩阵（Game.Core/Game.Godot/Tests.* 与 Scripts/Core/Adapters/Scenes 的允许/禁止依赖关系），AGENTS.md 中引用该小节作为架构依赖 SSoT。 Refs: Game.Core.Tests/Architecture/DependencyMatrixRulesTests.cs",
+      "存在 scripts/python/dependency_guard.py 或等价脚本，能够扫描 C# 工程（csproj 与 using 语句）和 Godot Scripts 目录结构，检测是否存在违反依赖矩阵的引用（例如 Game.Core 中出现 Godot 命名空间、Game.Godot 引用 Tests.*、Scripts/Core 引用 Godot API 等），并将结果写入 logs/ci/<date>/dependency-guard.json 与文本摘要。 Refs: Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs Game.Core.Tests/Architecture/DependencyGuardArtifactsTests.cs",
+      "在 windows-quality-gate 或等价 CI 工作流中增加依赖护栏脚本的调用步骤（初期可为软门禁），当检测到违规依赖时在 Step Summary 中给出清晰的违规列表，后续可按需要将部分规则提升为硬门禁。 Refs: Game.Core.Tests/Architecture/DependencyGuardSummaryFormatTests.cs",
+      "应完成：架构依赖护栏与依赖图校验骨架 Refs: Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs",
+      "应有测试：至少新增/更新 1 个确定性测试并在 test_refs 中引用。 Refs: Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/Architecture/DependencyGuardArtifactsTests.cs"
     ],
     "test_strategy": [
       "本地：构造刻意违反依赖矩阵的示例（例如在 Game.Core 中添加 using Godot; 或在 Scripts/Core 中直接引用 Godot API），运行 dependency_guard 脚本验证其能正确发现并在 JSON/文本摘要中报告。",
-      "CI：在测试分支上启用依赖护栏步骤，故意保留一处违规依赖，确认 windows-quality-gate（或等价工作流）中的 Step Summary 能显示违规详情，并在规则配置为硬门禁时正确使 Job 失败。"
+      "CI：在测试分支上启用依赖护栏步骤，故意保留一处违规依赖，确认 windows-quality-gate（或等价工作流）中的 Step Summary 能显示违规详情，并在规则配置为硬门禁时正确使 Job 失败。",
+      "Optional: TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/**.",
+      "Optional: Rewrite-Intent: Promote backlog task into SSoT to be implemented in the current phase."
     ],
     "taskmaster_exported": false,
     "contractRefs": [],
     "artifactRefs": [
       "logs/ci/<date>/dependency-guard.json",
       "logs/ci/<date>/dependency-guard-summary.txt"
-    ]
+    ],
+    "taskmaster_id": 43
   },
   {
     "id": "NG-0039",

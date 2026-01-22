@@ -7,7 +7,7 @@
     "testStrategy": "Verify the project builds successfully and the UI framework is correctly integrated by creating a simple UI component.",
     "priority": "high",
     "dependencies": [],
-    "status": "pending",
+    "status": "done",
     "subtasks": [],
     "story_id": "PRD-GUILD-MANAGER",
     "layer": "adapter",
@@ -41,7 +41,7 @@
     "dependencies": [
       1
     ],
-    "status": "pending",
+    "status": "done",
     "subtasks": [
       {
         "id": 1,
@@ -124,7 +124,7 @@
     "dependencies": [
       1
     ],
-    "status": "pending",
+    "status": "done",
     "subtasks": [
       {
         "id": 1,
@@ -220,7 +220,7 @@
     "dependencies": [
       1
     ],
-    "status": "pending",
+    "status": "done",
     "subtasks": [],
     "story_id": "PRD-GUILD-MANAGER",
     "layer": "adapter",
@@ -258,7 +258,7 @@
     "dependencies": [
       4
     ],
-    "status": "pending",
+    "status": "done",
     "subtasks": [],
     "story_id": "PRD-GUILD-MANAGER",
     "layer": "core",
@@ -373,7 +373,7 @@
     "dependencies": [
       1
     ],
-    "status": "pending",
+    "status": "done",
     "subtasks": [],
     "story_id": "PRD-GUILD-MANAGER",
     "layer": "tbd",
@@ -526,7 +526,7 @@
     "testStrategy": "Unit test each phase to ensure correct state transitions and data updates.",
     "priority": "high",
     "dependencies": [],
-    "status": "pending",
+    "status": "done",
     "subtasks": [],
     "story_id": "PRD-GUILD-MANAGER",
     "layer": "adapter",
@@ -599,7 +599,7 @@
     "dependencies": [
       11
     ],
-    "status": "pending",
+    "status": "done",
     "subtasks": [
       {
         "id": 1,
@@ -768,7 +768,7 @@
       12,
       13
     ],
-    "status": "pending",
+    "status": "done",
     "subtasks": [],
     "story_id": "PRD-GUILD-MANAGER",
     "layer": "core",
@@ -874,7 +874,7 @@
     "dependencies": [
       14
     ],
-    "status": "pending",
+    "status": "done",
     "subtasks": [],
     "story_id": "PRD-GUILD-MANAGER",
     "layer": "adapter",

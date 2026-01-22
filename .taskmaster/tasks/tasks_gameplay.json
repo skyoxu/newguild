@@ -717,5 +717,1002 @@
       "core.save.requested"
     ],
     "artifactRefs": []
+  },
+  {
+    "id": "GM-0301",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-CONTENT",
+    "title": "阶段2：内容加载与 JSON 清单接入（Assets/Data）",
+    "description": "将现有 res://Game.Godot/Assets/Data/content/base/*.json 作为内容源，建立统一的加载/校验/缓存路径，并把结果以纯 C# DTO 供 Game.Core 使用（Core 不引用 Godot API）。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "adapter",
+    "depends_on": [
+      "NG-0014",
+      "NG-0042"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0011",
+      "ADR-0019"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Content-Loading.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "content",
+      "assets",
+      "json"
+    ],
+    "contractRefs": [
+      "core.content.manifest.loaded"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "提供一个统一的内容清单加载入口（从 res://Game.Godot/Assets/Data/content/base/manifest.json），能解析并返回可用的内容条目列表；失败应给出可定位错误。 Refs: Tests.Godot/tests/Content/test_content_manifest_load.gd",
+      "内容解析/校验逻辑在纯 C# 层可单测（不依赖 Godot API）。 Refs: Game.Core.Tests/Services/ContentManifestParserTests.cs",
+      "应完成：阶段2：内容加载与 JSON 清单接入（Assets/Data） Refs: Tests.Godot/tests/Content/test_content_manifest_load.gd",
+      "应有测试：至少包含并通过 test_refs 引用的测试（2 个）。 Refs: Tests.Godot/tests/Content/test_content_manifest_load.gd",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.content.manifest.loaded）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.content.manifest.loaded）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "领域逻辑用 xUnit 覆盖关键边界与确定性规则。",
+      "Optional: TDD (red->green->refactor). Add xUnit tests for JSON parse/validation (pure). Add GdUnit4/headless smoke to load base manifest and fail fast with actionable errors. Write evidence under logs/ci and logs/e2e.",
+      "Optional: Rewrite-Intent: Extend existing content assets and adapters; do not introduce a parallel content pipeline."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Content/test_content_manifest_load.gd",
+      "Game.Core.Tests/Services/ContentManifestParserTests.cs",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd"
+    ],
+    "taskmaster_id": 27,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0302",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-EVENT-CONTRACTS",
+    "title": "阶段2：事件定义与事件链契约（EventDefinition/EventChain）",
+    "description": "在 Game.Core/Contracts 中补齐事件定义与事件链的强类型契约，并把 IEventCatalog 规范化为可被 EventEngine 使用的最小接口（避免 EmptyEventCatalog/裸实现漂移）。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": [
+      "GM-0101"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Events-ContentDriven.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "events",
+      "wiring"
+    ],
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "为 EventDefinition/EventChain 增加强类型契约，并满足 ADR-0004 的事件命名与常量化要求。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应完成：阶段2：事件定义与事件链契约（EventDefinition/EventChain） Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "领域逻辑用 xUnit 覆盖关键边界与确定性规则。",
+      "Optional: xUnit contract tests: compile-level + EventType constants. Deterministic serialization tests for definitions (no Godot).",
+      "Optional: Rewrite-Intent: Formalize existing EventEngine inputs; do not build a second event engine."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Contracts/EventDefinitionContractsTests.cs",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+    ],
+    "taskmaster_id": 28,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0303",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-EVENT-CATALOG",
+    "title": "阶段2：内容驱动事件系统接入（EventCatalog + EventEngine）",
+    "description": "把 EventEngine 从 T2 的硬编码演示升级为“由 EventCatalog 提供定义/开关/权重”的内容驱动实现；在 HUD/GameLoop 中替换 EmptyEventCatalog，确保事件可观察且可测试。\n\nEvidence Artifacts (not test_refs):\n- Game.Godot/Scripts/CI/WiringSmoke.gd",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": [
+      "GM-0103",
+      "GM-0301",
+      "GM-0302"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Events-ContentDriven.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "events",
+      "wiring"
+    ],
+    "contractRefs": [
+      "core.event_catalog.loaded"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "EventEngine 使用 EventCatalog 进行内容驱动（不再依赖 HUD 内的 EmptyEventCatalog 兜底），并能在固定时间/固定种子下产出确定性事件。 Refs: Game.Core.Tests/Domain/EventEngineContentDrivenDeterminismTests.cs",
+      "Headless wiring-smoke 能观察到至少一个内容驱动事件并验证 UI/状态同步。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "应完成：阶段2：内容驱动事件系统接入（EventCatalog + EventEngine） Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "应有测试：至少包含并通过 test_refs 引用的测试（2 个）。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.event_catalog.loaded）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/ArtifactsEvidenceTests.cs",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.event_catalog.loaded）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "领域逻辑用 xUnit 覆盖关键边界与确定性规则。",
+      "Optional: xUnit: EventEngine executes phases and emits expected domain events given a fixed catalog/time/id generator. GdUnit4: headless wiring-smoke validates at least one content-driven event is emitted and UI updates.",
+      "Optional: Rewrite-Intent: Extend existing GameTurnSystem/EventEngine; keep Core deterministic; publish events via existing IEventBus."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Engine/EventEngineContentDrivenTests.cs",
+      "Game.Core.Tests/Domain/EventEngineContentDrivenDeterminismTests.cs",
+      "Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Game.Core.Tests/CI/ArtifactsEvidenceTests.cs"
+    ],
+    "taskmaster_id": 29,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0304",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-UI-RESPONSIVE",
+    "title": "阶段2：UI 响应式布局与可点击性收口（Scroll/Anchor/MouseFilter）",
+    "description": "把当前 UI 超出窗口/被透明层遮挡等问题系统性收口：统一 ScrollContainer、Anchor、Container size flags 与 Control.mouse_filter，确保 HUD/Guild/Settings 可完整操作。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "adapter",
+    "depends_on": [
+      "GM-0202",
+      "GM-0206"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0011",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07",
+      "CH10"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "ui"
+    ],
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "关键界面（HUD/Guild/Settings）在默认窗口尺寸内可完整操作（滚动/布局/点击不被遮挡）。 Refs: Tests.Godot/tests/Scenes/test_scene_ui_responsive_clickability_smoke.gd",
+      "应完成：阶段2：UI 响应式布局与可点击性收口（Scroll/Anchor/MouseFilter） Refs: Tests.Godot/tests/Scenes/test_scene_ui_responsive_clickability_smoke.gd",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Tests.Godot/tests/Scenes/test_scene_ui_responsive_clickability_smoke.gd",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/Scenes/test_scene_ui_responsive_clickability_smoke.gd"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "为 UI/场景行为添加 GdUnit4 headless 用例，避免仅字符串断言。",
+      "Optional: GdUnit4: instantiate key screens and assert critical buttons are clickable (mouse_filter not blocking). Headless smoke verifies the same paths.",
+      "Optional: Rewrite-Intent: Fix wiring and usability; do not hide features to pass tests."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Scenes/test_ui_clickability_smoke.gd",
+      "Tests.Godot/tests/Scenes/test_scene_ui_responsive_clickability_smoke.gd",
+      "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "taskmaster_id": 30,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0305",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-UI-COMPONENTS",
+    "title": "阶段2：核心 UI 组件库（Status/Panel/List）",
+    "description": "沉淀可复用 UI 组件：状态条/错误提示/列表渲染/确认对话框，供战术中心、活动反馈、官员任命等复用，减少散乱 UI 逻辑。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "depends_on": [
+      "GM-0304"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "ui"
+    ],
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "新增可复用 UI 组件（状态/错误/列表等），用于多个面板复用而非复制粘贴。 Refs: Tests.Godot/tests/UI/test_ui_components_smoke.gd",
+      "应完成：阶段2：核心 UI 组件库（Status/Panel/List） Refs: Tests.Godot/tests/UI/test_guild_panel_scene.gd",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Tests.Godot/tests/UI/test_ui_components_smoke.gd",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/UI/test_guild_panel_scene.gd",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "为 UI/场景行为添加 GdUnit4 headless 用例，避免仅字符串断言。",
+      "Optional: GdUnit4: instantiate each component scene, set sample props, and assert text/state transitions without timers.",
+      "Optional: Rewrite-Intent: Build reusable components to reduce duplicated UI glue code."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_ui_components_smoke.gd",
+      "Tests.Godot/tests/UI/test_guild_panel_scene.gd",
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+    ],
+    "taskmaster_id": 31,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0306",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-UI-INTERACTION",
+    "title": "阶段2：交互模式统一（Loading/Error/Disable/Retry）",
+    "description": "为按钮与异步操作建立统一交互：点击后进入 loading、错误可重试、成功自动刷新；错误信息遵循 ADR-0019 脱敏与审计。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "depends_on": [
+      "GM-0305"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0018",
+      "ADR-0019"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH02",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "ui"
+    ],
+    "contractRefs": [],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "异步交互具备统一状态（loading/disabled/error/retry），并且错误信息遵循 ADR-0019 脱敏策略。 Refs: Tests.Godot/tests/Security/Hard/test_godot_sqlite_database_error_sanitization.gd",
+      "应完成：阶段2：交互模式统一（Loading/Error/Disable/Retry） Refs: Tests.Godot/tests/UI/test_ui_interaction_states.gd",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Services/AsyncInteractionStateTests.cs",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/InteractionArtifactsLoggingTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "为 UI/场景行为添加 GdUnit4 headless 用例，避免仅字符串断言。",
+      "Optional: GdUnit4: simulate button press and assert state transitions (disabled->loading->enabled) using frame waits only.",
+      "Optional: Rewrite-Intent: Reduce 'stuck' UX; provide deterministic visible states."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_ui_interaction_states.gd",
+      "Tests.Godot/tests/Security/Hard/test_godot_sqlite_database_error_sanitization.gd",
+      "Game.Core.Tests/Services/AsyncInteractionStateTests.cs",
+      "Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
+      "Game.Core.Tests/CI/InteractionArtifactsLoggingTests.cs"
+    ],
+    "taskmaster_id": 32,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0307",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-ACTIVITY-FEED",
+    "title": "阶段2：活动反馈系统（Activity Feed / Timeline）",
+    "description": "提供一个玩家可见的“发生了什么”面板：订阅 DomainEventEmitted，将关键事件（副本/声望/社交/奖励）按时间线展示，便于测试与玩家理解。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "depends_on": [
+      "GM-0303",
+      "GM-0306"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH03",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "events",
+      "wiring"
+    ],
+    "contractRefs": [
+      "core.ai.cycle.completed",
+      "core.ai.cycle.started",
+      "core.ai.ecosystem.step.completed",
+      "core.ai.intent.issued",
+      "core.content.manifest.loaded",
+      "core.event_catalog.loaded",
+      "core.game_turn.phase_changed",
+      "core.game_turn.started",
+      "core.game_turn.week_advanced",
+      "core.guild.created",
+      "core.guild.disbanded",
+      "core.guild.member.joined",
+      "core.guild.member.left",
+      "core.guild.member.role_changed",
+      "core.load.completed",
+      "core.load.failed",
+      "core.load.requested",
+      "core.media.beat.triggered",
+      "core.raid.resolved",
+      "core.raid.scheduled",
+      "core.recruitment.offer.presented",
+      "core.recruitment.offer.resolved",
+      "core.reputation.changed",
+      "core.save.completed",
+      "core.save.failed",
+      "core.save.format.migration.applied",
+      "core.save.requested",
+      "core.social.interaction.triggered",
+      "core.social.relationship.changed"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "提供活动反馈面板，能把关键事件按时间线展示（至少覆盖 raid/media/social）。 Refs: Tests.Godot/tests/UI/test_activity_feed_smoke.gd",
+      "应完成：阶段2：活动反馈系统（Activity Feed / Timeline） Refs: Tests.Godot/tests/UI/test_activity_feed_smoke.gd",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Tests.Godot/tests/UI/test_activity_feed_smoke.gd",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.ai.cycle.completed, core.ai.cycle.started, core.ai.ecosystem.step.completed, core.ai.intent.issued, core.content.manifest.loaded, core.event_catalog.loaded, core.game_turn.phase_changed, core.game_turn.started ...）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/UI/test_activity_feed_navigation_clickable.gd",
+      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/UI/test_activity_feed_smoke.gd",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.ai.cycle.completed, core.ai.cycle.started, core.ai.ecosystem.step.completed, core.ai.intent.issued, core.content.manifest.loaded, core.event_catalog.loaded, core.game_turn.phase_changed, core.game_turn.started ...）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "为 UI/场景行为添加 GdUnit4 headless 用例，避免仅字符串断言。",
+      "Optional: xUnit: event filtering and formatting rules. GdUnit4: publish a deterministic event and assert feed shows it.",
+      "Optional: Rewrite-Intent: Reuse existing EventBusAdapter signal; do not add bespoke log plumbing."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_activity_feed_smoke.gd",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Tests.Godot/tests/UI/test_activity_feed_navigation_clickable.gd",
+      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "taskmaster_id": 33,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0308",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-TACTICAL-CENTER",
+    "title": "阶段2：战术中心（Tactical Center）入口与最小编成",
+    "description": "为 PVE 副本建立一个统一入口：最小队伍编成/校验/自动分配（基于现有 roster），并驱动现有 RaidEncounter demo/事件输出。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "depends_on": [
+      "GM-0202",
+      "GM-0204",
+      "GM-0305"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0007",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "tactical",
+      "pve"
+    ],
+    "contractRefs": [
+      "core.raid.resolved",
+      "core.raid.scheduled"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "提供战术中心入口：最小编成/校验/触发 raid，并能观察到 core.raid.resolved。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "应完成：阶段2：战术中心（Tactical Center）入口与最小编成 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.raid.resolved, core.raid.scheduled）。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_artifacts.gd",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.raid.resolved, core.raid.scheduled）。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "为 UI/场景行为添加 GdUnit4 headless 用例，避免仅字符串断言。",
+      "Optional: xUnit: composition validation (deterministic). GdUnit4: open Tactical Center, trigger a raid, observe core.raid.resolved and UI status update.",
+      "Optional: Rewrite-Intent: Add a single UI entry that drives existing PVE/roster modules."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Scenes/test_tactical_center_smoke.gd",
+      "Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_artifacts.gd"
+    ],
+    "taskmaster_id": 34,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0309",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-REWARDS",
+    "title": "阶段2：奖励发放统一（Reward Ledger）",
+    "description": "如果没有其他任务负责战斗奖励发放，则在本阶段实现统一奖励账本：监听副本/媒体/事件结果并发放奖励（金币/声望/经验等的最小集合），可 Save/Load 回放。",
+    "status": "pending",
+    "priority": "P1",
+    "layer": "core",
+    "depends_on": [
+      "GM-0204",
+      "GM-0206",
+      "NG-0046"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "progression",
+      "rewards"
+    ],
+    "contractRefs": [
+      "core.media.beat.triggered",
+      "core.raid.resolved",
+      "core.recruitment.offer.resolved"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "奖励发放由统一 Reward Ledger 处理（raid/media 等结果驱动），并可 Save/Load 回放。 Refs: Game.Core.Tests/Progression/RewardLedgerTests.cs",
+      "应完成：阶段2：奖励发放统一（Reward Ledger） Refs: Game.Core.Tests/Progression/RewardLedgerTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Progression/RewardLedgerTests.cs",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/ArtifactsLoggingTests.cs",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "领域逻辑用 xUnit 覆盖关键边界与确定性规则。",
+      "Optional: xUnit: reward rules deterministic for known events. GdUnit4: run raid demo, verify reward UI updated and persists across save/load.",
+      "Optional: Rewrite-Intent: Centralize reward logic; avoid ad-hoc reward mutations scattered across demos."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Progression/RewardLedgerTests.cs",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Game.Core.Tests/CI/ArtifactsLoggingTests.cs"
+    ],
+    "taskmaster_id": 35,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0310",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-ACHIEVEMENTS",
+    "title": "阶段2：成就系统（Achievement Definitions + Tracker）",
+    "description": "建立最小成就定义与追踪：由 DomainEvent 驱动达成判定，并在 UI 中可查看；与奖励账本对齐。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "GM-0309"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "progression",
+      "rewards"
+    ],
+    "contractRefs": [
+      "core.guild.created",
+      "core.media.beat.triggered",
+      "core.raid.resolved",
+      "core.recruitment.offer.resolved",
+      "core.reputation.changed"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "成就定义与追踪由 DomainEvent 驱动，至少实现 1 个确定性成就并可在 UI 中查看。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+      "应完成：阶段2：成就系统（Achievement Definitions + Tracker） Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（2 个）。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved, core.reputation.changed）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.guild.created, core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved, core.reputation.changed）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "领域逻辑用 xUnit 覆盖关键边界与确定性规则。",
+      "Optional: xUnit: given events -> achievement unlocked. GdUnit4: trigger one achievement and verify UI list updates.",
+      "Optional: Rewrite-Intent: Drive achievements off existing DomainEvent stream."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_achievements_smoke.gd",
+      "Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd"
+    ],
+    "taskmaster_id": 36,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0311",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-XP",
+    "title": "阶段2：经验系统（XP/Level）与奖励对齐",
+    "description": "实现最小经验/等级曲线（确定性），并作为 Reward Ledger 的一种奖励类型展示与持久化。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "GM-0309"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "progression",
+      "rewards"
+    ],
+    "contractRefs": [
+      "core.media.beat.triggered",
+      "core.raid.resolved",
+      "core.recruitment.offer.resolved"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "经验/等级曲线为确定性规则，且与奖励账本对齐并可持久化。 Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs",
+      "应完成：阶段2：经验系统（XP/Level）与奖励对齐 Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "领域逻辑用 xUnit 覆盖关键边界与确定性规则。",
+      "Optional: xUnit: XP->Level boundary tests. GdUnit4: show XP changes after a raid and persist across save/load.",
+      "Optional: Rewrite-Intent: Keep math deterministic and testable; wire to UI through adapters."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Progression/ExperienceSystemTests.cs",
+      "Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+    ],
+    "taskmaster_id": 37,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0312",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-OFFICERS",
+    "title": "阶段2：官员系统（Officer Slots + Assignment）",
+    "description": "在 Guild roster 之上增加最小官员槽位与任命规则（确定性），并落库/随存档持久化。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "GM-0202",
+      "NG-0046"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Officers.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "officers",
+      "guild"
+    ],
+    "contractRefs": [
+      "core.guild.created",
+      "core.guild.member.role_changed"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "官员槽位与任命规则可用且可持久化（随 Save/Load）。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_guild_officers_save_load.gd",
+      "应完成：阶段2：官员系统（Officer Slots + Assignment） Refs: Game.Core.Tests/Services/OfficerAssignmentPersistenceTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Services/OfficerAssignmentPersistenceTests.cs",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "领域逻辑用 xUnit 覆盖关键边界与确定性规则。",
+      "Optional: xUnit: assignment rules and persistence mapping. GdUnit4: assign an officer and verify it survives restart (save/load).",
+      "Optional: Rewrite-Intent: Extend existing guild persistence; do not add new DB outside SqliteDataStore path."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Guild/OfficerAssignmentTests.cs",
+      "Tests.Godot/tests/Scenes/Guild/test_scene_guild_officers_save_load.gd",
+      "Game.Core.Tests/Services/OfficerAssignmentPersistenceTests.cs",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+    ],
+    "taskmaster_id": 38,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0313",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-OFFICERS-UI",
+    "title": "阶段2：官员 UI 入口（Simplified Officer UI）",
+    "description": "提供官员管理的最小 UI：列表展示、任命/撤销、状态提示；交互模式复用统一组件。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "depends_on": [
+      "GM-0312",
+      "GM-0306"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Officers.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "ui"
+    ],
+    "contractRefs": [
+      "core.guild.created",
+      "core.guild.member.role_changed"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "提供官员 UI 入口，能任命/撤销并显示状态；交互模式复用统一组件。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
+      "应完成：阶段2：官员 UI 入口（Simplified Officer UI） Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
+      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "为 UI/场景行为添加 GdUnit4 headless 用例，避免仅字符串断言。",
+      "Optional: GdUnit4: open officers panel, assign a member, assert labels updated; no timing-based sleeps.",
+      "Optional: Rewrite-Intent: UI should call Core services via adapters; no direct SQL in scenes."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_officer_ui_smoke.gd",
+      "Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
+      "Game.Core.Tests/Domain/GuildRosterServiceTests.cs",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "taskmaster_id": 39,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0314",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-WORLDGEN",
+    "title": "阶段2：世界生成端口（World Generation Port）与开局 Seed",
+    "description": "把世界状态初始化收口为一个端口：开局生成 NPC 公会/对手/基础赛季信息，并与 Save/Load 对齐（可重放）。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "GM-0201",
+      "NG-0046",
+      "GM-0301"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0007",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Worldgen.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "worldgen",
+      "seed"
+    ],
+    "contractRefs": [
+      "core.game.started"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "世界生成端口收口开局初始化：给定固定 seed 可生成确定性的 NPC 公会集合，并与 Save/Load 对齐。 Refs: Game.Core.Tests/World/WorldGenerationPortTests.cs",
+      "应完成：阶段2：世界生成端口（World Generation Port）与开局 Seed Refs: Game.Core.Tests/World/WorldGenerationPortTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/World/WorldGenerationPortTests.cs",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.game.started）。 Refs: Game.Core.Tests/Services/GameStartWorkflowTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/LogArtifactsConventionsTests.cs",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.game.started）。 Refs: Game.Core.Tests/Services/GameStartWorkflowTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "领域逻辑用 xUnit 覆盖关键边界与确定性规则。",
+      "Optional: xUnit: deterministic generation given seed. GdUnit4: new game initializes world and displays NPC guild count.",
+      "Optional: Rewrite-Intent: Single source of truth for world seed; wire to UI for deterministic testing."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/World/WorldGenerationPortTests.cs",
+      "Game.Core.Tests/Services/GameStartWorkflowTests.cs",
+      "Game.Core.Tests/CI/LogArtifactsConventionsTests.cs"
+    ],
+    "taskmaster_id": 40,
+    "taskmaster_exported": false
+  },
+  {
+    "id": "GM-0315",
+    "story_id": "PRD-GUILD-MANAGER-PHASE2-NPC-ARCHETYPES",
+    "title": "阶段2：NPC 公会原型（Archetypes）数据驱动落地",
+    "description": "将 NPC 公会原型从 json 数据驱动（如 base/npc_guilds.json），并与世界生成端口对齐；避免散落硬编码。",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "GM-0314",
+      "GM-0301"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Worldgen.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "owner": "architecture",
+    "labels": [
+      "phase2",
+      "content",
+      "assets",
+      "json"
+    ],
+    "contractRefs": [
+      "core.content.manifest.loaded"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
+    "acceptance": [
+      "NPC 公会原型从内容 json 数据驱动加载，并能被世界生成端口消费。 Refs: Game.Core.Tests/World/NpcGuildArchetypeTests.cs",
+      "应完成：阶段2：NPC 公会原型（Archetypes）数据驱动落地 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/World/NpcGuildArchetypeTests.cs",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.content.manifest.loaded）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.content.manifest.loaded）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+    ],
+    "test_strategy": [
+      "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
+      "测试与取证产物统一写入 logs/**（遵循仓库 SSoT）。",
+      "领域逻辑用 xUnit 覆盖关键边界与确定性规则。",
+      "Optional: xUnit: parse/validate npc guild archetypes. GdUnit4: load content and show at least one archetype in UI.",
+      "Optional: Rewrite-Intent: Data-driven NPC world; reuse existing content assets and persistence."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/World/NpcGuildArchetypeTests.cs",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+    ],
+    "taskmaster_id": 41,
+    "taskmaster_exported": false
   }
 ]

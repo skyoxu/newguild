@@ -178,7 +178,7 @@ def _extract_refs_from_acceptance_item(text: str) -> list[str]:
 
 def _extract_prd_excerpt() -> str:
     root = repo_root()
-    prd = root / "prd.txt"
+    prd = root / ".taskmaster" / "docs" / "prd.txt"
     prd_yuan = root / "prd_yuan.md"
     blob = ""
     if prd.exists():
@@ -339,7 +339,7 @@ def _build_prompt(
             "- Do NOT use placeholder-like names such as:",
             f"  - Game.Core.Tests/Tasks/Task{task_id}AcceptanceTests.cs",
             f"  - Game.Core.Tests/Tasks/Task{task_id}RequirementsTests.cs",
-            f"  - Tests.Godot/tests/Scenes/Sanguo/test_task{task_id}_acceptance.gd",
+            f"  - Tests.Godot/tests/Scenes/test_task{task_id}_acceptance.gd",
             f"  - (any .gd filename containing task{task_id})",
             "- Prefer subject-based naming and directory semantics:",
             "  - Core domain/value objects: Game.Core.Tests/Domain/<Subject>Tests.cs",
@@ -347,7 +347,7 @@ def _build_prompt(
             "  - Task-scoped only when truly cross-cutting: Game.Core.Tests/Tasks/Task<id><Topic>Tests.cs",
             "    - <Topic> must be short English PascalCase (2-5 words), describing behavior, not 'Acceptance'.",
             "  - Godot scene/UI behaviors:",
-            "    - Tests.Godot/tests/Scenes/Sanguo/test_sanguo_<scene>_<behavior>.gd",
+            "    - Tests.Godot/tests/Scenes/test_scene_<feature>_<behavior>.gd",
             "    - Tests.Godot/tests/UI/test_hud_<behavior>.gd",
             "- Prefer refs that can *prove* behavior (state/invariants/negative paths), avoid weak refs that only check a constant exists.",
         ]

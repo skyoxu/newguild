@@ -494,6 +494,7 @@ public partial class HUD : Control
 
     private sealed class EmptyEventCatalog : IEventCatalog
     {
+        public bool IsEventEnabled(string eventType) => true;
     }
 
     private sealed class NoopAICoordinator : IAICoordinator
