@@ -1,7 +1,12 @@
 name: Windows Quality Gate
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      task_id:
+        description: 'Taskmaster task id (e.g. 19). Used by scripts/sc/acceptance_check.py.'
+        required: false
+        default: ''
   push:
     branches: [ main ]
   pull_request:
@@ -64,9 +69,23 @@ jobs:
           python-version: '3.x'
 
       - name: Acceptance check (hard gate)
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
         shell: pwsh
         run: |
-          py -3 scripts/sc/acceptance_check.py --only adr,links,overlay,contracts,arch,build
+          $taskId = ""
+          if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
+            $taskId = "${{ inputs.task_id }}"
+          }
+          if (($env:GITHUB_EVENT_NAME -eq 'pull_request') -and (-not $taskId)) {
+            $branch = "${{ github.head_ref }}"
+            if ($branch -match '(^|/)T(?<id>\d+)(-|$)') {
+              $taskId = $Matches['id']
+            }
+          }
+          if (-not $taskId) {
+            throw "SC acceptance_check requires a task id. Provide workflow_dispatch input 'task_id' or use a branch name like task/T19 for pull_request."
+          }
+          py -3 scripts/sc/acceptance_check.py --task-id $taskId --only adr,links,overlay,contracts,arch,build
 
       - name: Ensure GdUnit4 plugin
         shell: pwsh

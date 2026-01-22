@@ -55,7 +55,11 @@ def parse_task_id(value: str | None) -> str | None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="sc-acceptance-check (reproducible acceptance gate)")
-    ap.add_argument("--task-id", default=None, help="Taskmaster id (e.g. 10 or 10.3). Default: first status=in-progress task.")
+    ap.add_argument(
+        "--task-id",
+        default=None,
+        help="Taskmaster id (e.g. 10 or 10.3). If omitted: uses env SC_TASK_ID if set; otherwise first status=in-progress task.",
+    )
     ap.add_argument("--godot-bin", default=None, help="Godot mono console path (or set env GODOT_BIN)")
     ap.add_argument("--perf-p95-ms", type=int, default=None, help="Enable perf hard gate by parsing [PERF] p95_ms from latest logs/ci/**/headless.log. 0 disables.")
     ap.add_argument("--require-perf", action="store_true", help="(legacy) enable perf hard gate using env PERF_P95_THRESHOLD_MS (or default 20ms)")
