@@ -1531,6 +1531,20 @@
           "CH07"
         ],
         "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Architecture-Guards.md",
+        "testRefs": [
+          "Game.Core.Tests/Architecture/DependencyMatrixRulesTests.cs",
+          "Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs",
+          "Game.Core.Tests/Architecture/DependencyGuardArtifactsTests.cs",
+          "Game.Core.Tests/Architecture/DependencyGuardSummaryFormatTests.cs"
+        ],
+        "acceptance": [
+          "docs/architecture/base/07-dev-build-and-gates-v2.md 中 7.y 小节明确给出项目级与目录级依赖矩阵（Game.Core/Game.Godot/Tests.* 与 Scripts/Core/Adapters/Scenes 的允许/禁止依赖关系），AGENTS.md 中引用该小节作为架构依赖 SSoT。 Refs: Game.Core.Tests/Architecture/DependencyMatrixRulesTests.cs",
+          "存在 scripts/python/dependency_guard.py 或等价脚本，能够扫描 C# 工程（csproj 与 using 语句）和 Godot Scripts 目录结构，检测是否存在违反依赖矩阵的引用（例如 Game.Core 中出现 Godot 命名空间、Game.Godot 引用 Tests.*、Scripts/Core 引用 Godot API 等），并将结果写入 logs/ci/<date>/dependency-guard.json 与文本摘要。 Refs: Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs Game.Core.Tests/Architecture/DependencyGuardArtifactsTests.cs",
+          "在 windows-quality-gate 或等价 CI 工作流中增加依赖护栏脚本的调用步骤（初期可为软门禁），当检测到违规依赖时在 Step Summary 中给出清晰的违规列表，后续可按需要将部分规则提升为硬门禁。 Refs: Game.Core.Tests/Architecture/DependencyGuardSummaryFormatTests.cs",
+          "应完成：架构依赖护栏与依赖图校验骨架 Refs: Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs",
+          "应有测试：至少新增/更新 1 个确定性测试并在 testRefs 中引用。 Refs: Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs",
+          "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/Architecture/DependencyGuardArtifactsTests.cs"
+        ],
         "priority": "medium",
         "complexity": 6,
         "dependencies": [

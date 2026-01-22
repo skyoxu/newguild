@@ -1,235 +1,115 @@
 ---
-title: 07 dev build and gates v2
+title: 07 dev build and gates (Godot + C#) v2
 status: base-SSoT
 generated_variant: deep-optimized
 ssot_scope: chapter-07-only
 reuse_level: base-clean
-adr_refs: [ADR-0002, ADR-0003, ADR-0005, ADR-0012, ADR-0015]
-placeholders: Unknown Product, unknown-product, gamedev, dev, 0.0.0, production, dev-team, dev-project
-derived_from: 07-dev-build-and-gates-v2.md
-last_generated: 2025-08-21
+adr_refs: [ADR-0002, ADR-0003, ADR-0005, ADR-0007, ADR-0011, ADR-0015, ADR-0018]
+last_updated: 2026-01-22
 ---
 
-> 目标：在 optimized 基础上引入**可执行门禁矩阵**、**Windows 兼容脚本**与**可追溯矩阵**，对齐 03 章 Release Health 放量口径。
+> 目标：本章给出 Windows-only 的 Godot 4.5 + C#（.NET 8）项目在本地与 CI 中的**可执行质量门禁**与**可追溯工件**口径（ADR-0005/ADR-0011），并对齐安全与发布健康的基线（ADR-0002/ADR-0003）。
 
-## 0.1 开发构建容器视图（C4 Container）
+## 0.1 工具链与职责边界（概览）
 
-```mermaid
-C4Container
-    title Development & Build Toolchain for Unknown Product
-    Person(dev, "Developer", "开发者提交代码")
-    System_Boundary(devenv, "Development Environment") {
-        Container(vscode, "VS Code/IDE", "TypeScript", "代码编辑与调试")
-        Container(vite, "Vite Dev Server", "Rollup", "热更新与开发构建")
-        Container(electron_main, "Electron Main", "Node.js", "主进程开发调试")
-        Container(electron_renderer, "Electron Renderer", "React 19", "渲染进程开发")
-    }
-    System_Boundary(buildtools, "Build & Quality Tools") {
-        Container(tsc, "TypeScript Compiler", "tsc", "类型检查与编译")
-        Container(eslint, "ESLint", "AST", "代码质量检查")
-        Container(vitest, "Vitest", "Testing", "单元测试与覆盖率")
-        Container(playwright, "Playwright", "E2E", "端到端测试")
-        Container(security_scan, "Security Scanner", "Node.js", "Electron安全扫描")
-    }
-    System_Boundary(cicd, "CI/CD Pipeline") {
-        Container(github_actions, "GitHub Actions", "YAML", "自动化构建与部署")
-        Container(release_health, "Release Health Check", "Sentry API", "发布健康门禁")
-    }
-    System_Ext(sentry, "dev-team", "监控与发布健康")
+本项目是 Windows-only（ADR-0011），核心门禁通过 Python 驱动并在 CI 固化（ADR-0005）。工具链分工如下：
 
-    Rel(dev, vscode, "编写代码", "TypeScript/React")
-    Rel(vscode, vite, "启动开发服务器", "npm run dev")
-    Rel(vite, electron_main, "构建主进程", "esbuild")
-    Rel(vite, electron_renderer, "构建渲染进程", "HMR")
-    Rel(dev, tsc, "类型检查", "tsc --noEmit")
-    Rel(dev, eslint, "代码检查", "eslint .")
-    Rel(dev, vitest, "运行单元测试", "vitest run")
-    Rel(dev, playwright, "运行E2E测试", "playwright test")
-    Rel(dev, security_scan, "安全扫描", "scan_electron_safety.mjs")
-    Rel(github_actions, release_health, "检查发布健康", "API调用")
-    Rel(release_health, sentry, "获取crash-free指标", "HTTPS")
-```
+- Godot：运行与 headless 冒烟（含 GdUnit4 场景测试）
+- .NET 8：编译与 xUnit 单测（领域层）
+- Python（`py -3`）：门禁聚合、静态扫描、日志工件归档（统一写入 `logs/**`）
+- GitHub Actions：Windows Runner 上执行 `windows-quality-gate` 等工作流
 
-### B.1 Windows 单测稳定脚本与日志归档
+## 0.2 门禁执行流程（本地/CI 一致）
 
-- 使用 `npm run test:unit:ps` 调用 `scripts/windows/test-unit.ps1`，在 Windows 环境下稳定运行 旧单元测试工具，避免 PowerShell 将下游进程的 stderr 误判为错误。
-- 所有测试与门禁输出统一归档至 `logs/<日期>/<模块>/`，例如：`logs/20251004/unit/test-unit-ps-<time>.log`。
-- 本地与 CI 推荐一致使用该脚本或等效参数，确保可重复与可追溯。
-
-## 0.2 质量门禁执行流程（C4 Dynamic）
+原则：本地与 CI 使用同一组脚本/参数，输出统一落盘 `logs/**`，便于取证与归档（目录约定见 `AGENTS.md` 的“6.3 日志与工件（SSoT）”）。
 
 ```mermaid
-C4Dynamic
-    title Quality Gates Execution Flow for Unknown Product
-    Person(dev, "Developer")
-    Container(local_env, "Local Environment", "开发环境")
-    Container(ci_runner, "CI Runner", "GitHub Actions")
-    Container(quality_gates, "Quality Gates Script", "Node.js")
-    Container(security_scan, "Security Scanner", "scan_electron_safety.mjs")
-    Container(release_health, "Release Health", "release_health_check.mjs")
-    System_Ext(sentry, "dev-team")
-
-    Rel(dev, local_env, "1. 提交代码", "git push")
-    Rel(local_env, ci_runner, "2. 触发CI", "webhook")
-    Rel(ci_runner, quality_gates, "3. 执行门禁脚本", "pnpm guard:ci")
-    Rel(quality_gates, quality_gates, "4. TypeScript检查", "tsc --noEmit")
-    Rel(quality_gates, quality_gates, "5. ESLint检查", "eslint .")
-    Rel(quality_gates, quality_gates, "6. 单元测试", "vitest --coverage")
-    Rel(quality_gates, security_scan, "7. 安全扫描", "执行脚本")
-    Rel(quality_gates, quality_gates, "8. E2E测试", "playwright test")
-    Rel(quality_gates, release_health, "9. 健康检查", "执行脚本")
-    Rel(release_health, sentry, "10. 获取指标", "API调用")
-    Rel(sentry, release_health, "11. 返回crash-free数据", "JSON响应")
-    Rel(release_health, quality_gates, "12. 验证阈值", "crashFreeUsers ≥ 99.5%")
-    Rel(quality_gates, ci_runner, "13. 门禁结果", "成功/失败")
+flowchart TD
+  A[Developer] --> B[Git push / PR]
+  B --> C[GitHub Actions: windows-quality-gate]
+  C --> D[dotnet build (warnaserror)]
+  D --> E[Unit tests + Coverage gate]
+  E --> F[Dependency Guard (hard gate)]
+  F --> G[Links/Overlay/Contracts validation]
+  G --> H[Godot headless smoke/security]
+  H --> I[Perf smoke (DB) + validate_perf]
+  I --> J[Release health (optional)]
+  C --> K[Upload logs/** artifacts]
 ```
 
 ## A) 质量门禁矩阵（最小可执行）
 
-| Gate          | 工具                       | 阈值/策略                     | 失败动作 |
-| ------------- | -------------------------- | ----------------------------- | -------- |
-| TS            | `tsc --noEmit`             | 严格模式                      | fail     |
-| Lint          | `eslint`                   | `maxWarnings:0`               | fail     |
-| Unit          | `旧单元测试工具 --coverage`        | lines≥90%/branches≥85%        | fail     |
-| E2E           | `旧端到端测试工具`               | retries=2（CI）               | fail     |
-| Security      | `scan_electron_safety.mjs` | nodeIntegration=false 等      | fail     |
-| Base          | `verify_base_clean.mjs`    | 禁业务耦合/占位符齐全         | fail     |
-| ReleaseHealth | `release_health_check.mjs` | crash‑free 用户/会话 + 采用率 | fail     |
+| Gate | 工具/脚本（SSoT） | 策略/口径 | 失败动作 | 主要工件（示例） |
+| --- | --- | --- | --- | --- |
+| Build | `dotnet build -warnaserror`（由 `scripts/sc/acceptance_check.py` 与 CI 调用） | 编译/告警即错误（ADR-0005） | fail | `logs/ci/<date>/sc-acceptance-check/dotnet-build-warnaserror.log` |
+| Unit + Coverage | `scripts/sc/test.py --type unit` | 覆盖率门禁口径见 `AGENTS.md` 6.2 | fail | `logs/unit/<date>/summary.json` |
+| Dependency Guard | `scripts/python/dependency_guard.py` | 依赖矩阵口径见本章 7.y | fail（硬门禁） | `logs/ci/<date>/dependency-guard.json`、`dependency-guard-summary.txt` |
+| Links/Overlay | `scripts/python/task_links_validate.py` / `validate_task_overlays.py` | Base/Overlay 回链一致性 | fail | `logs/ci/<date>/sc-acceptance-check/task-links-validate.log` |
+| Contracts | `scripts/python/validate_contracts.py` | 契约可编译 + 回链一致 | fail | `logs/ci/<date>/sc-acceptance-check/validate-contracts.log` |
+| Security (soft) | `scripts/python/security_soft_scan.py` 等 | 防御性扫描（ADR-0002） | 默认不阻断（可提升） | `logs/ci/<date>/sc-acceptance-check/security-soft-scan.json` |
+| Godot Headless | `scripts/sc/test.py --type all` 或 `scripts/python/*gdunit*` | 场景冒烟/集成 | fail/soft（按工作流配置） | `logs/e2e/**` |
+| Perf (DB) | `scripts/python/perf_smoke_db.py` + `validate_perf.py` | 性能预算口径见 ADR-0015 | fail（在 `windows-quality-gate`） | `logs/perf/<date>/db/db-perf-summary.json` |
+| Release Health | `scripts/python/release_health_gate.py` | 发布健康口径见 ADR-0003 | fail（非 PR 时） | `logs/ci/<date>/release-health.json` |
 
-## B) Windows 兼容（.ps1 变体）
+## B) Windows 本地运行（建议命令集）
+
+> 说明：以下命令以 PowerShell 为例；Python 使用 `py -3`；Godot 路径通过环境变量 `GODOT_BIN` 传入。
 
 ```bash
-# Node-first 聚合示例（建议在 CI 与本地统一使用）
-npm run typecheck
-npm run lint
-npm run test:unit:node
-npm run guard:electron
-npm run test:e2e
-node scripts/release_health_check.mjs
-npm run guard:base
+# 1) 任务级确定性门禁（包含 ADR/Links/Overlay/Contracts/Arch/Build 等）
+py -3 scripts/sc/acceptance_check.py --task-id 43
+
+# 2) 单测（含覆盖率门禁汇总写入 logs/unit/<date>/summary.json）
+py -3 scripts/sc/test.py --type unit
+
+# 3) 依赖护栏（本地可先跑；CI 会强制）
+py -3 scripts/python/dependency_guard.py
+
+# 4) 全量管线（本地复现 CI 的聚合跑法）
+py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debug --godot-bin "%GODOT_BIN%" --build-solutions
 ```
 
-## C) 旧桌面壳 安全基线 & CSP 验证
+## 7.x 性能门禁（Godot Headless / DB）
 
-```js
-// scripts/verify_csp.mjs（片段）
-import fs from 'node:fs';
-import { JSDOM } from 'jsdom';
-const html = fs.readFileSync('dist/index.html', 'utf-8');
-const csp = new JSDOM(html).window.document.querySelector(
-  'meta[http-equiv="Content-Security-Policy"]'
-);
-if (!csp) throw new Error('Missing CSP meta');
-if (!/default-src 'self'/.test(csp.getAttribute('content')))
-  throw new Error("CSP must restrict to 'self'");
-```
+本项目性能门禁预算由 ADR-0015 定义；CI 中的“DB perf smoke”会生成 `logs/perf/<YYYY-MM-DD>/db/db-perf-summary.json`（或 `logs/perf/<YYYY-MM-DD>/summary.json`），随后用 `scripts/python/validate_perf.py` 校验并产出报告到 `logs/ci/<YYYY-MM-DD>/`。
 
-## D) Release Health（含 ENV 覆盖）
+## G) 合并前验收清单（最小）
 
-```json
-// src/config/sentry-gate.json（示例）
-{
-  "crashFreeSessionsThreshold": 0.99,
-  "crashFreeUsersThreshold": 0.995,
-  "minAdoptionRate": 0.2,
-  "releaseFormat": "dev@0.0.0"
-}
-```
+- [ ] `py -3 scripts/sc/acceptance_check.py --task-id <id>` 通过（确定性证据落盘 `logs/ci/<date>/sc-acceptance-check/`）
+- [ ] `py -3 scripts/python/dependency_guard.py` 通过（硬门禁；工件落盘 `logs/ci/<date>/dependency-guard.*`）
+- [ ] `py -3 scripts/sc/test.py --type unit` 通过且覆盖率门禁满足 `AGENTS.md` 6.2
+- [ ] `py -3 scripts/sc/test.py --type all --godot-bin "%GODOT_BIN%"` 可在 headless 下运行（若本次变更涉及 Godot）
+- [ ] 性能/安全/发布健康相关变更：引用并遵循对应 ADR（ADR-0015/ADR-0002/ADR-0003）
 
-## E) 可追溯矩阵（变更→ADR/测试）
+## 7.y 架构依赖矩阵与依赖护栏（Dependency Guard）
 
-| 变更项              | 关联 ADR | 覆盖测试   |
-| ------------------- | -------- | ---------- |
-| 安全基线扫描        | ADR-0002 | T07-SEC-01 |
-| Release Health Gate | ADR-0003 | T07-RH-01  |
-| 质量门禁聚合        | ADR-0005 | T07-QG-01  |
+本小节是“架构依赖”的 SSoT：用于防止依赖方向漂移、跨层耦合回流，确保可测试架构长期可持续（ADR-0007）并可被门禁自动化校验（ADR-0005）。
 
-## F) Playwright官方API升级（Windows兼容性）
+### 7.y.1 项目级依赖矩阵（csproj / assembly）
 
-```typescript
-// tests/e2e/utils/electron-launcher.ts（官方API模式）
-import { _electron as electron, ElectronApplication } from '@playwright/test';
+> 说明：本项目的 Godot 层 csproj 文件名为 `GodotGame.csproj`，概念上对应“Game.Godot（运行时/适配层）”。下表按“概念层”描述依赖方向。
 
-export async function launchApp(
-  extraArgs: string[] = []
-): Promise<ElectronApplication> {
-  const appEntry = path.resolve(__dirname, '../../../dist-electron/main.js');
+| From（源） | Allowed（允许引用） | Forbidden（禁止引用） | 备注 |
+| --- | --- | --- | --- |
+| Game.Core | BCL/.NET 标准库 | Godot / GodotSharp / GodotGame / Tests.Godot / Game.Core.Tests | Core 必须保持纯 C#（零 Godot 依赖） |
+| Game.Godot（GodotGame.csproj） | Game.Core + BCL + Godot | Tests.* | 运行时可以依赖 Core，但不能依赖测试 |
+| Tests（Game.Core.Tests / Tests.Godot） | 对应生产项目 | （无生产反向依赖） | 测试可依赖生产，生产不得依赖测试 |
 
-  return electron.launch({
-    args: [appEntry, ...extraArgs],
-    timeout: 30000, // 30秒启动超时
+### 7.y.2 目录级依赖矩阵（源码分层）
 
-    // Windows兼容性配置
-    env: {
-      ...process.env,
-      // Windows需要此配置避免Chrome沙箱问题
-      ELECTRON_DISABLE_SANDBOX: 'true',
-      // 测试模式标识
-      NODE_ENV: 'test',
-      // 禁用GPU加速（CI环境兼容）
-      ELECTRON_DISABLE_GPU: 'true',
-    },
+| From（源目录/层） | Allowed（允许依赖） | Forbidden（禁止依赖） | 备注 |
+| --- | --- | --- | --- |
+| `Game.Core/**` | 仅 BCL/.NET 标准库 | `Godot.*` 命名空间与 Godot 相关 SDK/程序集 | 单元测试必须可在无 Godot 环境运行 |
+| `Scripts/Core/**` | 仅 BCL/.NET 标准库 | `Godot.*` 命名空间 | 领域/核心逻辑层（仅 .NET） |
+| `Scripts/Adapters/**` | `Godot.*` + `Game.Core/**` | （按需收敛） | 适配层允许触达 Godot API，负责端口注入 |
+| `Scenes/**` | 资源引用 + 绑定脚本 | （禁止业务逻辑堆积） | 场景应保持装配/路由/信号胶水 |
 
-    // 开发调试选项（仅非CI环境）
-    ...(process.env.CI
-      ? {}
-      : {
-          headless: false,
-          devtools: true,
-        }),
-  });
-}
-```
+### 7.y.3 自动化依赖护栏（硬门禁）
 
-### F.1) Windows E2E测试优化策略
-
-| 配置项                     | Windows值     | 说明                      |
-| -------------------------- | ------------- | ------------------------- |
-| `ELECTRON_DISABLE_SANDBOX` | `'true'`      | 避免Chrome沙箱权限问题    |
-| `ELECTRON_DISABLE_GPU`     | `'true'`      | CI环境GPU加速兼容         |
-| `timeout`                  | `30000ms`     | Windows启动较慢，增加超时 |
-| `workers`                  | `1`（CI环境） | 避免Electron进程冲突      |
-
-### F.2) 测试启动器种类（按场景优化）
-
-```typescript
-// 安全测试专用启动器
-export async function launchAppForSecurity(
-  extraArgs: string[] = []
-): Promise<ElectronApplication> {
-  return launchApp([
-    '--test-mode',
-    '--enable-features=ElectronSerialChooser',
-    '--disable-features=VizDisplayCompositor',
-    ...extraArgs,
-  ]);
-}
-
-// 性能测试专用启动器
-export async function launchAppForPerformance(
-  extraArgs: string[] = []
-): Promise<ElectronApplication> {
-  return launchApp([
-    '--disable-web-security', // 仅测试环境
-    '--disable-extensions',
-    '--disable-default-apps',
-    '--test-mode',
-    ...extraArgs,
-  ]);
-}
-```
-
-## G) 验收清单（合并前）
-
-- [ ] `pnpm guard:ci` 全绿（本地与 CI）
-- [ ] `.ps1` 变体可在 Windows 运行
-- [ ] `.release-health.json` 的 crash-free 与 adoption 达标
-- [ ] `index.html` 含 CSP meta 且限制 `default-src 'self'`
-- [ ] 所有E2E测试使用官方 `_electron as 旧桌面壳` API
-- [ ] `tests/e2e/utils/旧桌面壳-launcher.ts` 提供跨平台启动器
-- [ ] Windows环境下 `ELECTRON_DISABLE_SANDBOX=true` 生效
-
-## 7.x 性能门禁（Godot Headless）
+- 脚本：`scripts/python/dependency_guard.py`
+- 触发：GitHub Actions `windows-quality-gate`（Pull Request 为硬门禁）
+- 工件输出（可追溯）：`logs/ci/<YYYY-MM-DD>/dependency-guard.json` 与 `logs/ci/<YYYY-MM-DD>/dependency-guard-summary.txt`
+- 行为：检测到违规依赖时退出码非 0，并在 Step Summary 输出违规列表
 
 为 Godot 运行时提供最小可执行的帧时间 P95 门禁：通过 Autoload `PerformanceTracker` 输出 `[PERF] ... p95_ms=...`，CI 侧解析 `headless.log` 并对比预算阈值。
 

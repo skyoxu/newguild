@@ -19,6 +19,7 @@ This file provides guidance to Codex Cli when working with code in this reposito
 - AI 优先 + arc42/C4 思维：按 不可回退 → 跨切面 → 运行时骨干 → 功能纵切 顺序
 - 删除无用代码，修改功能不保留旧的兼容性代码
 - **完整实现**，禁止MVP/占位/TODO，必须完整可运行
+- **架构依赖 SSoT**：`docs/architecture/base/07-dev-build-and-gates-v2.md` 的 `7.y`（架构依赖矩阵与依赖护栏 / Dependency Guard）
 
 ## 0 Scope & Intent
 
