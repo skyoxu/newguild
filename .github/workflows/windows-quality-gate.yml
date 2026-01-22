@@ -150,6 +150,12 @@ jobs:
           }
           py -3 scripts/python/release_health_gate.py
 
+      - name: DB perf smoke (hard gate input)
+        if: always()
+        shell: pwsh
+        run: |
+          py -3 scripts/python/perf_smoke_db.py --godot-bin "$env:GODOT_BIN"
+
       - name: Validate perf summary (hard gate)
         if: always()
         shell: pwsh
@@ -165,6 +171,14 @@ jobs:
           if (-not (Test-Path $summaryPath)) { $summaryPath = $dbSummary }
 
           py -3 scripts/python/validate_perf.py --summary-path "$summaryPath" --metric "DB_QUERY_P95" --threshold-ms "$env:PERF_P95_THRESHOLD_MS" --report "$ciDir/quality-gates-perf.json" --strict
+
+      - name: Upload perf logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-logs
+          path: logs/perf/**
+          if-no-files-found: ignore
 
       - name: Upload CI logs (always)
         if: always()
