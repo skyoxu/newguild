@@ -100,18 +100,18 @@ jobs:
           $summaryPath = Join-Path $outDir "dependency-guard-summary.txt"
           $jsonPath = Join-Path $outDir "dependency-guard.json"
 
-          "### Dependency Guard" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-          "Artifacts:" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          '### Dependency Guard' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          'Artifacts:' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           "- $jsonPath" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           "- $summaryPath" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
           if (Test-Path $summaryPath) {
-            "" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-            "```text" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            '' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            '```text' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             Get-Content -Encoding utf8 $summaryPath | Select-Object -First 200 | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-            "```" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            '```' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           } else {
-            "" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            '' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             "Summary file missing: $summaryPath" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
 
