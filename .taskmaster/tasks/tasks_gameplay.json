@@ -736,11 +736,9 @@
       "ADR-0019"
     ],
     "chapter_refs": [
-      "CH01",
-      "CH04",
-      "CH05",
-      "CH06",
-      "CH07"
+      "CH02",
+      "CH07",
+      "CH10"
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
@@ -807,7 +805,6 @@
     "chapter_refs": [
       "CH01",
       "CH04",
-      "CH05",
       "CH06",
       "CH07"
     ],
