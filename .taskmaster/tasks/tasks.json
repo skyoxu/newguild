@@ -1047,7 +1047,7 @@
         "id": "27",
         "title": "阶段2：内容加载与 JSON 清单接入（Assets/Data）",
         "description": "将现有 res://Game.Godot/Assets/Data/content/base/*.json 作为内容源，建立统一的加载/校验/缓存路径，并把结果以纯 C# DTO 供 Game.Core 使用（Core 不引用 Godot API）。",
-        "details": "Story: PRD-GUILD-MANAGER-PHASE2-CONTENT\nADR Refs: ADR-0005; ADR-0011; ADR-0019\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T89\nRewrite-Intent: Extend existing content assets and adapters; do not introduce a parallel content pipeline.\nSource-Title: Integrate JSON Data Management",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-CONTENT\nADR Refs: ADR-0005; ADR-0011; ADR-0019\nChapters: CH02; CH07; CH10\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T89\nRewrite-Intent: Extend existing content assets and adapters; do not introduce a parallel content pipeline.\nSource-Title: Integrate JSON Data Management",
         "testStrategy": "TDD (red->green->refactor). Add xUnit tests for JSON parse/validation (pure). Add GdUnit4/headless smoke to load base manifest and fail fast with actionable errors. Write evidence under logs/ci and logs/e2e.",
         "adrRefs": [
           "ADR-0005",
@@ -1077,7 +1077,7 @@
         "id": "28",
         "title": "阶段2：事件定义与事件链契约（EventDefinition/EventChain）",
         "description": "在 Game.Core/Contracts 中补齐事件定义与事件链的强类型契约，并把 IEventCatalog 规范化为可被 EventEngine 使用的最小接口（避免 EmptyEventCatalog/裸实现漂移）。",
-        "details": "Story: PRD-GUILD-MANAGER-PHASE2-EVENT-CONTRACTS\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T100\nRewrite-Intent: Formalize existing EventEngine inputs; do not build a second event engine.\nSource-Title: Design EventDefinition and EventChain",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-EVENT-CONTRACTS\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T100\nRewrite-Intent: Formalize existing EventEngine inputs; do not build a second event engine.\nSource-Title: Design EventDefinition and EventChain",
         "testStrategy": "xUnit contract tests: compile-level + EventType constants. Deterministic serialization tests for definitions (no Godot).",
         "adrRefs": [
           "ADR-0004",
