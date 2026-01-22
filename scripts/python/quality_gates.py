@@ -4,7 +4,7 @@ Quality gates entry for Windows (Godot+C# variant).
 
 Current minimal implementation:
 - Delegates to ci_pipeline.py `all` command, which runs:
-  * dotnet tests + coverage (soft gate on coverage)
+  * dotnet tests + coverage (hard gate on coverage; ADR-0005)
   * Godot self-check (hard gate)
   * encoding scan (soft gate)
   * SQL static scan (hard gate)

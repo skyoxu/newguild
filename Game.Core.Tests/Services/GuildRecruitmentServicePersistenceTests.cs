@@ -41,7 +41,10 @@ public sealed class GuildRecruitmentServicePersistenceTests
         public void Error(string message) { }
         public void Error(string message, Exception ex) { }
     }
-    private sealed class DummyEventCatalog : IEventCatalog { }
+    private sealed class DummyEventCatalog : IEventCatalog
+    {
+        public bool IsEventEnabled(string eventType) => true;
+    }
 
     [Fact]
     public async Task RecruitmentOffers_Should_Survive_Service_Recreate_And_Be_Consumable()

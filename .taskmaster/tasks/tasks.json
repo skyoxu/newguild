@@ -199,7 +199,7 @@
         "id": "7",
         "title": "扩展 quality_gates.py 覆盖率阈值与 GdUnit4 集成",
         "description": "承接 Phase-13-Quality-Gates-Script.md 与 Backlog：将 xUnit 覆盖率门禁提升到蓝图标准（行≥90%、分支≥85%，可由环境变量覆盖），并把关键 GdUnit4 集合（Adapters+Security 小集）通过 quality_gates.py 聚合输出到统一 summary，以便在 CI 中统一判定。",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "5"
@@ -416,7 +416,7 @@
         "id": "11",
         "title": "SqliteDataStore 路径校验与插件后端安全收紧",
         "description": "在 Game.Godot/Adapters/SqliteDataStore 中增强路径与扩展名校验：对 user:// 路径进行规范化后再做前缀与 .. 检查，增加 .db/.sqlite/.sqlite3 等扩展名白名单，并为已有 ValidatePath 逻辑补充文件大小上限检查；同时通过环境变量限制 plugin backend 的启用范围（如仅在开发环境允许），将 plugin backend 风险收敛为受控技术债。",
-        "status": "in-progress",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "8"
@@ -693,7 +693,7 @@
         "id": "18",
         "title": "T3 社交系统（Social / Intimacy）",
         "description": "实现公会成员间的社交/亲密度最小系统：在 Game.Core 建模关系值与变化规则，并通过事件驱动 UI 展示与玩法联动（可与招募/声望产生弱耦合）。",
-        "status": "pending",
+        "status": "done",
         "priority": "low",
         "dependencies": [
           "17"
@@ -1042,6 +1042,504 @@
         ],
         "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
         "updatedAt": "2026-01-08T17:13:31"
+      },
+      {
+        "id": "27",
+        "title": "阶段2：内容加载与 JSON 清单接入（Assets/Data）",
+        "description": "将现有 res://Game.Godot/Assets/Data/content/base/*.json 作为内容源，建立统一的加载/校验/缓存路径，并把结果以纯 C# DTO 供 Game.Core 使用（Core 不引用 Godot API）。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-CONTENT\nADR Refs: ADR-0005; ADR-0011; ADR-0019\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T89\nRewrite-Intent: Extend existing content assets and adapters; do not introduce a parallel content pipeline.\nSource-Title: Integrate JSON Data Management",
+        "testStrategy": "TDD (red->green->refactor). Add xUnit tests for JSON parse/validation (pure). Add GdUnit4/headless smoke to load base manifest and fail fast with actionable errors. Write evidence under logs/ci and logs/e2e.",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0011",
+          "ADR-0019"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Content-Loading.md",
+        "priority": "high",
+        "complexity": 6,
+        "dependencies": [
+          "8",
+          "11"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611798+00:00"
+      },
+      {
+        "id": "28",
+        "title": "阶段2：事件定义与事件链契约（EventDefinition/EventChain）",
+        "description": "在 Game.Core/Contracts 中补齐事件定义与事件链的强类型契约，并把 IEventCatalog 规范化为可被 EventEngine 使用的最小接口（避免 EmptyEventCatalog/裸实现漂移）。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-EVENT-CONTRACTS\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T100\nRewrite-Intent: Formalize existing EventEngine inputs; do not build a second event engine.\nSource-Title: Design EventDefinition and EventChain",
+        "testStrategy": "xUnit contract tests: compile-level + EventType constants. Deterministic serialization tests for definitions (no Godot).",
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Events-ContentDriven.md",
+        "priority": "high",
+        "complexity": 5,
+        "dependencies": [
+          "3"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611827+00:00"
+      },
+      {
+        "id": "29",
+        "title": "阶段2：内容驱动事件系统接入（EventCatalog + EventEngine）",
+        "description": "把 EventEngine 从 T2 的硬编码演示升级为“由 EventCatalog 提供定义/开关/权重”的内容驱动实现；在 HUD/GameLoop 中替换 EmptyEventCatalog，确保事件可观察且可测试。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-EVENT-CATALOG\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T12\nRewrite-Intent: Extend existing GameTurnSystem/EventEngine; keep Core deterministic; publish events via existing IEventBus.\nSource-Title: Develop Event System",
+        "testStrategy": "xUnit: EventEngine executes phases and emits expected domain events given a fixed catalog/time/id generator. GdUnit4: headless wiring-smoke validates at least one content-driven event is emitted and UI updates.",
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Events-ContentDriven.md",
+        "priority": "high",
+        "complexity": 7,
+        "dependencies": [
+          "4",
+          "27",
+          "28"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611831+00:00"
+      },
+      {
+        "id": "30",
+        "title": "阶段2：UI 响应式布局与可点击性收口（Scroll/Anchor/MouseFilter）",
+        "description": "把当前 UI 超出窗口/被透明层遮挡等问题系统性收口：统一 ScrollContainer、Anchor、Container size flags 与 Control.mouse_filter，确保 HUD/Guild/Settings 可完整操作。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-UI-RESPONSIVE\nADR Refs: ADR-0005; ADR-0011; ADR-0018\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T48\nRewrite-Intent: Fix wiring and usability; do not hide features to pass tests.\nSource-Title: Design Responsive User Interface",
+        "testStrategy": "GdUnit4: instantiate key screens and assert critical buttons are clickable (mouse_filter not blocking). Headless smoke verifies the same paths.",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0011",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+        "priority": "high",
+        "complexity": 5,
+        "dependencies": [
+          "13",
+          "19"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611834+00:00"
+      },
+      {
+        "id": "31",
+        "title": "阶段2：核心 UI 组件库（Status/Panel/List）",
+        "description": "沉淀可复用 UI 组件：状态条/错误提示/列表渲染/确认对话框，供战术中心、活动反馈、官员任命等复用，减少散乱 UI 逻辑。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-UI-COMPONENTS\nADR Refs: ADR-0005; ADR-0018\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T49\nRewrite-Intent: Build reusable components to reduce duplicated UI glue code.\nSource-Title: Implement Core UI Components",
+        "testStrategy": "GdUnit4: instantiate each component scene, set sample props, and assert text/state transitions without timers.",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+        "priority": "medium",
+        "complexity": 5,
+        "dependencies": [
+          "30"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611837+00:00"
+      },
+      {
+        "id": "32",
+        "title": "阶段2：交互模式统一（Loading/Error/Disable/Retry）",
+        "description": "为按钮与异步操作建立统一交互：点击后进入 loading、错误可重试、成功自动刷新；错误信息遵循 ADR-0019 脱敏与审计。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-UI-INTERACTION\nADR Refs: ADR-0005; ADR-0018; ADR-0019\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T50\nRewrite-Intent: Reduce 'stuck' UX; provide deterministic visible states.\nSource-Title: Develop Interaction Patterns",
+        "testStrategy": "GdUnit4: simulate button press and assert state transitions (disabled->loading->enabled) using frame waits only.",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0018",
+          "ADR-0019"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+        "priority": "medium",
+        "complexity": 4,
+        "dependencies": [
+          "31"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611841+00:00"
+      },
+      {
+        "id": "33",
+        "title": "阶段2：活动反馈系统（Activity Feed / Timeline）",
+        "description": "提供一个玩家可见的“发生了什么”面板：订阅 DomainEventEmitted，将关键事件（副本/声望/社交/奖励）按时间线展示，便于测试与玩家理解。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-ACTIVITY-FEED\nADR Refs: ADR-0003; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH03; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T55\nRewrite-Intent: Reuse existing EventBusAdapter signal; do not add bespoke log plumbing.\nSource-Title: Create Activity Feedback System",
+        "testStrategy": "xUnit: event filtering and formatting rules. GdUnit4: publish a deterministic event and assert feed shows it.",
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH03",
+          "CH04",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+        "priority": "medium",
+        "complexity": 6,
+        "dependencies": [
+          "29",
+          "32"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611844+00:00"
+      },
+      {
+        "id": "34",
+        "title": "阶段2：战术中心（Tactical Center）入口与最小编成",
+        "description": "为 PVE 副本建立一个统一入口：最小队伍编成/校验/自动分配（基于现有 roster），并驱动现有 RaidEncounter demo/事件输出。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-TACTICAL-CENTER\nADR Refs: ADR-0004; ADR-0005; ADR-0007; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T15\nRewrite-Intent: Add a single UI entry that drives existing PVE/roster modules.\nSource-Title: Create Tactical Center Module",
+        "testStrategy": "xUnit: composition validation (deterministic). GdUnit4: open Tactical Center, trigger a raid, observe core.raid.resolved and UI status update.",
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0007",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+        "priority": "medium",
+        "complexity": 7,
+        "dependencies": [
+          "13",
+          "17",
+          "31"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611847+00:00"
+      },
+      {
+        "id": "35",
+        "title": "阶段2：奖励发放统一（Reward Ledger）",
+        "description": "如果没有其他任务负责战斗奖励发放，则在本阶段实现统一奖励账本：监听副本/媒体/事件结果并发放奖励（金币/声望/经验等的最小集合），可 Save/Load 回放。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-REWARDS\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T25\nRewrite-Intent: Centralize reward logic; avoid ad-hoc reward mutations scattered across demos.\nSource-Title: Design Achievement and Reward System",
+        "testStrategy": "xUnit: reward rules deterministic for known events. GdUnit4: run raid demo, verify reward UI updated and persists across save/load.",
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+        "priority": "high",
+        "complexity": 6,
+        "dependencies": [
+          "17",
+          "19",
+          "25"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611849+00:00"
+      },
+      {
+        "id": "36",
+        "title": "阶段2：成就系统（Achievement Definitions + Tracker）",
+        "description": "建立最小成就定义与追踪：由 DomainEvent 驱动达成判定，并在 UI 中可查看；与奖励账本对齐。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-ACHIEVEMENTS\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T51\nRewrite-Intent: Drive achievements off existing DomainEvent stream.\nSource-Title: Design Achievement System",
+        "testStrategy": "xUnit: given events -> achievement unlocked. GdUnit4: trigger one achievement and verify UI list updates.",
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+        "priority": "medium",
+        "complexity": 5,
+        "dependencies": [
+          "35"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611850+00:00"
+      },
+      {
+        "id": "37",
+        "title": "阶段2：经验系统（XP/Level）与奖励对齐",
+        "description": "实现最小经验/等级曲线（确定性），并作为 Reward Ledger 的一种奖励类型展示与持久化。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-XP\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T53\nRewrite-Intent: Keep math deterministic and testable; wire to UI through adapters.\nSource-Title: Implement Experience System",
+        "testStrategy": "xUnit: XP->Level boundary tests. GdUnit4: show XP changes after a raid and persist across save/load.",
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+        "priority": "medium",
+        "complexity": 4,
+        "dependencies": [
+          "35"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611853+00:00"
+      },
+      {
+        "id": "38",
+        "title": "阶段2：官员系统（Officer Slots + Assignment）",
+        "description": "在 Guild roster 之上增加最小官员槽位与任命规则（确定性），并落库/随存档持久化。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-OFFICERS\nADR Refs: ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T56\nRewrite-Intent: Extend existing guild persistence; do not add new DB outside SqliteDataStore path.\nSource-Title: Design Officer System",
+        "testStrategy": "xUnit: assignment rules and persistence mapping. GdUnit4: assign an officer and verify it survives restart (save/load).",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Officers.md",
+        "priority": "medium",
+        "complexity": 5,
+        "dependencies": [
+          "13",
+          "25"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611860+00:00"
+      },
+      {
+        "id": "39",
+        "title": "阶段2：官员 UI 入口（Simplified Officer UI）",
+        "description": "提供官员管理的最小 UI：列表展示、任命/撤销、状态提示；交互模式复用统一组件。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-OFFICERS-UI\nADR Refs: ADR-0005; ADR-0018\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T57\nRewrite-Intent: UI should call Core services via adapters; no direct SQL in scenes.\nSource-Title: Implement Simplified Officer Interface",
+        "testStrategy": "GdUnit4: open officers panel, assign a member, assert labels updated; no timing-based sleeps.",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Officers.md",
+        "priority": "medium",
+        "complexity": 4,
+        "dependencies": [
+          "38",
+          "32"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611864+00:00"
+      },
+      {
+        "id": "40",
+        "title": "阶段2：世界生成端口（World Generation Port）与开局 Seed",
+        "description": "把世界状态初始化收口为一个端口：开局生成 NPC 公会/对手/基础赛季信息，并与 Save/Load 对齐（可重放）。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-WORLDGEN\nADR Refs: ADR-0005; ADR-0006; ADR-0007; ADR-0018\nChapters: CH01; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T26\nRewrite-Intent: Single source of truth for world seed; wire to UI for deterministic testing.\nSource-Title: Define World Generation System Interface",
+        "testStrategy": "xUnit: deterministic generation given seed. GdUnit4: new game initializes world and displays NPC guild count.",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0007",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Worldgen.md",
+        "priority": "medium",
+        "complexity": 6,
+        "dependencies": [
+          "15",
+          "25",
+          "27"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611867+00:00"
+      },
+      {
+        "id": "41",
+        "title": "阶段2：NPC 公会原型（Archetypes）数据驱动落地",
+        "description": "将 NPC 公会原型从 json 数据驱动（如 base/npc_guilds.json），并与世界生成端口对齐；避免散落硬编码。",
+        "details": "Story: PRD-GUILD-MANAGER-PHASE2-NPC-ARCHETYPES\nADR Refs: ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nSource-Newguild: T27\nRewrite-Intent: Data-driven NPC world; reuse existing content assets and persistence.\nSource-Title: Implement NPC Guild Archetype Interface",
+        "testStrategy": "xUnit: parse/validate npc guild archetypes. GdUnit4: load content and show at least one archetype in UI.",
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Worldgen.md",
+        "priority": "medium",
+        "complexity": 6,
+        "dependencies": [
+          "40",
+          "27"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611871+00:00"
+      },
+      {
+        "id": "42",
+        "title": "事件命名统一迁移（game.* → core.*.*）",
+        "description": "根据 Phase-9-Signal-Backlog.md B1，将仍然存在于测试中的旧事件类型（如 game.started/score.changed/player.health.changed）统一迁移为 core.*.* 命名约定，并更新相关测试与文档，避免旧前缀继续被误用。",
+        "details": "Story: PH9-BACKLOG-B1\nADR Refs: ADR-0004; ADR-0006; ADR-0018; ADR-0023\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nSource-Back: NG-0023\nRewrite-Intent: Promote backlog task into SSoT to be implemented in the current phase.",
+        "testStrategy": "TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/**.",
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0006",
+          "ADR-0018",
+          "ADR-0023"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Events-ContentDriven.md",
+        "priority": "high",
+        "complexity": 4,
+        "dependencies": [
+          "3",
+          "4"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611872+00:00"
+      },
+      {
+        "id": "43",
+        "title": "架构依赖护栏与依赖图校验骨架",
+        "description": "根据 Base 07 章 7.y “架构依赖护栏（Godot + C# 模板）” 与 ADR-0007（端口与适配器），为 newguild 提供一套最小可执行的依赖矩阵与校验骨架：在 C# 工程层面约束 Game.Core/Game.Godot/Tests.* 之间的引用方向，在 Godot Scripts 目录层面约束 Scripts/Core/Adapters/Scenes 的依赖关系，并通过 CI 中的依赖护栏脚本生成 logs/ci/<date>/dependency-guard.json 与摘要，逐步收紧 Core 禁 Godot/测试、Adapters 不反向依赖 UI 的架构约束。",
+        "details": "Story: PH07-BACKLOG-ARCH-DEPENDENCY-GUARD\nADR Refs: ADR-0007; ADR-0005; ADR-0018\nChapters: CH01; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nSource-Back: NG-0038\nRewrite-Intent: Promote backlog task into SSoT to be implemented in the current phase.",
+        "testStrategy": "TDD (red->green->refactor). Keep Game.Core free of Godot API. Write artifacts under logs/**.",
+        "adrRefs": [
+          "ADR-0007",
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Architecture-Guards.md",
+        "priority": "medium",
+        "complexity": 6,
+        "dependencies": [
+          "2"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "recommendedSubtasks": 0,
+        "updatedAt": "2026-01-21T17:06:38.611877+00:00"
       }
     ],
     "metadata": {

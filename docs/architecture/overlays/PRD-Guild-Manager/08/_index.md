@@ -53,6 +53,16 @@ Arch-Refs:
   - `PRD-GUILD-MANAGER-T3-MEDIA` → `08-FeatureSlice-T3-Media-Reputation.md`（GM-0206）
   - `PRD-GUILD-MANAGER-T3-SAVELOAD-UI` → `08-FeatureSlice-T3-SaveLoad-UI.md`（GM-0207）
 
+  - `PRD-GUILD-MANAGER-PHASE2-CONTENT` → `08-FeatureSlice-Phase2-Content-Loading.md`（T27 / GM-0301）
+  - `PRD-GUILD-MANAGER-PHASE2-EVENT-CONTRACTS` → `08-FeatureSlice-Phase2-Events-ContentDriven.md`（T28 / GM-0302）
+  - `PRD-GUILD-MANAGER-PHASE2-EVENT-CATALOG` → `08-FeatureSlice-Phase2-Events-ContentDriven.md`（T29,T42 / GM-0303）
+  - `PRD-GUILD-MANAGER-PHASE2-UI-RESPONSIVE` → `08-FeatureSlice-Phase2-UI-Usability.md`（T30-33 / GM-0304..GM-0307）
+  - `PRD-GUILD-MANAGER-PHASE2-TACTICAL-CENTER` → `08-FeatureSlice-Phase2-Tactical-Rewards.md`（T34 / GM-0308）
+  - `PRD-GUILD-MANAGER-PHASE2-REWARDS` → `08-FeatureSlice-Phase2-Tactical-Rewards.md`（T35-37 / GM-0309..GM-0311）
+  - `PRD-GUILD-MANAGER-PHASE2-OFFICERS` → `08-FeatureSlice-Phase2-Officers.md`（T38-39 / GM-0312..GM-0313）
+  - `PRD-GUILD-MANAGER-PHASE2-WORLDGEN` → `08-FeatureSlice-Phase2-Worldgen.md`（T40-41 / GM-0314..GM-0315）
+  - `PHASE2-BACK-DEPENDENCY-GUARDS` → `08-FeatureSlice-Phase2-Architecture-Guards.md`（T43）
+
 - Core
   - `08-FeatureSlice-Core-Event-Engine.md`
   - `08-FeatureSlice-Core-Game-Loop.md`

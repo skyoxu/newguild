@@ -33,6 +33,7 @@ from typing import Any
 REFS_RE = re.compile(r"\bRefs\s*:\s*(.+)$", flags=re.IGNORECASE)
 XUNIT_MARKER_RE = re.compile(r"^\s*\[\s*(Fact|Theory)\s*\]\s*$")
 GDUNIT_MARKER_RE = re.compile(r"^\s*func\s+test_", flags=re.IGNORECASE)
+PYTEST_MARKER_RE = re.compile(r"^\s*def\s+test_", flags=re.IGNORECASE)
 
 
 def repo_root() -> Path:
@@ -107,6 +108,8 @@ def _is_anchor_bound_to_test(lines: list[str], anchor: str, *, max_lines_after_a
         marker = XUNIT_MARKER_RE
     elif kind == "gd":
         marker = GDUNIT_MARKER_RE
+    elif kind == "py":
+        marker = PYTEST_MARKER_RE
     else:
         return False
 
@@ -188,7 +191,7 @@ def validate_view_entry(*, root: Path, view_name: str, task_id: str, entry: dict
                 rel = str(p.relative_to(root)).replace("\\", "/")
                 found_in.append(rel)
                 ext = p.suffix.lower()
-                kind = "cs" if ext == ".cs" else ("gd" if ext == ".gd" else "other")
+                kind = "cs" if ext == ".cs" else ("gd" if ext == ".gd" else ("py" if ext == ".py" else "other"))
                 lines = t.splitlines()
                 max_lines = 5 if stage == "refactor" else 30
                 if _is_anchor_bound_to_test(lines, anchor, max_lines_after_anchor=max_lines, kind=kind):

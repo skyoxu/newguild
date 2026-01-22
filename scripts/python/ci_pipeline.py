@@ -73,7 +73,7 @@ def main():
     }
     hard_fail = False
 
-    # 1) Dotnet tests + coverage (soft gate on coverage)
+    # 1) Dotnet tests + coverage (hard gate on coverage; ADR-0005)
     rc, out = run_cmd(['py', '-3', 'scripts/python/run_dotnet.py',
                        '--solution', args.solution,
                        '--configuration', args.configuration], cwd=root)
@@ -84,7 +84,13 @@ def main():
         'branch_pct': (dotnet_sum.get('coverage') or {}).get('branch_pct'),
         'status': dotnet_sum.get('status')
     }
-    if rc not in (0, 2) or summary['dotnet']['status'] == 'tests_failed':
+    # run_dotnet.py returns:
+    # - 0: ok (or coverage_overridden)
+    # - 1: tests failed or other hard failure
+    # - 2: coverage failed (tests passed but below thresholds)
+    #
+    # ADR-0005 requires coverage thresholds as a hard gate by default.
+    if rc != 0:
         hard_fail = True
 
     # 2) Godot self-check (hard gate)
