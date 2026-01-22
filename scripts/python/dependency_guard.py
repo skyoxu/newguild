@@ -85,6 +85,26 @@ def _scan_game_core_for_godot(repo_root: Path) -> list[Violation]:
     return violations
 
 
+def _scan_scripts_core_for_godot(repo_root: Path) -> list[Violation]:
+    violations: list[Violation] = []
+    scripts_core_dir = repo_root / "Scripts" / "Core"
+    if not scripts_core_dir.exists():
+        return violations
+
+    for cs in _find_cs_files(scripts_core_dir):
+        text = _read_text(cs)
+        if RE_USING_GODOT.search(text) or RE_GODOT_API.search(text):
+            violations.append(
+                Violation(
+                    code="SCRIPTS_CORE_USES_GODOT",
+                    message="Scripts/Core must not reference Godot APIs or namespaces.",
+                    target=str(cs.relative_to(repo_root)).replace("\\", "/"),
+                )
+            )
+
+    return violations
+
+
 def _scan_csproj_direction(repo_root: Path) -> list[Violation]:
     violations: list[Violation] = []
 
@@ -157,6 +177,7 @@ def run_guard(repo_root: Path) -> dict[str, Any]:
     violations: list[Violation] = []
     violations.extend(_scan_csproj_direction(repo_root))
     violations.extend(_scan_game_core_for_godot(repo_root))
+    violations.extend(_scan_scripts_core_for_godot(repo_root))
 
     result = {
         "ts": _dt.datetime.utcnow().isoformat() + "Z",
@@ -165,6 +186,7 @@ def run_guard(repo_root: Path) -> dict[str, Any]:
             "Game.Core must not reference Godot APIs (no Godot namespace usage).",
             "Game.Core must not reference Godot app/test projects.",
             "Game.Core csproj must not use Godot.NET.Sdk.",
+            "Scripts/Core must not reference Godot APIs (core layer must remain pure).",
         ],
         "violations": [v.__dict__ for v in violations],
         "summary": {

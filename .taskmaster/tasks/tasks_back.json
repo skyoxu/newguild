@@ -1603,7 +1603,6 @@
     ],
     "owner": "architecture",
     "test_refs": [
-      "Game.Core.Tests/Architecture/DependencyGuardRulesTests.cs",
       "Game.Core.Tests/Architecture/DependencyMatrixRulesTests.cs",
       "Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs",
       "Game.Core.Tests/Architecture/DependencyGuardArtifactsTests.cs",

@@ -206,6 +206,12 @@ public partial class GuildManager : Node
 
     public string CreateGuild(string creatorId, string guildName)
     {
+        _ = CreateGuildAsync(creatorId, guildName);
+        return "PENDING";
+    }
+
+    public async Task<string> CreateGuildAsync(string creatorId, string guildName)
+    {
         try
         {
             _lastError = null;
@@ -224,7 +230,7 @@ public partial class GuildManager : Node
             var guild = new Guild(guildId, creatorId, guildName);
 
             // Persist to database
-            _currentGuild = _repository.CreateAsync(guild).GetAwaiter().GetResult();
+            _currentGuild = await _repository.CreateAsync(guild);
 
             var createdEvt = new GuildCreated(
                 _currentGuild.GuildId,
@@ -232,14 +238,12 @@ public partial class GuildManager : Node
                 _currentGuild.Name,
                 _currentGuild.CreatedAt);
 
-            _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
-                    GuildCreated.EventType,
-                    nameof(GuildManager),
-                    createdEvt,
-                    createdEvt.CreatedAt.UtcDateTime,
-                    Guid.NewGuid().ToString("N")))
-                .GetAwaiter()
-                .GetResult();
+            await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
+                GuildCreated.EventType,
+                nameof(GuildManager),
+                createdEvt,
+                createdEvt.CreatedAt.UtcDateTime,
+                Guid.NewGuid().ToString("N")));
 
             GD.Print($"[GuildManager] Created guild '{guildName}' for user {creatorId}");
             return "OK";
@@ -270,6 +274,11 @@ public partial class GuildManager : Node
 
     private void PublishGuildCreatedSnapshot(Guild guild)
     {
+        _ = PublishGuildCreatedSnapshotAsync(guild);
+    }
+
+    private async Task PublishGuildCreatedSnapshotAsync(Guild guild)
+    {
         try
         {
             var createdEvt = new GuildCreated(
@@ -278,14 +287,12 @@ public partial class GuildManager : Node
                 guild.Name,
                 guild.CreatedAt);
 
-            _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
-                    GuildCreated.EventType,
-                    nameof(GuildManager),
-                    createdEvt,
-                    createdEvt.CreatedAt.UtcDateTime,
-                    Guid.NewGuid().ToString("N")))
-                .GetAwaiter()
-                .GetResult();
+            await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
+                GuildCreated.EventType,
+                nameof(GuildManager),
+                createdEvt,
+                createdEvt.CreatedAt.UtcDateTime,
+                Guid.NewGuid().ToString("N")));
         }
         catch (Exception ex)
         {

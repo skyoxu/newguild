@@ -355,11 +355,16 @@ public partial class GuildPanel : Control
         }
     }
 
-    private void OnCreateGuildPressed()
+    private async void OnCreateGuildPressed()
     {
-        var guildManager = GetGuildManagerOrReport();
-        if (guildManager == null)
+        var guildManagerNode = GetGuildManagerOrReport();
+        if (guildManagerNode == null)
             return;
+        if (guildManagerNode is not GuildManager guildManager)
+        {
+            SetGuildStatus("ERROR: GuildManager type mismatch.");
+            return;
+        }
 
         _guildNameInput ??= GetNodeOrNull<LineEdit>("VBox/GuildInfo/GuildNameRow/GuildNameInput");
         if (_guildNameInput == null)
@@ -368,27 +373,20 @@ public partial class GuildPanel : Control
             return;
         }
 
-        if (guildManager.HasMethod("HasCurrentGuild"))
+        try
         {
-            try
+            if (guildManager.HasCurrentGuild())
             {
-                var has = (bool)guildManager.Call("HasCurrentGuild");
-                if (has)
-                {
-                    SetGuildStatus("Already has a guild. Syncing UI...");
-                    if (guildManager.HasMethod("GetCurrentGuildSummaryJson"))
-                    {
-                        var json = (string)guildManager.Call("GetCurrentGuildSummaryJson");
-                        if (!string.IsNullOrWhiteSpace(json))
-                            HandleGuildCreated(json);
-                    }
-                    return;
-                }
+                SetGuildStatus("Already has a guild. Syncing UI...");
+                var json = guildManager.GetCurrentGuildSummaryJson();
+                if (!string.IsNullOrWhiteSpace(json))
+                    HandleGuildCreated(json);
+                return;
             }
-            catch
-            {
-                // Best-effort only.
-            }
+        }
+        catch
+        {
+            // Best-effort only.
         }
 
         var session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
@@ -400,45 +398,34 @@ public partial class GuildPanel : Control
         if (string.IsNullOrWhiteSpace(inputName))
             _guildNameInput.Text = guildName;
 
-        if (!guildManager.HasMethod("CreateGuild"))
-        {
-            SetGuildStatus("ERROR: GuildManager.CreateGuild missing.");
-            return;
-        }
-
         SetGuildStatus("Creating...");
         try
         {
-            var result = guildManager.Call("CreateGuild", userId, guildName);
-            if (result.VariantType == Variant.Type.String)
+            var result = await guildManager.CreateGuildAsync(userId, guildName);
+            if (!string.IsNullOrWhiteSpace(result))
             {
-                var s = result.AsString();
-                if (!string.IsNullOrWhiteSpace(s) && s.StartsWith("ERROR:", StringComparison.Ordinal))
+                if (result.StartsWith("ERROR:", StringComparison.Ordinal))
                 {
                     var details = string.Empty;
                     try
                     {
-                        if (guildManager.HasMethod("GetLastError"))
-                            details = (string)guildManager.Call("GetLastError");
+                        details = guildManager.GetLastError();
                     }
                     catch { /* ignore */ }
 
-                    SetGuildStatus(string.IsNullOrWhiteSpace(details) ? s : $"{s} ({details})");
+                    SetGuildStatus(string.IsNullOrWhiteSpace(details) ? result : $"{result} ({details})");
                 }
             }
 
-            if (guildManager.HasMethod("GetCurrentGuildSummaryJson"))
+            try
             {
-                try
-                {
-                    var json = (string)guildManager.Call("GetCurrentGuildSummaryJson");
-                    if (!string.IsNullOrWhiteSpace(json) && json != "{}")
-                        HandleGuildCreated(json);
-                }
-                catch
-                {
-                    // Best-effort only.
-                }
+                var json = guildManager.GetCurrentGuildSummaryJson();
+                if (!string.IsNullOrWhiteSpace(json) && json != "{}")
+                    HandleGuildCreated(json);
+            }
+            catch
+            {
+                // Best-effort only.
             }
         }
         catch
