@@ -31,7 +31,7 @@ public class SecurityAdapterTests
         // Assert
         result.Should().BeFalse("javascript: scheme should be blocked");
         capturedEvent.Should().NotBeNull("security event should be published");
-        capturedEvent!.Type.Should().Be("security.url_access.denied");
+        capturedEvent!.Type.Should().Be("core.security.url_access.denied");
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public class SecurityAdapterTests
 
         // Assert
         capturedEvent.Should().NotBeNull();
-        capturedEvent!.Type.Should().Be("security.url_access.denied");
+        capturedEvent!.Type.Should().Be("core.security.url_access.denied");
         capturedEvent.Source.Should().Be("SecurityUrlAdapter");
         capturedEvent.Data.Should().NotBeNull();
         // Verify audit data structure: {action, reason, target, caller}
@@ -184,7 +184,7 @@ public class SecurityAdapterTests
         // Assert
         result.Should().BeFalse("null/empty URL must be rejected");
         capturedEvent.Should().NotBeNull("security event should be published");
-        capturedEvent!.Type.Should().Be("security.url_access.denied");
+        capturedEvent!.Type.Should().Be("core.security.url_access.denied");
     }
 
     [Fact]
@@ -424,7 +424,7 @@ public class SecurityAdapterTests
 
         // Assert
         capturedEvent.Should().NotBeNull("security event should be published on rejection");
-        capturedEvent!.Type.Should().Be("security.file_access.denied");
+        capturedEvent!.Type.Should().Be("core.security.file_access.denied");
         capturedEvent.Source.Should().Be("SecurityFileAdapter");
     }
 
@@ -443,7 +443,7 @@ public class SecurityAdapterTests
         // Assert
         emptyPath.Should().BeNull("empty path should be rejected as invalid");
         capturedEvent.Should().NotBeNull("audit event should be published for invalid path");
-        capturedEvent!.Type.Should().Be("security.file_access.denied");
+        capturedEvent!.Type.Should().Be("core.security.file_access.denied");
         capturedEvent.Data.Should().NotBeNull();
     }
 
@@ -504,7 +504,7 @@ public class SecurityAdapterTests
         // Assert
         result.Should().BeNull("non-whitelisted command should be rejected");
         capturedEvent.Should().NotBeNull("security event should be published");
-        capturedEvent!.Type.Should().Be("security.process.denied");
+        capturedEvent!.Type.Should().Be("core.security.process.denied");
     }
 
     [Fact]
@@ -550,7 +550,7 @@ public class SecurityAdapterTests
             result.Should().NotBeNull("development mode should execute whitelisted command");
             result!.ExitCode.Should().BeGreaterOrEqualTo(0, "valid exit code expected");
             capturedEvent.Should().NotBeNull("approval event should be published for successful execution");
-            capturedEvent!.Type.Should().Be("security.process.approved");
+            capturedEvent!.Type.Should().Be("core.security.process.approved");
         }
         finally
         {
@@ -586,7 +586,7 @@ public class SecurityAdapterTests
 
         // Assert
         capturedEvent.Should().NotBeNull("security event should be published on rejection");
-        capturedEvent!.Type.Should().Be("security.process.denied");
+        capturedEvent!.Type.Should().Be("core.security.process.denied");
         capturedEvent.Source.Should().Be("SecurityProcessAdapter");
         capturedEvent.Data.Should().NotBeNull();
     }
@@ -637,7 +637,7 @@ public class SecurityAdapterTests
             // Assert
             result.Should().BeNull("non-whitelisted command should be rejected before execution");
             capturedEvent.Should().NotBeNull("denial event should be published");
-            capturedEvent!.Type.Should().Be("security.process.denied");
+            capturedEvent!.Type.Should().Be("core.security.process.denied");
         }
         finally
         {
@@ -666,7 +666,7 @@ public class SecurityAdapterTests
         // Assert
         result.Should().BeNull("production mode should reject all process execution");
         capturedEvent.Should().NotBeNull("security event should be published in production mode");
-        capturedEvent!.Type.Should().Be("security.process.denied");
+        capturedEvent!.Type.Should().Be("core.security.process.denied");
         // Verify reason indicates production mode restriction
         capturedEvent.Data.Should().NotBeNull();
         var dataStr = System.Text.Json.JsonSerializer.Serialize(capturedEvent.Data);
@@ -698,7 +698,7 @@ public class SecurityAdapterTests
             result!.ExitCode.Should().BeGreaterOrEqualTo(0, "process should return valid exit code");
             // Success audit event should be published
             capturedEvent.Should().NotBeNull("audit event should be published for successful execution");
-            capturedEvent!.Type.Should().Be("security.process.approved");
+            capturedEvent!.Type.Should().Be("core.security.process.approved");
         }
         finally
         {

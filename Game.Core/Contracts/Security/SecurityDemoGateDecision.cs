@@ -1,7 +1,7 @@
 namespace Game.Core.Contracts.Security;
 
 /// <summary>
-/// Domain event: security.raid_encounter_demo.decision
+/// Domain event: core.security.raid_encounter_demo.decision
 /// Description: Emitted when the Raid Encounter demo gate evaluates allow/deny/error.
 /// </summary>
 /// <remarks>
@@ -23,7 +23,7 @@ public sealed record SecurityDemoGateDecision(
     /// <summary>
     /// CloudEvents 1.0 type field for this event.
     /// </summary>
-    public const string EventType = "security.raid_encounter_demo.decision";
+    public const string EventType = "core.security.raid_encounter_demo.decision";
 
     public const string DecisionAllow = "allow";
     public const string DecisionDeny = "deny";

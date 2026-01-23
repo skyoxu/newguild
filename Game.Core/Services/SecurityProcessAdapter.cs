@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using Game.Core.Contracts;
+using Game.Core.Contracts.Security;
 
 namespace Game.Core.Services;
 
@@ -95,7 +96,7 @@ public class SecurityProcessAdapter
     private async Task PublishDeniedEvent(string command, string[] args, string reason)
     {
         await _eventBus.PublishAsync(new DomainEvent(
-            Type: "security.process.denied",
+            Type: SecurityProcessDenied.EventType,
             Source: "SecurityProcessAdapter",
             Data: new
             {
@@ -113,7 +114,7 @@ public class SecurityProcessAdapter
     private async Task PublishApprovedEvent(string command, string[] args, int exitCode)
     {
         await _eventBus.PublishAsync(new DomainEvent(
-            Type: "security.process.approved",
+            Type: SecurityProcessApproved.EventType,
             Source: "SecurityProcessAdapter",
             Data: new
             {

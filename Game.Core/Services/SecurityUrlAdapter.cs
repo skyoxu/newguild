@@ -1,4 +1,5 @@
 using Game.Core.Contracts;
+using Game.Core.Contracts.Security;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ namespace Game.Core.Services;
 /// <summary>
 /// Core service for URL security validation with event-driven architecture.
 /// Validates URLs against dangerous schemes and optional domain whitelist.
-/// Publishes security.url_access.denied events when validation fails.
+/// Publishes core.security.url_access.denied events when validation fails.
 /// </summary>
 public class SecurityUrlAdapter
 {
@@ -38,7 +39,7 @@ public class SecurityUrlAdapter
     /// <summary>
     /// Validates URL against security policies.
     /// Returns true if URL is safe, false if rejected.
-    /// Publishes security.url_access.denied event on rejection.
+    /// Publishes core.security.url_access.denied event on rejection.
     /// </summary>
     public async Task<bool> ValidateAsync(string url)
     {
@@ -89,7 +90,7 @@ public class SecurityUrlAdapter
     private async Task PublishDeniedEventAsync(string url, string reason)
     {
         var evt = new DomainEvent(
-            Type: "security.url_access.denied",
+            Type: SecurityUrlAccessDenied.EventType,
             Source: "SecurityUrlAdapter",
             Data: new { Url = url, Reason = reason },
             Timestamp: DateTime.UtcNow,
