@@ -18,6 +18,7 @@ import json
 import time
 from pathlib import Path
 import sys
+import xml.etree.ElementTree as ET
 
 from godot_cli import build_userdir_args, default_user_dir
 
@@ -114,6 +115,85 @@ def write_text(path: str, content: str) -> None:
         f.write(content)
 
 
+def _safe_rmtree(path: str) -> None:
+    try:
+        shutil.rmtree(path, ignore_errors=True)
+    except Exception:
+        pass
+
+
+def _list_failed_testcases_from_junit_xml(xml_path: Path) -> list[dict]:
+    failures: list[dict] = []
+    try:
+        root = ET.parse(xml_path).getroot()
+    except Exception:
+        return failures
+
+    for tc in root.iter("testcase"):
+        failure = tc.find("failure")
+        error = tc.find("error")
+        if failure is None and error is None:
+            continue
+        node = failure if failure is not None else error
+        failures.append(
+            {
+                "classname": tc.attrib.get("classname") or "",
+                "name": tc.attrib.get("name") or "",
+                "kind": "failure" if failure is not None else "error",
+                "message": (node.attrib.get("message") if node is not None else None) or "",
+                "xml": str(xml_path).replace("\\", "/"),
+            }
+        )
+    return failures
+
+
+def _collect_failed_testcases_from_reports(dest_dir: str) -> list[dict]:
+    dest = Path(dest_dir)
+    if not dest.is_dir():
+        return []
+    failures: list[dict] = []
+    for xml_path in sorted(dest.glob("**/results.xml")):
+        failures.extend(_list_failed_testcases_from_junit_xml(xml_path))
+    return failures
+
+
+def _print_failure_summary(console_path: str, dest_dir: str, out_dir: str) -> None:
+    print("GDUNIT_FAILURE_SUMMARY begin")
+    print(f"console_path={console_path}")
+    print(f"reports_dest={dest_dir}")
+    print(f"out_dir={out_dir}")
+    print("---- gdunit-console tail ----")
+    print(tail_text(console_path, max_chars=20_000))
+
+    failures = _collect_failed_testcases_from_reports(dest_dir)
+    if failures:
+        print("---- junit failures ----")
+        # Print a bounded list to keep CI logs readable
+        max_items = 50
+        for i, f in enumerate(failures[:max_items], start=1):
+            cls = f.get("classname", "")
+            name = f.get("name", "")
+            kind = f.get("kind", "")
+            msg = f.get("message", "")
+            xml = f.get("xml", "")
+            print(f"{i:02d}. {kind} {cls}::{name}")
+            if msg:
+                print(f"    message={msg}")
+            print(f"    results={xml}")
+        if len(failures) > max_items:
+            print(f"... truncated ({len(failures)} total failing testcases)")
+    else:
+        print("---- junit failures ----")
+        print("(none found under reports dest; check gdunit-console and godot logs)")
+
+    godot_log = Path(out_dir) / "gdunit-godot.log"
+    if godot_log.is_file():
+        print("---- gdunit-godot.log tail ----")
+        print(tail_text(str(godot_log), max_chars=20_000))
+
+    print("GDUNIT_FAILURE_SUMMARY end")
+
+
 def read_project_name(project_dir: Path) -> str | None:
     project_godot = project_dir / "project.godot"
     if not project_godot.is_file():
@@ -202,7 +282,9 @@ def main():
     # In clean CI checkouts this folder may not exist and can cause GdUnit4 to crash
     # with "Cannot call method 'seek' on a null value." when opening report files.
     try:
-        os.makedirs(os.path.join(proj, 'reports'), exist_ok=True)
+        # Ensure a clean report directory per run to avoid mixing old failures into diagnosis.
+        _safe_rmtree(os.path.join(proj, "reports"))
+        os.makedirs(os.path.join(proj, "reports"), exist_ok=True)
     except Exception:
         # Best-effort; do not fail the run just because report pre-creation failed.
         pass
@@ -476,6 +558,11 @@ def main():
         except Exception as e:
             write_text(os.path.join(dest, 'godot-userlogs-error.txt'), str(e))
     print(f'GDUNIT_DONE rc={rc} out={out_dir}')
+    if rc != 0:
+        try:
+            _print_failure_summary(console_path=console_path, dest_dir=dest, out_dir=out_dir)
+        except Exception as e:
+            print(f"GDUNIT_FAILURE_SUMMARY error={e}")
     return 0 if rc == 0 else rc
 
 
