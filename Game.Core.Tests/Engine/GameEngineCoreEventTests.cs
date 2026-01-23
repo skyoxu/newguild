@@ -53,8 +53,9 @@ public class GameEngineCoreEventTests
         return new GameEngineCore(config, inventory, bus);
     }
 
+    // ACC:T42.2
     [Fact]
-    public void Start_Publishes_Game_Started_Event()
+    public void Should_Publish_GameStarted_Event_When_Start_IsCalled()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
@@ -73,8 +74,9 @@ public class GameEngineCoreEventTests
         }
     }
 
+    // ACC:T42.5
     [Fact]
-    public void AddScore_Publishes_Score_Changed_Event()
+    public void Should_Publish_ScoreChanged_Event_When_AddScore_IsCalled()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
@@ -96,8 +98,9 @@ public class GameEngineCoreEventTests
         }
     }
 
+    // ACC:T42.6
     [Fact]
-    public void ApplyDamage_Publishes_Player_Health_Changed_Event()
+    public void Should_Publish_PlayerHealthChanged_Event_When_ApplyDamage_IsCalled()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
@@ -120,7 +123,7 @@ public class GameEngineCoreEventTests
     }
 
     [Fact]
-    public void Move_Publishes_Player_Moved_Event_And_Updates_Position()
+    public void Should_Publish_PlayerMoved_Event_And_Update_Position_When_Move_IsCalled()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);
@@ -144,7 +147,7 @@ public class GameEngineCoreEventTests
     }
 
     [Fact]
-    public void End_Publishes_Game_Ended_Event_And_Returns_Result()
+    public void Should_Publish_GameEnded_Event_And_Return_Result_When_End_IsCalled()
     {
         // Arrange
         var engine = CreateEngineAndBus(out var bus);

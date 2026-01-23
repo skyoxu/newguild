@@ -295,7 +295,7 @@ public class GameStateManagerTests
         var store = new InMemoryDataStore();
         var mgr = new GameStateManager(store);
         var eventCount = 0;
-        mgr.OnEvent(evt => { if (evt.Type == "game.autosave.enabled") eventCount++; });
+        mgr.OnEvent(evt => { if (evt.Type == "core.autosave.enabled") eventCount++; });
 
         // Act - call EnableAutoSave twice
         mgr.EnableAutoSave();
@@ -313,7 +313,7 @@ public class GameStateManagerTests
         var mgr = new GameStateManager(store);
         mgr.EnableAutoSave();
         var eventCount = 0;
-        mgr.OnEvent(evt => { if (evt.Type == "game.autosave.disabled") eventCount++; });
+        mgr.OnEvent(evt => { if (evt.Type == "core.autosave.disabled") eventCount++; });
 
         // Act - call DisableAutoSave twice
         mgr.DisableAutoSave();
