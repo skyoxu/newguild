@@ -338,7 +338,9 @@ def find_audit_logs(pattern: str, base_dir: Path = Path('.')) -> List[Path]:
 def stage_fallback_audit_logs(*, base_dir: Path, target_dir: Path) -> int:
     """
     Stop-loss: when logs/ci/<date>/security-audit*.jsonl are missing, try to locate
-    archived Godot user:// logs under logs/** (e.g. logs/e2e/.../godot-userlogs/...)
+    either:
+      - archived Godot user:// logs under logs/** (e.g. logs/e2e/.../godot-userlogs/...)
+      - project-local res:// logs produced by GdUnit suites (e.g. Tests.Godot/logs/ci/<date>/...)
     and copy them into the expected directory so validation can proceed.
     """
 
@@ -347,11 +349,17 @@ def stage_fallback_audit_logs(*, base_dir: Path, target_dir: Path) -> int:
 
     candidates: List[Path] = []
     if date:
+        # Project-local logs from GdUnit res:// (Tests.Godot is the test project root)
+        candidates.extend(find_audit_logs(f"Tests.Godot/logs/ci/{date}/security-audit*.jsonl", base_dir))
+        candidates.extend(find_audit_logs(f"Game.Godot/logs/ci/{date}/security-audit*.jsonl", base_dir))
+
         candidates.extend(find_audit_logs(f"logs/e2e/{date}/**/godot-userlogs/ci/{date}/security-audit*.jsonl", base_dir))
         candidates.extend(find_audit_logs(f"logs/**/godot-userlogs/ci/{date}/security-audit*.jsonl", base_dir))
         candidates.extend(find_audit_logs(f"logs/_godot_userdir/**/logs/ci/{date}/security-audit*.jsonl", base_dir))
         candidates.extend(find_audit_logs("logs/_godot_userdir/**/logs/security/security-audit*.jsonl", base_dir))
     else:
+        candidates.extend(find_audit_logs("Tests.Godot/logs/**/security-audit*.jsonl", base_dir))
+        candidates.extend(find_audit_logs("Game.Godot/logs/**/security-audit*.jsonl", base_dir))
         candidates.extend(find_audit_logs("logs/**/godot-userlogs/**/security-audit*.jsonl", base_dir))
         candidates.extend(find_audit_logs("logs/_godot_userdir/**/logs/**/security-audit*.jsonl", base_dir))
 
