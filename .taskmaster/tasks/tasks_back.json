@@ -217,10 +217,10 @@
     "taskmaster_exported": true,
     "taskmaster_id": 8,
     "contractRefs": [
-      "security.file_access.denied",
-      "security.process.approved",
-      "security.process.denied",
-      "security.url_access.denied"
+      "core.security.file_access.denied",
+      "core.security.process.approved",
+      "core.security.process.denied",
+      "core.security.url_access.denied"
     ],
     "artifactRefs": [
       "logs/ci/<date>/security-audit.jsonl"
@@ -1690,10 +1690,10 @@
       "core.game_turn.phase_changed",
       "core.game_turn.started",
       "core.game_turn.week_advanced",
-      "security.file_access.denied",
-      "security.process.approved",
-      "security.process.denied",
-      "security.url_access.denied"
+      "core.security.file_access.denied",
+      "core.security.process.approved",
+      "core.security.process.denied",
+      "core.security.url_access.denied"
     ],
     "artifactRefs": [
       "logs/security-audit-gameloop.json",
@@ -1868,7 +1868,7 @@
     "taskmaster_exported": true,
     "taskmaster_id": 11,
     "contractRefs": [
-      "security.file_access.denied"
+      "core.security.file_access.denied"
     ],
     "artifactRefs": [
       "logs/ci/<date>/security-audit.jsonl"
@@ -1924,7 +1924,7 @@
     "taskmaster_exported": true,
     "taskmaster_id": 12,
     "contractRefs": [
-      "security.file_access.denied"
+      "core.security.file_access.denied"
     ],
     "artifactRefs": [
       "logs/ci/<date>/security-audit.jsonl"
@@ -1984,10 +1984,10 @@
       "core.game_turn.phase_changed",
       "core.game_turn.started",
       "core.game_turn.week_advanced",
-      "security.file_access.denied",
-      "security.process.approved",
-      "security.process.denied",
-      "security.url_access.denied"
+      "core.security.file_access.denied",
+      "core.security.process.approved",
+      "core.security.process.denied",
+      "core.security.url_access.denied"
     ],
     "artifactRefs": [
       "logs/ci/<date>/gameloop-quality-guard.json"
