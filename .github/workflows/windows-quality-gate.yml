@@ -25,6 +25,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set CI_DATE (stable per run)
+        shell: pwsh
+        run: |
+          $date = Get-Date -Format 'yyyy-MM-dd'
+          Add-Content -Path $env:GITHUB_ENV -Value "CI_DATE=$date" -Encoding utf8
+          Write-Host "CI_DATE=$date"
+
       - name: Logs seed (ensure artifacts paths)
         shell: pwsh
         run: |
@@ -90,7 +97,7 @@ jobs:
       - name: Dependency guard (hard gate)
         shell: pwsh
         run: |
-          $date = Get-Date -Format 'yyyy-MM-dd'
+          $date = $env:CI_DATE
           $outDir = "logs/ci/$date"
           New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
@@ -100,19 +107,20 @@ jobs:
           $summaryPath = Join-Path $outDir "dependency-guard-summary.txt"
           $jsonPath = Join-Path $outDir "dependency-guard.json"
 
-          '### Dependency Guard' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-          'Artifacts:' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-          "- $jsonPath" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-          "- $summaryPath" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '### Dependency Guard' -Encoding utf8
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'Artifacts:' -Encoding utf8
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ("- " + $jsonPath) -Encoding utf8
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ("- " + $summaryPath) -Encoding utf8
 
           if (Test-Path $summaryPath) {
-            '' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-            '```text' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-            Get-Content -Encoding utf8 $summaryPath | Select-Object -First 200 | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-            '```' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '' -Encoding utf8
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```text' -Encoding utf8
+            $lines = Get-Content -Encoding utf8 -TotalCount 200 $summaryPath
+            foreach ($ln in $lines) { Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $ln -Encoding utf8 }
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```' -Encoding utf8
           } else {
-            '' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-            "Summary file missing: $summaryPath" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '' -Encoding utf8
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ("Summary file missing: " + $summaryPath) -Encoding utf8
           }
 
           if ($rc -ne 0) {
@@ -123,7 +131,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
-          $date = Get-Date -Format 'yyyy-MM-dd'
+          $date = $env:CI_DATE
           $ciDir = "logs/ci/$date"
           New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
           $diag = Join-Path $ciDir 'ensure-gdunit4-diag.txt'
@@ -211,7 +219,7 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          $date = Get-Date -Format 'yyyy-MM-dd'
+          $date = $env:CI_DATE
           $ciDir = "logs/ci/$date"
           $perfDir = "logs/perf/$date"
           New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
@@ -253,7 +261,7 @@ jobs:
       - name: Validate security audit JSONL (hard gate)
         shell: pwsh
         run: |
-          $date = Get-Date -Format 'yyyy-MM-dd'
+          $date = $env:CI_DATE
           $logPattern = "logs/ci/$date/security-audit*.jsonl"
           py -3 scripts/python/validate_audit_logs.py --log-path $logPattern --check-sensitive --strict --report "logs/ci/$date/audit-validation-report.json"
 
@@ -297,7 +305,6 @@ jobs:
         shell: pwsh
         continue-on-error: true
         run: |
-          $date = Get-Date -Format 'yyyy-MM-dd'
           $out = "logs/ci/${{ github.run_id }}/schema-dump.json"
           py -3 scripts/python/db_schema_dump.py --glob "$env:APPDATA\Godot\app_userdata\GodotGame\*.db" --out "$out"
           Write-Host "SCHEMA_DUMP_OUT=$out"
