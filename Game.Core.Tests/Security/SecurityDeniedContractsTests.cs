@@ -9,18 +9,18 @@ public class SecurityDeniedContractsTests
     [Fact]
     public void SecurityFileAccessDenied_ShouldExposeExpectedEventType()
     {
-        SecurityFileAccessDenied.EventType.Should().Be("security.file_access.denied");
+        SecurityFileAccessDenied.EventType.Should().Be("core.security.file_access.denied");
     }
 
     [Fact]
     public void SecurityProcessDenied_ShouldExposeExpectedEventType()
     {
-        SecurityProcessDenied.EventType.Should().Be("security.process.denied");
+        SecurityProcessDenied.EventType.Should().Be("core.security.process.denied");
     }
 
     [Fact]
     public void SecurityUrlAccessDenied_ShouldExposeExpectedEventType()
     {
-        SecurityUrlAccessDenied.EventType.Should().Be("security.url_access.denied");
+        SecurityUrlAccessDenied.EventType.Should().Be("core.security.url_access.denied");
     }
 }

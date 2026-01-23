@@ -16,7 +16,7 @@ var _score_values: Array[int] = []
 func _on_evt(type, _source, _data_json, id, _specVersion, _dataContentType, _timestampIso) -> void:
 	var t := str(type)
 	_types.append(t)
-	if t == "security.raid_encounter_demo.decision":
+	if t == "core.security.raid_encounter_demo.decision":
 		_security_ids.append(str(id))
 	if t == "core.raid.resolved":
 		var json := JSON.new()
@@ -157,7 +157,7 @@ func test_hud_can_trigger_raid_encounter_demo_and_expose_result() -> void:
 
 	hud_scene.TriggerRaidEncounterDemo()
 	assert_bool(hud_scene.has_signal("RaidEncounterDemoCompleted")).is_true()
-	var ok_security := await _wait_for_type_count(types, "security.raid_encounter_demo.decision", 1)
+	var ok_security := await _wait_for_type_count(types, "core.security.raid_encounter_demo.decision", 1)
 	assert_bool(ok_security).is_true()
 	if not ok_security:
 		return
@@ -168,7 +168,7 @@ func test_hud_can_trigger_raid_encounter_demo_and_expose_result() -> void:
 
 	assert_bool(types.has("core.raid.scheduled")).is_true()
 	assert_bool(types.has("core.raid.resolved")).is_true()
-	assert_bool(types.has("security.raid_encounter_demo.decision")).is_true()
+	assert_bool(types.has("core.security.raid_encounter_demo.decision")).is_true()
 	assert_bool(reward_points.size() > 0).is_true()
 	if reward_points.size() > 0:
 		assert_bool(reward_points[reward_points.size() - 1] > 0).is_true()
@@ -185,7 +185,7 @@ func test_hud_can_trigger_raid_encounter_demo_and_expose_result() -> void:
 
 	var date_utc := Time.get_date_string_from_system(true)
 	var audit_path := "user://logs/ci/%s/security-audit.jsonl" % date_utc
-	assert_bool(await _wait_for_audit_contains(audit_path, "security.raid_encounter_demo.decision")).is_true()
+	assert_bool(await _wait_for_audit_contains(audit_path, "core.security.raid_encounter_demo.decision")).is_true()
 	assert_bool(await _wait_for_audit_contains(audit_path, security_ids[security_ids.size() - 1])).is_true()
 
 # ACC:T17.3
@@ -218,14 +218,14 @@ func test_hud_demo_gate_denies_when_disabled() -> void:
 	await get_tree().process_frame
 
 	hud_scene.TriggerRaidEncounterDemo()
-	var ok_security := await _wait_for_type_count(types, "security.raid_encounter_demo.decision", 1)
+	var ok_security := await _wait_for_type_count(types, "core.security.raid_encounter_demo.decision", 1)
 	assert_bool(ok_security).is_true()
 	if not ok_security:
 		return
 
 	var result := str(hud_scene.RaidEncounterDemoLastResult)
 	assert_bool(result == "denied").is_true()
-	assert_bool(types.has("security.raid_encounter_demo.decision")).is_true()
+	assert_bool(types.has("core.security.raid_encounter_demo.decision")).is_true()
 	assert_bool(security_ids.size() > 0).is_true()
 	if security_ids.size() == 0:
 		return

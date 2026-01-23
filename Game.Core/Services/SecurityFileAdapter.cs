@@ -1,4 +1,5 @@
 using Game.Core.Contracts;
+using Game.Core.Contracts.Security;
 using Game.Core.Domain;
 using Game.Core.Ports;
 
@@ -54,7 +55,7 @@ public class SecurityFileAdapter
     private void PublishDeniedEvent(string path, string reason)
     {
         _eventBus.PublishAsync(new DomainEvent(
-            Type: "security.file_access.denied",
+            Type: SecurityFileAccessDenied.EventType,
             Source: "SecurityFileAdapter",
             Data: new
             {

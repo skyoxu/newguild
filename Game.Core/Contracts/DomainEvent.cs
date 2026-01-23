@@ -14,7 +14,7 @@ namespace Game.Core.Contracts
 namespace Game.Core.Contracts.Security
 {
     /// <summary>
-    /// Domain event: security.file_access.denied
+    /// Domain event: core.security.file_access.denied
     /// Description: Emitted when file path validation denies access.
     /// </summary>
     /// <remarks>
@@ -30,11 +30,11 @@ namespace Game.Core.Contracts.Security
         /// <summary>
         /// CloudEvents 1.0 type field for this event.
         /// </summary>
-        public const string EventType = "security.file_access.denied";
+        public const string EventType = "core.security.file_access.denied";
     }
 
     /// <summary>
-    /// Domain event: security.process.denied
+    /// Domain event: core.security.process.denied
     /// Description: Emitted when a process execution request is denied.
     /// </summary>
     /// <remarks>
@@ -50,11 +50,11 @@ namespace Game.Core.Contracts.Security
         /// <summary>
         /// CloudEvents 1.0 type field for this event.
         /// </summary>
-        public const string EventType = "security.process.denied";
+        public const string EventType = "core.security.process.denied";
     }
 
     /// <summary>
-    /// Domain event: security.process.approved
+    /// Domain event: core.security.process.approved
     /// Description: Emitted when a process execution request is approved (development/CI only).
     /// </summary>
     /// <remarks>
@@ -70,11 +70,11 @@ namespace Game.Core.Contracts.Security
         /// <summary>
         /// CloudEvents 1.0 type field for this event.
         /// </summary>
-        public const string EventType = "security.process.approved";
+        public const string EventType = "core.security.process.approved";
     }
 
     /// <summary>
-    /// Domain event: security.url_access.denied
+    /// Domain event: core.security.url_access.denied
     /// Description: Emitted when URL validation denies access.
     /// </summary>
     /// <remarks>
@@ -90,6 +90,6 @@ namespace Game.Core.Contracts.Security
         /// <summary>
         /// CloudEvents 1.0 type field for this event.
         /// </summary>
-        public const string EventType = "security.url_access.denied";
+        public const string EventType = "core.security.url_access.denied";
     }
 }

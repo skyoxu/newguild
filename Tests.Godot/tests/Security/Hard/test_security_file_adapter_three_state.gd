@@ -165,10 +165,10 @@ func test_audit_event_on_denial() -> void:
 	get_tree().get_root().add_child(auto_free(bus))
 	await get_tree().process_frame
 
-	# Create a signal listener for security.file_access.denied events
+	# Create a signal listener for core.security.file_access.denied events
 	var event_captured = false
 	var event_callback = func(evt):
-		if evt.has("Type") and evt.Type == "security.file_access.denied":
+		if evt.has("Type") and evt.Type == "core.security.file_access.denied":
 			event_captured = true
 
 	# Subscribe to events (EventBusAdapter.Subscribe expects a Callable)

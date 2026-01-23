@@ -131,7 +131,7 @@ ADR-Refs:
 
 ### Contracts
 
-- **security.file_access.denied**
+- **core.security.file_access.denied**
   - Trigger: Emitted when file path validation denies access.
   - Fields: Type, Source, Data, Timestamp, Id, "1.0", Target, Reason, OccurredAt, Caller
   - Contract: `Game.Core/Contracts/DomainEvent.cs`
@@ -317,4 +317,3 @@ ADR-Refs:
 - `Game.Core/Contracts/Events/EventDefinition.cs`
 
 <!-- GENERATED_CONTRACTS_END -->
-
