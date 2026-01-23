@@ -209,14 +209,17 @@ public sealed partial class SecurityUrlAdapter : RefCounted, ISecurityUrlValidat
     {
         try
         {
+            var normalizedTarget = string.IsNullOrWhiteSpace(url) ? "<empty>" : url;
+            var normalizedCaller = string.IsNullOrWhiteSpace(caller) ? "unknown" : caller;
+
             // Construct audit entry with all 5 required fields (ADR-0019)
             var auditEntry = new
             {
                 ts = DateTime.UtcNow.ToString("o"),  // ISO 8601 timestamp
                 action = "security.url.rejected",     // ADR-0004 dot-separated format
                 reason = reason,
-                target = url,
-                caller = caller
+                target = normalizedTarget,
+                caller = normalizedCaller
             };
 
             // Serialize to single-line JSON (JSONL format)
