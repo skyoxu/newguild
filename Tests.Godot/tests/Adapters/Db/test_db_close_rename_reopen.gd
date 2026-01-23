@@ -25,13 +25,20 @@ func _force_managed() -> void:
 func _abs(p: String) -> String:
     return ProjectSettings.globalize_path(p)
 
-static func _try_rename_abs(from_path: String, to_path: String) -> void:
+func _try_rename_abs(from_path: String, to_path: String) -> void:
     var err = DirAccess.rename_absolute(from_path, to_path)
     if err != OK:
         # fallback: copy + remove
+        assert_bool(FileAccess.file_exists(from_path)).is_true()
         var rf = FileAccess.open(from_path, FileAccess.ModeFlags.READ)
         var wf = FileAccess.open(to_path, FileAccess.ModeFlags.WRITE)
-        var size := rf.get_length()
+        if rf == null:
+            assert_bool(false).override_failure_message("Failed to open source file for fallback copy: %s" % from_path).is_true()
+            return
+        if wf == null:
+            assert_bool(false).override_failure_message("Failed to open destination file for fallback copy: %s" % to_path).is_true()
+            return
+        var size = rf.get_length()
         var buf = rf.get_buffer(size)
         wf.store_buffer(buf)
         rf.close(); wf.close()

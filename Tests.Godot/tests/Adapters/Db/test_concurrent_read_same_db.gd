@@ -37,7 +37,7 @@ func test_concurrent_read_after_write_commit() -> void:
     assert_bool(a.TryOpen(path)).is_true()
     assert_bool(b.TryOpen(path)).is_true()
     _db_helper.ExecOnNode("SqlDbA", "CREATE TABLE IF NOT EXISTS t(k TEXT PRIMARY KEY, v INTEGER);")
-    _db_helper.ExecOnNode("SqlDbA", "INSERT OR REPLACE INTO t(k,v) VALUES('key',7);")
+    _db_helper.ExecOnNode2("SqlDbA", "INSERT OR REPLACE INTO t(k,v) VALUES(@0,@1);", "key", 7)
     await get_tree().process_frame
     var value = _db_helper.QueryOnNode2("SqlDbB", "SELECT v FROM t WHERE k=@0;", "key")
     assert_int(value).is_equal(7)

@@ -1,6 +1,11 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
 func _new_db(name: String) -> Node:
+    var existing = get_node_or_null("/root/" + name)
+    if existing != null:
+        existing.queue_free()
+        await get_tree().process_frame
+
     var db = null
     if ClassDB.class_exists("SqliteDataStore"):
         db = ClassDB.instantiate("SqliteDataStore")
@@ -52,12 +57,13 @@ func test_wal_backup_copy_and_reopen_has_same_data() -> void:
         return
     assert_bool(db.TryOpen(src_user)).is_true()
     helper.ExecSql("CREATE TABLE IF NOT EXISTS t(k TEXT PRIMARY KEY, v INTEGER);")
-    helper.ExecSql("INSERT OR REPLACE INTO t(k,v) VALUES('alpha', 99);")
+    helper.ExecSql2("INSERT OR REPLACE INTO t(k,v) VALUES(@0, @1);", "alpha", 99)
     await get_tree().process_frame
     var src_abs = _abs(src_user)
     var wal_abs = src_abs + "-wal"
     # wal may not exist immediately on some providers; this test is best-effort
-    var dst_abs = src_abs.get_base_dir().path_join("backup_copy.db")
+    var dst_user = src_user.get_base_dir().path_join("backup_copy.db")
+    var dst_abs = _abs(dst_user)
     _copy_abs(src_abs, dst_abs)
     if FileAccess.file_exists(wal_abs):
         _copy_abs(wal_abs, dst_abs + "-wal")
@@ -66,7 +72,6 @@ func test_wal_backup_copy_and_reopen_has_same_data() -> void:
     if db2 == null:
         push_warning("SKIP: missing C# instantiate, skip test")
         return
-    assert_bool(db2.TryOpen(ProjectSettings.localize_path(dst_abs))).is_true()
-    var rows = helper.QueryScalarInt("SELECT COUNT(1) FROM t WHERE k='alpha' AND v=99;")
+    assert_bool(db2.TryOpen(dst_user)).is_true()
+    var rows = helper.QueryScalarInt2("SELECT COUNT(1) FROM t WHERE k=@0 AND v=@1;", "alpha", 99)
     assert_int(rows).is_equal(1)
-

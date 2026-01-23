@@ -31,6 +31,14 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     private string? _dbPathVirtual;
     public string? LastError { get; private set; }
 
+    private static string? GetEnv(string key)
+    {
+        var v = OS.GetEnvironment(key);
+        if (!string.IsNullOrWhiteSpace(v))
+            return v;
+        return System.Environment.GetEnvironmentVariable(key);
+    }
+
     public override void _Ready()
     {
         _ = GetSecurityFileAdapter();
@@ -76,7 +84,33 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         if (validatedPath == null)
         {
             GD.PrintErr($"[SqliteDataStore] Database path validation failed: {dbPath}");
-            throw new NotSupportedException($"Database path not allowed: {dbPath}");
+            // Special-case: invalid extension under user:// should be audited distinctly.
+            // SafeResourcePath rejects non-whitelisted extensions early, so we infer from the raw string here.
+            var audited = false;
+            try
+            {
+                var trimmed = dbPath.Trim();
+                if (trimmed.StartsWith("user://", StringComparison.OrdinalIgnoreCase))
+                {
+                    var ext = System.IO.Path.GetExtension(trimmed);
+                    if (!string.IsNullOrWhiteSpace(ext) &&
+                        !ext.Equals(".db", StringComparison.OrdinalIgnoreCase) &&
+                        !ext.Equals(".sqlite", StringComparison.OrdinalIgnoreCase) &&
+                        !ext.Equals(".sqlite3", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!IncludeSensitiveDetails())
+                        {
+                            Audit("db.sqlite.invalid_extension", ext, trimmed, caller: nameof(SqliteDataStore));
+                            audited = true;
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            var ex = new NotSupportedException($"Database path not allowed (expected user://): {dbPath}");
+            if (audited) ex.Data[AuditWrittenDataKey] = true;
+            throw ex;
         }
 
         var extension = System.IO.Path.GetExtension(validatedPath.Value);
@@ -171,7 +205,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         TryHardenDbAclBestEffort();
         // Enable FK + configurable journal mode (default WAL; override via GD_DB_JOURNAL=DELETE|WAL|TRUNCATE|MEMORY|PERSIST)
         using var cmd = _conn.CreateCommand();
-        var journal = (System.Environment.GetEnvironmentVariable("GD_DB_JOURNAL") ?? "WAL").ToUpperInvariant();
+        var journal = (GetEnv("GD_DB_JOURNAL") ?? "WAL").ToUpperInvariant();
         switch (journal)
         {
             case "WAL": case "DELETE": case "TRUNCATE": case "MEMORY": case "PERSIST": break;
@@ -766,12 +800,12 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         var isDebugBuild = false;
 #endif
 
-        return SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild);
+        return SensitiveDetailsPolicy.IncludeSensitiveDetails(isDebugBuild, GetEnv);
     }
 
     private static long GetMaxDbBytes()
     {
-        var raw = System.Environment.GetEnvironmentVariable(MaxDbBytesEnv);
+        var raw = GetEnv(MaxDbBytesEnv);
         if (string.IsNullOrWhiteSpace(raw))
             return DefaultMaxDbBytes;
 
@@ -783,7 +817,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
 
     private static bool IsPluginBackendAllowed()
     {
-        var allow = (System.Environment.GetEnvironmentVariable(AllowPluginBackendEnv) ?? string.Empty).Trim() == "1";
+        var allow = (GetEnv(AllowPluginBackendEnv) ?? string.Empty).Trim() == "1";
         if (!allow)
             return false;
 
@@ -808,7 +842,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         try
         {
             var date = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
-            var root = System.Environment.GetEnvironmentVariable("AUDIT_LOG_ROOT");
+            var root = GetEnv("AUDIT_LOG_ROOT");
             string path;
             if (!string.IsNullOrWhiteSpace(root))
             {
@@ -817,14 +851,14 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             }
             else
             {
-                var isCi = !string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("CI"));
-                if (isCi)
+                var isCi = !string.IsNullOrWhiteSpace(GetEnv("CI"));
+                var isSecureOrTest = string.Equals(GetEnv("GD_SECURE_MODE"), "1", StringComparison.Ordinal) ||
+                                     string.Equals(GetEnv("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal);
+                if (isCi || isSecureOrTest)
                 {
-                    var baseDir = ProjectSettings.GlobalizePath("res://");
-                    var rel = System.IO.Path.Combine("logs", "ci", date, "security-audit.jsonl");
-                    path = System.IO.Path.GetFullPath(rel, baseDir);
-                    var dir = System.IO.Path.GetDirectoryName(path);
-                    if (!string.IsNullOrEmpty(dir)) System.IO.Directory.CreateDirectory(dir);
+                    var dir = ProjectSettings.GlobalizePath($"user://logs/ci/{date}");
+                    System.IO.Directory.CreateDirectory(dir);
+                    path = System.IO.Path.Combine(dir, "security-audit.jsonl");
                 }
                 else
                 {

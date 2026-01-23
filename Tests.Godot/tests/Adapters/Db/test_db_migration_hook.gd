@@ -1,6 +1,11 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
 func _new_db(name: String) -> Node:
+    var existing = get_node_or_null("/root/" + name)
+    if existing != null:
+        existing.queue_free()
+        await get_tree().process_frame
+
     var db = null
     if ClassDB.class_exists("SqliteDataStore"):
         db = ClassDB.instantiate("SqliteDataStore")
@@ -31,7 +36,8 @@ func test_migration_ensure_min_version() -> void:
     # simulate downgrade
     var h2 = preload("res://Game.Godot/Adapters/Db/DbTestHelper.cs").new()
     add_child(auto_free(h2))
-    h2.ExecSql("UPDATE schema_version SET version=0 WHERE id=1;")
+    h2.ExecSql1("UPDATE schema_version SET version=@0 WHERE id=1;", 0)
+    await get_tree().process_frame
     var before:int = helper.GetSchemaVersion()
     assert_int(before).is_less(1)
     helper.EnsureMinVersion(1)

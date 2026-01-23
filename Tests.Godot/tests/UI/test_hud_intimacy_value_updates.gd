@@ -11,7 +11,7 @@ func before() -> void:
 # ACC:T18.3
 func test_hud_shows_relationship_value_change_after_advancing_turn() -> void:
 	var hud := preload("res://Game.Godot/Scenes/UI/HUD.tscn").instantiate()
-	add_child_autofree(hud)
+	get_tree().get_root().add_child(auto_free(hud))
 	await get_tree().process_frame
 
 	var label: Label = hud.get_node("IntimacyPanel/IntimacyValueLabel")

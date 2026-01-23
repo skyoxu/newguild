@@ -44,7 +44,13 @@ public partial class GuildManager : Node
             _initializedOk = false;
 
             // Initialize database adapter
-            var rawDbRel = System.Environment.GetEnvironmentVariable("GD_GUILD_DB_PATH") ?? "data/game.db";
+            //
+            // Prefer Godot's environment accessor so GDScript tests can configure the DB path deterministically
+            // via OS.set_environment() before this node initializes. Fall back to the process environment for CI.
+            var rawDbRel = OS.GetEnvironment("GD_GUILD_DB_PATH");
+            if (string.IsNullOrWhiteSpace(rawDbRel))
+                rawDbRel = System.Environment.GetEnvironmentVariable("GD_GUILD_DB_PATH");
+            rawDbRel ??= "data/game.db";
             var dbRel = SanitizeEnvPath(rawDbRel);
             var dbPath = SafeResourcePath.UserPath(dbRel);
             if (dbPath == null)

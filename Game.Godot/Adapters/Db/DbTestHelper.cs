@@ -6,6 +6,18 @@ namespace Game.Godot.Adapters.Db;
 
 public partial class DbTestHelper : Node
 {
+    private static object ToSqlParam(global::Godot.Variant value)
+    {
+        return value.VariantType switch
+        {
+            global::Godot.Variant.Type.String => (string)value,
+            global::Godot.Variant.Type.Int => (long)value,
+            global::Godot.Variant.Type.Float => (double)value,
+            global::Godot.Variant.Type.Bool => (bool)value,
+            _ => value.ToString(),
+        };
+    }
+
     public void ForceManaged()
     {
         System.Environment.SetEnvironmentVariable("GODOT_DB_BACKEND", "managed");
@@ -88,16 +100,50 @@ public partial class DbTestHelper : Node
         db.Execute(SqlStatement.NoParameters(sql));
     }
 
-    public void ExecSql2(string sql, object p0, object p1)
+    public void ExecSql2(string sql, global::Godot.Variant p0, global::Godot.Variant p1)
     {
         var db = GetDb();
-        db.Execute(SqlStatement.Positional(sql, p0, p1));
+        db.Execute(SqlStatement.Positional(sql, ToSqlParam(p0), ToSqlParam(p1)));
+    }
+
+    public void ExecSql1(string sql, global::Godot.Variant p0)
+    {
+        var db = GetDb();
+        db.Execute(SqlStatement.Positional(sql, ToSqlParam(p0)));
     }
 
     public int QueryScalarInt(string sql)
     {
         var db = GetDb();
         var rows = db.Query(SqlStatement.NoParameters(sql));
+        if (rows.Count == 0) return 0;
+        var row = rows[0];
+        foreach (var kv in row)
+        {
+            if (kv.Value == null) continue;
+            try { return Convert.ToInt32(kv.Value); } catch { }
+        }
+        return 0;
+    }
+
+    public int QueryScalarInt1(string sql, global::Godot.Variant p0)
+    {
+        var db = GetDb();
+        var rows = db.Query(SqlStatement.Positional(sql, ToSqlParam(p0)));
+        if (rows.Count == 0) return 0;
+        var row = rows[0];
+        foreach (var kv in row)
+        {
+            if (kv.Value == null) continue;
+            try { return Convert.ToInt32(kv.Value); } catch { }
+        }
+        return 0;
+    }
+
+    public int QueryScalarInt2(string sql, global::Godot.Variant p0, global::Godot.Variant p1)
+    {
+        var db = GetDb();
+        var rows = db.Query(SqlStatement.Positional(sql, ToSqlParam(p0), ToSqlParam(p1)));
         if (rows.Count == 0) return 0;
         var row = rows[0];
         foreach (var kv in row)
@@ -116,11 +162,18 @@ public partial class DbTestHelper : Node
         db.Execute(SqlStatement.NoParameters(sql));
     }
 
-    public void ExecOnNode2(string nodeName, string sql, object p0, object p1)
+    public void ExecOnNode2(string nodeName, string sql, global::Godot.Variant p0, global::Godot.Variant p1)
     {
         var db = GetNodeOrNull<SqliteDataStore>("/root/" + nodeName);
         if (db == null) throw new InvalidOperationException($"SqliteDataStore not found at /root/{nodeName}");
-        db.Execute(SqlStatement.Positional(sql, p0, p1));
+        db.Execute(SqlStatement.Positional(sql, ToSqlParam(p0), ToSqlParam(p1)));
+    }
+
+    public void ExecOnNode1(string nodeName, string sql, global::Godot.Variant p0)
+    {
+        var db = GetNodeOrNull<SqliteDataStore>("/root/" + nodeName);
+        if (db == null) throw new InvalidOperationException($"SqliteDataStore not found at /root/{nodeName}");
+        db.Execute(SqlStatement.Positional(sql, ToSqlParam(p0)));
     }
 
     public int QueryOnNode2(string nodeName, string sql, global::Godot.Variant p0)

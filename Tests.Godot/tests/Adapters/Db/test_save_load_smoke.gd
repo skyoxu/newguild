@@ -1,16 +1,16 @@
-extends 'res://addons/gdUnit4/src/GdUnitTestSuite.gd'
+extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
-func _new_node(class_name: String, script_path: String, name: String) -> Node:
+func _new_node(node_class_name: String, script_path: String, node_name: String) -> Node:
 	var node: Node = null
-	if ClassDB.class_exists(class_name):
-		node = ClassDB.instantiate(class_name)
+	if ClassDB.class_exists(node_class_name):
+		node = ClassDB.instantiate(node_class_name)
 	else:
 		var s = load(script_path)
 		if s == null or not s.has_method("new"):
-			push_warning("SKIP: missing %s (%s)" % [class_name, script_path])
+			push_warning("SKIP: missing %s (%s)" % [node_class_name, script_path])
 			return null
 		node = s.new()
-	node.name = name
+	node.name = node_name
 	get_tree().get_root().add_child(auto_free(node))
 	return node
 
@@ -20,7 +20,7 @@ func _today_utc() -> String:
 	return "%04d-%02d-%02d" % [dt.year, dt.month, dt.day]
 
 func _audit_path() -> String:
-	return "res://logs/ci/%s/security-audit.jsonl" % _today_utc()
+	return "user://logs/ci/%s/security-audit.jsonl" % _today_utc()
 
 # ACC:T25.3
 # Migration must be idempotent and auditable.
@@ -29,9 +29,12 @@ func test_schema_version_meta_and_audit_on_invalid_db_path() -> void:
 	OS.set_environment("GD_SECURE_MODE", "1")
 	OS.set_environment("GD_DATASTORE_BACKEND", "sqlite")
 
-	var bus = _new_node("EventBusAdapter", "res://Game.Godot/Adapters/EventBusAdapter.cs", "EventBus")
-	if bus == null:
-		return
+	var bus = get_node_or_null("/root/EventBus")
+	assert_object(bus).is_not_null()
+
+	var existing_db = get_node_or_null("/root/SqlDb")
+	if existing_db != null:
+		existing_db.free()
 
 	var db = _new_node("SqliteDataStore", "res://Game.Godot/Adapters/SqliteDataStore.cs", "SqlDb")
 	if db == null:
@@ -55,9 +58,12 @@ func test_datastore_save_load_roundtrip_uses_sqlite() -> void:
 	OS.set_environment("GD_SECURE_MODE", "1")
 	OS.set_environment("GD_DATASTORE_BACKEND", "sqlite")
 
-	var bus = _new_node("EventBusAdapter", "res://Game.Godot/Adapters/EventBusAdapter.cs", "EventBus")
-	if bus == null:
-		return
+	var bus = get_node_or_null("/root/EventBus")
+	assert_object(bus).is_not_null()
+
+	var existing_db = get_node_or_null("/root/SqlDb")
+	if existing_db != null:
+		existing_db.free()
 
 	var db = _new_node("SqliteDataStore", "res://Game.Godot/Adapters/SqliteDataStore.cs", "SqlDb")
 	if db == null:
@@ -76,8 +82,8 @@ func test_datastore_save_load_roundtrip_uses_sqlite() -> void:
 
 	var key = "t25_roundtrip"
 	var json = "{\"t\":%d}" % int(Time.get_unix_time_from_system())
-	await store.SaveAsync(key, json)
-	var loaded = await store.LoadAsync(key)
+	store.SaveSync(key, json)
+	var loaded = store.LoadSync(key)
 	assert_str(loaded).is_equal(json)
 
 	# Prove persistence uses SQLite by checking kv_store has at least 1 row.

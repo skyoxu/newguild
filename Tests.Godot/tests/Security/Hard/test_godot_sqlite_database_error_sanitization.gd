@@ -37,8 +37,8 @@ func _assert_audit_line_has_required_fields(line: String) -> void:
 	assert_bool(parsed.has("target")).is_true()
 	assert_bool(parsed.has("caller")).is_true()
 	var reason = str(parsed.get("reason", ""))
-	assert_str(reason).does_not_contain("C:\\")
-	assert_str(reason).does_not_contain("SELECT")
+	assert_str(reason).not_contains("C:\\")
+	assert_str(reason).not_contains("SELECT")
 
 
 func test_secure_mode_sanitizes_open_error_and_writes_audit_log() -> void:
@@ -157,9 +157,9 @@ func test_ReleaseMode_SanitizesErrorMessages() -> void:
 
 	var msg := str(result.get("message", ""))
 	assert_str(msg).is_equal("Database operation failed.")
-	assert_str(msg).does_not_contain("user://")
-	assert_str(msg).does_not_contain("SELECT")
-	assert_str(msg).does_not_contain("C:\\")
+	assert_str(msg).not_contains("user://")
+	assert_str(msg).not_contains("SELECT")
+	assert_str(msg).not_contains("C:\\")
 
 	assert_bool(FileAccess.file_exists(_audit_path_res())).is_true()
 	var txt: String = FileAccess.get_file_as_string(_audit_path_res())
@@ -203,9 +203,9 @@ func test_SecureMode_NeverLeaksPaths() -> void:
 
 	var msg := str(result.get("message", ""))
 	assert_str(msg).is_equal("Database operation failed.")
-	assert_str(msg).does_not_contain("user://")
-	assert_str(msg).does_not_contain("res://")
-	assert_str(msg).does_not_contain("C:\\")
+	assert_str(msg).not_contains("user://")
+	assert_str(msg).not_contains("res://")
+	assert_str(msg).not_contains("C:\\")
 
 	assert_bool(FileAccess.file_exists(_audit_path_res())).is_true()
 

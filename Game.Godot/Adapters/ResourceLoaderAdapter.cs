@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using Game.Core.Ports;
 using Game.Core.Domain;
@@ -26,6 +27,14 @@ public partial class ResourceLoaderAdapter : Node, IResourceLoader
         }
     }
 
+    // GDScript-friendly wrapper (tests and UI often start from raw strings).
+    public string LoadTextFromString(string rawPath)
+    {
+        var safe = SafeResourcePath.FromString(rawPath);
+        if (safe == null) return string.Empty;
+        return LoadText(safe) ?? string.Empty;
+    }
+
     public byte[]? LoadBytes(SafeResourcePath path)
     {
         try
@@ -39,5 +48,12 @@ public partial class ResourceLoaderAdapter : Node, IResourceLoader
         {
             return null;
         }
+    }
+
+    public byte[] LoadBytesFromString(string rawPath)
+    {
+        var safe = SafeResourcePath.FromString(rawPath);
+        if (safe == null) return Array.Empty<byte>();
+        return LoadBytes(safe) ?? Array.Empty<byte>();
     }
 }
