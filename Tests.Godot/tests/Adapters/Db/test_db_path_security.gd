@@ -1,6 +1,10 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
 func _db() -> Node:
+    var existing = get_node_or_null("/root/SqlDb")
+    if existing != null:
+        existing.free()
+
     var db = null
     if ClassDB.class_exists("SqliteDataStore"):
         db = ClassDB.instantiate("SqliteDataStore")
@@ -22,7 +26,7 @@ func test_try_open_user_path_should_succeed() -> void:
     var p = "user://utdb_%d/game.db" % Time.get_unix_time_from_system()
     var ok = db.TryOpen(p)
     assert_bool(ok).is_true()
-    # 文件应已在 user:// 下创建（不直接调用 C# Execute/Query 以避免绑定差异）
+    # File should exist under user:// (avoid calling C# Execute/Query to reduce binding variance).
     assert_bool(FileAccess.file_exists(p)).is_true()
 
 func test_try_open_absolute_path_should_fail() -> void:

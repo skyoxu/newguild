@@ -1,6 +1,11 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
 func _new_db(name: String) -> Node:
+    var existing = get_node_or_null("/root/" + name)
+    if existing != null:
+        existing.queue_free()
+        await get_tree().process_frame
+
     var db = null
     if ClassDB.class_exists("SqliteDataStore"):
         db = ClassDB.instantiate("SqliteDataStore")
@@ -35,10 +40,10 @@ func test_fk_on_delete_cascade_works() -> void:
     helper.ExecSql("PRAGMA foreign_keys=ON;")
     helper.ExecSql("CREATE TABLE IF NOT EXISTS p(id TEXT PRIMARY KEY);")
     helper.ExecSql("CREATE TABLE IF NOT EXISTS c(id TEXT PRIMARY KEY, pid TEXT, FOREIGN KEY(pid) REFERENCES p(id) ON DELETE CASCADE);")
-    helper.ExecSql("INSERT OR IGNORE INTO p(id) VALUES('A');")
-    helper.ExecSql("INSERT OR REPLACE INTO c(id,pid) VALUES('C1','A');")
-    var cnt = helper.QueryScalarInt("SELECT COUNT(1) AS cnt FROM c WHERE pid='A';")
+    helper.ExecSql1("INSERT OR IGNORE INTO p(id) VALUES(@0);", "A")
+    helper.ExecSql2("INSERT OR REPLACE INTO c(id,pid) VALUES(@0,@1);", "C1", "A")
+    var cnt = helper.QueryScalarInt1("SELECT COUNT(1) AS cnt FROM c WHERE pid=@0;", "A")
     assert_int(cnt).is_equal(1)
-    helper.ExecSql("DELETE FROM p WHERE id='A';")
+    helper.ExecSql1("DELETE FROM p WHERE id=@0;", "A")
     var cnt2 = helper.QueryScalarInt("SELECT COUNT(1) AS cnt FROM c;")
     assert_int(cnt2).is_equal(0)

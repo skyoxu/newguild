@@ -6,9 +6,8 @@ extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 var _bus: Node
 
 func before() -> void:
-	_bus = preload("res://Game.Godot/Adapters/EventBusAdapter.cs").new()
-	_bus.name = "EventBus"
-	get_tree().get_root().add_child(auto_free(_bus))
+	_bus = get_node_or_null("/root/EventBus")
+	assert_object(_bus).is_not_null()
 
 func _guild_panel() -> Node:
 	var panel = preload("res://Game.Godot/Scenes/UI/GuildPanel.tscn").instantiate()
@@ -18,7 +17,7 @@ func _guild_panel() -> Node:
 
 func test_guild_panel_updates_on_guild_created_event() -> void:
 	var panel = await _guild_panel()
-	var guild_name_label: Label = panel.get_node("VBox/GuildInfo/GuildNameLabel")
+	var guild_name_input: LineEdit = panel.get_node("VBox/GuildInfo/GuildNameRow/GuildNameInput")
 	var member_count_label: Label = panel.get_node("VBox/GuildInfo/MemberCountLabel")
 	var members_list: ItemList = panel.get_node("VBox/MembersList")
 	var create_button: Button = panel.get_node("VBox/Actions/CreateGuildButton")
@@ -30,7 +29,7 @@ func test_guild_panel_updates_on_guild_created_event() -> void:
 	await get_tree().process_frame
 
 	# Verify UI updates
-	assert_str(guild_name_label.text).contains("TestGuild")
+	assert_str(guild_name_input.text).contains("TestGuild")
 	assert_str(member_count_label.text).contains("1")
 	assert_int(members_list.item_count).is_equal(1)
 	assert_str(members_list.get_item_text(0)).contains("u456")
@@ -109,11 +108,12 @@ func test_guild_panel_updates_on_member_role_changed_event() -> void:
 
 	# Verify role updated
 	assert_str(members_list.get_item_text(1)).contains("Admin")
-	assert_str(members_list.get_item_text(1)).does_not_contain("Member")
+	assert_str(members_list.get_item_text(1)).not_contains("Member")
 
 func test_guild_panel_updates_on_guild_disbanded_event() -> void:
 	var panel = await _guild_panel()
-	var guild_name_label: Label = panel.get_node("VBox/GuildInfo/GuildNameLabel")
+	var status_label: Label = panel.get_node("VBox/GuildInfo/StatusLabel")
+	var guild_name_input: LineEdit = panel.get_node("VBox/GuildInfo/GuildNameRow/GuildNameInput")
 	var member_count_label: Label = panel.get_node("VBox/GuildInfo/MemberCountLabel")
 	var members_list: ItemList = panel.get_node("VBox/MembersList")
 	var create_button: Button = panel.get_node("VBox/Actions/CreateGuildButton")
@@ -132,7 +132,8 @@ func test_guild_panel_updates_on_guild_disbanded_event() -> void:
 	await get_tree().process_frame
 
 	# Verify UI reset
-	assert_str(guild_name_label.text).is_equal("Guild: None")
+	assert_str(status_label.text).contains("Disbanded")
+	assert_str(guild_name_input.text).is_equal("")
 	assert_str(member_count_label.text).is_equal("Members: 0")
 	assert_int(members_list.item_count).is_equal(0)
 	assert_bool(create_button.disabled).is_false()

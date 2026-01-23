@@ -16,6 +16,14 @@ public partial class DataStoreAdapter : Node, IDataStore
     private SqliteDataStore? _sqlDb;
     private bool _kvReady;
 
+    private static string? GetEnv(string key)
+    {
+        var v = OS.GetEnvironment(key);
+        if (!string.IsNullOrWhiteSpace(v))
+            return v;
+        return System.Environment.GetEnvironmentVariable(key);
+    }
+
     public override void _Ready()
     {
         _ = GetSecurityFileAdapter();
@@ -48,17 +56,17 @@ public partial class DataStoreAdapter : Node, IDataStore
     private static string PathFor(string key) => $"{GetSavePath()}/{MakeSafe(key)}.json";
 
     private static bool IsSecureMode() =>
-        (System.Environment.GetEnvironmentVariable("GD_SECURE_MODE") ?? string.Empty).Trim() == "1";
+        (GetEnv("GD_SECURE_MODE") ?? string.Empty).Trim() == "1";
 
     private static string GetConfiguredDbPath()
     {
-        var raw = System.Environment.GetEnvironmentVariable(DataStoreDbPathEnv);
+        var raw = GetEnv(DataStoreDbPathEnv);
         return string.IsNullOrWhiteSpace(raw) ? DefaultDbPath : raw.Trim();
     }
 
     private string GetBackend()
     {
-        var raw = (System.Environment.GetEnvironmentVariable(DataStoreBackendEnv) ?? string.Empty).Trim().ToLowerInvariant();
+        var raw = (GetEnv(DataStoreBackendEnv) ?? string.Empty).Trim().ToLowerInvariant();
         return string.IsNullOrWhiteSpace(raw) ? "auto" : raw;
     }
 

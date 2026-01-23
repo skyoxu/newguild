@@ -32,7 +32,7 @@ func test_perf_tracker_writes_perf_json_with_expected_shape() -> void:
 
 	var script := load(PERF_TRACKER_CS)
 	assert_object(script).is_not_null()
-	var tracker := script.new()
+	var tracker = script.new()
 	if tracker == null:
 		tracker = Node.new()
 		tracker.set_script(script)
@@ -41,7 +41,7 @@ func test_perf_tracker_writes_perf_json_with_expected_shape() -> void:
 	tracker.set("WindowFrames", 5)
 	tracker.set("FlushIntervalSec", 0.0)
 
-	add_child_autofree(tracker)
+	get_tree().get_root().add_child(auto_free(tracker))
 	await _wait_frames(10)
 
 	assert_bool(FileAccess.file_exists(PERF_JSON_USER)).is_true()

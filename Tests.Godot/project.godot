@@ -16,3 +16,7 @@ enabled=PackedStringArray("gdUnit4")
 
 project/assembly_name="Tests.Godot"
 project/project_path="res://Tests.Godot.csproj"
+
+[autoload]
+
+EventBus="*res://Game.Godot/Adapters/EventBusAdapter.cs"

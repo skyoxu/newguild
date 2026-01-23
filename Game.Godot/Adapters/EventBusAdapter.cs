@@ -195,10 +195,8 @@ public partial class EventBusAdapter : Node, IEventBus
         if (OS.IsDebugBuild())
             return true;
 
-        return string.Equals(
-            System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"),
-            "1",
-            StringComparison.Ordinal);
+        return string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
+               string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal);
     }
 
     private static int GetAuditFlushTimeoutMs()

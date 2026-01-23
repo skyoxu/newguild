@@ -15,7 +15,8 @@ func test_guild_panel_has_required_nodes() -> void:
 	await get_tree().process_frame
 
 	# Verify UI structure
-	var guild_name_label: Label = scene.get_node("VBox/GuildInfo/GuildNameLabel")
+	var guild_name_input: LineEdit = scene.get_node("VBox/GuildInfo/GuildNameRow/GuildNameInput")
+	var status_label: Label = scene.get_node("VBox/GuildInfo/StatusLabel")
 	var member_count_label: Label = scene.get_node("VBox/GuildInfo/MemberCountLabel")
 	var members_list: ItemList = scene.get_node("VBox/MembersList")
 	var create_button: Button = scene.get_node("VBox/Actions/CreateGuildButton")
@@ -27,7 +28,8 @@ func test_guild_panel_has_required_nodes() -> void:
 	var demote_button: Button = scene.get_node("VBox/RosterActions/MemberActionsRow/DemoteButton")
 	var kick_button: Button = scene.get_node("VBox/RosterActions/MemberActionsRow/KickButton")
 
-	assert_object(guild_name_label).is_not_null()
+	assert_object(guild_name_input).is_not_null()
+	assert_object(status_label).is_not_null()
 	assert_object(member_count_label).is_not_null()
 	assert_object(members_list).is_not_null()
 	assert_object(create_button).is_not_null()
@@ -44,7 +46,8 @@ func test_guild_panel_initial_state() -> void:
 	add_child(auto_free(scene))
 	await get_tree().process_frame
 
-	var guild_name_label: Label = scene.get_node("VBox/GuildInfo/GuildNameLabel")
+	var guild_name_input: LineEdit = scene.get_node("VBox/GuildInfo/GuildNameRow/GuildNameInput")
+	var status_label: Label = scene.get_node("VBox/GuildInfo/StatusLabel")
 	var member_count_label: Label = scene.get_node("VBox/GuildInfo/MemberCountLabel")
 	var members_list: ItemList = scene.get_node("VBox/MembersList")
 	var create_button: Button = scene.get_node("VBox/Actions/CreateGuildButton")
@@ -56,7 +59,9 @@ func test_guild_panel_initial_state() -> void:
 	var kick_button: Button = scene.get_node("VBox/RosterActions/MemberActionsRow/KickButton")
 
 	# Initial state: no guild
-	assert_str(guild_name_label.text).is_equal("Guild: None")
+	assert_str(status_label.text).is_equal("")
+	assert_str(guild_name_input.text).is_equal("")
+	assert_bool(guild_name_input.editable).is_true()
 	assert_str(member_count_label.text).is_equal("Members: 0")
 	assert_int(members_list.item_count).is_equal(0)
 	assert_bool(create_button.disabled).is_false()

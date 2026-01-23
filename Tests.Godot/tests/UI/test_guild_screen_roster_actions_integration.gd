@@ -22,8 +22,8 @@ func before() -> void:
 	_logger = _new_csharp_node("res://Game.Godot/Adapters/LoggerAdapter.cs", "Logger")
 	get_tree().get_root().add_child(auto_free(_logger))
 
-	_bus = _new_csharp_node("res://Game.Godot/Adapters/EventBusAdapter.cs", "EventBus")
-	get_tree().get_root().add_child(auto_free(_bus))
+	_bus = get_node_or_null("/root/EventBus")
+	assert_object(_bus).is_not_null()
 
 	_session = _new_csharp_node("res://Game.Godot/Scripts/Autoload/PlayerSession.cs", "PlayerSession")
 	get_tree().get_root().add_child(auto_free(_session))
@@ -61,7 +61,7 @@ func _item_text(members_list: ItemList, user_id: String) -> String:
 # ACC:T13.3
 func test_roster_actions_update_member_list_via_events() -> void:
 	var screen := await _guild_screen()
-	var panel: Node = screen.get_node("GuildPanel")
+	var panel: Node = screen.get_node("Scroll/GuildPanel")
 
 	var create_button: Button = panel.get_node("VBox/Actions/CreateGuildButton")
 	var members_list: ItemList = panel.get_node("VBox/MembersList")

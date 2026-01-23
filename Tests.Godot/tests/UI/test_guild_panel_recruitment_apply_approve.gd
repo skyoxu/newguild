@@ -13,30 +13,32 @@ var _logger: Node
 var _emitted_types: Array[String] = []
 
 func _new_csharp_node(script_path: String, node_name: String) -> Node:
-	var n := Node.new()
-	n.set_script(load(script_path))
+	var s = load(script_path)
+	if s == null or not s.has_method("new"):
+		push_warning("SKIP: CSharpScript.new() unavailable: %s" % script_path)
+		return null
+	var n = s.new()
 	n.name = node_name
 	return n
 
 func before() -> void:
 	_emitted_types.clear()
 	var suffix := str(Time.get_unix_time_from_system()) + "-" + str(randi() % 1000000)
-	OS.set_environment("GD_GUILD_DB_PATH", "user://gdunit/gdunit-recruitment-" + suffix + ".db")
+	OS.set_environment("GD_GUILD_DB_PATH", "gdunit/gdunit-recruitment-" + suffix + ".db")
 	OS.set_environment("SECURITY_TEST_MODE", "1")
 
-	_logger = _new_csharp_node("res://Game.Godot/Adapters/LoggerAdapter.cs", "Logger")
-	get_tree().get_root().add_child(auto_free(_logger))
-
-	_bus = _new_csharp_node("res://Game.Godot/Adapters/EventBusAdapter.cs", "EventBus")
-	get_tree().get_root().add_child(auto_free(_bus))
+	_bus = get_node_or_null("/root/EventBus")
+	assert_object(_bus).is_not_null()
 	var cb := Callable(self, "_on_evt")
 	if not _bus.is_connected("DomainEventEmitted", cb):
 		_bus.connect("DomainEventEmitted", cb)
 
 	_session = _new_csharp_node("res://Game.Godot/Scripts/Autoload/PlayerSession.cs", "PlayerSession")
+	assert_object(_session).is_not_null()
 	get_tree().get_root().add_child(auto_free(_session))
 
 	_guild_manager = _new_csharp_node("res://Game.Godot/Scripts/Autoload/GuildManager.cs", "GuildManager")
+	assert_object(_guild_manager).is_not_null()
 	get_tree().get_root().add_child(auto_free(_guild_manager))
 
 	await get_tree().process_frame
@@ -128,7 +130,7 @@ func test_recruitment_apply_contract_and_optional_ui_smoke() -> void:
 	assert_str(presented_cs).contains("core.recruitment.offer.presented")
 
 	var screen := await _guild_screen()
-	var panel: Node = screen.get_node_or_null("GuildPanel")
+	var panel: Node = screen.get_node_or_null("Scroll/GuildPanel")
 	assert_object(panel).is_not_null()
 
 	await _ensure_guild_created(panel)
@@ -140,7 +142,7 @@ func test_recruitment_apply_contract_and_optional_ui_smoke() -> void:
 
 	var candidate_input = controls.get("candidate_input")
 	assert_bool(candidate_input is LineEdit).is_true()
-	(candidate_input as LineEdit).text = "u2"
+	(candidate_input as LineEdit).text = "u3"
 
 	_emitted_types.clear()
 	(apply_button as Button).pressed.emit()
@@ -153,7 +155,7 @@ func test_recruitment_approve_contract_and_optional_ui_smoke() -> void:
 	assert_str(resolved_cs).contains("core.recruitment.offer.resolved")
 
 	var screen := await _guild_screen()
-	var panel: Node = screen.get_node_or_null("GuildPanel")
+	var panel: Node = screen.get_node_or_null("Scroll/GuildPanel")
 	assert_object(panel).is_not_null()
 
 	await _ensure_guild_created(panel)

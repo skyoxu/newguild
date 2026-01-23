@@ -57,7 +57,13 @@ public partial class SecurityHttpClient : Node
 
     private bool Block(string evt, string url, string reason)
     {
-        EmitSignal(SignalName.RequestBlocked, reason, url);
+        // GDScript/C# signal name casing can differ depending on binding; emit the canonical name and
+        // a snake_case alias if present, without duplicating when they resolve to the same underlying name.
+        var primaryName = SignalName.RequestBlocked.ToString();
+        if (HasSignal(SignalName.RequestBlocked))
+            EmitSignal(SignalName.RequestBlocked, reason, url);
+        if (!string.Equals(primaryName, "request_blocked", StringComparison.Ordinal) && HasSignal("request_blocked"))
+            EmitSignal("request_blocked", reason, url);
         Audit(evt, url, reason);
         return false;
     }
