@@ -12,6 +12,7 @@ namespace Game.Core.Tests.CI;
 
 public sealed class Task23QualityGatesAcceptanceTests
 {
+    // ACC:T42.8
     // ACC:T23.1
     [Fact]
     public void Should_ValidateAuditJsonl_AndEmitReport_AndExitNonZeroOnInvalidEntries()

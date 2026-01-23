@@ -10,6 +10,7 @@ ADR-Refs:
 Test-Refs:
   - Game.Core.Tests/Contracts/DomainEventTests.cs
   - Game.Core.Tests/Domain/PersistenceContractsTests.cs
+  - Game.Core.Tests/Contracts/GameStateManagerEventsContractsTests.cs
 Contracts-Refs:
   - Game.Core/Contracts/DomainEvent.cs
   - Game.Core/Contracts/Persistence/SaveRequested.cs
@@ -19,6 +20,11 @@ Contracts-Refs:
   - Game.Core/Contracts/Persistence/LoadCompleted.cs
   - Game.Core/Contracts/Persistence/LoadFailed.cs
   - Game.Core/Contracts/Persistence/SaveFormatMigrationApplied.cs
+  - Game.Core/Contracts/Persistence/SaveDeleted.cs
+  - Game.Core/Contracts/Persistence/AutoSaveEnabled.cs
+  - Game.Core/Contracts/Persistence/AutoSaveDisabled.cs
+  - Game.Core/Contracts/Persistence/AutoSaveCompleted.cs
+  - Game.Core/Contracts/State/GameStateUpdated.cs
 Status: Proposed
 ---
 
@@ -51,3 +57,22 @@ Status: Proposed
 - **LoadCompleted** (`core.load.completed`)：`Game.Core/Contracts/Persistence/LoadCompleted.cs`
 - **LoadFailed** (`core.load.failed`)：`Game.Core/Contracts/Persistence/LoadFailed.cs`
 - **SaveFormatMigrationApplied** (`core.save.format.migration.applied`)：`Game.Core/Contracts/Persistence/SaveFormatMigrationApplied.cs`
+
+
+补充：状态/存档相关事件契约（per ADR-0004）
+
+- **SaveDeleted** (core.save.deleted)：Game.Core/Contracts/Persistence/SaveDeleted.cs
+  - 触发时机：DeleteSaveAsync 成功删除存档后
+  - 字段：SaveId, DeletedAt
+- **AutoSaveEnabled** (core.autosave.enabled)：Game.Core/Contracts/Persistence/AutoSaveEnabled.cs
+  - 触发时机：EnableAutoSave 调用生效后
+  - 字段：IntervalMs, EnabledAt
+- **AutoSaveDisabled** (core.autosave.disabled)：Game.Core/Contracts/Persistence/AutoSaveDisabled.cs
+  - 触发时机：DisableAutoSave 调用生效后
+  - 字段：DisabledAt
+- **AutoSaveCompleted** (core.autosave.completed)：Game.Core/Contracts/Persistence/AutoSaveCompleted.cs
+  - 触发时机：AutoSaveTickAsync 自动存档完成后
+  - 字段：SaveId, IntervalMs, CompletedAt
+- **GameStateUpdated** (core.game_state.updated)：Game.Core/Contracts/State/GameStateUpdated.cs
+  - 触发时机：SetState 更新当前游戏状态后
+  - 字段：StateId, HasConfig, UpdatedAt

@@ -240,6 +240,8 @@ def step_test_quality_soft(out_dir: Path, triplet: TaskmasterTriplet, *, strict:
         ]
     )
     taskdoc_path = Path(triplet.taskdoc_path) if triplet.taskdoc_path else None
+    layer = str(((triplet.gameplay or {}).get("layer") or (triplet.back or {}).get("layer") or triplet.master.get("layer") or "")).strip() or None
+
 
     report = assess_test_quality(
         repo_root=repo_root(),
@@ -247,6 +249,7 @@ def step_test_quality_soft(out_dir: Path, triplet: TaskmasterTriplet, *, strict:
         title=title,
         details_blob=details_blob,
         taskdoc_path=taskdoc_path,
+        layer=layer,
     )
     write_json(out_dir / "test-quality.json", report)
 

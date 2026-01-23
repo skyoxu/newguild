@@ -1502,13 +1502,35 @@
           "CH07"
         ],
         "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Events-ContentDriven.md",
+        "testRefs": [
+          "Game.Core.Tests/Engine/GameEngineCoreEventTests.cs",
+          "Tests.Godot/tests/Scenes/test_main_scene_signals.gd",
+          "Game.Core.Tests/Tasks/Task42EventTypePrefixMigrationTests.cs",
+          "Game.Core.Tests/Docs/OverlayGuildManagerEventExamplesConsistencyTests.cs",
+          "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+          "Game.Core.Tests/Domain/GameLoopContractsTests.cs",
+          "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+          "Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs"
+        ],
+        "acceptance": [
+          "Game.Core 与 Tests 中不再存在旧事件类型（legacy，例如 game/started、score/changed、player.health/changed），全部迁移为 core.*.* 命名。 Refs: Game.Core.Tests/Tasks/Task42EventTypePrefixMigrationTests.cs",
+          "GameEngineCoreEventTests 覆盖新的事件类型常量，并全部通过。 Refs: Game.Core.Tests/Engine/GameEngineCoreEventTests.cs",
+          "Overlay 08-Contracts-Guild-Manager-Events.md 与 08-FeatureSlice-Guild-Manager.md 中的事件示例与实际事件类型保持一致。 Refs: Game.Core.Tests/Docs/OverlayGuildManagerEventExamplesConsistencyTests.cs",
+          "一次 signal 自检（例如全文搜索）可以证明仓库内仅保留 core.*.* 作为事件命名前缀。 Refs: Game.Core.Tests/Tasks/Task42EventTypePrefixMigrationTests.cs",
+          "应完成：事件命名统一迁移（game.* → core.*.*） Refs: Game.Core.Tests/Engine/GameEngineCoreEventTests.cs",
+          "应有测试：至少包含并通过 testRefs 引用的测试（2 个）。 Refs: Game.Core.Tests/Engine/GameEngineCoreEventTests.cs",
+          "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.ai.cycle.completed, core.ai.cycle.started, core.ai.ecosystem.step.completed, core.ai.intent.issued, core.content.manifest.loaded, core.event_catalog.loaded, core.game.ended, core.game.started ...）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs Game.Core.Tests/Domain/GameLoopContractsTests.cs",
+          "应留证：在 logs/** 下产出最小审计/门禁证据（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs",
+          "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.ai.cycle.completed, core.ai.cycle.started, core.ai.ecosystem.step.completed, core.ai.intent.issued, core.content.manifest.loaded, core.event_catalog.loaded, core.game.ended, core.game.started ...）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs Game.Core.Tests/Domain/GameLoopContractsTests.cs",
+          "Godot 场景信号/事件桥接冒烟：主场景可启动且不会发布旧的 game.* 事件类型（至少覆盖一次 Create/Play/进入主场景的最小路径）。 Refs: Tests.Godot/tests/Scenes/test_main_scene_signals.gd"
+        ],
         "priority": "high",
         "complexity": 4,
         "dependencies": [
           "3",
           "4"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611872+00:00"
@@ -1550,7 +1572,7 @@
         "dependencies": [
           "2"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611877+00:00"

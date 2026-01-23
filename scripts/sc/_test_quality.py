@@ -46,6 +46,19 @@ def _is_ui_task(*, title: str, details_blob: str) -> bool:
     return False
 
 
+_UI_LAYERS = {"ui", "screen", "gameplay"}
+_NON_UI_LAYERS = {"core", "back", "infra", "contracts", "data"}
+
+
+def _infer_ui_task(*, layer: str | None, title: str, details_blob: str) -> tuple[bool, str]:
+    normalized = (layer or "").strip().lower()
+    if normalized in _UI_LAYERS:
+        return True, f"layer:{normalized}"
+    if normalized in _NON_UI_LAYERS:
+        return False, f"layer:{normalized}"
+    return _is_ui_task(title=title, details_blob=details_blob), "heuristic:text"
+
+
 def _extract_events_from_taskdoc(taskdoc_path: Path | None) -> dict[str, list[str]]:
     if not taskdoc_path or not taskdoc_path.is_file():
         return {"core": [], "ui": []}
@@ -77,8 +90,9 @@ def assess_test_quality(
     title: str,
     details_blob: str,
     taskdoc_path: Path | None,
+    layer: str | None = None,
 ) -> dict[str, Any]:
-    ui_task = _is_ui_task(title=title, details_blob=details_blob)
+    ui_task, ui_task_reason = _infer_ui_task(layer=layer, title=title, details_blob=details_blob)
     taskdoc_events = _extract_events_from_taskdoc(taskdoc_path)
 
     tests_root = repo_root / "Tests.Godot" / "tests"
@@ -150,7 +164,9 @@ def assess_test_quality(
     return {
         "task_id": str(task_id),
         "title": title,
+        "layer": (layer or "").strip() or None,
         "ui_task": ui_task,
+        "ui_task_reason": ui_task_reason,
         "taskdoc_path": _to_posix(taskdoc_path) if taskdoc_path else None,
         "taskdoc_events": taskdoc_events,
         "gdunit": {

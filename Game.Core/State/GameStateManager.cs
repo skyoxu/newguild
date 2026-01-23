@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Game.Core.Contracts;
 using Game.Core.Contracts.Persistence;
+using Game.Core.Contracts.State;
 using Game.Core.Domain;
 using Game.Core.Ports;
 
@@ -33,12 +34,13 @@ public class GameStateManager
         if (config is not null)
             _currentConfig = config with { };
 
+        var nowOffset = DateTimeOffset.UtcNow;
         Publish(new DomainEvent(
-            Type: "game.state.manager.updated",
+            Type: GameStateUpdated.EventType,
             Source: nameof(GameStateManager),
-            Data: new { state, config },
-            Timestamp: DateTime.UtcNow,
-            Id: $"state-update-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            Data: new GameStateUpdated(StateId: state.Id, HasConfig: config is not null, UpdatedAt: nowOffset),
+            Timestamp: nowOffset.UtcDateTime,
+            Id: $"state-update-{nowOffset.ToUnixTimeMilliseconds()}"
         ));
     }
 
@@ -163,12 +165,13 @@ public class GameStateManager
         await _store.DeleteAsync(saveId);
         await UpdateIndexAsync(remove: saveId);
 
+        var nowOffset = DateTimeOffset.UtcNow;
         Publish(new DomainEvent(
-            Type: "game.save.deleted",
+            Type: SaveDeleted.EventType,
             Source: nameof(GameStateManager),
-            Data: new { saveId },
-            Timestamp: DateTime.UtcNow,
-            Id: $"delete-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            Data: new SaveDeleted(saveId, nowOffset),
+            Timestamp: nowOffset.UtcDateTime,
+            Id: $"delete-{nowOffset.ToUnixTimeMilliseconds()}"
         ));
     }
 
@@ -197,12 +200,13 @@ public class GameStateManager
     {
         if (_autoSaveEnabled) return;
         _autoSaveEnabled = true;
+        var nowOffset = DateTimeOffset.UtcNow;
         Publish(new DomainEvent(
-            Type: "game.autosave.enabled",
+            Type: AutoSaveEnabled.EventType,
             Source: nameof(GameStateManager),
-            Data: new { interval = _options.AutoSaveInterval.TotalMilliseconds },
-            Timestamp: DateTime.UtcNow,
-            Id: $"autosave-enable-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            Data: new AutoSaveEnabled(_options.AutoSaveInterval.TotalMilliseconds, nowOffset),
+            Timestamp: nowOffset.UtcDateTime,
+            Id: $"autosave-enable-{nowOffset.ToUnixTimeMilliseconds()}"
         ));
     }
 
@@ -210,12 +214,13 @@ public class GameStateManager
     {
         if (!_autoSaveEnabled) return;
         _autoSaveEnabled = false;
+        var nowOffset = DateTimeOffset.UtcNow;
         Publish(new DomainEvent(
-            Type: "game.autosave.disabled",
+            Type: AutoSaveDisabled.EventType,
             Source: nameof(GameStateManager),
-            Data: new { },
-            Timestamp: DateTime.UtcNow,
-            Id: $"autosave-disable-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+            Data: new AutoSaveDisabled(nowOffset),
+            Timestamp: nowOffset.UtcDateTime,
+            Id: $"autosave-disable-{nowOffset.ToUnixTimeMilliseconds()}"
         ));
     }
 
@@ -224,13 +229,14 @@ public class GameStateManager
     {
         if (_autoSaveEnabled && _currentState is not null && _currentConfig is not null)
         {
-            await SaveGameAsync($"auto-save-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
+            var nowOffset = DateTimeOffset.UtcNow;
+            var saveId = await SaveGameAsync($"auto-save-{nowOffset.ToUnixTimeMilliseconds()}");
             Publish(new DomainEvent(
-                Type: "game.autosave.completed",
+                Type: AutoSaveCompleted.EventType,
                 Source: nameof(GameStateManager),
-                Data: new { interval = _options.AutoSaveInterval.TotalMilliseconds },
-                Timestamp: DateTime.UtcNow,
-                Id: $"autosave-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+                Data: new AutoSaveCompleted(saveId, _options.AutoSaveInterval.TotalMilliseconds, nowOffset),
+                Timestamp: nowOffset.UtcDateTime,
+                Id: $"autosave-{nowOffset.ToUnixTimeMilliseconds()}"
             ));
         }
     }
