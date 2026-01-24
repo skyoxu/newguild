@@ -753,7 +753,8 @@
       "json"
     ],
     "contractRefs": [
-      "core.content.manifest.loaded"
+      "core.content.manifest.loaded",
+      "core.event_catalog.loaded"
     ],
     "artifactRefs": [
       "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
@@ -767,7 +768,8 @@
       "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
       "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
       "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd",
-      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.content.manifest.loaded）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.content.manifest.loaded）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "启动接线：Main.tscn 启动时加载 res://Game.Godot/Assets/Data/content/base/manifest.json 并发布 core.content.manifest.loaded（payload entryCount>0，失败可定位）。 Refs: Tests.Godot/tests/Content/test_content_manifest_emits_loaded_event.gd"
     ],
     "test_strategy": [
       "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
@@ -778,6 +780,7 @@
     ],
     "test_refs": [
       "Tests.Godot/tests/Content/test_content_manifest_load.gd",
+      "Tests.Godot/tests/Content/test_content_manifest_emits_loaded_event.gd",
       "Game.Core.Tests/Services/ContentManifestParserTests.cs",
       "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
       "Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",

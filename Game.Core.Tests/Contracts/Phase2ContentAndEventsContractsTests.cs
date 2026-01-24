@@ -8,12 +8,14 @@ namespace Game.Core.Tests.Contracts;
 public class Phase2ContentAndEventsContractsTests
 {
     // ACC:T42.7
+    // ACC:T27.5
     [Fact]
     public void Should_Have_CoreContentManifestLoaded_EventType()
     {
         ContentManifestLoaded.EventType.Should().Be("core.content.manifest.loaded");
     }
 
+    // ACC:T27.9
     [Fact]
     public void Should_Have_CoreEventCatalogLoaded_EventType()
     {

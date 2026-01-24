@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://Game.Godot/Scripts/UI/SettingsLoader.cs" id="11"]
 [ext_resource type="Script" path="res://Game.Godot/Scripts/Navigation/ScreenNavigator.cs" id="13"]
 [ext_resource type="Script" path="res://Game.Godot/Scripts/Bootstrap/InputMapper.cs" id="12"]
+[ext_resource type="Script" path="res://Game.Godot/Scripts/Bootstrap/ContentManifestBootstrapper.cs" id="14"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -23,6 +24,10 @@ theme = ExtResource("5")
 
 [node name="InputMapper" type="Node" parent="."]
 script = ExtResource("12")
+theme = ExtResource("5")
+
+[node name="ContentManifestBootstrapper" type="Node" parent="."]
+script = ExtResource("14")
 theme = ExtResource("5")
 
 [node name="SettingsLoader" type="Node" parent="."]
