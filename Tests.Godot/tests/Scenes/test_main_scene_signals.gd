@@ -3,6 +3,11 @@ extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 const CONTRACTS_DIR := "res://Game.Core/Contracts"
 const MAIN_SCENE_SETTING_KEY := "application/run/main_scene"
 
+func after_test() -> void:
+	# Allow queued frees from auto_free()/queue_free() to be processed before orphan detection.
+	await get_tree().process_frame
+	await get_tree().process_frame
+
 func _read_text(path: String) -> String:
 	if not FileAccess.file_exists(path):
 		return ""
@@ -85,7 +90,8 @@ func test_main_scene_smoke_loads_and_runs_one_frame() -> void:
 		assert_bool(false).is_true()
 		return
 
-	get_tree().root.add_child(instance)
+	add_child(instance)
+	auto_free(instance)
 	await get_tree().process_frame
 	assert_bool(is_instance_valid(instance)).is_true()
 
@@ -99,8 +105,6 @@ func test_main_scene_smoke_loads_and_runs_one_frame() -> void:
 	if legacy_hits.size() > 0:
 		# Informational only: this scan is intentionally broad and may include non-event strings (e.g., CloudEvents `source`).
 		push_warning("Legacy string candidates detected (scan=\\\"\\\"game.\\\"\\\"): %s" % str(legacy_hits))
-
-	(instance as Node).queue_free()
 	await get_tree().process_frame
 
 func test_contract_eventtype_constants_use_core_prefix() -> void:

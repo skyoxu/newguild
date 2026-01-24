@@ -29,28 +29,29 @@ public sealed partial class ContentManifestBootstrapper : Node
         var bus = GetNodeOrNull<Game.Godot.Adapters.EventBusAdapter>("/root/EventBus");
         if (bus is null)
         {
-            GD.PushWarning("[ContentManifestBootstrapper] EventBus not found; skipping manifest load.");
+            GD.PrintErr("[ContentManifestBootstrapper] EventBus not found; skipping manifest load.");
             return;
         }
 
         var safeManifestPath = SafeResourcePath.FromString(ManifestPath);
         if (safeManifestPath is null || safeManifestPath.Type != PathType.ReadOnly)
         {
-            GD.PushWarning($"[ContentManifestBootstrapper] Manifest path is not a res:// path: '{ManifestPath}'.");
-            return;
-        }
-
-        // Do not rely on /root/ResourceLoader (it may not exist before CompositionRoot finishes wiring).
-        var loader = new Game.Godot.Adapters.ResourceLoaderAdapter();
-        var json = loader.LoadText(safeManifestPath);
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            GD.PushWarning($"[ContentManifestBootstrapper] Manifest is missing or empty: '{ManifestPath}'.");
+            GD.PrintErr($"[ContentManifestBootstrapper] Manifest path is not a res:// path: '{ManifestPath}'.");
             return;
         }
 
         try
         {
+            // Do not rely on /root/ResourceLoader (it may not exist in tests or before CompositionRoot wiring).
+            // Use FileAccess directly to avoid creating orphan Nodes that break strict GdUnit smoke runs.
+            using var f = FileAccess.Open(safeManifestPath.Value, FileAccess.ModeFlags.Read);
+            var json = f?.GetAsText();
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                GD.PrintErr($"[ContentManifestBootstrapper] Manifest is missing or empty: '{ManifestPath}'.");
+                return;
+            }
+
             var manifest = ContentManifestParser.Parse(json);
             var loadedAt = DateTimeOffset.UtcNow;
 
@@ -71,8 +72,7 @@ public sealed partial class ContentManifestBootstrapper : Node
         }
         catch (Exception ex)
         {
-            GD.PushWarning($"[ContentManifestBootstrapper] Failed to load manifest path={ManifestPath} exType={ex.GetType().Name} msg={ex.Message}");
+            GD.PrintErr($"[ContentManifestBootstrapper] Failed to load manifest path={ManifestPath} exType={ex.GetType().Name} msg={ex.Message}");
         }
     }
 }
-
