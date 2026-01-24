@@ -5,6 +5,8 @@ func after_test() -> void:
     await get_tree().process_frame
     await get_tree().process_frame
 
+# ACC:T27.6
+# ACC:T27.7
 func test_t2_playable_loop_scene_skeleton() -> void:
     var scene := preload("res://Game.Godot/Scenes/Main.tscn").instantiate()
     add_child(scene)
