@@ -12,19 +12,19 @@ func _read_text_utf8(path: String) -> String:
 	return file.get_as_text()
 
 func _parse_manifest_entries(json_text: String) -> Array:
-	var parsed := JSON.parse_string(json_text)
+	var parsed = JSON.parse_string(json_text)
 	if parsed == null:
 		return []
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return []
-	var dict := parsed as Dictionary
-	var entries := dict.get("entries", [])
+	var dict = parsed as Dictionary
+	var entries = dict.get("files", [])
 	if typeof(entries) != TYPE_ARRAY:
 		return []
 	return entries
 
 func _try_load_manifest_entries(path: String) -> Dictionary:
-	var result := {
+	var result = {
 		"ok": false,
 		"path": path,
 		"entries": [],
@@ -50,7 +50,7 @@ func _try_load_manifest_entries(path: String) -> Dictionary:
 	return result
 
 func _sample_manifest_json() -> String:
-	return "{\"manifest_id\":\"sample\",\"schema_version\":\"1\",\"entries\":[{\"id\":\"e1\",\"path\":\"res://dummy\",\"type\":\"text\"}]}"
+	return "{\"contentVersion\":\"1.0.0\",\"packId\":\"Base\",\"idNamespacePrefix\":\"Base_\",\"files\":[\"tuning.json\"]}"
 
 # ACC:T27.1
 func test_manifest_path_constant_is_canonical() -> void:
@@ -70,10 +70,7 @@ func test_loader_returns_locatable_error_on_missing_manifest() -> void:
 func test_sample_manifest_json_parses_to_entries_list() -> void:
 	var entries := _parse_manifest_entries(_sample_manifest_json())
 	assert_int(entries.size()).is_equal(1)
-	assert_bool(typeof(entries[0]) == TYPE_DICTIONARY).is_true()
-	var entry := entries[0] as Dictionary
-	assert_str(str(entry.get("id", ""))).is_equal("e1")
-	assert_str(str(entry.get("path", ""))).starts_with("res://")
+	assert_str(str(entries[0])).ends_with(".json")
 
 # ACC:T27.4
 func test_real_manifest_loads_and_has_entries() -> void:
