@@ -11,6 +11,16 @@ const EVT_REPUTATION_CHANGED := "core.reputation.changed"
 const EVT_RAID_RESOLVED := "core.raid.resolved"
 const EVT_MEDIA_BEAT_TRIGGERED := "core.media.beat.triggered"
 
+const PATH_GUILD_NAME_INPUT := NodePath("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput")
+const PATH_CREATE_GUILD_BUTTON := NodePath("Scroll/Margin/VBox/Actions/CreateGuildButton")
+const PATH_USER_ID_INPUT := NodePath("Scroll/Margin/VBox/RosterActions/UserIdRow/UserIdInput")
+const PATH_JOIN_BUTTON := NodePath("Scroll/Margin/VBox/RosterActions/MemberActionsRow/JoinButton")
+const PATH_MEMBERS_LIST := NodePath("Scroll/Margin/VBox/MembersList")
+const PATH_CANDIDATE_ID_INPUT := NodePath("Scroll/Margin/VBox/RecruitmentSection/CandidateIdRow/CandidateIdInput")
+const PATH_APPLY_BUTTON := NodePath("Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow/ApplyButton")
+const PATH_APPROVE_BUTTON := NodePath("Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow/ApproveButton")
+const PATH_OFFERS_LIST := NodePath("Scroll/Margin/VBox/RecruitmentSection/OffersList")
+
 var _event_types: Array[String] = []
 
 func _ready() -> void:
@@ -97,18 +107,21 @@ func _run() -> void:
 	get_tree().get_root().add_child(panel)
 	await get_tree().process_frame
 
-	_require(panel.has_node("VBox/Actions/CreateGuildButton"), "GuildPanel missing CreateGuildButton")
-	var create_btn: Button = panel.get_node("VBox/Actions/CreateGuildButton")
+	_require(panel.has_node(PATH_GUILD_NAME_INPUT), "GuildPanel missing GuildNameInput")
+	_require(panel.has_node(PATH_CREATE_GUILD_BUTTON), "GuildPanel missing CreateGuildButton")
+	var guild_name_input: LineEdit = panel.get_node(PATH_GUILD_NAME_INPUT)
+	guild_name_input.text = "WiringGuild"
+	var create_btn: Button = panel.get_node(PATH_CREATE_GUILD_BUTTON)
 	create_btn.pressed.emit()
 	var ok_guild := await _wait_for_type(EVT_GUILD_CREATED, 1, 240)
 	_require(ok_guild, "Did not observe event: " + EVT_GUILD_CREATED)
 
-	_require(panel.has_node("VBox/RosterActions/UserIdRow/UserIdInput"), "GuildPanel missing UserIdInput")
-	_require(panel.has_node("VBox/RosterActions/MemberActionsRow/JoinButton"), "GuildPanel missing JoinButton")
-	_require(panel.has_node("VBox/MembersList"), "GuildPanel missing MembersList")
-	var user_input: LineEdit = panel.get_node("VBox/RosterActions/UserIdRow/UserIdInput")
-	var join_btn: Button = panel.get_node("VBox/RosterActions/MemberActionsRow/JoinButton")
-	var members_list: ItemList = panel.get_node("VBox/MembersList")
+	_require(panel.has_node(PATH_USER_ID_INPUT), "GuildPanel missing UserIdInput")
+	_require(panel.has_node(PATH_JOIN_BUTTON), "GuildPanel missing JoinButton")
+	_require(panel.has_node(PATH_MEMBERS_LIST), "GuildPanel missing MembersList")
+	var user_input: LineEdit = panel.get_node(PATH_USER_ID_INPUT)
+	var join_btn: Button = panel.get_node(PATH_JOIN_BUTTON)
+	var members_list: ItemList = panel.get_node(PATH_MEMBERS_LIST)
 	user_input.text = "npc-0001"
 	join_btn.pressed.emit()
 	var ok_join := await _wait_for_type(EVT_GUILD_MEMBER_JOINED, 1, 240)
@@ -116,14 +129,14 @@ func _run() -> void:
 	await get_tree().process_frame
 	_require(members_list.item_count >= 1, "GuildPanel members list not updated")
 
-	_require(panel.has_node("VBox/RecruitmentSection/CandidateIdRow/CandidateIdInput"), "GuildPanel missing CandidateIdInput")
-	_require(panel.has_node("VBox/RecruitmentSection/RecruitmentActionsRow/ApplyButton"), "GuildPanel missing ApplyButton")
-	_require(panel.has_node("VBox/RecruitmentSection/RecruitmentActionsRow/ApproveButton"), "GuildPanel missing ApproveButton")
-	_require(panel.has_node("VBox/RecruitmentSection/OffersList"), "GuildPanel missing OffersList")
-	var candidate_input: LineEdit = panel.get_node("VBox/RecruitmentSection/CandidateIdRow/CandidateIdInput")
-	var apply_btn: Button = panel.get_node("VBox/RecruitmentSection/RecruitmentActionsRow/ApplyButton")
-	var approve_btn: Button = panel.get_node("VBox/RecruitmentSection/RecruitmentActionsRow/ApproveButton")
-	var offers_list: ItemList = panel.get_node("VBox/RecruitmentSection/OffersList")
+	_require(panel.has_node(PATH_CANDIDATE_ID_INPUT), "GuildPanel missing CandidateIdInput")
+	_require(panel.has_node(PATH_APPLY_BUTTON), "GuildPanel missing ApplyButton")
+	_require(panel.has_node(PATH_APPROVE_BUTTON), "GuildPanel missing ApproveButton")
+	_require(panel.has_node(PATH_OFFERS_LIST), "GuildPanel missing OffersList")
+	var candidate_input: LineEdit = panel.get_node(PATH_CANDIDATE_ID_INPUT)
+	var apply_btn: Button = panel.get_node(PATH_APPLY_BUTTON)
+	var approve_btn: Button = panel.get_node(PATH_APPROVE_BUTTON)
+	var offers_list: ItemList = panel.get_node(PATH_OFFERS_LIST)
 	candidate_input.text = "cand-0001"
 	apply_btn.pressed.emit()
 	var ok_offer := await _wait_for_type(EVT_RECRUITMENT_OFFER_PRESENTED, 1, 240)
