@@ -247,6 +247,14 @@ jobs:
           path: logs/ci/**
           if-no-files-found: ignore
 
+      - name: Upload unit logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-logs
+          path: logs/unit/**
+          if-no-files-found: ignore
+
       - name: GdUnit4 tests (Python, soft gate)
         shell: pwsh
         continue-on-error: true
