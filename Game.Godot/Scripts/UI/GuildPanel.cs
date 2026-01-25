@@ -78,24 +78,24 @@ public partial class GuildPanel : Control
     public override void _Ready()
     {
         // Get node references
-        _guildNameInput = GetNodeOrNull<LineEdit>("VBox/GuildInfo/GuildNameRow/GuildNameInput");
-        _memberCountLabel = GetNode<Label>("VBox/GuildInfo/MemberCountLabel");
-        _statusLabel = GetNodeOrNull<Label>("VBox/GuildInfo/StatusLabel") ?? new Label();
-        _createGuildButton = GetNode<Button>("VBox/Actions/CreateGuildButton");
-        _disbandGuildButton = GetNode<Button>("VBox/Actions/DisbandGuildButton");
-        _membersList = GetNode<ItemList>("VBox/MembersList");
-        _userIdInput = GetNode<LineEdit>("VBox/RosterActions/UserIdRow/UserIdInput");
-        _joinButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/JoinButton");
-        _leaveButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/LeaveButton");
-        _promoteButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/PromoteButton");
-        _demoteButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/DemoteButton");
-        _kickButton = GetNode<Button>("VBox/RosterActions/MemberActionsRow/KickButton");
-        _candidateIdInput = GetNode<LineEdit>("VBox/RecruitmentSection/CandidateIdRow/CandidateIdInput");
-        _offerIdInput = GetNode<LineEdit>("VBox/RecruitmentSection/OfferIdRow/OfferIdInput");
-        _offersList = GetNode<ItemList>("VBox/RecruitmentSection/OffersList");
-        _applyButton = GetNode<Button>("VBox/RecruitmentSection/RecruitmentActionsRow/ApplyButton");
-        _approveButton = GetNode<Button>("VBox/RecruitmentSection/RecruitmentActionsRow/ApproveButton");
-        _rejectButton = GetNode<Button>("VBox/RecruitmentSection/RecruitmentActionsRow/RejectButton");
+        _guildNameInput = GetNodeOrNull<LineEdit>("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput");
+        _memberCountLabel = GetNode<Label>("Scroll/Margin/VBox/GuildInfo/MemberCountLabel");
+        _statusLabel = GetNodeOrNull<Label>("Scroll/Margin/VBox/GuildInfo/StatusLabel") ?? new Label();
+        _createGuildButton = GetNode<Button>("Scroll/Margin/VBox/Actions/CreateGuildButton");
+        _disbandGuildButton = GetNode<Button>("Scroll/Margin/VBox/Actions/DisbandGuildButton");
+        _membersList = GetNode<ItemList>("Scroll/Margin/VBox/MembersList");
+        _userIdInput = GetNode<LineEdit>("Scroll/Margin/VBox/RosterActions/UserIdRow/UserIdInput");
+        _joinButton = GetNode<Button>("Scroll/Margin/VBox/RosterActions/MemberActionsRow/JoinButton");
+        _leaveButton = GetNode<Button>("Scroll/Margin/VBox/RosterActions/MemberActionsRow/LeaveButton");
+        _promoteButton = GetNode<Button>("Scroll/Margin/VBox/RosterActions/MemberActionsRow/PromoteButton");
+        _demoteButton = GetNode<Button>("Scroll/Margin/VBox/RosterActions/MemberActionsRow/DemoteButton");
+        _kickButton = GetNode<Button>("Scroll/Margin/VBox/RosterActions/MemberActionsRow/KickButton");
+        _candidateIdInput = GetNode<LineEdit>("Scroll/Margin/VBox/RecruitmentSection/CandidateIdRow/CandidateIdInput");
+        _offerIdInput = GetNode<LineEdit>("Scroll/Margin/VBox/RecruitmentSection/OfferIdRow/OfferIdInput");
+        _offersList = GetNode<ItemList>("Scroll/Margin/VBox/RecruitmentSection/OffersList");
+        _applyButton = GetNode<Button>("Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow/ApplyButton");
+        _approveButton = GetNode<Button>("Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow/ApproveButton");
+        _rejectButton = GetNode<Button>("Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow/RejectButton");
 
         // Connect button signals
         _createGuildButton.Pressed += OnCreateGuildPressed;
