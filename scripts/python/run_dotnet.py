@@ -20,6 +20,7 @@ import locale
 import shutil
 import subprocess
 import sys
+import time
 import xml.etree.ElementTree as ET
 import re
 
@@ -64,6 +65,24 @@ def run_cmd(args, cwd=None, timeout=900_000, env=None):
 
 def ensure_dir(path):
     os.makedirs(path, exist_ok=True)
+
+
+def _tail(text: str, max_lines: int = 120) -> str:
+    lines = (text or "").splitlines()
+    if len(lines) <= max_lines:
+        return "\n".join(lines)
+    return "\n".join(["... (truncated) ..."] + lines[-max_lines:])
+
+
+def _write_text(path: str, text: str) -> None:
+    with io.open(path, "w", encoding="utf-8") as f:
+        f.write(text or "")
+
+
+def _try_dotnet_info(root: str, out_dir: str, env: dict) -> None:
+    rc, out = run_cmd(["dotnet", "--info"], cwd=root, env=env)
+    _write_text(os.path.join(out_dir, "dotnet-info.txt"), out)
+    _write_text(os.path.join(out_dir, "dotnet-info.rc.txt"), str(rc))
 
 
 def parse_cobertura(path):
@@ -215,19 +234,54 @@ def main():
     env.setdefault("DOTNET_CLI_UI_LANGUAGE", "en")
     env.setdefault("DOTNET_NOLOGO", "1")
 
+    _try_dotnet_info(root, out_dir, env)
+
     # Restore
     #
     # NOTE: We intentionally avoid parallel restore for solution files because it can fail
     # non-deterministically on Windows (observed as exit code 1 with no output).
     # Running MSBuild restore with -m:1 is slower but stable and still uses NuGet restore.
-    rc, out = run_cmd(['dotnet', 'msbuild', args.solution, '-t:Restore', '-m:1', '-v:minimal'], cwd=root, env=env)
-    with io.open(os.path.join(out_dir, 'dotnet-restore.log'), 'w', encoding='utf-8') as f:
-        f.write(out)
+    restore_cmd = ['dotnet', 'msbuild', args.solution, '-t:Restore', '-m:1', '-v:minimal']
+    summary['restore_cmd'] = restore_cmd
+
+    max_attempts = int(os.environ.get("DOTNET_RESTORE_MAX_ATTEMPTS", "3") or "3")
+    max_attempts = max(1, min(5, max_attempts))
+    summary['restore_max_attempts'] = max_attempts
+
+    restore_attempts = []
+    rc = 1
+    out = ""
+    for attempt in range(1, max_attempts + 1):
+        rc, out = run_cmd(restore_cmd, cwd=root, env=env)
+        attempt_log = os.path.join(out_dir, f"dotnet-restore-attempt{attempt}.log")
+        _write_text(attempt_log, out)
+        restore_attempts.append({'attempt': attempt, 'rc': rc, 'log': attempt_log})
+        if rc == 0:
+            break
+        if attempt < max_attempts:
+            time.sleep(2 ** attempt)
+
+    summary['restore_attempts'] = restore_attempts
     summary['restore_rc'] = rc
+
     if rc != 0:
+        # Fallback: a diagnostic restore to improve evidence on hosted runners.
+        diag_cmd = ['dotnet', 'restore', args.solution, '--disable-parallel', '-v', 'diag']
+        diag_rc, diag_out = run_cmd(diag_cmd, cwd=root, env=env, timeout=1_800_000)
+        diag_log = os.path.join(out_dir, 'dotnet-restore-diag.log')
+        _write_text(diag_log, diag_out)
+        summary['restore_diag_cmd'] = diag_cmd
+        summary['restore_diag_rc'] = diag_rc
+        summary['restore_diag_log'] = diag_log
+
         with io.open(os.path.join(out_dir, 'summary.json'), 'w', encoding='utf-8') as f:
             json.dump(summary, f, ensure_ascii=False, indent=2)
+
         print(f'RUN_DOTNET status=fail stage=restore out={out_dir}')
+        if out.strip():
+            print(_tail(out))
+        if diag_out.strip():
+            print(_tail(diag_out))
         return 1
 
     # Test with coverage

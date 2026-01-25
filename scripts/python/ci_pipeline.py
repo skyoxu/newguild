@@ -74,9 +74,31 @@ def main():
     hard_fail = False
 
     # 1) Dotnet tests + coverage (hard gate on coverage; ADR-0005)
-    rc, out = run_cmd(['py', '-3', 'scripts/python/run_dotnet.py',
-                       '--solution', args.solution,
-                       '--configuration', args.configuration], cwd=root)
+    rc, out = run_cmd(
+        [
+            "py",
+            "-3",
+            "scripts/python/run_dotnet.py",
+            "--solution",
+            args.solution,
+            "--configuration",
+            args.configuration,
+        ],
+        cwd=root,
+    )
+    # Always persist dotnet stdout/stderr for forensics; workflow must upload logs/unit/** for root cause.
+    try:
+        dotnet_out_path = os.path.join("logs", "ci", date, "ci-pipeline-dotnet-stdout.txt")
+        ensure_dir(os.path.dirname(dotnet_out_path))
+        with io.open(dotnet_out_path, "w", encoding="utf-8") as f:
+            f.write(out)
+    except Exception as ex:
+        # Keep CI moving; this is only for diagnostics.
+        print(f"CI_PIPELINE WARN: failed to write dotnet stdout log: {type(ex).__name__}")
+
+    if rc != 0 and out.strip():
+        # Surface the first evidence to Actions log for faster triage when artifacts are missing/misconfigured.
+        print(out.strip())
     dotnet_sum = read_json(os.path.join('logs', 'unit', date, 'summary.json')) or {}
     summary['dotnet'] = {
         'rc': rc,
