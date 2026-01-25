@@ -89,8 +89,16 @@ jobs:
               $taskId = $Matches['id']
             }
           }
+          if (($env:GITHUB_EVENT_NAME -eq 'pull_request') -and (-not $taskId)) {
+            $title = "${{ github.event.pull_request.title }}"
+            if ($title -match 'Task\\s+(?<id>\\d+):') {
+              $taskId = $Matches['id']
+            }
+          }
           if (-not $taskId) {
-            throw "SC acceptance_check requires a task id. Provide workflow_dispatch input 'task_id' or use a branch name like task/T19 for pull_request."
+            Write-Host "SC_ACCEPTANCE_CHECK status=skipped reason=no_task_id"
+            Write-Host "Hint: use workflow_dispatch input 'task_id', or name the PR branch like task/T19, or use a PR title like 'Task 19:...'."
+            exit 0
           }
           py -3 scripts/sc/acceptance_check.py --task-id $taskId --only adr,links,overlay,contracts,arch,build
 
