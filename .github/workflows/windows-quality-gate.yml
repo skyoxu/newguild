@@ -83,24 +83,30 @@ jobs:
           if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
             $taskId = "${{ inputs.task_id }}"
           }
-          if (($env:GITHUB_EVENT_NAME -eq 'pull_request') -and (-not $taskId)) {
+          if (($env:GITHUB_EVENT_NAME -eq 'pull_request') -and ([string]::IsNullOrWhiteSpace($taskId))) {
             $branch = "${{ github.head_ref }}"
             if ($branch -match '(^|/)T(?<id>\d+)(-|$)') {
               $taskId = $Matches['id']
             }
           }
-          if (($env:GITHUB_EVENT_NAME -eq 'pull_request') -and (-not $taskId)) {
+          if (($env:GITHUB_EVENT_NAME -eq 'pull_request') -and ([string]::IsNullOrWhiteSpace($taskId))) {
             $title = "${{ github.event.pull_request.title }}"
             if ($title -match 'Task\\s+(?<id>\\d+):') {
               $taskId = $Matches['id']
             }
           }
-          if (-not $taskId) {
+          if ([string]::IsNullOrWhiteSpace($taskId)) {
             Write-Host "SC_ACCEPTANCE_CHECK status=skipped reason=no_task_id"
             Write-Host "Hint: use workflow_dispatch input 'task_id', or name the PR branch like task/T19, or use a PR title like 'Task 19:...'."
             exit 0
           }
+          Write-Host "SC_ACCEPTANCE_CHECK resolved task_id=$taskId"
           py -3 scripts/sc/acceptance_check.py --task-id $taskId --only adr,links,overlay,contracts,arch,build
+          $rc = $LASTEXITCODE
+          if ($rc -ne 0) {
+            py -3 -c "import json, pathlib; p=pathlib.Path(r'logs/ci')/('${{ env.CI_DATE }}')/'sc-acceptance-check'/'summary.json'; print(p.as_posix()); print(p.read_text(encoding='utf-8',errors='replace')[:4000] if p.exists() else 'summary.json missing')"
+            exit $rc
+          }
 
       - name: Dependency guard (hard gate)
         shell: pwsh
