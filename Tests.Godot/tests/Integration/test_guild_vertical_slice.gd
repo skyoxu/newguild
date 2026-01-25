@@ -38,14 +38,17 @@ func _guild_panel() -> Node:
 	await get_tree().process_frame
 	return panel
 
+# ACC:T30.4
+# Wiring and clickability: the Guild screen entry must be reachable and its critical buttons clickable (no overlay/mouse filter blocking).
+
 func test_vertical_slice_create_guild_flow() -> void:
 	var panel = await _guild_panel()
-	var status_label: Label = panel.get_node("VBox/GuildInfo/StatusLabel")
-	var guild_name_input: LineEdit = panel.get_node("VBox/GuildInfo/GuildNameRow/GuildNameInput")
-	var member_count_label: Label = panel.get_node("VBox/GuildInfo/MemberCountLabel")
-	var members_list: ItemList = panel.get_node("VBox/MembersList")
-	var create_button: Button = panel.get_node("VBox/Actions/CreateGuildButton")
-	var disband_button: Button = panel.get_node("VBox/Actions/DisbandGuildButton")
+	var status_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/StatusLabel")
+	var guild_name_input: LineEdit = panel.get_node("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput")
+	var member_count_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/MemberCountLabel")
+	var members_list: ItemList = panel.get_node("Scroll/Margin/VBox/MembersList")
+	var create_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/CreateGuildButton")
+	var disband_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/DisbandGuildButton")
 
 	# Initial state
 	assert_str(status_label.text).is_equal("")
@@ -72,10 +75,10 @@ func test_vertical_slice_create_guild_flow() -> void:
 
 func test_vertical_slice_disband_guild_flow() -> void:
 	var panel = await _guild_panel()
-	var status_label: Label = panel.get_node("VBox/GuildInfo/StatusLabel")
-	var guild_name_input: LineEdit = panel.get_node("VBox/GuildInfo/GuildNameRow/GuildNameInput")
-	var create_button: Button = panel.get_node("VBox/Actions/CreateGuildButton")
-	var disband_button: Button = panel.get_node("VBox/Actions/DisbandGuildButton")
+	var status_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/StatusLabel")
+	var guild_name_input: LineEdit = panel.get_node("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput")
+	var create_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/CreateGuildButton")
+	var disband_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/DisbandGuildButton")
 
 	# First create a guild
 	guild_name_input.text = "TestGuild2"
@@ -84,7 +87,7 @@ func test_vertical_slice_disband_guild_flow() -> void:
 	await get_tree().process_frame
 
 	assert_bool(disband_button.disabled).is_false()
-	var guild_name_after_create = guild_name_input.text
+	var _guild_name_after_create = guild_name_input.text
 
 	# Now disband the guild
 	disband_button.pressed.emit()
@@ -102,8 +105,8 @@ func test_vertical_slice_persistence() -> void:
 	# by checking that GuildManager can create/retrieve guilds
 
 	var panel = await _guild_panel()
-	var create_button: Button = panel.get_node("VBox/Actions/CreateGuildButton")
-	var guild_name_input: LineEdit = panel.get_node("VBox/GuildInfo/GuildNameRow/GuildNameInput")
+	var create_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/CreateGuildButton")
+	var guild_name_input: LineEdit = panel.get_node("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput")
 
 	# Create guild
 	guild_name_input.text = "TestGuildPersist"

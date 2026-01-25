@@ -2,174 +2,189 @@
 
 [ext_resource type="Script" path="res://Game.Godot/Scripts/UI/GuildPanel.cs" id="1"]
 
-[node name="GuildPanel" type="MarginContainer"]
+[node name="GuildPanel" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
 script = ExtResource("1")
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="Scroll" type="ScrollContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
 
-[node name="TitleLabel" type="Label" parent="VBox"]
+[node name="Margin" type="MarginContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="Scroll/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TitleLabel" type="Label" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 text = "Guild Management"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="VBox"]
+[node name="HSeparator" type="HSeparator" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 
-[node name="GuildInfo" type="VBoxContainer" parent="VBox"]
+[node name="GuildInfo" type="VBoxContainer" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 
-[node name="GuildNameRow" type="HBoxContainer" parent="VBox/GuildInfo"]
+[node name="GuildNameRow" type="HBoxContainer" parent="Scroll/Margin/VBox/GuildInfo"]
 layout_mode = 2
 
-[node name="GuildNameTitle" type="Label" parent="VBox/GuildInfo/GuildNameRow"]
+[node name="GuildNameTitle" type="Label" parent="Scroll/Margin/VBox/GuildInfo/GuildNameRow"]
 layout_mode = 2
 text = "Guild Name"
 
-[node name="GuildNameInput" type="LineEdit" parent="VBox/GuildInfo/GuildNameRow"]
+[node name="GuildNameInput" type="LineEdit" parent="Scroll/Margin/VBox/GuildInfo/GuildNameRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 editable = true
 placeholder_text = "None"
 text = ""
 
-[node name="MemberCountLabel" type="Label" parent="VBox/GuildInfo"]
+[node name="MemberCountLabel" type="Label" parent="Scroll/Margin/VBox/GuildInfo"]
 layout_mode = 2
 text = "Members: 0"
 
-[node name="StatusLabel" type="Label" parent="VBox/GuildInfo"]
+[node name="StatusLabel" type="Label" parent="Scroll/Margin/VBox/GuildInfo"]
 layout_mode = 2
 text = ""
 
-[node name="HSeparator2" type="HSeparator" parent="VBox"]
+[node name="HSeparator2" type="HSeparator" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 
-[node name="Actions" type="HBoxContainer" parent="VBox"]
+[node name="Actions" type="HBoxContainer" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 
-[node name="CreateGuildButton" type="Button" parent="VBox/Actions"]
+[node name="CreateGuildButton" type="Button" parent="Scroll/Margin/VBox/Actions"]
 layout_mode = 2
 text = "Create Guild"
 
-[node name="DisbandGuildButton" type="Button" parent="VBox/Actions"]
+[node name="DisbandGuildButton" type="Button" parent="Scroll/Margin/VBox/Actions"]
 layout_mode = 2
 disabled = true
 text = "Disband Guild"
 
-[node name="MembersListLabel" type="Label" parent="VBox"]
+[node name="MembersListLabel" type="Label" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 text = "Guild Members:"
 
-[node name="MembersList" type="ItemList" parent="VBox"]
+[node name="MembersList" type="ItemList" parent="Scroll/Margin/VBox"]
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 
-[node name="HSeparator3" type="HSeparator" parent="VBox"]
+[node name="HSeparator3" type="HSeparator" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 
-[node name="RosterActions" type="VBoxContainer" parent="VBox"]
+[node name="RosterActions" type="VBoxContainer" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 
-[node name="UserIdRow" type="HBoxContainer" parent="VBox/RosterActions"]
+[node name="UserIdRow" type="HBoxContainer" parent="Scroll/Margin/VBox/RosterActions"]
 layout_mode = 2
 
-[node name="UserIdLabel" type="Label" parent="VBox/RosterActions/UserIdRow"]
+[node name="UserIdLabel" type="Label" parent="Scroll/Margin/VBox/RosterActions/UserIdRow"]
 layout_mode = 2
 text = "User ID:"
 
-[node name="UserIdInput" type="LineEdit" parent="VBox/RosterActions/UserIdRow"]
+[node name="UserIdInput" type="LineEdit" parent="Scroll/Margin/VBox/RosterActions/UserIdRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "u2"
 
-[node name="MemberActionsRow" type="HBoxContainer" parent="VBox/RosterActions"]
+[node name="MemberActionsRow" type="HBoxContainer" parent="Scroll/Margin/VBox/RosterActions"]
 layout_mode = 2
 
-[node name="JoinButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+[node name="JoinButton" type="Button" parent="Scroll/Margin/VBox/RosterActions/MemberActionsRow"]
 layout_mode = 2
 text = "Join"
 
-[node name="LeaveButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+[node name="LeaveButton" type="Button" parent="Scroll/Margin/VBox/RosterActions/MemberActionsRow"]
 layout_mode = 2
 text = "Leave"
 
-[node name="PromoteButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+[node name="PromoteButton" type="Button" parent="Scroll/Margin/VBox/RosterActions/MemberActionsRow"]
 layout_mode = 2
 text = "Promote"
 
-[node name="DemoteButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+[node name="DemoteButton" type="Button" parent="Scroll/Margin/VBox/RosterActions/MemberActionsRow"]
 layout_mode = 2
 text = "Demote"
 
-[node name="KickButton" type="Button" parent="VBox/RosterActions/MemberActionsRow"]
+[node name="KickButton" type="Button" parent="Scroll/Margin/VBox/RosterActions/MemberActionsRow"]
 layout_mode = 2
 text = "Kick"
 
-[node name="HSeparator4" type="HSeparator" parent="VBox"]
+[node name="HSeparator4" type="HSeparator" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 
-[node name="RecruitmentSection" type="VBoxContainer" parent="VBox"]
+[node name="RecruitmentSection" type="VBoxContainer" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 
-[node name="RecruitmentLabel" type="Label" parent="VBox/RecruitmentSection"]
+[node name="RecruitmentLabel" type="Label" parent="Scroll/Margin/VBox/RecruitmentSection"]
 layout_mode = 2
 text = "Recruitment"
 horizontal_alignment = 1
 
-[node name="CandidateIdRow" type="HBoxContainer" parent="VBox/RecruitmentSection"]
+[node name="CandidateIdRow" type="HBoxContainer" parent="Scroll/Margin/VBox/RecruitmentSection"]
 layout_mode = 2
 
-[node name="CandidateIdLabel" type="Label" parent="VBox/RecruitmentSection/CandidateIdRow"]
+[node name="CandidateIdLabel" type="Label" parent="Scroll/Margin/VBox/RecruitmentSection/CandidateIdRow"]
 layout_mode = 2
 text = "Candidate ID:"
 
-[node name="CandidateIdInput" type="LineEdit" parent="VBox/RecruitmentSection/CandidateIdRow"]
+[node name="CandidateIdInput" type="LineEdit" parent="Scroll/Margin/VBox/RecruitmentSection/CandidateIdRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "u2"
 
-[node name="OfferIdRow" type="HBoxContainer" parent="VBox/RecruitmentSection"]
+[node name="OfferIdRow" type="HBoxContainer" parent="Scroll/Margin/VBox/RecruitmentSection"]
 layout_mode = 2
 
-[node name="OfferIdLabel" type="Label" parent="VBox/RecruitmentSection/OfferIdRow"]
+[node name="OfferIdLabel" type="Label" parent="Scroll/Margin/VBox/RecruitmentSection/OfferIdRow"]
 layout_mode = 2
 text = "Offer ID:"
 
-[node name="OfferIdInput" type="LineEdit" parent="VBox/RecruitmentSection/OfferIdRow"]
+[node name="OfferIdInput" type="LineEdit" parent="Scroll/Margin/VBox/RecruitmentSection/OfferIdRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "offer id"
 
-[node name="RecruitmentActionsRow" type="HBoxContainer" parent="VBox/RecruitmentSection"]
+[node name="RecruitmentActionsRow" type="HBoxContainer" parent="Scroll/Margin/VBox/RecruitmentSection"]
 layout_mode = 2
 
-[node name="ApplyButton" type="Button" parent="VBox/RecruitmentSection/RecruitmentActionsRow"]
+[node name="ApplyButton" type="Button" parent="Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow"]
 layout_mode = 2
 text = "Apply"
 
-[node name="ApproveButton" type="Button" parent="VBox/RecruitmentSection/RecruitmentActionsRow"]
+[node name="ApproveButton" type="Button" parent="Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow"]
 layout_mode = 2
 text = "Approve"
 
-[node name="RejectButton" type="Button" parent="VBox/RecruitmentSection/RecruitmentActionsRow"]
+[node name="RejectButton" type="Button" parent="Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow"]
 layout_mode = 2
 text = "Reject"
 
-[node name="OffersList" type="ItemList" parent="VBox/RecruitmentSection"]
+[node name="OffersList" type="ItemList" parent="Scroll/Margin/VBox/RecruitmentSection"]
 custom_minimum_size = Vector2(0, 140)
 layout_mode = 2

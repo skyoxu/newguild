@@ -822,10 +822,10 @@
       "events",
       "wiring"
     ],
-  "contractRefs": [
-    "core.event_catalog.loaded",
-    "core.content.manifest.loaded"
-  ],
+    "contractRefs": [
+      "core.event_catalog.loaded",
+      "core.content.manifest.loaded"
+    ],
     "artifactRefs": [
       "logs/ci/<YYYY-MM-DD>/sc-build-tdd/summary.json"
     ],
@@ -881,18 +881,18 @@
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
-  "labels": [
-    "phase2",
-    "events",
-    "wiring"
-  ],
-  "contractRefs": [
-    "core.event_catalog.loaded",
-    "core.content.manifest.loaded"
-  ],
-  "artifactRefs": [
-    "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
-  ],
+    "labels": [
+      "phase2",
+      "events",
+      "wiring"
+    ],
+    "contractRefs": [
+      "core.event_catalog.loaded",
+      "core.content.manifest.loaded"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+    ],
     "acceptance": [
       "EventEngine 使用 EventCatalog 进行内容驱动（不再依赖 HUD 内的 EmptyEventCatalog 兜底），并能在固定时间/固定种子下产出确定性事件。 Refs: Game.Core.Tests/Domain/EventEngineContentDrivenDeterminismTests.cs",
       "Headless wiring-smoke 能观察到至少一个内容驱动事件并验证 UI/状态同步。 Refs: Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd",
@@ -970,7 +970,6 @@
       "Optional: Rewrite-Intent: Fix wiring and usability; do not hide features to pass tests."
     ],
     "test_refs": [
-      "Tests.Godot/tests/Scenes/test_ui_clickability_smoke.gd",
       "Tests.Godot/tests/Scenes/test_scene_ui_responsive_clickability_smoke.gd",
       "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
     ],
