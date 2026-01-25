@@ -1,0 +1,26 @@
+{
+  "catalogId": "base",
+  "schemaVersion": "1",
+  "events": [
+    { "type": "core.guild.created", "enabledByDefault": true },
+    { "type": "core.guild.member.joined", "enabledByDefault": true },
+    { "type": "core.guild.member.left", "enabledByDefault": true },
+    { "type": "core.guild.member.role_changed", "enabledByDefault": true },
+    { "type": "core.guild.disbanded", "enabledByDefault": true },
+
+    { "type": "core.reputation.changed", "enabledByDefault": true },
+    { "type": "core.media.beat.triggered", "enabledByDefault": true },
+    { "type": "core.raid.resolved", "enabledByDefault": true },
+
+    { "type": "core.game_turn.started", "enabledByDefault": true },
+    { "type": "core.game_turn.phase_changed", "enabledByDefault": true },
+    { "type": "core.game_turn.week_advanced", "enabledByDefault": true },
+
+    { "type": "core.ai.cycle.started", "enabledByDefault": true },
+    { "type": "core.ai.cycle.completed", "enabledByDefault": true },
+    { "type": "core.ai.ecosystem.step.completed", "enabledByDefault": true },
+    { "type": "core.ai.intent.issued", "enabledByDefault": true }
+  ],
+  "chains": []
+}
+

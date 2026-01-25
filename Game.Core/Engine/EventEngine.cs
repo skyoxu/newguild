@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Game.Core.Contracts.Guild;
 using Game.Core.Contracts;
@@ -42,9 +43,44 @@ public sealed class EventEngine : IEventEngine
         _intimacySystem = new IntimacySystem(_eventBus, _time, _idGenerator);
     }
 
+    /// <summary>
+    /// Generates a deterministic sequence of <see cref="DomainEvent"/> instances from a content-driven catalog.
+    /// </summary>
+    /// <remarks>
+    /// Refs: ADR-0004 (event contracts), ADR-0005 (quality gates).
+    /// This method is intentionally static and pure (no Godot dependencies) to support repeatable unit tests.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="catalog"/> is null.</exception>
+    public static IEnumerable<DomainEvent> GenerateEvents(EventCatalog? catalog, int seed, DateTimeOffset now, int count)
+    {
+        if (catalog is null)
+            throw new ArgumentNullException(nameof(catalog));
+
+        if (count <= 0)
+            yield break;
+
+        var enabledTypes = catalog.GetEnabledEventTypes();
+        if (enabledTypes.Count == 0)
+            yield break;
+
+        var rng = new Random(seed);
+        var source = "EventEngine.GenerateEvents";
+        var nowUnixMs = now.ToUnixTimeMilliseconds();
+
+        for (var i = 0; i < count; i++)
+        {
+            var eventType = enabledTypes[rng.Next(enabledTypes.Count)];
+            yield return new DomainEvent(
+                Type: eventType,
+                Source: source,
+                Data: null,
+                Timestamp: now.UtcDateTime.AddSeconds(i),
+                Id: $"{seed}:{nowUnixMs}:{i}");
+        }
+    }
+
     public async Task<GameTurnState> ExecuteResolutionPhaseAsync(GameTurnState state)
     {
-        // T2 minimal: Publish GuildCreated event
         var guildCreated = new GuildCreated(
             GuildId: "temp-guild-id",
             CreatorId: "temp-creator-id",
@@ -52,22 +88,12 @@ public sealed class EventEngine : IEventEngine
             CreatedAt: _time.UtcNowOffset
         );
 
-        var now = _time.UtcNowOffset;
-        var domainEvent = new DomainEvent(
-            Type: GuildCreated.EventType,
-            Source: "EventEngine",
-            Data: guildCreated,
-            Timestamp: now.UtcDateTime,
-            Id: _idGenerator.NewId()
-        );
-
-        await _eventBus.PublishAsync(domainEvent);
+        await PublishAsync(GuildCreated.EventType, nameof(EventEngine), guildCreated);
         return state;
     }
 
     public async Task<GameTurnState> ExecutePlayerPhaseAsync(GameTurnState state)
     {
-        // T2 minimal: Publish GuildMemberJoined event
         var memberJoined = new GuildMemberJoined(
             UserId: "temp-user-id",
             GuildId: "temp-guild-id",
@@ -75,16 +101,7 @@ public sealed class EventEngine : IEventEngine
             Role: "member"
         );
 
-        var now = _time.UtcNowOffset;
-        var domainEvent = new DomainEvent(
-            Type: GuildMemberJoined.EventType,
-            Source: "EventEngine",
-            Data: memberJoined,
-            Timestamp: now.UtcDateTime,
-            Id: _idGenerator.NewId()
-        );
-
-        await _eventBus.PublishAsync(domainEvent);
+        await PublishAsync(GuildMemberJoined.EventType, nameof(EventEngine), memberJoined);
 
         // T18 minimal: Each player phase triggers a deterministic "social interaction" effect
         // between the creator and the joined member, updating relationship value and emitting
@@ -105,16 +122,25 @@ public sealed class EventEngine : IEventEngine
 
         var aiCoordinatorEvents = _aiCoordinator.GenerateAiEvents(state);
         foreach (var evt in aiCoordinatorEvents)
-            await _eventBus.PublishAsync(evt);
+        {
+            if (_eventCatalog.IsEventEnabled(evt.Type))
+                await _eventBus.PublishAsync(evt);
+        }
 
         var events = _aiEcosystem.Advance(state);
         foreach (var evt in events)
-            await _eventBus.PublishAsync(evt);
+        {
+            if (_eventCatalog.IsEventEnabled(evt.Type))
+                await _eventBus.PublishAsync(evt);
+        }
         return state;
     }
 
     private Task PublishAsync(string type, string source, object? data)
     {
+        if (!_eventCatalog.IsEventEnabled(type))
+            return Task.CompletedTask;
+
         var now = _time.UtcNowOffset;
         var evt = new DomainEvent(
             Type: type,

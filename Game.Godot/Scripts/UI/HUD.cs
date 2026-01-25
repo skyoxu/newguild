@@ -6,10 +6,12 @@ using System.Text.Json;
 using Game.Godot.Adapters;
 using Game.Godot.Autoloads;
 using Game.Core.Contracts;
+using Game.Core.Contracts.Events;
 using Game.Core.Contracts.Engine;
 using Game.Core.Contracts.Media;
 using Game.Core.Contracts.Raid;
 using Game.Core.Contracts.Security;
+using Game.Core.Domain;
 using Game.Core.Domain.Turn;
 using Game.Core.Engine;
 using Game.Godot.Scripts.Demo;
@@ -25,6 +27,7 @@ public partial class HUD : Control
     public const string DemoResultError = "error";
     private const string ReputationLabelPrefix = "Reputation";
     private const string MediaBeatLabelPrefix = "MediaBeat";
+    private const string EventCatalogPath = "res://Game.Godot/Assets/Data/content/base/event_catalog.json";
     private static readonly JsonDocumentOptions JsonOptions = new()
     {
         MaxDepth = 32,
@@ -103,11 +106,13 @@ public partial class HUD : Control
         var root = CompositionRoot.Instance;
         ITime timePort;
         IEventBus eventBus;
-
+ 
         if (root != null)
         {
             timePort = root.Time ?? new FixedTimePort();
-            var busNode = root.EventBus ?? _eventBus;
+            // Prefer the actual /root/EventBus node if present to avoid stale references
+            // when tests temporarily rename/disable the original bus Node.
+            var busNode = (IEventBus?)_eventBus ?? root.EventBus;
             eventBus = busNode ?? new InMemoryEventBus();
         }
         else
@@ -123,7 +128,7 @@ public partial class HUD : Control
         _demoScore = 0;
         _mediaBeatSystem = new MediaBeatSystem(eventBus, timePort, _coreIdGenerator);
 
-        IEventCatalog catalog = new EmptyEventCatalog();
+        var catalog = LoadEventCatalogOrThrow(eventBus, timePort);
         var saveId = new SaveIdValue("t2-demo");
 
         var world = new InMemoryAiWorldStatePort();
@@ -492,9 +497,61 @@ public partial class HUD : Control
             _phase.Text = $"Phase: {_currentTurn.Phase}";
     }
 
-    private sealed class EmptyEventCatalog : IEventCatalog
+    private static IEventCatalog LoadEventCatalogOrThrow(IEventBus eventBus, ITime timePort)
     {
-        public bool IsEventEnabled(string eventType) => true;
+        if (eventBus is null)
+            throw new ArgumentNullException(nameof(eventBus));
+        if (timePort is null)
+            throw new ArgumentNullException(nameof(timePort));
+
+        var safePath = SafeResourcePath.FromString(EventCatalogPath);
+        if (safePath is null || safePath.Type != PathType.ReadOnly)
+            throw new InvalidOperationException($"Event catalog path must be a res:// path. path='{EventCatalogPath}'");
+
+        using var f = FileAccess.Open(safePath.Value, FileAccess.ModeFlags.Read);
+        var json = f?.GetAsText();
+        if (string.IsNullOrWhiteSpace(json))
+            throw new InvalidOperationException($"Event catalog is missing or empty. path='{EventCatalogPath}'");
+
+        var catalogId = "base";
+        var schemaVersion = "1";
+        try
+        {
+            using var doc = JsonDocument.Parse(json, JsonOptions);
+            if (doc.RootElement.TryGetProperty("catalogId", out var cid) && cid.ValueKind == JsonValueKind.String)
+                catalogId = cid.GetString() ?? catalogId;
+            if (doc.RootElement.TryGetProperty("schemaVersion", out var sv) && sv.ValueKind == JsonValueKind.String)
+                schemaVersion = sv.GetString() ?? schemaVersion;
+        }
+        catch (JsonException)
+        {
+            // Metadata parsing is best-effort; the catalog itself must still validate via EventCatalog.FromJson().
+        }
+
+        var catalog = EventCatalog.FromJson(json);
+
+        var loadedAt = timePort.UtcNowOffset;
+        var evt = new EventCatalogLoaded(
+            CatalogId: catalogId,
+            SchemaVersion: schemaVersion,
+            EventDefinitionCount: catalog.GetEnabledEventTypes().Count,
+            EventChainCount: 0,
+            LoadedAt: loadedAt);
+
+        _ = eventBus.PublishAsync(new DomainEvent(
+            Type: EventCatalogLoaded.EventType,
+            Source: nameof(HUD),
+            Data: evt,
+            Timestamp: loadedAt.UtcDateTime,
+            Id: Guid.NewGuid().ToString("N")));
+
+        if (string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
+            string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal))
+        {
+            GD.Print($"[HUD] EventCatalog loaded catalogId={catalogId} schemaVersion={schemaVersion} enabled={evt.EventDefinitionCount}");
+        }
+
+        return catalog;
     }
 
     private sealed class NoopAICoordinator : IAICoordinator
