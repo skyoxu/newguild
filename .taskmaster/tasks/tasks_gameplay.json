@@ -822,15 +822,17 @@
       "events",
       "wiring"
     ],
-    "contractRefs": [],
+    "contractRefs": [
+      "core.event_catalog.loaded"
+    ],
     "artifactRefs": [
-      "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
+      "logs/ci/<YYYY-MM-DD>/sc-build-tdd/summary.json"
     ],
     "acceptance": [
-      "为 EventDefinition/EventChain 增加强类型契约，并满足 ADR-0004 的事件命名与常量化要求。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
-      "应完成：阶段2：事件定义与事件链契约（EventDefinition/EventChain） Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
-      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
-      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+      "为 EventDefinition/EventChain 增加强类型契约，并满足 ADR-0004 的事件命名与常量化要求。 Refs: Game.Core.Tests/Contracts/Task28EventDefinitionEventChainAcceptanceTests.cs",
+      "应完成：阶段2：事件定义与事件链契约（EventDefinition/EventChain） Refs: Game.Core.Tests/Contracts/Task28EventDefinitionEventChainAcceptanceTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Contracts/Task28EventDefinitionEventChainAcceptanceTests.cs",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task28ArtifactRefsAcceptanceTests.cs"
     ],
     "test_strategy": [
       "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
@@ -840,9 +842,8 @@
       "Optional: Rewrite-Intent: Formalize existing EventEngine inputs; do not build a second event engine."
     ],
     "test_refs": [
-      "Game.Core.Tests/Contracts/EventDefinitionContractsTests.cs",
-      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
-      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+      "Game.Core.Tests/Contracts/Task28EventDefinitionEventChainAcceptanceTests.cs",
+      "Game.Core.Tests/CI/Task28ArtifactRefsAcceptanceTests.cs"
     ],
     "taskmaster_id": 28,
     "taskmaster_exported": false
