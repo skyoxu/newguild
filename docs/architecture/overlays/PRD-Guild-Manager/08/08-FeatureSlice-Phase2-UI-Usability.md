@@ -37,3 +37,9 @@ Arch-Refs:
 
 - 收口 Scroll/Anchor/mouse_filter，避免透明层吞输入导致不可玩。
 - 统一 loading/error/retry/disabled 交互模式，降低“卡住/无反馈”风险。
+
+## Test-Refs
+
+- T31: `Tests.Godot/tests/UI/test_ui_components_smoke.gd`
+- T31: `Tests.Godot/tests/UI/test_guild_panel_scene.gd`
+- T31: `Game.Core.Tests/CI/Task31UiComponentsAcceptanceTests.cs`

@@ -109,7 +109,7 @@
     "story_id": "PH13-BACKLOG-B1-B2-B5",
     "title": "扩展 quality_gates.py 覆盖率阈值与 GdUnit4 集成",
     "description": "承接 Phase-13-Quality-Gates-Script.md 与 Backlog：将 xUnit 覆盖率门禁提升到蓝图标准（行≥90%、分支≥85%，可由环境变量覆盖），并把关键 GdUnit4 集合（Adapters+Security 小集）通过 quality_gates.py 聚合输出到统一 summary，以便在 CI 中统一判定。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "ci",
     "depends_on": [
@@ -709,7 +709,7 @@
     "story_id": "PH9-BACKLOG-B1",
     "title": "事件命名统一迁移（game.* → core.*.*）",
     "description": "根据 Phase-9-Signal-Backlog.md B1，将仍然存在于测试中的旧事件类型（如 game.started/score.changed/player.health.changed）统一迁移为 core.*.* 命名约定，并更新相关测试与文档，避免旧前缀继续被误用。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -1577,7 +1577,7 @@
     "story_id": "PH07-BACKLOG-ARCH-DEPENDENCY-GUARD",
     "title": "架构依赖护栏与依赖图校验骨架",
     "description": "根据 Base 07 章 7.y “架构依赖护栏（Godot + C# 模板）” 与 ADR-0007（端口与适配器），为 newguild 提供一套最小可执行的依赖矩阵与校验骨架：在 C# 工程层面约束 Game.Core/Game.Godot/Tests.* 之间的引用方向，在 Godot Scripts 目录层面约束 Scripts/Core/Adapters/Scenes 的依赖关系，并通过 CI 中的依赖护栏脚本生成 logs/ci/<date>/dependency-guard.json 与摘要，逐步收紧 Core 禁 Godot/测试、Adapters 不反向依赖 UI 的架构约束。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "ci",
     "depends_on": [
@@ -1822,7 +1822,7 @@
     "story_id": "PH06-GAMELOOP-SQLITE-PATH-HARDENING",
     "title": "SqliteDataStore 路径校验与插件后端安全收紧",
     "description": "在 Game.Godot/Adapters/SqliteDataStore 中增强路径与扩展名校验：对 user:// 路径进行规范化后再做前缀与 .. 检查，增加 .db/.sqlite/.sqlite3 等扩展名白名单，并为已有 ValidatePath 逻辑补充文件大小上限检查；同时通过环境变量限制 plugin backend 的启用范围（如仅在开发环境允许），将 plugin backend 风险收敛为受控技术债。",
-    "status": "in-progress",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [

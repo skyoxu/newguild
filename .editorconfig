@@ -5,6 +5,12 @@ charset = utf-8
 end_of_line = crlf
 insert_final_newline = true
 
+[*.md]
+end_of_line = lf
+
+[*.json]
+end_of_line = lf
+
 # Treat third-party GdUnit4 C# API as external code and
 # relax analyzer rules there. We keep project-owned code
 # under full quality gates and structural refactor rules.

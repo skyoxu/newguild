@@ -177,6 +177,7 @@ jobs:
         shell: pwsh
         continue-on-error: true
         run: |
+          py -3 scripts/python/check_gdunit_gate_layout.py --ui-dir Tests.Godot/tests/UI
           py -3 scripts/python/run_gdunit.py --prewarm --godot-bin "$env:GODOT_BIN" --project Tests.Godot --add tests/UI --timeout-sec 480 --rd "logs/e2e/${{ github.run_id }}/gdunit-reports/ui"
 
       - name: GdUnit4 a11y tests (Python, soft gate)

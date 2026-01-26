@@ -230,3 +230,9 @@ Artifact-Refs:
   - Windows CI/Release 工作流可用于派生项目
 
 > 注：本清单是模板级 DoD 骨架，不强制具体游戏玩法完全实现，仅要求“当基于 newguild 开发公会管理器游戏时，有一条清晰、可执行的验收路线”，并确保所有跨切面约束来自 Base/ADR，而非散落在实现或文档中。
+
+## Test-Refs
+
+- T31: `Tests.Godot/tests/UI/test_ui_components_smoke.gd`
+- T31: `Tests.Godot/tests/UI/test_guild_panel_scene.gd`
+- T31: `Game.Core.Tests/CI/Task31UiComponentsAcceptanceTests.cs`
