@@ -1,33 +1,39 @@
 * text=auto eol=crlf
 
-# Text files (force as text with CRLF in working tree)
-*.md      text eol=lf
-*.txt     text eol=crlf
-*.cs      text diff=csharp eol=crlf
-*.csproj  text eol=crlf
-*.sln     text eol=crlf
-*.gd      text eol=crlf
-*.tscn    text eol=crlf
-*.tres    text eol=crlf
-*.json    text eol=lf
-*.yml     text eol=crlf
-*.yaml    text eol=crlf
-*.xml     text eol=crlf
-*.ps1     text eol=crlf
+*.cs text eol=crlf diff=csharp
+*.gd text eol=crlf
+*.tscn text eol=crlf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=crlf
+*.yaml text eol=crlf
+*.xml text eol=crlf
+*.txt text eol=crlf
+*.editorconfig text eol=crlf
+*.gitignore text eol=crlf
 
-# Binary files (no EOL conversions)
-*.png  binary
-*.jpg  binary
+*.sln text eol=crlf
+*.csproj text eol=crlf
+*.props text eol=crlf
+*.targets text eol=crlf
+
+*.ps1 text eol=crlf
+.gitattributes text eol=crlf
+
+*.png binary
+*.jpg binary
 *.jpeg binary
-*.gif  binary
-*.bmp  binary
-*.ico  binary
-*.ogg  binary
-*.wav  binary
-*.mp3  binary
-*.zip  binary
-*.7z   binary
-*.exe  binary
-*.dll  binary
-*.pdb  binary
-*.pck  binary
+*.gif binary
+*.bmp binary
+*.ico binary
+*.ogg binary
+*.wav binary
+*.mp3 binary
+*.ttf binary
+*.otf binary
+*.zip binary
+*.7z binary
+*.exe binary
+*.dll binary
+*.pdb binary
+*.pck binary

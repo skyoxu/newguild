@@ -43,10 +43,10 @@ func _guild_panel() -> Node:
 
 func test_vertical_slice_create_guild_flow() -> void:
 	var panel = await _guild_panel()
-	var status_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/StatusLabel")
+	var status_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/StatusPanel/Root/Message")
 	var guild_name_input: LineEdit = panel.get_node("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput")
 	var member_count_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/MemberCountLabel")
-	var members_list: ItemList = panel.get_node("Scroll/Margin/VBox/MembersList")
+	var members_list: ItemList = panel.get_node("Scroll/Margin/VBox/MembersListPanel/Root/Items")
 	var create_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/CreateGuildButton")
 	var disband_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/DisbandGuildButton")
 
@@ -75,7 +75,7 @@ func test_vertical_slice_create_guild_flow() -> void:
 
 func test_vertical_slice_disband_guild_flow() -> void:
 	var panel = await _guild_panel()
-	var status_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/StatusLabel")
+	var status_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/StatusPanel/Root/Message")
 	var guild_name_input: LineEdit = panel.get_node("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput")
 	var create_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/CreateGuildButton")
 	var disband_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/DisbandGuildButton")
@@ -91,6 +91,12 @@ func test_vertical_slice_disband_guild_flow() -> void:
 
 	# Now disband the guild
 	disband_button.pressed.emit()
+	await get_tree().process_frame
+
+	var confirm: Control = panel.get_node("Scroll/Margin/VBox/GuildInfo/ConfirmDisbandDialog")
+	assert_bool(confirm.visible).is_true()
+	var confirm_button: Button = confirm.get_node("Root/Buttons/ConfirmButton")
+	confirm_button.pressed.emit()
 	await get_tree().create_timer(0.5).timeout
 	await get_tree().process_frame
 

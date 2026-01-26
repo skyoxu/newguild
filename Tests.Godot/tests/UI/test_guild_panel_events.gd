@@ -17,11 +17,11 @@ func _guild_panel() -> Node:
 
 func test_guild_panel_updates_on_guild_created_event() -> void:
 	var panel = await _guild_panel()
-	var guild_name_input: LineEdit = panel.get_node("VBox/GuildInfo/GuildNameRow/GuildNameInput")
-	var member_count_label: Label = panel.get_node("VBox/GuildInfo/MemberCountLabel")
-	var members_list: ItemList = panel.get_node("VBox/MembersList")
-	var create_button: Button = panel.get_node("VBox/Actions/CreateGuildButton")
-	var disband_button: Button = panel.get_node("VBox/Actions/DisbandGuildButton")
+	var guild_name_input: LineEdit = panel.get_node("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput")
+	var member_count_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/MemberCountLabel")
+	var members_list: ItemList = panel.get_node("Scroll/Margin/VBox/MembersListPanel/Root/Items")
+	var create_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/CreateGuildButton")
+	var disband_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/DisbandGuildButton")
 
 	# Publish guild created event
 	var event_data = '{"guildId":"g123","creatorId":"u456","guildName":"TestGuild","createdAt":"2025-01-01T00:00:00Z"}'
@@ -39,8 +39,8 @@ func test_guild_panel_updates_on_guild_created_event() -> void:
 
 func test_guild_panel_updates_on_member_joined_event() -> void:
 	var panel = await _guild_panel()
-	var members_list: ItemList = panel.get_node("VBox/MembersList")
-	var member_count_label: Label = panel.get_node("VBox/GuildInfo/MemberCountLabel")
+	var members_list: ItemList = panel.get_node("Scroll/Margin/VBox/MembersListPanel/Root/Items")
+	var member_count_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/MemberCountLabel")
 
 	# First create a guild
 	var create_event = '{"guildId":"g123","creatorId":"u1","guildName":"MyGuild","createdAt":"2025-01-01T00:00:00Z"}'
@@ -60,8 +60,8 @@ func test_guild_panel_updates_on_member_joined_event() -> void:
 
 func test_guild_panel_updates_on_member_left_event() -> void:
 	var panel = await _guild_panel()
-	var members_list: ItemList = panel.get_node("VBox/MembersList")
-	var member_count_label: Label = panel.get_node("VBox/GuildInfo/MemberCountLabel")
+	var members_list: ItemList = panel.get_node("Scroll/Margin/VBox/MembersListPanel/Root/Items")
+	var member_count_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/MemberCountLabel")
 
 	# Create guild with creator
 	var create_event = '{"guildId":"g123","creatorId":"u1","guildName":"MyGuild","createdAt":"2025-01-01T00:00:00Z"}'
@@ -87,7 +87,7 @@ func test_guild_panel_updates_on_member_left_event() -> void:
 
 func test_guild_panel_updates_on_member_role_changed_event() -> void:
 	var panel = await _guild_panel()
-	var members_list: ItemList = panel.get_node("VBox/MembersList")
+	var members_list: ItemList = panel.get_node("Scroll/Margin/VBox/MembersListPanel/Root/Items")
 
 	# Create guild
 	var create_event = '{"guildId":"g123","creatorId":"u1","guildName":"MyGuild","createdAt":"2025-01-01T00:00:00Z"}'
@@ -112,12 +112,12 @@ func test_guild_panel_updates_on_member_role_changed_event() -> void:
 
 func test_guild_panel_updates_on_guild_disbanded_event() -> void:
 	var panel = await _guild_panel()
-	var status_label: Label = panel.get_node("VBox/GuildInfo/StatusLabel")
-	var guild_name_input: LineEdit = panel.get_node("VBox/GuildInfo/GuildNameRow/GuildNameInput")
-	var member_count_label: Label = panel.get_node("VBox/GuildInfo/MemberCountLabel")
-	var members_list: ItemList = panel.get_node("VBox/MembersList")
-	var create_button: Button = panel.get_node("VBox/Actions/CreateGuildButton")
-	var disband_button: Button = panel.get_node("VBox/Actions/DisbandGuildButton")
+	var status_message: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/StatusPanel/Root/Message")
+	var guild_name_input: LineEdit = panel.get_node("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput")
+	var member_count_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/MemberCountLabel")
+	var members_list: ItemList = panel.get_node("Scroll/Margin/VBox/MembersListPanel/Root/Items")
+	var create_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/CreateGuildButton")
+	var disband_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/DisbandGuildButton")
 
 	# Create guild first
 	var create_event = '{"guildId":"g123","creatorId":"u1","guildName":"MyGuild","createdAt":"2025-01-01T00:00:00Z"}'
@@ -132,7 +132,7 @@ func test_guild_panel_updates_on_guild_disbanded_event() -> void:
 	await get_tree().process_frame
 
 	# Verify UI reset
-	assert_str(status_label.text).contains("Disbanded")
+	assert_str(status_message.text).contains("Disbanded")
 	assert_str(guild_name_input.text).is_equal("")
 	assert_str(member_count_label.text).is_equal("Members: 0")
 	assert_int(members_list.item_count).is_equal(0)

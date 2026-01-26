@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://Game.Godot/Scripts/UI/GuildPanel.cs" id="1"]
+[ext_resource type="PackedScene" path="res://Game.Godot/Scenes/UI/Components/StatusPanel.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://Game.Godot/Scenes/UI/Components/ErrorPanel.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://Game.Godot/Scenes/UI/Components/ConfirmDialog.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://Game.Godot/Scenes/UI/Components/ListPanel.tscn" id="5"]
 
 [node name="GuildPanel" type="Control"]
 layout_mode = 3
@@ -67,9 +71,16 @@ text = ""
 layout_mode = 2
 text = "Members: 0"
 
-[node name="StatusLabel" type="Label" parent="Scroll/Margin/VBox/GuildInfo"]
+[node name="StatusPanel" parent="Scroll/Margin/VBox/GuildInfo" instance=ExtResource("2")]
 layout_mode = 2
-text = ""
+
+[node name="ErrorPanel" parent="Scroll/Margin/VBox/GuildInfo" instance=ExtResource("3")]
+layout_mode = 2
+visible = false
+
+[node name="ConfirmDisbandDialog" parent="Scroll/Margin/VBox/GuildInfo" instance=ExtResource("4")]
+layout_mode = 2
+visible = false
 
 [node name="HSeparator2" type="HSeparator" parent="Scroll/Margin/VBox"]
 layout_mode = 2
@@ -86,11 +97,7 @@ layout_mode = 2
 disabled = true
 text = "Disband Guild"
 
-[node name="MembersListLabel" type="Label" parent="Scroll/Margin/VBox"]
-layout_mode = 2
-text = "Guild Members:"
-
-[node name="MembersList" type="ItemList" parent="Scroll/Margin/VBox"]
+[node name="MembersListPanel" parent="Scroll/Margin/VBox" instance=ExtResource("5")]
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 

@@ -509,7 +509,7 @@
     "story_id": "PRD-GUILD-MANAGER-T3-SOCIAL",
     "title": "T3 社交系统（Social / Intimacy）",
     "description": "实现公会成员间的社交/亲密度最小系统：在 Game.Core 建模关系值与变化规则，并通过事件驱动 UI 展示与玩法联动（可与招募/声望产生弱耦合）。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -654,7 +654,7 @@
     "story_id": "PRD-GUILD-MANAGER-T3-SAVELOAD-UI",
     "title": "T3 Save/Load UI 入口（Menu / Debug Entry）",
     "description": "为玩家提供可触达的 Save/Load 入口：最小化 UI（或 Debug 面板）触发保存与读取，并展示成功/失败结果；核心存档逻辑在 Game.Core，UI 只负责调用与展示。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "adapter",
     "depends_on": [
@@ -723,7 +723,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-CONTENT",
     "title": "阶段2：内容加载与 JSON 清单接入（Assets/Data）",
     "description": "将现有 res://Game.Godot/Assets/Data/content/base/*.json 作为内容源，建立统一的加载/校验/缓存路径，并把结果以纯 C# DTO 供 Game.Core 使用（Core 不引用 Godot API）。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "adapter",
     "depends_on": [
@@ -794,7 +794,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-EVENT-CONTRACTS",
     "title": "阶段2：事件定义与事件链契约（EventDefinition/EventChain）",
     "description": "在 Game.Core/Contracts 中补齐事件定义与事件链的强类型契约，并把 IEventCatalog 规范化为可被 EventEngine 使用的最小接口（避免 EmptyEventCatalog/裸实现漂移）。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -854,7 +854,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-EVENT-CATALOG",
     "title": "阶段2：内容驱动事件系统接入（EventCatalog + EventEngine）",
     "description": "把 EventEngine 从 T2 的硬编码演示升级为“由 EventCatalog 提供定义/开关/权重”的内容驱动实现；在 HUD/GameLoop 中替换 EmptyEventCatalog，确保事件可观察且可测试。\n\nEvidence Artifacts (not test_refs):\n- Game.Godot/Scripts/CI/WiringSmoke.gd",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -981,7 +981,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-UI-COMPONENTS",
     "title": "阶段2：核心 UI 组件库（Status/Panel/List）",
     "description": "沉淀可复用 UI 组件：状态条/错误提示/列表渲染/确认对话框，供战术中心、活动反馈、官员任命等复用，减少散乱 UI 逻辑。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -1015,7 +1015,7 @@
       "应完成：阶段2：核心 UI 组件库（Status/Panel/List） Refs: Tests.Godot/tests/UI/test_guild_panel_scene.gd",
       "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Tests.Godot/tests/UI/test_ui_components_smoke.gd",
       "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/UI/test_guild_panel_scene.gd",
-      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task31UiComponentsAcceptanceTests.cs"
     ],
     "test_strategy": [
       "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
@@ -1027,7 +1027,7 @@
     "test_refs": [
       "Tests.Godot/tests/UI/test_ui_components_smoke.gd",
       "Tests.Godot/tests/UI/test_guild_panel_scene.gd",
-      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+      "Game.Core.Tests/CI/Task31UiComponentsAcceptanceTests.cs"
     ],
     "taskmaster_id": 31,
     "taskmaster_exported": false

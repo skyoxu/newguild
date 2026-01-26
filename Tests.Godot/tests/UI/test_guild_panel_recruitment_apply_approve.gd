@@ -77,8 +77,8 @@ func _guild_screen() -> Node:
 	return screen
 
 func _ensure_guild_created(panel: Node) -> void:
-	var create_button: Button = panel.get_node_or_null("VBox/Actions/CreateGuildButton")
-	var members_list: ItemList = panel.get_node_or_null("VBox/MembersList")
+	var create_button: Button = panel.get_node_or_null("Scroll/Margin/VBox/Actions/CreateGuildButton")
+	var members_list: ItemList = panel.get_node_or_null("Scroll/Margin/VBox/MembersListPanel/Root/Items")
 	assert_object(create_button).is_not_null()
 	assert_object(members_list).is_not_null()
 	if create_button.disabled:

@@ -3,6 +3,7 @@ using Game.Core.Contracts.Guild;
 using Game.Core.Contracts.Recruitment;
 using Game.Godot.Adapters;
 using Game.Godot.Scripts.Autoload;
+using Game.Godot.Scripts.UI.Components;
 using System;
 using System.Text.Json;
 
@@ -28,9 +29,12 @@ public partial class GuildPanel : Control
 
     private LineEdit? _guildNameInput;
     private Label _memberCountLabel = default!;
-    private Label _statusLabel = default!;
+    private StatusPanel? _statusPanel;
+    private ErrorPanel? _errorPanel;
+    private ConfirmDialogPanel? _confirmDialog;
     private Button _createGuildButton = default!;
     private Button _disbandGuildButton = default!;
+    private ListPanel? _membersListPanel;
     private ItemList _membersList = default!;
     private LineEdit _userIdInput = default!;
     private Button _joinButton = default!;
@@ -48,19 +52,31 @@ public partial class GuildPanel : Control
     private string? _currentGuildId;
     private EventBusAdapter? _eventBus;
     private Callable _domainEventCallable;
+    private bool _confirmDialogWired;
 
     private void SetGuildStatus(string message)
     {
         try
         {
-            if (_statusLabel != null)
-                _statusLabel.Text = message;
+            _statusPanel?.SetStatus("Guild", message);
         }
         catch
         {
             // Best-effort only.
         }
         GD.Print($"[GuildPanel] {message}");
+    }
+
+    private void ShowError(string title, string message)
+    {
+        if (_errorPanel == null)
+        {
+            SetGuildStatus($"ERROR: {message}");
+            return;
+        }
+
+        _errorPanel.Visible = true;
+        _errorPanel.SetError(title, message);
     }
 
     private Node? GetGuildManagerOrReport()
@@ -80,10 +96,13 @@ public partial class GuildPanel : Control
         // Get node references
         _guildNameInput = GetNodeOrNull<LineEdit>("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput");
         _memberCountLabel = GetNode<Label>("Scroll/Margin/VBox/GuildInfo/MemberCountLabel");
-        _statusLabel = GetNodeOrNull<Label>("Scroll/Margin/VBox/GuildInfo/StatusLabel") ?? new Label();
+        _statusPanel = GetNodeOrNull<StatusPanel>("Scroll/Margin/VBox/GuildInfo/StatusPanel");
+        _errorPanel = GetNodeOrNull<ErrorPanel>("Scroll/Margin/VBox/GuildInfo/ErrorPanel");
+        _confirmDialog = GetNodeOrNull<ConfirmDialogPanel>("Scroll/Margin/VBox/GuildInfo/ConfirmDisbandDialog");
         _createGuildButton = GetNode<Button>("Scroll/Margin/VBox/Actions/CreateGuildButton");
         _disbandGuildButton = GetNode<Button>("Scroll/Margin/VBox/Actions/DisbandGuildButton");
-        _membersList = GetNode<ItemList>("Scroll/Margin/VBox/MembersList");
+        _membersListPanel = GetNodeOrNull<ListPanel>("Scroll/Margin/VBox/MembersListPanel");
+        _membersList = GetNode<ItemList>("Scroll/Margin/VBox/MembersListPanel/Root/Items");
         _userIdInput = GetNode<LineEdit>("Scroll/Margin/VBox/RosterActions/UserIdRow/UserIdInput");
         _joinButton = GetNode<Button>("Scroll/Margin/VBox/RosterActions/MemberActionsRow/JoinButton");
         _leaveButton = GetNode<Button>("Scroll/Margin/VBox/RosterActions/MemberActionsRow/LeaveButton");
@@ -109,6 +128,25 @@ public partial class GuildPanel : Control
         _approveButton.Pressed += OnApprovePressed;
         _rejectButton.Pressed += OnRejectPressed;
 
+        if (_statusPanel != null)
+            _statusPanel.SetStatus("Guild", string.Empty);
+
+        if (_membersListPanel != null)
+            _membersListPanel.SetTitle("Guild Members");
+
+        if (_errorPanel != null)
+        {
+            _errorPanel.Visible = false;
+            _errorPanel.CloseRequested += () => _errorPanel.Visible = false;
+            _errorPanel.RetryRequested += () => _errorPanel.Visible = false;
+        }
+
+        if (_confirmDialog != null)
+        {
+            _confirmDialog.Visible = false;
+            WireConfirmDialog();
+        }
+
         // Subscribe to domain events via EventBusAdapter
         _eventBus = GetNodeOrNull<EventBusAdapter>(EventBusPath);
         if (_eventBus == null)
@@ -126,6 +164,21 @@ public partial class GuildPanel : Control
 
         // Initial UI state
         UpdateUIState(hasGuild: false);
+    }
+
+    private void WireConfirmDialog()
+    {
+        if (_confirmDialog == null || _confirmDialogWired)
+            return;
+
+        _confirmDialog.Confirmed += () =>
+        {
+            _confirmDialog.Visible = false;
+            PerformDisband();
+        };
+
+        _confirmDialog.Cancelled += () => _confirmDialog.Visible = false;
+        _confirmDialogWired = true;
     }
 
     public override void _ExitTree()
@@ -366,7 +419,7 @@ public partial class GuildPanel : Control
             return;
         }
 
-        _guildNameInput ??= GetNodeOrNull<LineEdit>("VBox/GuildInfo/GuildNameRow/GuildNameInput");
+        _guildNameInput ??= GetNodeOrNull<LineEdit>("Scroll/Margin/VBox/GuildInfo/GuildNameRow/GuildNameInput");
         if (_guildNameInput == null)
         {
             SetGuildStatus("ERROR: GuildNameInput missing.");
@@ -402,20 +455,22 @@ public partial class GuildPanel : Control
         try
         {
             var result = await guildManager.CreateGuildAsync(userId, guildName);
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-                if (result.StartsWith("ERROR:", StringComparison.Ordinal))
+                if (!string.IsNullOrWhiteSpace(result))
                 {
-                    var details = string.Empty;
-                    try
+                    if (result.StartsWith("ERROR:", StringComparison.Ordinal))
                     {
-                        details = guildManager.GetLastError();
-                    }
-                    catch { /* ignore */ }
+                        var details = string.Empty;
+                        try
+                        {
+                            details = guildManager.GetLastError();
+                        }
+                        catch { /* ignore */ }
 
-                    SetGuildStatus(string.IsNullOrWhiteSpace(details) ? result : $"{result} ({details})");
+                        var message = string.IsNullOrWhiteSpace(details) ? result : $"{result} ({details})";
+                        SetGuildStatus(message);
+                        ShowError("CreateGuild failed", message);
+                    }
                 }
-            }
 
             try
             {
@@ -428,15 +483,31 @@ public partial class GuildPanel : Control
                 // Best-effort only.
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Best-effort only.
+            ShowError("CreateGuild failed", ex.Message);
         }
     }
 
     private void OnDisbandGuildPressed()
     {
-        if (_currentGuildId == null) return;
+        if (_currentGuildId == null)
+            return;
+
+        if (_confirmDialog != null)
+        {
+            _confirmDialog.SetPrompt("Disband Guild", "Are you sure?");
+            _confirmDialog.Visible = true;
+            return;
+        }
+
+        PerformDisband();
+    }
+
+    private void PerformDisband()
+    {
+        if (_currentGuildId == null)
+            return;
 
         var guildManager = GetGuildManagerOrReport();
         if (guildManager == null)
@@ -446,7 +517,7 @@ public partial class GuildPanel : Control
 
         if (!guildManager.HasMethod("DisbandGuild"))
         {
-            SetGuildStatus("ERROR: GuildManager.DisbandGuild missing.");
+            ShowError("Guild", "ERROR: GuildManager.DisbandGuild missing.");
             return;
         }
 
