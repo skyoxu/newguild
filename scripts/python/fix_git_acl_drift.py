@@ -74,9 +74,30 @@ def run_powershell(ps: str, *, root: Path) -> tuple[int, str]:
     ps_wrapped = (
         "[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;"
         + "$ErrorActionPreference='Stop';"
+        + "try { Import-Module Microsoft.PowerShell.Security -ErrorAction Stop } catch { }"
         + ps
     )
-    return run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_wrapped], cwd=root)
+
+    def _try(exe: str) -> tuple[int, str]:
+        try:
+            return run([exe, "-NoProfile", "-NonInteractive", "-Command", ps_wrapped], cwd=root)
+        except FileNotFoundError:
+            return 127, f"{exe} not found"
+
+    rc, out = _try("powershell")
+    if rc == 0:
+        return rc, out
+
+    # GitHub Actions runners sometimes fail to autoload/resolve Get-Acl in Windows PowerShell;
+    # retry using PowerShell 7 if available.
+    lowered = out.lower()
+    if "get-acl" in lowered and ("could not be loaded" in lowered or "couldnotautoloadmatchingmodule" in lowered):
+        rc2, out2 = _try("pwsh")
+        if rc2 == 0:
+            return rc2, out2
+        return rc2, out2 + "\n" + out
+
+    return rc, out
 
 
 def get_acl_json(path: Path, *, root: Path) -> dict:
