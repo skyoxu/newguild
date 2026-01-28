@@ -1253,7 +1253,6 @@
       "Optional: Rewrite-Intent: Add a single UI entry that drives existing PVE/roster modules."
     ],
     "test_refs": [
-      "Tests.Godot/tests/Scenes/test_tactical_center_smoke.gd",
       "Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
       "Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_artifacts.gd"
     ],
