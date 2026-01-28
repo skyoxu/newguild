@@ -1,5 +1,7 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
+const MENU_TYPES := preload("res://Game.Godot/Scripts/UI/UiMenuEventTypes.gd")
+
 const CONTRACTS_DIR := "res://Game.Core/Contracts"
 const MAIN_SCENE_SETTING_KEY := "application/run/main_scene"
 
@@ -119,7 +121,7 @@ func test_contract_eventtype_constants_use_core_prefix() -> void:
 		event_types.append_array(_extract_event_types_from_cs(_read_text(p)))
 
 	assert_bool(event_types.size() > 0).is_true()
-	var allowed_prefixes := PackedStringArray(["core.", "ui.menu.", "screen."])
+	var allowed_prefixes := PackedStringArray(["core.", MENU_TYPES.PREFIX, "screen."])
 	var invalid := PackedStringArray()
 	for t in event_types:
 		if t == "":

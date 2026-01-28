@@ -5,6 +5,7 @@
 var _score: int = 0
 var _hp: int = 100
 const SCORE_CHANGED_EVENT_TYPE := "core.score.changed"
+const MENU_TYPES := preload("res://Game.Godot/Scripts/UI/UiMenuEventTypes.gd")
 
 func _ready() -> void:
     print("[TEMPLATE_SMOKE_READY] Main scene initialized")
@@ -137,7 +138,7 @@ func _on_next_turn_debug() -> void:
         hud.AdvanceTurnFromGd()
 
 func _on_domain_event(type: String, source: String, data_json: String, id: String, spec: String, ct: String, ts: String) -> void:
-    if type == "ui.menu.start":
+    if type == MENU_TYPES.START:
         var demo = get_node_or_null("/root/Main/EngineDemo")
         if demo != null and demo.has_method("StartGame"):
             demo.StartGame()
@@ -155,14 +156,19 @@ func _on_domain_event(type: String, source: String, data_json: String, id: Strin
                     return
             if ResourceLoader.exists("res://Game.Godot/Scenes/Screens/StartScreen.tscn"):
                 nav.SwitchTo("res://Game.Godot/Scenes/Screens/StartScreen.tscn")
-    elif type == "ui.menu.settings":
+    elif type == MENU_TYPES.SETTINGS:
         var sp = get_node_or_null("/root/Main/SettingsPanel")
         if sp != null and sp.has_method("ShowPanel"):
             sp.ShowPanel()
-    elif type == "ui.menu.guild":
+    elif type == MENU_TYPES.ACTIVITY:
+        var nav = get_node_or_null("/root/Main/ScreenNavigator")
+        if nav != null and nav.has_method("SwitchTo"):
+            if ResourceLoader.exists("res://Game.Godot/Scenes/Screens/ActivityFeedScreen.tscn"):
+                nav.SwitchTo("res://Game.Godot/Scenes/Screens/ActivityFeedScreen.tscn")
+    elif type == MENU_TYPES.GUILD:
         var nav = get_node_or_null("/root/Main/ScreenNavigator")
         if nav != null and nav.has_method("SwitchTo"):
             if ResourceLoader.exists("res://Game.Godot/Scenes/Screens/GuildScreen.tscn"):
                 nav.SwitchTo("res://Game.Godot/Scenes/Screens/GuildScreen.tscn")
-    elif type == "ui.menu.quit":
+    elif type == MENU_TYPES.QUIT:
         get_tree().quit()

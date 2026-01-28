@@ -27,6 +27,10 @@ text = "Play"
 layout_mode = 2
 text = "Guild"
 
+[node name="BtnActivity" type="Button" parent="VBox"]
+layout_mode = 2
+text = "Activity"
+
 [node name="BtnSettings" type="Button" parent="VBox"]
 layout_mode = 2
 text = "Settings"

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using Game.Core.Contracts.UI;
 using Game.Core.Ports;
 using Game.Core.Services;
 using Game.Godot.Adapters;
@@ -14,6 +15,7 @@ public partial class StartScreen : Control
 
     private Button _btnOpenGuild = default!;
     private Button _btnSaveLoad = default!;
+    private Button _btnActivityFeed = default!;
     private Button _btnAiLog = default!;
     private Button _btnDemoRaid = default!;
     private Button _btnDemoMedia = default!;
@@ -41,6 +43,7 @@ public partial class StartScreen : Control
 
         _btnOpenGuild = GetNode<Button>("Center/VBox/BtnOpenGuild");
         _btnSaveLoad = GetNode<Button>("Center/VBox/BtnSaveLoad");
+        _btnActivityFeed = GetNode<Button>("Center/VBox/BtnActivityFeed");
         _btnAiLog = GetNode<Button>("Center/VBox/BtnAiLog");
         _btnDemoRaid = GetNode<Button>("Center/VBox/BtnDemoRaid");
         _btnDemoMedia = GetNode<Button>("Center/VBox/BtnDemoMedia");
@@ -54,6 +57,7 @@ public partial class StartScreen : Control
 
         _btnOpenGuild.Pressed += OnOpenGuildPressed;
         _btnSaveLoad.Pressed += OnSaveLoadPressed;
+        _btnActivityFeed.Pressed += OnActivityFeedPressed;
         _btnAiLog.Pressed += OnShowAiLogPressed;
         _btnDemoRaid.Pressed += OnDemoRaidPressed;
         _btnDemoMedia.Pressed += OnDemoMediaPressed;
@@ -234,6 +238,18 @@ public partial class StartScreen : Control
         {
             SetOutput($"Save+Load failed exType={ex.GetType().Name}");
         }
+    }
+
+    private void OnActivityFeedPressed()
+    {
+        if (_bus == null || !_bus.HasMethod("PublishSimple"))
+        {
+            SetOutput("EventBus not found.");
+            return;
+        }
+
+        _bus.Call("PublishSimple", UiMenuEventTypes.Activity, "ui", "{}");
+        SetOutput("Requested Activity Feed.");
     }
 
     private void OnShowAiLogPressed()
