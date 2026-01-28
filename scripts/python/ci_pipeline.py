@@ -67,6 +67,7 @@ def main():
         'selfcheck': {},
         'perf_db': {},
         'sql_scan': {},
+        'ui_menu_types': {},
         'task_links': {},
         'encoding': {},
         'status': 'ok'
@@ -222,7 +223,28 @@ def main():
     if rc_content != 0:
         hard_fail = True
 
-    # 7) Task links / view semantics (hard gate)
+    # 7) UI menu event types generation + sync (hard gate)
+    rc_ui_gen, out_ui_gen = run_cmd(['py', '-3', 'scripts/python/generate_ui_menu_event_types.py'], cwd=root)
+    with io.open(os.path.join('logs', 'ci', date, 'ui-menu-types-generate-stdout.txt'), 'w', encoding='utf-8') as f:
+        f.write(out_ui_gen)
+    if rc_ui_gen != 0:
+        hard_fail = True
+
+    rc_ui, out_ui = run_cmd(['py', '-3', 'scripts/python/validate_ui_menu_event_types.py'], cwd=root)
+    with io.open(os.path.join('logs', 'ci', date, 'ui-menu-types-stdout.txt'), 'w', encoding='utf-8') as f:
+        f.write(out_ui)
+    ui_report = read_json(os.path.join('logs', 'ci', date, 'ui-menu-event-types', 'report.json')) or {}
+    summary['ui_menu_types'] = {
+        'rc': rc_ui if rc_ui_gen == 0 else 1,
+        'status': 'ok' if rc_ui == 0 else 'fail',
+        'out': os.path.join('logs', 'ci', date, 'ui-menu-event-types', 'report.json'),
+        'errors': ui_report.get('errors'),
+        'generated': rc_ui_gen == 0,
+    }
+    if rc_ui != 0:
+        hard_fail = True
+
+    # 8) Task links / view semantics (hard gate)
     rc_links, out_links = run_cmd(['py', '-3', 'scripts/python/task_links_validate.py'], cwd=root)
     with io.open(os.path.join('logs', 'ci', date, 'task-links-stdout.txt'), 'w', encoding='utf-8') as f:
         f.write(out_links)
@@ -245,6 +267,7 @@ def main():
         f"sql_scan={summary['sql_scan'].get('status')} "
         f"perf_db={summary['perf_db'].get('status')} "
         f"content={summary.get('content_validation', {}).get('status')} "
+        f"ui_menu={summary.get('ui_menu_types', {}).get('status')} "
         f"task_links={summary.get('task_links', {}).get('status')} "
         f"encoding_bad={summary['encoding'].get('bad', 'n/a')}"
     )
