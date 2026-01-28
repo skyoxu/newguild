@@ -3,7 +3,7 @@ Fix NTFS ACL drift that can block Git writes on Windows.
 
 - Captures ACL snapshots to logs/ci/<date>/permissions/
 - Audits the ACL chain for unresolved SID DENY rules
-- Removes a specified SID's ACEs from repo root and .git
+- Removes unresolved SID ACEs from repo root and .git (or a specified SID)
 - Optional: protect repo root from parent inheritance drift
 - References: ADR-0002, ADR-0005
 """
@@ -16,10 +16,11 @@ import hashlib
 import json
 import os
 import platform
+import re
 import subprocess
 from pathlib import Path
 
-DEFAULT_ORPHAN_SID = "S-1-5-21-2376321176-251309245-3829575599-4253457930"
+DEFAULT_SID_SELECTOR = "auto"
 
 
 def repo_root() -> Path:
@@ -146,6 +147,22 @@ def summarize_unresolved_denies(acl: dict) -> list[dict]:
     return hits
 
 
+def collect_unresolved_deny_sids(path: Path, *, root: Path) -> list[str]:
+    acl = get_acl_json(path, root=root)
+    denies = summarize_unresolved_denies(acl)
+    sids = sorted({d.get("Identity") for d in denies if d.get("Identity")})
+    return [s for s in sids if isinstance(s, str) and s.strip()]
+
+
+_SID_RE = re.compile(r"^S-1-\d+(?:-\d+)+$")
+
+
+def is_windows_sid(identity: str) -> bool:
+    # Restrict auto mode to true SID strings only.
+    # If callers need to remove a non-SID identity, they must pass --sid explicitly.
+    return bool(_SID_RE.match(identity.strip()))
+
+
 def remove_sid_aces(path: Path, sid: str, *, root: Path) -> int:
     # Remove both allow and deny ACEs for this SID, even if the SID cannot be translated.
     #
@@ -237,7 +254,11 @@ def write_report(out_dir: Path, payload: dict) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--sid", default=DEFAULT_ORPHAN_SID, help="SID to remove from ACLs.")
+    ap.add_argument(
+        "--sid",
+        default=DEFAULT_SID_SELECTOR,
+        help="SID to remove from ACLs. Use 'auto' to remove all unresolved SID DENY identities discovered on the target paths.",
+    )
     ap.add_argument("--git-dir", default=".git", help="Git directory relative to repo root.")
     ap.add_argument("--dry-run", action="store_true", help="Only report; do not modify ACLs.")
     ap.add_argument(
@@ -286,7 +307,15 @@ def main() -> int:
     root = repo_root()
     out_dir = ensure_logs_dir(root)
     git_dir = (root / args.git_dir).resolve()
-    sid = str(args.sid).strip()
+    try:
+        _ = git_dir.relative_to(root)
+    except ValueError:
+        raise SystemExit(f"--git-dir must resolve inside repo root (root={root}, git_dir={git_dir}).")
+    sid = str(args.sid).strip() or DEFAULT_SID_SELECTOR
+
+    root_unresolved = collect_unresolved_deny_sids(root, root=root)
+    git_unresolved = collect_unresolved_deny_sids(git_dir, root=root)
+    needs_fix = bool(root_unresolved or git_unresolved)
 
     steps: list[str] = []
     payload = {
@@ -297,6 +326,10 @@ def main() -> int:
         "git_dir": str(git_dir),
         "remove_from_repo_root": bool(args.remove_from_repo_root),
         "inheritance_mode": args.inheritance,
+        "findings": {
+            "repo_root_unresolved_deny_sids": root_unresolved,
+            "git_unresolved_deny_sids": git_unresolved,
+        },
         "steps": steps,
     }
     write_report(out_dir, payload)
@@ -349,16 +382,48 @@ def main() -> int:
         )
         steps.append(f"Wrote ACL audit: {out_dir / 'acl-audit.json'}")
 
+    all_unresolved = sorted({*root_unresolved, *git_unresolved})
+    unresolved_sid_identities = [i for i in all_unresolved if is_windows_sid(i)]
+    unresolved_non_sid_identities = [i for i in all_unresolved if not is_windows_sid(i)]
+    payload["findings"]["unresolved_deny_non_sid_identities"] = unresolved_non_sid_identities
+
+    planned_target_sids: list[str]
+    if sid.lower() == "auto":
+        planned_target_sids = unresolved_sid_identities
+    else:
+        planned_target_sids = [sid]
+    payload["plannedTargetSids"] = planned_target_sids
+
     if args.dry_run:
         payload["status"] = "dry-run"
-        steps.append("Dry-run: no ACL changes applied.")
+        payload["needs_fix"] = needs_fix
+        if args.smoke_git_lock:
+            steps.append("Note: --smoke-git-lock skipped in dry-run mode (no repository writes).")
+        if needs_fix:
+            steps.append(
+                f"Detected unresolved SID DENY rules (repo_root={len(root_unresolved)}, git={len(git_unresolved)})."
+            )
+        else:
+            steps.append("No unresolved SID DENY rules detected.")
     else:
-        if args.remove_from_repo_root:
-            removed_root = remove_sid_aces(root, sid, root=root)
-            steps.append(f"Removed SID ACEs from repo root (removed={removed_root}).")
+        target_sids: list[str]
+        if sid.lower() == "auto":
+            target_sids = unresolved_sid_identities
+            steps.append(f"Auto mode: removing unresolved deny SID identities (count={len(target_sids)}).")
+        else:
+            target_sids = [sid]
+        payload["targetSids"] = target_sids
 
-        removed_git = remove_sid_aces(git_dir, sid, root=root)
-        steps.append(f"Removed SID ACEs from .git (removed={removed_git}).")
+        if args.remove_from_repo_root:
+            removed_root_total = 0
+            for s in target_sids:
+                removed_root_total += remove_sid_aces(root, s, root=root)
+            steps.append(f"Removed SID ACEs from repo root (removed_total={removed_root_total}).")
+
+        removed_git_total = 0
+        for s in target_sids:
+            removed_git_total += remove_sid_aces(git_dir, s, root=root)
+        steps.append(f"Removed SID ACEs from .git (removed_total={removed_git_total}).")
 
         if args.recursive:
             # Optional deep cleanup: apply the same removal to all descendants.
@@ -366,7 +431,8 @@ def main() -> int:
             removed_desc = 0
             for p in [git_dir, *git_dir.rglob("*")]:
                 try:
-                    removed_desc += remove_sid_aces(p, sid, root=root)
+                    for s in target_sids:
+                        removed_desc += remove_sid_aces(p, s, root=root)
                 except Exception:
                     # Best-effort to keep the script usable; details are in ACL snapshots.
                     continue
@@ -385,11 +451,41 @@ def main() -> int:
         if args.smoke_git_lock:
             git_lock_smoke(root)
             steps.append("Git lock/write smoke test passed (git update-ref).")
+            payload["smoke"] = {"git_update_ref": True}
 
-    dump_icacls(root, out_dir / "after-repo-root.icacls.txt", root=root)
-    dump_icacls(git_dir, out_dir / "after-dotgit.icacls.txt", root=root)
+        root_unresolved_after = collect_unresolved_deny_sids(root, root=root)
+        git_unresolved_after = collect_unresolved_deny_sids(git_dir, root=root)
+        payload["findings"] = {
+            "repo_root_unresolved_deny_sids": root_unresolved_after,
+            "git_unresolved_deny_sids": git_unresolved_after,
+        }
+        if root_unresolved_after or git_unresolved_after:
+            payload["status"] = "failed"
+            steps.append(
+                f"Unresolved SID DENY rules still present after cleanup (repo_root={len(root_unresolved_after)}, git={len(git_unresolved_after)})."
+            )
+            write_report(out_dir, payload)
+            print(f"[REPORT] {out_dir / 'fix-git-acl-drift.json'}")
+            print(f"[REPORT] {out_dir / 'fix-git-acl-drift.txt'}")
+            return 3
 
-    payload["status"] = "ok"
+    if args.dry_run:
+        dump_icacls(root, out_dir / "dryrun-repo-root.icacls.txt", root=root)
+        dump_icacls(git_dir, out_dir / "dryrun-dotgit.icacls.txt", root=root)
+    else:
+        dump_icacls(root, out_dir / "after-repo-root.icacls.txt", root=root)
+        dump_icacls(git_dir, out_dir / "after-dotgit.icacls.txt", root=root)
+
+    # If we are in dry-run and findings exist, fail the process so CI can gate/auto-remediate.
+    if args.dry_run and needs_fix:
+        write_report(out_dir, payload)
+        print(f"[REPORT] {out_dir / 'fix-git-acl-drift.json'}")
+        print(f"[REPORT] {out_dir / 'fix-git-acl-drift.txt'}")
+        return 2
+
+    if payload.get("status") in (None, "started"):
+        payload["status"] = "ok"
+
     write_report(out_dir, payload)
     print(f"[REPORT] {out_dir / 'fix-git-acl-drift.json'}")
     print(f"[REPORT] {out_dir / 'fix-git-acl-drift.txt'}")

@@ -6,6 +6,7 @@ using Game.Godot.Scripts.Autoload;
 using Game.Godot.Scripts.UI.Components;
 using System;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Game.Godot.Scripts.UI;
 
@@ -54,29 +55,89 @@ public partial class GuildPanel : Control
     private Callable _domainEventCallable;
     private bool _confirmDialogWired;
 
+    private const string InteractionStateReady = "ready";
+    private const string InteractionStateLoading = "loading";
+    private const string InteractionStateError = "error";
+
+    private Script? _interactionStateUiScript;
+    private Control? _interactionRoot;
+    private Label? _interactionStatusLabel;
+    private Button? _interactionRetryButton;
+    private Button? _interactionCloseButton;
+    private Func<Task>? _retryAsync;
+
     private void SetGuildStatus(string message)
     {
-        try
-        {
-            _statusPanel?.SetStatus("Guild", message);
-        }
-        catch
-        {
-            // Best-effort only.
-        }
+        SetInteractionState(InteractionStateReady, message, retryAsync: null);
         GD.Print($"[GuildPanel] {message}");
     }
 
     private void ShowError(string title, string message)
     {
-        if (_errorPanel == null)
+        SetInteractionState(InteractionStateError, message, retryAsync: null, errorTitle: title);
+    }
+
+    private void SetInteractionState(string state, string message, Func<Task>? retryAsync, string errorTitle = "Error")
+    {
+        _retryAsync = retryAsync;
+
+        _interactionStateUiScript ??= GD.Load<Script>("res://Game.Godot/Scripts/UI/InteractionStateUi.gd");
+        _interactionRoot ??= GetNodeOrNull<Control>("Scroll/Margin/VBox");
+        _interactionStatusLabel ??= GetNodeOrNull<Label>("Scroll/Margin/VBox/GuildInfo/StatusPanel/Root/Message");
+        _interactionRetryButton ??= GetNodeOrNull<Button>("Scroll/Margin/VBox/GuildInfo/ErrorPanel/Root/Buttons/RetryButton");
+        _interactionCloseButton ??= GetNodeOrNull<Button>("Scroll/Margin/VBox/GuildInfo/ErrorPanel/Root/Buttons/CloseButton");
+
+        if (_errorPanel != null)
         {
-            SetGuildStatus($"ERROR: {message}");
+            _errorPanel.Visible = state == InteractionStateError;
+            if (_errorPanel.Visible)
+                _errorPanel.SetError(errorTitle, message);
+        }
+
+        if (_interactionStateUiScript == null || _interactionRoot == null || _interactionStatusLabel == null || _interactionRetryButton == null)
+            return;
+
+        var exceptions = new global::Godot.Collections.Array<global::Godot.Node> { _interactionRetryButton };
+        if (_interactionCloseButton != null)
+            exceptions.Add(_interactionCloseButton);
+
+        _interactionStateUiScript.Call(
+            "apply_state_with_exceptions",
+            _interactionRoot,
+            _interactionStatusLabel,
+            _interactionRetryButton,
+            exceptions,
+            state,
+            message
+        );
+
+        if (state == InteractionStateError && _retryAsync == null)
+        {
+            _interactionRetryButton.Visible = false;
+        }
+    }
+
+    private async void OnErrorRetryRequested()
+    {
+        if (_retryAsync == null)
+        {
+            SetInteractionState(InteractionStateReady, string.Empty, retryAsync: null);
             return;
         }
 
-        _errorPanel.Visible = true;
-        _errorPanel.SetError(title, message);
+        try
+        {
+            await _retryAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowError("Retry failed", ex.Message);
+        }
+    }
+
+    private void OnErrorCloseRequested()
+    {
+        SetInteractionState(InteractionStateReady, string.Empty, retryAsync: null);
     }
 
     private Node? GetGuildManagerOrReport()
@@ -137,8 +198,8 @@ public partial class GuildPanel : Control
         if (_errorPanel != null)
         {
             _errorPanel.Visible = false;
-            _errorPanel.CloseRequested += () => _errorPanel.Visible = false;
-            _errorPanel.RetryRequested += () => _errorPanel.Visible = false;
+            _errorPanel.CloseRequested += OnErrorCloseRequested;
+            _errorPanel.RetryRequested += OnErrorRetryRequested;
         }
 
         if (_confirmDialog != null)
@@ -164,6 +225,7 @@ public partial class GuildPanel : Control
 
         // Initial UI state
         UpdateUIState(hasGuild: false);
+        SetInteractionState(InteractionStateReady, string.Empty, retryAsync: null);
     }
 
     private void WireConfirmDialog()
@@ -410,6 +472,11 @@ public partial class GuildPanel : Control
 
     private async void OnCreateGuildPressed()
     {
+        await CreateGuildAsync();
+    }
+
+    private async Task CreateGuildAsync()
+    {
         var guildManagerNode = GetGuildManagerOrReport();
         if (guildManagerNode == null)
             return;
@@ -446,31 +513,34 @@ public partial class GuildPanel : Control
         string userId = session?.CurrentUserId ?? "player1";
         var inputName = _guildNameInput.Text?.Trim() ?? string.Empty;
         string guildName = string.IsNullOrWhiteSpace(inputName)
-            ? $"Guild_{System.Guid.NewGuid().ToString("N").Substring(0, 6)}"
+            ? $"Guild_{Guid.NewGuid().ToString("N").Substring(0, 6)}"
             : inputName;
         if (string.IsNullOrWhiteSpace(inputName))
             _guildNameInput.Text = guildName;
 
-        SetGuildStatus("Creating...");
+        SetInteractionState(InteractionStateLoading, "Creating...", retryAsync: CreateGuildAsync);
         try
         {
             var result = await guildManager.CreateGuildAsync(userId, guildName);
-                if (!string.IsNullOrWhiteSpace(result))
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+                if (result.StartsWith("ERROR:", StringComparison.Ordinal))
                 {
-                    if (result.StartsWith("ERROR:", StringComparison.Ordinal))
+                    var details = string.Empty;
+                    try
                     {
-                        var details = string.Empty;
-                        try
-                        {
-                            details = guildManager.GetLastError();
-                        }
-                        catch { /* ignore */ }
-
-                        var message = string.IsNullOrWhiteSpace(details) ? result : $"{result} ({details})";
-                        SetGuildStatus(message);
-                        ShowError("CreateGuild failed", message);
+                        details = guildManager.GetLastError();
                     }
+                    catch
+                    {
+                        // Best-effort only.
+                    }
+
+                    var message = string.IsNullOrWhiteSpace(details) ? result : $"{result} ({details})";
+                    SetInteractionState(InteractionStateError, message, retryAsync: CreateGuildAsync, errorTitle: "CreateGuild failed");
+                    return;
                 }
+            }
 
             try
             {
@@ -485,7 +555,7 @@ public partial class GuildPanel : Control
         }
         catch (Exception ex)
         {
-            ShowError("CreateGuild failed", ex.Message);
+            SetInteractionState(InteractionStateError, ex.Message, retryAsync: CreateGuildAsync, errorTitle: "CreateGuild failed");
         }
     }
 

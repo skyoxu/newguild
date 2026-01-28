@@ -71,6 +71,7 @@ func _wait_for_event_type(wanted: String, frames: int = 240) -> bool:
 # ACC:T29.2
 # ACC:T29.3
 # ACC:T29.4
+# ACC:T32.4
 func test_t2_playable_loop_scene_skeleton() -> void:
     var scene := preload("res://Game.Godot/Scenes/Main.tscn").instantiate()
     add_child(scene)
@@ -91,3 +92,7 @@ func test_t2_playable_loop_scene_skeleton() -> void:
     assert_bool(scene.has_node("MainMenu")).is_true()
     var menu: Control = scene.get_node("MainMenu")
     assert_bool(menu.visible).is_true()
+    assert_int(menu.mouse_filter).is_equal(Control.MOUSE_FILTER_STOP)
+    assert_bool(menu.has_node("VBox/BtnPlay")).is_true()
+    var btn_play: Button = menu.get_node("VBox/BtnPlay")
+    assert_bool(btn_play.disabled).is_false()

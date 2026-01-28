@@ -41,6 +41,7 @@ func _assert_audit_line_has_required_fields(line: String) -> void:
 	assert_str(reason).not_contains("SELECT")
 
 
+# ACC:T32.1
 func test_secure_mode_sanitizes_open_error_and_writes_audit_log() -> void:
 	_remove_audit_file()
 
@@ -57,7 +58,10 @@ func test_secure_mode_sanitizes_open_error_and_writes_audit_log() -> void:
 
 	assert_bool(bool(result.get("threw", false))).is_true()
 	assert_bool(bool(result.get("has_inner", true))).is_false()
-	assert_str(str(result.get("message", ""))).is_equal("Database operation failed.")
+	var msg := str(result.get("message", ""))
+	assert_str(msg).is_equal("Database operation failed.")
+	assert_str(msg).not_contains("C:\\")
+	assert_str(msg).not_contains("SELECT")
 
 	assert_bool(FileAccess.file_exists(_audit_path_res())).is_true()
 	var txt: String = FileAccess.get_file_as_string(_audit_path_res())

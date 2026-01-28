@@ -43,6 +43,25 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Preflight: audit .git ACL drift (Windows)
+        id: acl_audit
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          py -3 scripts/python/fix_git_acl_drift.py --audit --dry-run --sid auto
+
+      - name: Remediate: fix .git ACL drift (Windows)
+        if: steps.acl_audit.outcome == 'failure'
+        shell: pwsh
+        run: |
+          py -3 scripts/python/fix_git_acl_drift.py --audit --sid auto --smoke-git-lock --no-remove-from-repo-root --inheritance keep
+
+      - name: Verify: .git ACL drift cleared (Windows)
+        if: steps.acl_audit.outcome == 'failure'
+        shell: pwsh
+        run: |
+          py -3 scripts/python/fix_git_acl_drift.py --audit --dry-run --sid auto
+
       - name: Ensure GdUnit4 plugin
         shell: pwsh
         run: |
