@@ -1,5 +1,7 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
+const MENU_TYPES := preload("res://Game.Godot/Scripts/UI/UiMenuEventTypes.gd")
+
 var _bus
 var _etype := ""
 var _got := false
@@ -45,4 +47,4 @@ func test_main_scene_glue_publishes_on_menu_start() -> void:
     btn.emit_signal("pressed")
     await get_tree().process_frame
     assert_bool(_got).is_true()
-    assert_str(_etype).is_equal("ui.menu.start")
+    assert_str(_etype).is_equal(MENU_TYPES.START)

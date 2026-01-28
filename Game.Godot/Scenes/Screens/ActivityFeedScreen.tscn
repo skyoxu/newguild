@@ -1,0 +1,60 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Game.Godot/Scripts/Screens/ActivityFeedScreen.cs" id="1"]
+
+[node name="ActivityFeedScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="Top" type="HBoxContainer" parent="."]
+layout_mode = 2
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 840.0
+offset_bottom = 56.0
+
+[node name="Back" type="Button" parent="Top"]
+layout_mode = 2
+text = "Back"
+
+[node name="Title" type="Label" parent="Top"]
+layout_mode = 2
+text = "Activity Feed"
+
+[node name="Body" type="VBoxContainer" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_top = 64.0
+theme_override_constants/separation = 8
+
+[node name="Status" type="Label" parent="Body"]
+layout_mode = 2
+text = "No activity yet."
+
+[node name="Scroll" type="ScrollContainer" parent="Body"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Feed" type="RichTextLabel" parent="Body/Scroll"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+bbcode_enabled = true
+scroll_following = true

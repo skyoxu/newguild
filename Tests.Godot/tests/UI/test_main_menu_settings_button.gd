@@ -1,5 +1,7 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
+const MENU_TYPES := preload("res://Game.Godot/Scripts/UI/UiMenuEventTypes.gd")
+
 var _bus: Node
 var _received := false
 var _etype := ""
@@ -31,4 +33,4 @@ func test_main_menu_emits_settings() -> void:
     btn.emit_signal("pressed")
     await get_tree().process_frame
     assert_bool(_received).is_true()
-    assert_str(_etype).is_equal("ui.menu.settings")
+    assert_str(_etype).is_equal(MENU_TYPES.SETTINGS)
