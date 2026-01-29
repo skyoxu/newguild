@@ -16,7 +16,7 @@ public partial class GameEngineDemo : Node
         var cfg = new GameConfig(MaxLevel: 10, InitialHealth: 100, ScoreMultiplier: 1.0, AutoSave: false, Difficulty: Difficulty.Medium);
         var inv = new Game.Core.Domain.Inventory();
         _engine = new GameEngineCore(cfg, inv, bus);
-        // Defer start until UI emits ui.menu.start
+        // Defer start until UI emits UiMenuEventTypes.Start
     }
 
     public void AddScore(int basePoints)

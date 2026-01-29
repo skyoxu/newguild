@@ -1211,7 +1211,7 @@
         "dependencies": [
           "31"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611841+00:00"
@@ -1242,7 +1242,7 @@
           "29",
           "32"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611844+00:00"
@@ -1274,7 +1274,7 @@
           "17",
           "31"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611847+00:00"

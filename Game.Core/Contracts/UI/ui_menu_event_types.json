@@ -1,0 +1,10 @@
+{
+  "prefix": "ui.menu.",
+  "events": {
+    "Start": "ui.menu.start",
+    "Guild": "ui.menu.guild",
+    "Settings": "ui.menu.settings",
+    "Activity": "ui.menu.activity",
+    "Quit": "ui.menu.quit"
+  }
+}

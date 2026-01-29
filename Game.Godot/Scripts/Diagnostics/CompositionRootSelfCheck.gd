@@ -1,5 +1,7 @@
 extends SceneTree
 
+const MENU_TYPES := preload("res://Game.Godot/Scripts/UI/UiMenuEventTypes.gd")
+
 func _init() -> void:
     call_deferred("_run")
 
@@ -111,7 +113,7 @@ func _run() -> void:
 
 var _sc_published := false
 func _on_sc_domain_evt(type, _source, _data_json, _id, _spec, _ct, _ts, result: Dictionary) -> void:
-    if str(type) == "ui.menu.start":
+    if str(type) == MENU_TYPES.START:
         _sc_published = true
 
 func _write_and_quit(result: Dictionary) -> void:

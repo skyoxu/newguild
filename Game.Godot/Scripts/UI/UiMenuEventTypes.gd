@@ -1,0 +1,6 @@
+const PREFIX := "ui.menu."
+const START := "ui.menu.start"
+const GUILD := "ui.menu.guild"
+const SETTINGS := "ui.menu.settings"
+const ACTIVITY := "ui.menu.activity"
+const QUIT := "ui.menu.quit"

@@ -1,5 +1,7 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
+const MENU_TYPES := preload("res://Game.Godot/Scripts/UI/UiMenuEventTypes.gd")
+
 var _bus: Node
 var _received := false
 var _etype := ""
@@ -31,7 +33,7 @@ func test_main_menu_emits_start() -> void:
     btn.emit_signal("pressed")
     await get_tree().process_frame
     assert_bool(_received).is_true()
-    assert_str(_etype).is_equal("ui.menu.start")
+    assert_str(_etype).is_equal(MENU_TYPES.START)
 
 func test_main_menu_emits_guild() -> void:
     _received = false
@@ -42,4 +44,15 @@ func test_main_menu_emits_guild() -> void:
     btn.emit_signal("pressed")
     await get_tree().process_frame
     assert_bool(_received).is_true()
-    assert_str(_etype).is_equal("ui.menu.guild")
+    assert_str(_etype).is_equal(MENU_TYPES.GUILD)
+
+func test_main_menu_emits_activity() -> void:
+    _received = false
+    var menu = preload("res://Game.Godot/Scenes/UI/MainMenu.tscn").instantiate()
+    add_child(auto_free(menu))
+    await get_tree().process_frame
+    var btn = menu.get_node("VBox/BtnActivity")
+    btn.emit_signal("pressed")
+    await get_tree().process_frame
+    assert_bool(_received).is_true()
+    assert_str(_etype).is_equal(MENU_TYPES.ACTIVITY)

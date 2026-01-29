@@ -1,5 +1,7 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
+const MENU_TYPES := preload("res://Game.Godot/Scripts/UI/UiMenuEventTypes.gd")
+
 func before() -> void:
     var __bus = preload("res://Game.Godot/Adapters/EventBusAdapter.cs").new()
     __bus.name = "EventBus"
@@ -18,7 +20,7 @@ func test_settings_panel_opens_on_ui_event() -> void:
     var panel = main.get_node("SettingsPanel")
     if panel.visible:
         panel.visible = false
-    bus.PublishSimple("ui.menu.settings", "ut", "{}")
+    bus.PublishSimple(MENU_TYPES.SETTINGS, "ut", "{}")
     var shown := false
     for i in range(120):
         if panel.visible:
