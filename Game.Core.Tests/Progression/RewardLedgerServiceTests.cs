@@ -22,7 +22,19 @@ public sealed class RewardLedgerServiceTests
     {
         var now = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var time = new FixedTime(now);
-        var ids = new SequenceIdGenerator("evt-1", "evt-2", "evt-3", "evt-4", "evt-5", "evt-6");
+        var ids = new SequenceIdGenerator(
+            "evt-1",
+            "evt-2",
+            "evt-3",
+            "evt-4",
+            "evt-5",
+            "evt-6",
+            "evt-7",
+            "evt-8",
+            "evt-9",
+            "evt-10",
+            "evt-11",
+            "evt-12");
         var bus = new InMemoryEventBus();
         var service = new RewardLedgerService(bus, time, ids);
 

@@ -1436,7 +1436,13 @@
     "contractRefs": [
       "core.media.beat.triggered",
       "core.raid.resolved",
-      "core.recruitment.offer.resolved"
+      "core.recruitment.offer.resolved",
+      "core.experience.changed",
+      "core.level.changed",
+      "core.content.manifest.loaded",
+      "core.event_catalog.loaded",
+      "core.reputation.changed",
+      "core.score.changed"
     ],
     "artifactRefs": [
       "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"

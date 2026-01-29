@@ -32,6 +32,18 @@ Arch-Refs:
 
 - 事件类型与触发时机以 `Game.Core/Contracts/**` 为准；本页仅提供索引与口径说明。
 
+## ????
+
+### ??
+- **ExperienceChanged** (`core.experience.changed`)
+  - ????????????? raid/media/recruitment ??????
+  - ???`GuildId`, `TotalExperience`, `Delta`, `Level`, `SourceEventType`, `ChangedAt`
+  - ?????`Game.Core/Contracts/Progression/ExperienceChanged.cs`
+- **LevelChanged** (`core.level.changed`)
+  - ???????????????????????
+  - ???`GuildId`, `OldLevel`, `NewLevel`, `TotalExperience`, `SourceEventType`, `ChangedAt`
+  - ?????`Game.Core/Contracts/Progression/LevelChanged.cs`
+
 ## 验收与证据链（Draft）
 
 - 本页为 Draft：当对应任务进入实现阶段时，将通过 view 任务 `acceptance[]` 的 `Refs:` 与测试文件内 `ACC:T<id>.<n>` anchors 建立确定性证据链。
