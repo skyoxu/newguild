@@ -40,3 +40,9 @@ Arch-Refs:
 
 - 奖励发放统一：若没有其他任务负责战斗奖励发放，本阶段在 Reward Ledger 完成。
 - 战术中心只做统一入口与最小编成/校验，驱动现有 PVE/Raid demo 与事件输出。
+
+## Test-Refs
+
+- `Game.Core.Tests/Progression/RewardLedgerServiceTests.cs`
+- `Game.Core.Tests/Progression/RewardLedgerTests.cs`
+- `Game.Core.Tests/CI/ArtifactsLoggingTests.cs`

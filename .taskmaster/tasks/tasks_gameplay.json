@@ -1299,7 +1299,11 @@
     "contractRefs": [
       "core.media.beat.triggered",
       "core.raid.resolved",
-      "core.recruitment.offer.resolved"
+      "core.recruitment.offer.resolved",
+      "core.content.manifest.loaded",
+      "core.event_catalog.loaded",
+      "core.score.changed",
+      "core.reputation.changed"
     ],
     "artifactRefs": [
       "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
@@ -1310,7 +1314,8 @@
       "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Progression/RewardLedgerTests.cs",
       "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
       "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/ArtifactsLoggingTests.cs",
-      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应由 RewardLedgerService 监听 raid/media/recruitment 事件并发布 ScoreChanged/ReputationChanged。 Refs: Game.Core.Tests/Progression/RewardLedgerServiceTests.cs"
     ],
     "test_strategy": [
       "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
@@ -1322,7 +1327,8 @@
     "test_refs": [
       "Game.Core.Tests/Progression/RewardLedgerTests.cs",
       "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
-      "Game.Core.Tests/CI/ArtifactsLoggingTests.cs"
+      "Game.Core.Tests/CI/ArtifactsLoggingTests.cs",
+      "Game.Core.Tests/Progression/RewardLedgerServiceTests.cs"
     ],
     "taskmaster_id": 35,
     "taskmaster_exported": false

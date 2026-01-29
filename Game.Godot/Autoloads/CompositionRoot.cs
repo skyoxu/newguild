@@ -1,3 +1,4 @@
+using System;
 using Game.Core.Ports;
 using Game.Core.Services;
 using Godot;
@@ -19,8 +20,10 @@ public partial class CompositionRoot : Node
     public IDataStore DataStore { get; private set; } = default!;
     public ILogger Logger { get; private set; } = default!;
     public IEventBus EventBus { get; private set; } = default!;
+    public RewardLedgerService RewardLedger { get; private set; } = default!;
 
     private bool _initialized;
+    private IDisposable? _rewardLedgerSubscription;
 
     public override void _EnterTree()
     {
@@ -34,6 +37,12 @@ public partial class CompositionRoot : Node
 
         InitializePorts();
         _initialized = true;
+    }
+
+    public override void _ExitTree()
+    {
+        _rewardLedgerSubscription?.Dispose();
+        _rewardLedgerSubscription = null;
     }
 
     private void InitializePorts()
@@ -88,6 +97,9 @@ public partial class CompositionRoot : Node
             root.CallDeferred(Node.MethodName.AddChild, loader);
         }
         ResourceLoader = loader;
+
+        RewardLedger = new RewardLedgerService(EventBus, Time);
+        _rewardLedgerSubscription = RewardLedger.Start();
     }
 
     // Expose a simple status map for GDScript without accessing C# properties directly
