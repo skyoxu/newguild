@@ -12,6 +12,7 @@ namespace Game.Core.Tests.CI;
 
 public sealed class Task23QualityGatesAcceptanceTests
 {
+    // ACC:T37.5
     // ACC:T42.8
     // ACC:T23.1
     [Fact]
