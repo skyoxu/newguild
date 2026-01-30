@@ -66,3 +66,6 @@ Arch-Refs:
 - `Game.Core.Tests/Progression/RewardLedgerServiceTests.cs`
 - `Game.Core.Tests/Progression/RewardLedgerTests.cs`
 - `Game.Core.Tests/CI/ArtifactsLoggingTests.cs`
+- `Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs`
+- `Tests.Godot/tests/UI/test_achievements_smoke.gd`
+- `Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd`
