@@ -6,12 +6,14 @@ using System.Text.Json;
 using Game.Godot.Adapters;
 using Game.Godot.Autoloads;
 using Game.Core.Contracts;
+using Game.Core.Contracts.Achievements;
 using Game.Core.Contracts.Events;
 using Game.Core.Contracts.Engine;
 using Game.Core.Contracts.Media;
 using Game.Core.Contracts.Raid;
 using Game.Core.Contracts.Security;
 using Game.Core.Domain;
+using Game.Core.Domain.Achievements;
 using Game.Core.Domain.Turn;
 using Game.Core.Engine;
 using Game.Godot.Scripts.Demo;
@@ -27,6 +29,7 @@ public partial class HUD : Control
     public const string DemoResultError = "error";
     private const string ReputationLabelPrefix = "Reputation";
     private const string MediaBeatLabelPrefix = "MediaBeat";
+    private const string AchievementsLabelPrefix = "Achievements";
     private const string EventCatalogPath = "res://Game.Godot/Assets/Data/content/base/event_catalog.json";
     private static readonly JsonDocumentOptions JsonOptions = new()
     {
@@ -39,10 +42,13 @@ public partial class HUD : Control
     private Label _health = default!;
     private Label _week = default!;
     private Label _phase = default!;
+    private Label _achievements = default!;
     private Label _reputation = default!;
     private Label _mediaBeatLabel = default!;
     private Button _mediaBeatButton = default!;
     private Button _nextTurnButton = default!;
+    private int _achievementsUnlockedCount;
+    private AchievementTracker? _achievementTracker;
 
     private EventBusAdapter? _eventBus;
     private Callable _domainEventCallable;
@@ -68,6 +74,7 @@ public partial class HUD : Control
         _health = GetNode<Label>("TopBar/HBox/HealthLabel");
         _week = GetNodeOrNull<Label>("TopBar/HBox/WeekLabel");
         _phase = GetNodeOrNull<Label>("TopBar/HBox/PhaseLabel");
+        _achievements = GetNodeOrNull<Label>("TopBar/HBox/AchievementsLabel");
         _reputation = GetNodeOrNull<Label>("TopBar/HBox/ReputationLabel");
         _mediaBeatLabel = GetNodeOrNull<Label>("TopBar/HBox/MediaBeatLabel");
         _mediaBeatButton = GetNodeOrNull<Button>("TopBar/HBox/MediaBeatButton");
@@ -77,6 +84,8 @@ public partial class HUD : Control
             _week.Text = "Week: -";
         if (_phase != null)
             _phase.Text = "Phase: -";
+        if (_achievements != null && string.IsNullOrWhiteSpace(_achievements.Text))
+            _achievements.Text = FormatAchievementsText(0);
         if (_reputation != null && string.IsNullOrWhiteSpace(_reputation.Text))
             _reputation.Text = FormatReputationText(0);
 
@@ -127,6 +136,10 @@ public partial class HUD : Control
         _coreIdGenerator = new GuidIdGenerator();
         _demoScore = 0;
         _mediaBeatSystem = new MediaBeatSystem(eventBus, timePort, _coreIdGenerator);
+        _achievementsUnlockedCount = 0;
+        _achievementTracker = new AchievementTracker(eventBus);
+        _achievementTracker.UnlockedCountChanged += OnAchievementCountChanged;
+        SetAchievementsUnlockedCount(_achievementTracker.UnlockedCount);
 
         var catalog = LoadEventCatalogOrThrow(eventBus, timePort);
         var saveId = new SaveIdValue("t2-demo");
@@ -146,6 +159,13 @@ public partial class HUD : Control
             return;
         if (_eventBus.IsConnected(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable))
             _eventBus.Disconnect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
+
+        if (_achievementTracker != null)
+        {
+            _achievementTracker.UnlockedCountChanged -= OnAchievementCountChanged;
+            _achievementTracker.Dispose();
+            _achievementTracker = null;
+        }
     }
 
     private void OnDomainEventEmitted(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso)
@@ -244,6 +264,8 @@ public partial class HUD : Control
 
     private static string FormatReputationText(int value) => $"{ReputationLabelPrefix}: {value}";
 
+    private static string FormatAchievementsText(int count) => $"{AchievementsLabelPrefix}: {count}";
+
     private static string FormatMediaBeatText(string beatId, string headline) =>
         $"{MediaBeatLabelPrefix}: {beatId} {headline}".Trim();
 
@@ -260,6 +282,17 @@ public partial class HUD : Control
 
     public void SetScore(int v) => _score.Text = $"Score: {v}";
     public void SetHealth(int v) => _health.Text = $"HP: {v}";
+    public void SetAchievementsUnlockedCount(int count)
+    {
+        _achievementsUnlockedCount = Math.Max(0, count);
+        if (_achievements == null)
+            return;
+        _achievements.Text = FormatAchievementsText(_achievementsUnlockedCount);
+    }
+    private void OnAchievementCountChanged(object? sender, AchievementCountChanged args)
+    {
+        SetAchievementsUnlockedCount(args.UnlockedCount);
+    }
 
     // Public entry for GDScript debug button to advance turn once.
     public void AdvanceTurnFromGd() => OnNextTurnPressed();
