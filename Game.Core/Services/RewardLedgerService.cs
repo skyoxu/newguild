@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Game.Core.Contracts;
 using Game.Core.Contracts.Engine;
 using Game.Core.Contracts.Media;
+using Game.Core.Contracts.Progression;
 using Game.Core.Contracts.Raid;
 using Game.Core.Contracts.Recruitment;
 using Game.Core.Ports;
@@ -14,9 +15,6 @@ namespace Game.Core.Services;
 
 public sealed class RewardLedgerService : IDisposable
 {
-    public const string RewardTypeScore = "score";
-    public const string RewardTypeReputation = "reputation";
-
     private const int RaidSuccessReputationDelta = 1;
     private const int MediaBeatReputationDelta = 1;
     private const int RecruitmentAcceptedScore = 5;
@@ -30,6 +28,7 @@ public sealed class RewardLedgerService : IDisposable
     private readonly object _gate = new();
     private RewardLedger _ledger = new();
     private readonly Dictionary<string, int> _reputationByGuild = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ExperienceSnapshot> _experienceByGuild = new(StringComparer.Ordinal);
     private int _scoreTotal;
     private IDisposable? _subscription;
 
@@ -72,6 +71,7 @@ public sealed class RewardLedgerService : IDisposable
             _ledger = loaded;
             _scoreTotal = 0;
             _reputationByGuild.Clear();
+            _experienceByGuild.Clear();
         }
 
         await ReplayAsync().ConfigureAwait(false);
@@ -84,6 +84,7 @@ public sealed class RewardLedgerService : IDisposable
         {
             _scoreTotal = 0;
             _reputationByGuild.Clear();
+            _experienceByGuild.Clear();
             grants = _ledger.Replay().ToList();
         }
 
@@ -121,9 +122,11 @@ public sealed class RewardLedgerService : IDisposable
     {
         var rewards = new Dictionary<string, int>(StringComparer.Ordinal);
         if (raid.RewardPoints > 0)
-            rewards[RewardTypeScore] = raid.RewardPoints;
+            rewards[RewardTypes.Score] = raid.RewardPoints;
         if (raid.RewardPoints > 0)
-            rewards[RewardTypeReputation] = RaidSuccessReputationDelta;
+            rewards[RewardTypes.Reputation] = RaidSuccessReputationDelta;
+        if (raid.RewardPoints > 0)
+            rewards[RewardTypes.Experience] = raid.RewardPoints;
 
         if (rewards.Count == 0)
             return null;
@@ -140,7 +143,8 @@ public sealed class RewardLedgerService : IDisposable
     {
         var rewards = new Dictionary<string, int>(StringComparer.Ordinal)
         {
-            [RewardTypeReputation] = MediaBeatReputationDelta
+            [RewardTypes.Reputation] = MediaBeatReputationDelta,
+            [RewardTypes.Experience] = MediaBeatReputationDelta
         };
 
         return new RewardGrant(
@@ -158,8 +162,9 @@ public sealed class RewardLedgerService : IDisposable
 
         var rewards = new Dictionary<string, int>(StringComparer.Ordinal)
         {
-            [RewardTypeScore] = RecruitmentAcceptedScore,
-            [RewardTypeReputation] = RecruitmentAcceptedReputationDelta
+            [RewardTypes.Score] = RecruitmentAcceptedScore,
+            [RewardTypes.Reputation] = RecruitmentAcceptedReputationDelta,
+            [RewardTypes.Experience] = RecruitmentAcceptedScore
         };
 
         return new RewardGrant(
@@ -177,16 +182,21 @@ public sealed class RewardLedgerService : IDisposable
 
         int scoreDelta;
         int reputationDelta;
+        int experienceDelta;
         int newScore;
         int oldReputation;
         int newReputation;
+        ExperienceSnapshot? oldExperience;
+        ExperienceSnapshot? newExperience;
+        bool levelChanged;
         lock (_gate)
         {
             if (record)
                 _ledger.Record(grant);
 
-            scoreDelta = grant.Rewards.TryGetValue(RewardTypeScore, out var sd) ? sd : 0;
-            reputationDelta = grant.Rewards.TryGetValue(RewardTypeReputation, out var rd) ? rd : 0;
+            scoreDelta = grant.Rewards.TryGetValue(RewardTypes.Score, out var sd) ? sd : 0;
+            reputationDelta = grant.Rewards.TryGetValue(RewardTypes.Reputation, out var rd) ? rd : 0;
+            experienceDelta = grant.Rewards.TryGetValue(RewardTypes.Experience, out var xd) ? Math.Max(0, xd) : 0;
 
             if (scoreDelta != 0)
                 _scoreTotal += scoreDelta;
@@ -206,6 +216,23 @@ public sealed class RewardLedgerService : IDisposable
             }
 
             newScore = _scoreTotal;
+
+            if (experienceDelta != 0)
+            {
+                oldExperience = _experienceByGuild.TryGetValue(grant.GuildId, out var current)
+                    ? current
+                    : ExperienceSystem.EmptySnapshot;
+                var totalExperience = oldExperience.TotalXp + experienceDelta;
+                newExperience = ExperienceSystem.FromTotalExperience(totalExperience);
+                _experienceByGuild[grant.GuildId] = newExperience;
+                levelChanged = newExperience.Level != oldExperience.Level;
+            }
+            else
+            {
+                oldExperience = null;
+                newExperience = null;
+                levelChanged = false;
+            }
         }
 
         if (scoreDelta != 0)
@@ -223,6 +250,31 @@ public sealed class RewardLedgerService : IDisposable
                 Reason: grant.SourceType,
                 ChangedAt: _time.UtcNowOffset);
             await PublishAsync(ReputationChanged.EventType, repEvent).ConfigureAwait(false);
+        }
+
+        if (experienceDelta != 0 && newExperience is not null)
+        {
+            var now = _time.UtcNowOffset;
+            var expEvent = new ExperienceChanged(
+                GuildId: grant.GuildId,
+                TotalExperience: newExperience.TotalXp,
+                Delta: experienceDelta,
+                Level: newExperience.Level,
+                SourceEventType: grant.SourceType,
+                ChangedAt: now);
+            await PublishAsync(ExperienceChanged.EventType, expEvent).ConfigureAwait(false);
+
+            if (levelChanged && oldExperience is not null)
+            {
+                var levelEvent = new LevelChanged(
+                    GuildId: grant.GuildId,
+                    OldLevel: oldExperience.Level,
+                    NewLevel: newExperience.Level,
+                    TotalExperience: newExperience.TotalXp,
+                    SourceEventType: grant.SourceType,
+                    ChangedAt: now);
+                await PublishAsync(LevelChanged.EventType, levelEvent).ConfigureAwait(false);
+            }
         }
     }
 

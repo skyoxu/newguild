@@ -35,11 +35,22 @@ Arch-Refs:
 
 ## 契约定义（索引）
 
+### 事件
+- **ExperienceChanged** (core.experience.changed)
+  - 触发时机：经验值变更（例如 raid/media/recruitment 结果结算后）。
+  - 字段：GuildId, TotalExperience, Delta, Level, SourceEventType, ChangedAt
+  - 契约位置：Game.Core/Contracts/Progression/ExperienceChanged.cs
+- **LevelChanged** (core.level.changed)
+  - 触发时机：等级提升或回退时触发。
+  - 字段：GuildId, OldLevel, NewLevel, TotalExperience, SourceEventType, ChangedAt
+  - 契约位置：Game.Core/Contracts/Progression/LevelChanged.cs
+
 ### DTO
 - **AchievementCountChanged**
   - 用途：成就计数变更通知（Core → UI）
   - 字段：UnlockedCount, TriggerEventType
   - 契约位置：Game.Core/Contracts/Achievements/AchievementCountChanged.cs
+
 
 ## 验收与证据链（Draft）
 

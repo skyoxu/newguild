@@ -3,6 +3,7 @@ using Game.Core.Contracts.Content;
 using Game.Core.Contracts.Events;
 using Game.Core.Contracts.Guild;
 using Game.Core.Contracts.Media;
+using Game.Core.Contracts.Progression;
 using Game.Core.Contracts.Raid;
 using Game.Core.Contracts.Recruitment;
 using Xunit;
@@ -43,6 +44,20 @@ public class Phase2ContentAndEventsContractsTests
         RaidResolved.EventType.Should().Be("core.raid.resolved");
         RecruitmentOfferResolved.EventType.Should().Be("core.recruitment.offer.resolved");
         ReputationChanged.EventType.Should().Be("core.reputation.changed");
+    }
+
+    // ACC:T37.4
+    [Fact]
+    public void Should_Have_CoreExperienceChanged_EventType()
+    {
+        ExperienceChanged.EventType.Should().Be("core.experience.changed");
+    }
+
+    // ACC:T37.6
+    [Fact]
+    public void Should_Have_CoreLevelChanged_EventType()
+    {
+        LevelChanged.EventType.Should().Be("core.level.changed");
     }
 }
 

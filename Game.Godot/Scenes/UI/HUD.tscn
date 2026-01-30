@@ -52,6 +52,10 @@ text = ""
 layout_mode = 2
 text = ""
 
+[node name="ExperienceLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+text = ""
+
 [node name="MediaBeatLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 text = ""

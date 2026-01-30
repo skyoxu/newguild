@@ -10,6 +10,7 @@ using Game.Core.Contracts.Achievements;
 using Game.Core.Contracts.Events;
 using Game.Core.Contracts.Engine;
 using Game.Core.Contracts.Media;
+using Game.Core.Contracts.Progression;
 using Game.Core.Contracts.Raid;
 using Game.Core.Contracts.Security;
 using Game.Core.Domain;
@@ -28,6 +29,7 @@ public partial class HUD : Control
     public const string DemoResultDenied = "denied";
     public const string DemoResultError = "error";
     private const string ReputationLabelPrefix = "Reputation";
+    private const string ExperienceLabelPrefix = "XP";
     private const string MediaBeatLabelPrefix = "MediaBeat";
     private const string AchievementsLabelPrefix = "Achievements";
     private const string EventCatalogPath = "res://Game.Godot/Assets/Data/content/base/event_catalog.json";
@@ -44,6 +46,7 @@ public partial class HUD : Control
     private Label _phase = default!;
     private Label _achievements = default!;
     private Label _reputation = default!;
+    private Label _experience = default!;
     private Label _mediaBeatLabel = default!;
     private Button _mediaBeatButton = default!;
     private Button _nextTurnButton = default!;
@@ -76,6 +79,7 @@ public partial class HUD : Control
         _phase = GetNodeOrNull<Label>("TopBar/HBox/PhaseLabel");
         _achievements = GetNodeOrNull<Label>("TopBar/HBox/AchievementsLabel");
         _reputation = GetNodeOrNull<Label>("TopBar/HBox/ReputationLabel");
+        _experience = GetNodeOrNull<Label>("TopBar/HBox/ExperienceLabel");
         _mediaBeatLabel = GetNodeOrNull<Label>("TopBar/HBox/MediaBeatLabel");
         _mediaBeatButton = GetNodeOrNull<Button>("TopBar/HBox/MediaBeatButton");
         _nextTurnButton = GetNodeOrNull<Button>("TopBar/HBox/NextTurnButton");
@@ -88,6 +92,8 @@ public partial class HUD : Control
             _achievements.Text = FormatAchievementsText(0);
         if (_reputation != null && string.IsNullOrWhiteSpace(_reputation.Text))
             _reputation.Text = FormatReputationText(0);
+        if (_experience != null && string.IsNullOrWhiteSpace(_experience.Text))
+            _experience.Text = FormatExperienceText(0, 1);
 
         var allowMediaBeatDemo = IsMediaBeatDemoAllowed();
         if (_mediaBeatLabel != null)
@@ -235,6 +241,40 @@ public partial class HUD : Control
                 GD.PushWarning($"[HUD] failed to parse event payload type={type} exType={ex.GetType().Name}");
             }
         }
+        else if (type == ExperienceChanged.EventType || type == LevelChanged.EventType)
+        {
+            if (_experience == null)
+                return;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(dataJson, JsonOptions);
+                int total;
+                int level;
+
+                if (doc.RootElement.TryGetProperty("totalExperience", out var totalExperience) && totalExperience.TryGetInt32(out total)) { }
+                else if (doc.RootElement.TryGetProperty("total", out var totalValue) && totalValue.TryGetInt32(out total)) { }
+                else
+                {
+                    GD.PushWarning($"[HUD] invalid payload for {type} (expected int totalExperience/total).");
+                    return;
+                }
+
+                if (doc.RootElement.TryGetProperty("level", out var levelValue) && levelValue.TryGetInt32(out level)) { }
+                else if (doc.RootElement.TryGetProperty("newLevel", out var newLevel) && newLevel.TryGetInt32(out level)) { }
+                else
+                {
+                    GD.PushWarning($"[HUD] invalid payload for {type} (expected int level/newLevel).");
+                    return;
+                }
+
+                _experience.Text = FormatExperienceText(total, level);
+            }
+            catch (Exception ex)
+            {
+                GD.PushWarning($"[HUD] failed to parse event payload type={type} exType={ex.GetType().Name}");
+            }
+        }
         else if (type == MediaBeatTriggered.EventType)
         {
             if (_mediaBeatLabel == null)
@@ -265,6 +305,8 @@ public partial class HUD : Control
     private static string FormatReputationText(int value) => $"{ReputationLabelPrefix}: {value}";
 
     private static string FormatAchievementsText(int count) => $"{AchievementsLabelPrefix}: {count}";
+    private static string FormatExperienceText(int totalExperience, int level) =>
+        $"{ExperienceLabelPrefix}: {totalExperience} Lv: {level}";
 
     private static string FormatMediaBeatText(string beatId, string headline) =>
         $"{MediaBeatLabelPrefix}: {beatId} {headline}".Trim();

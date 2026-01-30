@@ -25,3 +25,15 @@ func test_hud_updates_on_health_event() -> void:
     _bus.PublishSimple("core.health.updated", "ut", "{\"value\":77}")
     await get_tree().process_frame
     assert_str(hp_label.text).contains("77")
+
+func test_hud_updates_on_experience_event() -> void:
+    var hud = await _hud()
+    var xp_label: Label = hud.get_node("TopBar/HBox/ExperienceLabel")
+    _bus.PublishSimple(
+        "core.experience.changed",
+        "ut",
+        "{\"guildId\":\"g1\",\"totalExperience\":120,\"delta\":60,\"level\":2,\"sourceEventType\":\"core.raid.resolved\",\"changedAt\":\"2026-01-01T00:00:00Z\"}"
+    )
+    await get_tree().process_frame
+    assert_str(xp_label.text).contains("120")
+    assert_str(xp_label.text).contains("2")
