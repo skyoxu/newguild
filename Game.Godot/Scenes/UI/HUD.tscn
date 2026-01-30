@@ -44,6 +44,10 @@ text = "Week: -"
 layout_mode = 2
 text = "Phase: -"
 
+[node name="AchievementsLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+text = ""
+
 [node name="ReputationLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 text = ""

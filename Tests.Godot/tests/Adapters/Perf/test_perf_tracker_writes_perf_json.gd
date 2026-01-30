@@ -26,6 +26,7 @@ func _wait_frames(frames: int) -> void:
 
 # ACC:T20.3
 # ACC:T27.8
+# ACC:T36.5
 func test_perf_tracker_writes_perf_json_with_expected_shape() -> void:
 	assert_bool(FileAccess.file_exists(PERF_TRACKER_CS)).is_true()
 

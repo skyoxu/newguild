@@ -1371,7 +1371,9 @@
       "core.media.beat.triggered",
       "core.raid.resolved",
       "core.recruitment.offer.resolved",
-      "core.reputation.changed"
+      "core.reputation.changed",
+      "core.content.manifest.loaded",
+      "core.event_catalog.loaded"
     ],
     "artifactRefs": [
       "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
@@ -1379,7 +1381,7 @@
     "acceptance": [
       "成就定义与追踪由 DomainEvent 驱动，至少实现 1 个确定性成就并可在 UI 中查看。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
       "应完成：阶段2：成就系统（Achievement Definitions + Tracker） Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
-      "应有测试：至少包含并通过 test_refs 引用的测试（2 个）。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+      "应有测试：至少包含并通过 test_refs 引用的测试（2 个）。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd Tests.Godot/tests/UI/test_achievements_smoke.gd Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs",
       "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved, core.reputation.changed）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
       "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd",
       "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.guild.created, core.media.beat.triggered, core.raid.resolved, core.recruitment.offer.resolved, core.reputation.changed）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
@@ -1395,7 +1397,8 @@
       "Tests.Godot/tests/UI/test_achievements_smoke.gd",
       "Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
       "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
-      "Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd"
+      "Tests.Godot/tests/Adapters/Perf/test_perf_tracker_writes_perf_json.gd",
+      "Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs"
     ],
     "taskmaster_id": 36,
     "taskmaster_exported": false
