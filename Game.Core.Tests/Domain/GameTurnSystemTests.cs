@@ -103,12 +103,12 @@ public class GameTurnSystemTests
     [Fact]
     public void StartNewWeek_Should_Require_SaveIdValue_As_Input_Type()
     {
-        var m = typeof(GameTurnSystem).GetMethod(nameof(GameTurnSystem.StartNewWeek));
-        m.Should().NotBeNull();
+        var method = typeof(GameTurnSystem).GetMethod(nameof(GameTurnSystem.StartNewWeek));
+        method.Should().NotBeNull();
 
-        var p = m!.GetParameters();
-        p.Should().HaveCount(1);
-        p[0].ParameterType.Should().Be(typeof(SaveIdValue));
+        var parameters = method!.GetParameters();
+        parameters.Should().HaveCount(1);
+        parameters[0].ParameterType.Should().Be(typeof(SaveIdValue));
     }
 
     [Fact]

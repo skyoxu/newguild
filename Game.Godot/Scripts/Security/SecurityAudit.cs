@@ -17,10 +17,10 @@ public partial class SecurityAudit : Node
             {
                 // Avoid engine error log by checking class list before probing
                 var classes = ClassDB.GetClassList();
-                foreach (var c in classes)
+                foreach (var classValue in classes)
                 {
-                    var s = c.ToString();
-                    if (s == "SQLite") { hasSqlite = true; break; }
+                    var className = classValue.ToString();
+                    if (className == "SQLite") { hasSqlite = true; break; }
                 }
             }
             catch { hasSqlite = false; }
@@ -70,8 +70,8 @@ public partial class SecurityAudit : Node
     {
         try
         {
-            var v = ProjectSettings.GetSetting("application/config/name");
-            return v.VariantType == Variant.Type.Nil ? "GodotGame" : v.AsString();
+            var value = ProjectSettings.GetSetting("application/config/name");
+            return value.VariantType == Variant.Type.Nil ? "GodotGame" : value.AsString();
         }
         catch { return "GodotGame"; }
     }

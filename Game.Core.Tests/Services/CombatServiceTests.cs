@@ -37,32 +37,32 @@ public class CombatServiceTests
     [Fact]
     public void ApplyDamage_Reduces_Player_Health()
     {
-        var p = new Player(maxHealth: 100);
+        var player = new Player(maxHealth: 100);
         var svc = new CombatService();
-        svc.ApplyDamage(p, new Damage(25, DamageType.Physical), playerId: "player-1");
-        Assert.Equal(75, p.Health.Current);
+        svc.ApplyDamage(player, new Damage(25, DamageType.Physical), playerId: "player-1");
+        Assert.Equal(75, player.Health.Current);
     }
 
     [Fact]
     public void ApplyDamage_With_Int_Amount_Reduces_Player_Health()
     {
-        var p = new Player(maxHealth: 100);
+        var player = new Player(maxHealth: 100);
         var svc = new CombatService();
-        svc.ApplyDamage(p, amount: 30);
-        Assert.Equal(70, p.Health.Current);
+        svc.ApplyDamage(player, amount: 30);
+        Assert.Equal(70, player.Health.Current);
     }
 
     [Fact]
     public void ApplyDamage_With_Config_Applies_Damage_Correctly()
     {
-        var p = new Player(maxHealth: 100);
+        var player = new Player(maxHealth: 100);
         var cfg = new CombatConfig();
         cfg.Resistances[DamageType.Fire] = 0.5; // 50% resistance
         var svc = new CombatService();
 
         // 100 damage with 50% resistance = 50 damage
-        svc.ApplyDamage(p, new Damage(100, DamageType.Fire), cfg, playerId: "player-1");
-        Assert.Equal(50, p.Health.Current);
+        svc.ApplyDamage(player, new Damage(100, DamageType.Fire), cfg, playerId: "player-1");
+        Assert.Equal(50, player.Health.Current);
     }
 
     [Fact]

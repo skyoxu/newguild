@@ -105,7 +105,7 @@ public partial class CompositionRoot : Node
     // Expose a simple status map for GDScript without accessing C# properties directly
     public global::Godot.Collections.Dictionary PortsStatus()
     {
-        var d = new global::Godot.Collections.Dictionary
+        var status = new global::Godot.Collections.Dictionary
         {
             { "time", Time != null },
             { "input", Input != null },
@@ -114,6 +114,6 @@ public partial class CompositionRoot : Node
             { "logger", Logger != null },
             { "eventBus", EventBus != null },
         };
-        return d;
+        return status;
     }
 }

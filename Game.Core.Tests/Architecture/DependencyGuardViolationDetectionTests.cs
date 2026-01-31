@@ -136,9 +136,9 @@ public sealed class DependencyGuardViolationDetectionTests
         }
 
         var list = new List<string>();
-        foreach (var v in violations.EnumerateArray())
+        foreach (var violation in violations.EnumerateArray())
         {
-            list.Add(FlattenViolation(v));
+            list.Add(FlattenViolation(violation));
         }
 
         return list;

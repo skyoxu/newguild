@@ -74,8 +74,8 @@ public sealed class PerformanceTracker
             return 0;
 
         long sum = 0;
-        foreach (var v in samples)
-            sum += v;
+        foreach (var sample in samples)
+            sum += sample;
 
         return (double)sum / samples.Count;
     }
@@ -86,10 +86,10 @@ public sealed class PerformanceTracker
             return 0;
 
         var max = 0L;
-        foreach (var v in samples)
+        foreach (var sample in samples)
         {
-            if (v > max)
-                max = v;
+            if (sample > max)
+                max = sample;
         }
 
         return max;
@@ -105,12 +105,12 @@ public sealed class PerformanceTracker
         for (var i = 0; i < arr.Length; i++)
             asDouble[i] = arr[i];
 
-        var p = Percentiles.LinearInterpolated(asDouble, quantile);
-        if (p <= 0)
+        var percentile = Percentiles.LinearInterpolated(asDouble, quantile);
+        if (percentile <= 0)
             return 0;
-        if (p >= long.MaxValue)
+        if (percentile >= long.MaxValue)
             return long.MaxValue;
-        return (long)Math.Round(p, MidpointRounding.AwayFromZero);
+        return (long)Math.Round(percentile, MidpointRounding.AwayFromZero);
     }
 
     private bool TryGetSamples(string metricName, [NotNullWhen(true)] out Queue<long>? samples)

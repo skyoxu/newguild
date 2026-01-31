@@ -75,8 +75,8 @@ public partial class PerformanceTracker : Node
             var lo = (int)Math.Floor(pos);
             var hi = (int)Math.Ceiling(pos);
             if (lo == hi) return sorted[lo];
-            var w = pos - lo;
-            return sorted[lo] * (1 - w) + sorted[hi] * w;
+            var weight = pos - lo;
+            return sorted[lo] * (1 - weight) + sorted[hi] * weight;
         }
         return (frames, avg, P(0.5), P(0.95), P(0.99));
     }

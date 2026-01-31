@@ -117,8 +117,8 @@ public partial class SentryClient : Node
         {
             var key = kvp.Key ?? string.Empty;
             var value = kvp.Value;
-            if (!includeSensitiveDetails && value is string s)
-                sanitized[key] = PiiDataScrubber.Scrub(s);
+            if (!includeSensitiveDetails && value is string textValue)
+                sanitized[key] = PiiDataScrubber.Scrub(textValue);
             else
                 sanitized[key] = value ?? string.Empty;
         }

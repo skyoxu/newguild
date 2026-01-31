@@ -41,15 +41,15 @@ public class AchievementRepository : IAchievementRepository
             "SELECT id,user_id,achievement_key,unlocked_at,progress FROM achievements WHERE user_id=@0 ORDER BY unlocked_at DESC;",
             userId));
         var list = new List<Achievement>(rows.Count);
-        foreach (var r in rows)
+        foreach (var row in rows)
         {
             list.Add(new Achievement
             {
-                Id = r["id"]?.ToString() ?? string.Empty,
-                UserId = r["user_id"]?.ToString() ?? string.Empty,
-                AchievementKey = r["achievement_key"]?.ToString() ?? string.Empty,
-                UnlockedAt = Convert.ToInt64(r["unlocked_at"] ?? 0),
-                Progress = Convert.ToDouble(r["progress"] ?? 0)
+                Id = row["id"]?.ToString() ?? string.Empty,
+                UserId = row["user_id"]?.ToString() ?? string.Empty,
+                AchievementKey = row["achievement_key"]?.ToString() ?? string.Empty,
+                UnlockedAt = Convert.ToInt64(row["unlocked_at"] ?? 0),
+                Progress = Convert.ToDouble(row["progress"] ?? 0)
             });
         }
         return Task.FromResult(list);

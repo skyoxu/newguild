@@ -49,12 +49,12 @@ public partial class InventoryPanel : Control
     {
         // Build counts
         var counts = new Dictionary<string,int>();
-        for (int i = 0; i < _list.ItemCount; i++)
-        {
-            var name = _list.GetItemText(i);
-            counts.TryGetValue(name, out var c);
-            counts[name] = c + 1;
-        }
+            for (int i = 0; i < _list.ItemCount; i++)
+            {
+                var name = _list.GetItemText(i);
+                counts.TryGetValue(name, out var existingCount);
+                counts[name] = existingCount + 1;
+            }
         if (UseRepository)
         {
             var db = GetNodeOrNull<SqliteDataStore>("/root/SqlDb");

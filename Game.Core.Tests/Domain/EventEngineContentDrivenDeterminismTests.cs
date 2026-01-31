@@ -230,35 +230,35 @@ public sealed class EventEngineContentDrivenDeterminismTests
 
         private static bool CanSatisfyParameters(ParameterInfo[] parameters, Type requiresCatalogType)
         {
-            foreach (var p in parameters)
+            foreach (var parameter in parameters)
             {
-                var t = p.ParameterType;
+                var parameterType = parameter.ParameterType;
 
-                if (requiresCatalogType.IsAssignableFrom(t))
+                if (requiresCatalogType.IsAssignableFrom(parameterType))
                     continue;
 
-                if (t == typeof(object))
+                if (parameterType == typeof(object))
                     continue;
 
-                if (t == typeof(int) || t == typeof(long))
+                if (parameterType == typeof(int) || parameterType == typeof(long))
                     continue;
 
-                if (t == typeof(DateTimeOffset) || t == typeof(DateTime) || t == typeof(TimeSpan))
+                if (parameterType == typeof(DateTimeOffset) || parameterType == typeof(DateTime) || parameterType == typeof(TimeSpan))
                     continue;
 
-                if (t == typeof(Random))
+                if (parameterType == typeof(Random))
                     continue;
 
-                if (t == typeof(CancellationToken))
+                if (parameterType == typeof(CancellationToken))
                     continue;
 
-                if (LooksLikeTimeProvider(t))
+                if (LooksLikeTimeProvider(parameterType))
                     continue;
 
-                if (t == typeof(Guid))
+                if (parameterType == typeof(Guid))
                     continue;
 
-                if (t.IsEnum)
+                if (parameterType.IsEnum)
                     continue;
 
                 return false;
@@ -273,82 +273,82 @@ public sealed class EventEngineContentDrivenDeterminismTests
 
             for (var i = 0; i < parameters.Length; i++)
             {
-                var p = parameters[i];
-                var t = p.ParameterType;
-                var n = p.Name ?? string.Empty;
+                var parameter = parameters[i];
+                var parameterType = parameter.ParameterType;
+                var parameterName = parameter.Name ?? string.Empty;
 
-                if (t.IsInstanceOfType(catalog))
+                if (parameterType.IsInstanceOfType(catalog))
                 {
                     args[i] = catalog;
                     continue;
                 }
 
-                if (t == typeof(object) && catalog is not null)
+                if (parameterType == typeof(object) && catalog is not null)
                 {
                     args[i] = catalog;
                     continue;
                 }
 
-                if (t == typeof(int))
+                if (parameterType == typeof(int))
                 {
-                    if (n.Contains("seed", StringComparison.OrdinalIgnoreCase)) args[i] = seed;
-                    else if (n.Contains("count", StringComparison.OrdinalIgnoreCase) || n.Contains("take", StringComparison.OrdinalIgnoreCase) || n.Contains("limit", StringComparison.OrdinalIgnoreCase) || n.Contains("max", StringComparison.OrdinalIgnoreCase)) args[i] = count;
+                    if (parameterName.Contains("seed", StringComparison.OrdinalIgnoreCase)) args[i] = seed;
+                    else if (parameterName.Contains("count", StringComparison.OrdinalIgnoreCase) || parameterName.Contains("take", StringComparison.OrdinalIgnoreCase) || parameterName.Contains("limit", StringComparison.OrdinalIgnoreCase) || parameterName.Contains("max", StringComparison.OrdinalIgnoreCase)) args[i] = count;
                     else args[i] = count;
                     continue;
                 }
 
-                if (t == typeof(long))
+                if (parameterType == typeof(long))
                 {
-                    if (n.Contains("seed", StringComparison.OrdinalIgnoreCase)) args[i] = (long)seed;
+                    if (parameterName.Contains("seed", StringComparison.OrdinalIgnoreCase)) args[i] = (long)seed;
                     else args[i] = (long)count;
                     continue;
                 }
 
-                if (t == typeof(DateTimeOffset))
+                if (parameterType == typeof(DateTimeOffset))
                 {
                     args[i] = now;
                     continue;
                 }
 
-                if (t == typeof(DateTime))
+                if (parameterType == typeof(DateTime))
                 {
                     args[i] = now.UtcDateTime;
                     continue;
                 }
 
-                if (t == typeof(TimeSpan))
+                if (parameterType == typeof(TimeSpan))
                 {
                     args[i] = TimeSpan.Zero;
                     continue;
                 }
 
-                if (t == typeof(Random))
+                if (parameterType == typeof(Random))
                 {
                     args[i] = new Random(seed);
                     continue;
                 }
 
-                if (t == typeof(CancellationToken))
+                if (parameterType == typeof(CancellationToken))
                 {
                     args[i] = default(CancellationToken);
                     continue;
                 }
 
-                if (LooksLikeTimeProvider(t))
+                if (LooksLikeTimeProvider(parameterType))
                 {
-                    args[i] = CreateFixedTimeProvider(t, now);
+                    args[i] = CreateFixedTimeProvider(parameterType, now);
                     continue;
                 }
 
-                if (t == typeof(Guid))
+                if (parameterType == typeof(Guid))
                 {
                     args[i] = Guid.Empty;
                     continue;
                 }
 
-                if (t.IsEnum)
+                if (parameterType.IsEnum)
                 {
-                    args[i] = Enum.GetValues(t).Length > 0 ? Enum.GetValues(t).GetValue(0) : Activator.CreateInstance(t);
+                    args[i] = Enum.GetValues(parameterType).Length > 0 ? Enum.GetValues(parameterType).GetValue(0) : Activator.CreateInstance(parameterType);
                     continue;
                 }
 
@@ -369,12 +369,12 @@ public sealed class EventEngineContentDrivenDeterminismTests
 
             foreach (var name in names)
             {
-                foreach (var m in methods.Where(m => string.Equals(m.Name, name, StringComparison.OrdinalIgnoreCase)))
+                foreach (var method in methods.Where(m => string.Equals(m.Name, name, StringComparison.OrdinalIgnoreCase)))
                 {
-                    var ps = m.GetParameters();
+                    var ps = method.GetParameters();
                     if (ps.Length == 1 && ps[0].ParameterType == typeof(string))
                     {
-                        var created = m.Invoke(null, new object?[] { text });
+                        var created = method.Invoke(null, new object?[] { text });
                         if (created is not null)
                         {
                             catalog = created;
@@ -507,17 +507,17 @@ public sealed class EventEngineContentDrivenDeterminismTests
 
                     for (var i = 1; i < ps.Length; i++)
                     {
-                        var t = ps[i].ParameterType;
-                        if (t == typeof(int)) args[i] = 1;
-                        else if (t == typeof(long)) args[i] = 1L;
-                        else if (t == typeof(double)) args[i] = 1.0;
-                        else if (t == typeof(float)) args[i] = 1.0f;
-                        else if (t == typeof(bool)) args[i] = true;
-                        else if (t == typeof(string)) args[i] = string.Empty;
-                        else if (t == typeof(TimeSpan)) args[i] = TimeSpan.Zero;
-                        else if (t == typeof(DateTimeOffset)) args[i] = DateTimeOffset.UnixEpoch;
-                        else if (t == typeof(DateTime)) args[i] = DateTime.UnixEpoch;
-                        else args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                        var parameterType = ps[i].ParameterType;
+                        if (parameterType == typeof(int)) args[i] = 1;
+                        else if (parameterType == typeof(long)) args[i] = 1L;
+                        else if (parameterType == typeof(double)) args[i] = 1.0;
+                        else if (parameterType == typeof(float)) args[i] = 1.0f;
+                        else if (parameterType == typeof(bool)) args[i] = true;
+                        else if (parameterType == typeof(string)) args[i] = string.Empty;
+                        else if (parameterType == typeof(TimeSpan)) args[i] = TimeSpan.Zero;
+                        else if (parameterType == typeof(DateTimeOffset)) args[i] = DateTimeOffset.UnixEpoch;
+                        else if (parameterType == typeof(DateTime)) args[i] = DateTime.UnixEpoch;
+                        else args[i] = parameterType.IsValueType ? Activator.CreateInstance(parameterType) : null;
                     }
 
                     var created = ctor.Invoke(args);
@@ -580,19 +580,19 @@ public sealed class EventEngineContentDrivenDeterminismTests
                 .Take(16)
                 .ToArray();
 
-            foreach (var p in props)
+            foreach (var property in props)
             {
                 object? value;
                 try
                 {
-                    value = p.GetValue(evt);
+                    value = property.GetValue(evt);
                 }
                 catch
                 {
                     continue;
                 }
 
-                parts.Add(p.Name + "=" + FormatScalar(value));
+                parts.Add(property.Name + "=" + FormatScalar(value));
             }
 
             return string.Join("|", parts);
@@ -608,14 +608,14 @@ public sealed class EventEngineContentDrivenDeterminismTests
                 DateTimeOffset dto => dto.ToString("O"),
                 DateTime dt => dt.ToUniversalTime().ToString("O"),
                 TimeSpan ts => ts.ToString(),
-                Guid g => g.ToString("D"),
-                string s => s,
-                bool b => b ? "true" : "false",
+                Guid guidValue => guidValue.ToString("D"),
+                string textValue => textValue,
+                bool boolValue => boolValue ? "true" : "false",
                 int i => i.ToString(),
-                long l => l.ToString(),
-                double d => d.ToString("R"),
-                float f => f.ToString("R"),
-                Enum e => e.ToString(),
+                long longValue => longValue.ToString(),
+                double doubleValue => doubleValue.ToString("R"),
+                float floatValue => floatValue.ToString("R"),
+                Enum enumValue => enumValue.ToString(),
                 _ => value.ToString() ?? value.GetType().FullName ?? value.GetType().Name,
             };
         }

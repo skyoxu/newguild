@@ -19,8 +19,8 @@ public class CollisionServiceTests
     {
         Assert.True(CollisionService.CircleIntersects(0,0,3, 4,0,3));
         Assert.False(CollisionService.CircleIntersects(0,0,1, 5,0,1));
-        var d = CollisionService.Distance(new Position(0,0), new Position(3,4));
-        Assert.Equal(5, d, 3);
+        var distance = CollisionService.Distance(new Position(0,0), new Position(3,4));
+        Assert.Equal(5, distance, 3);
     }
 
     [Fact]

@@ -44,8 +44,8 @@ public sealed partial class ContentManifestBootstrapper : Node
         {
             // Do not rely on /root/ResourceLoader (it may not exist in tests or before CompositionRoot wiring).
             // Use FileAccess directly to avoid creating orphan Nodes that break strict GdUnit smoke runs.
-            using var f = FileAccess.Open(safeManifestPath.Value, FileAccess.ModeFlags.Read);
-            var json = f?.GetAsText();
+            using var file = FileAccess.Open(safeManifestPath.Value, FileAccess.ModeFlags.Read);
+            var json = file?.GetAsText();
             if (string.IsNullOrWhiteSpace(json))
             {
                 GD.PrintErr($"[ContentManifestBootstrapper] Manifest is missing or empty: '{ManifestPath}'.");

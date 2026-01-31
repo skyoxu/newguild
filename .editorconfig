@@ -5,6 +5,15 @@ charset = utf-8
 end_of_line = crlf
 insert_final_newline = true
 
+[*.cs]
+dotnet_diagnostic.NG0001.severity = error
+
+[**/*.g.cs]
+dotnet_diagnostic.NG0001.severity = silent
+
+[**/*.generated.cs]
+dotnet_diagnostic.NG0001.severity = silent
+
 [*.md]
 end_of_line = lf
 
@@ -21,3 +30,4 @@ dotnet_diagnostic.IDE0028.severity = silent
 dotnet_diagnostic.CA1711.severity = silent
 dotnet_diagnostic.CA2213.severity = silent
 dotnet_diagnostic.CA1031.severity = suggestion
+dotnet_diagnostic.NG0001.severity = silent

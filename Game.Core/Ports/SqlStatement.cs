@@ -156,9 +156,9 @@ public sealed record SqlStatement
     {
         for (var j = 0; j < word.Length; j++)
         {
-            var a = char.ToLowerInvariant(text[index + j]);
-            var b = char.ToLowerInvariant(word[j]);
-            if (a != b) return false;
+            var actualChar = char.ToLowerInvariant(text[index + j]);
+            var expectedChar = char.ToLowerInvariant(word[j]);
+            if (actualChar != expectedChar) return false;
         }
 
         var before = index - 1;

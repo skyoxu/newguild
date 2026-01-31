@@ -11,23 +11,23 @@ public static class Percentiles
         if (samples.Count == 0)
             return 0.0;
 
-        var q = quantile;
-        if (double.IsNaN(q) || double.IsInfinity(q))
-            q = 0.0;
+        var normalizedQuantile = quantile;
+        if (double.IsNaN(normalizedQuantile) || double.IsInfinity(normalizedQuantile))
+            normalizedQuantile = 0.0;
 
-        if (q < 0.0) q = 0.0;
-        if (q > 1.0) q = 1.0;
+        if (normalizedQuantile < 0.0) normalizedQuantile = 0.0;
+        if (normalizedQuantile > 1.0) normalizedQuantile = 1.0;
 
         var sorted = samples.OrderBy(v => v).ToArray();
-        var pos = q * (sorted.Length - 1);
+        var pos = normalizedQuantile * (sorted.Length - 1);
         var lo = (int)Math.Floor(pos);
         var hi = (int)Math.Ceiling(pos);
 
         if (lo == hi)
             return sorted[lo];
 
-        var w = pos - lo;
-        return (sorted[lo] * (1.0 - w)) + (sorted[hi] * w);
+        var weight = pos - lo;
+        return (sorted[lo] * (1.0 - weight)) + (sorted[hi] * weight);
     }
 }
 

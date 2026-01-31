@@ -78,8 +78,8 @@ public class MockSQLiteDatabase : ISQLiteDatabase
         if (sql.StartsWith("SELECT version FROM schema_version", StringComparison.OrdinalIgnoreCase))
         {
             var id = 1;
-            if (parameters != null && parameters.TryGetValue("@id", out var v) && v != null)
-                id = Convert.ToInt32(v);
+            if (parameters != null && parameters.TryGetValue("@id", out var value) && value != null)
+                id = Convert.ToInt32(value);
 
             if (!_tables.TryGetValue("schema_version", out var rows) || rows.Count == 0)
                 return Task.FromResult<object?>(null);

@@ -9,7 +9,7 @@ public class Inventory
 
     public IReadOnlyDictionary<string, int> Items => _items;
 
-    public int CountItem(string id) => _items.TryGetValue(id, out var c) ? c : 0;
+    public int CountItem(string id) => _items.TryGetValue(id, out var count) ? count : 0;
     public bool HasItem(string id, int atLeast = 1) => CountItem(id) >= atLeast;
 
     /// <summary>
@@ -40,4 +40,3 @@ public class Inventory
         return removed;
     }
 }
-

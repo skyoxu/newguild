@@ -61,8 +61,8 @@ public sealed class QueryPerformanceTracker
             }
         }
 
-        var s = sb.ToString().Trim('_');
-        return s.Length == 0 ? "query" : s;
+        var slug = sb.ToString().Trim('_');
+        return slug.Length == 0 ? "query" : slug;
     }
 
     private static long ElapsedMicroseconds(Stopwatch sw)

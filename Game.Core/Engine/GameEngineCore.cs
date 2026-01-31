@@ -14,6 +14,7 @@ public class GameEngineCore
     private readonly InventoryService _inventorySvc;
     private readonly IEventBus? _bus;
     private readonly ITime? _time;
+    private readonly string _seed;
 
     private DateTime _startUtc;
     private double _distanceTraveled;
@@ -42,12 +43,16 @@ public class GameEngineCore
             Position: new Position(0, 0),
             Timestamp: DateTime.UtcNow
         );
+
+        // Task 40: expose an explicit seed surface (SSoT for deterministic replay).
+        // Default to the state id when no external seed is wired yet.
+        _seed = State.Id;
     }
 
     public GameState Start()
     {
         _startUtc = DateTime.UtcNow;
-        var evt = new GameStarted(State.Id);
+        var evt = new GameStarted(State.Id, _seed);
         Publish(GameStarted.EventType, evt);
         return State;
     }

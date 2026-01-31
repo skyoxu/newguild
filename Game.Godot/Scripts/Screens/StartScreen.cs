@@ -345,13 +345,13 @@ public partial class StartScreen : Control
 
         try
         {
-            var v = await _reputation.ApplyDeltaAsync(
+            var newReputation = await _reputation.ApplyDeltaAsync(
                 guildId: DemoGuildId,
                 delta: +10,
                 reason: "StartScreen demo",
                 sourceId: "demo.startscreen.reputation");
 
-            SetOutput($"Reputation updated: {DemoGuildId} -> {v} (check HUD).");
+            SetOutput($"Reputation updated: {DemoGuildId} -> {newReputation} (check HUD).");
         }
         catch (Exception ex)
         {

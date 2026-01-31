@@ -46,11 +46,11 @@ public sealed class GuildRecruitmentService
             return;
 
         var offers = await _offerRepository.GetByGuildAsync(guildId).ConfigureAwait(false);
-        foreach (var o in offers)
+        foreach (var storedOffer in offers)
         {
-            var offer = new Offer(o.OfferId, o.GuildId, o.CandidateId, o.Role);
-            _offersById[o.OfferId] = offer;
-            _offerIdByGuildCandidate[(o.GuildId, o.CandidateId)] = o.OfferId;
+            var offer = new Offer(storedOffer.OfferId, storedOffer.GuildId, storedOffer.CandidateId, storedOffer.Role);
+            _offersById[storedOffer.OfferId] = offer;
+            _offerIdByGuildCandidate[(storedOffer.GuildId, storedOffer.CandidateId)] = storedOffer.OfferId;
         }
 
         _loadedGuilds.Add(guildId);

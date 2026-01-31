@@ -71,7 +71,7 @@ public partial class EventBusAdapter : Node, IEventBus
 
     public Task PublishAsync(DomainEvent evt)
     {
-        var dataJson = evt.Data is string s ? (string.IsNullOrWhiteSpace(s) ? "{}" : s)
+        var dataJson = evt.Data is string dataText ? (string.IsNullOrWhiteSpace(dataText) ? "{}" : dataText)
                                             : JsonSerializer.Serialize(evt.Data, JsonOptions);
 
         if (System.Environment.CurrentManagedThreadId == _mainThreadId)
@@ -98,36 +98,36 @@ public partial class EventBusAdapter : Node, IEventBus
     {
         Interlocked.Exchange(ref _flushScheduled, 0);
 
-        while (_pending.TryDequeue(out var p))
+        while (_pending.TryDequeue(out var pending))
         {
             try
             {
-                var ts = ParseTimestampOrNow(p.TimestampIso);
+                var ts = ParseTimestampOrNow(pending.TimestampIso);
                 var evt = new DomainEvent(
-                    Type: p.Type,
-                    Source: p.Source,
-                    Data: p.DataJson,
+                    Type: pending.Type,
+                    Source: pending.Source,
+                    Data: pending.DataJson,
                     Timestamp: ts,
-                    Id: p.Id,
-                    SpecVersion: p.SpecVersion,
-                    DataContentType: p.DataContentType);
+                    Id: pending.Id,
+                    SpecVersion: pending.SpecVersion,
+                    DataContentType: pending.DataContentType);
 
-                var task = PublishOnMainThread(evt, p.DataJson);
+                var task = PublishOnMainThread(evt, pending.DataJson);
                 _ = task.ContinueWith(
                     t =>
                     {
                         if (t.IsFaulted)
-                            p.Completion.TrySetException(t.Exception?.GetBaseException() ?? new Exception("Publish failed."));
+                            pending.Completion.TrySetException(t.Exception?.GetBaseException() ?? new Exception("Publish failed."));
                         else if (t.IsCanceled)
-                            p.Completion.TrySetCanceled();
+                            pending.Completion.TrySetCanceled();
                         else
-                            p.Completion.TrySetResult(true);
+                            pending.Completion.TrySetResult(true);
                     },
                     TaskScheduler.Default);
             }
             catch (Exception ex)
             {
-                p.Completion.TrySetException(ex);
+                pending.Completion.TrySetException(ex);
             }
         }
 

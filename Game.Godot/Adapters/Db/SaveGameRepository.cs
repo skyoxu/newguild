@@ -44,17 +44,17 @@ public class SaveGameRepository : ISaveGameRepository
             userId,
             slot));
         if (rows.Count == 0) return Task.FromResult<SaveGame?>(null);
-        var r = rows[0];
-        var s = new SaveGame
+        var row = rows[0];
+        var saveGame = new SaveGame
         {
-            Id = r["id"]?.ToString() ?? string.Empty,
-            UserId = r["user_id"]?.ToString() ?? string.Empty,
-            SlotNumber = Convert.ToInt32(r["slot_number"] ?? 0),
-            Data = r["data"]?.ToString() ?? "",
-            CreatedAt = Convert.ToInt64(r["created_at"] ?? 0),
-            UpdatedAt = Convert.ToInt64(r["updated_at"] ?? 0)
+            Id = row["id"]?.ToString() ?? string.Empty,
+            UserId = row["user_id"]?.ToString() ?? string.Empty,
+            SlotNumber = Convert.ToInt32(row["slot_number"] ?? 0),
+            Data = row["data"]?.ToString() ?? "",
+            CreatedAt = Convert.ToInt64(row["created_at"] ?? 0),
+            UpdatedAt = Convert.ToInt64(row["updated_at"] ?? 0)
         };
-        return Task.FromResult<SaveGame?>(s);
+        return Task.FromResult<SaveGame?>(saveGame);
     }
 
     public Task<List<SaveGame>> ListByUserAsync(string userId)
@@ -63,16 +63,16 @@ public class SaveGameRepository : ISaveGameRepository
             "SELECT id,user_id,slot_number,data,created_at,updated_at FROM saves WHERE user_id=@0 ORDER BY slot_number;",
             userId));
         var list = new List<SaveGame>(rows.Count);
-        foreach (var r in rows)
+        foreach (var row in rows)
         {
             list.Add(new SaveGame
             {
-                Id = r["id"]?.ToString() ?? string.Empty,
-                UserId = r["user_id"]?.ToString() ?? string.Empty,
-                SlotNumber = Convert.ToInt32(r["slot_number"] ?? 0),
-                Data = r["data"]?.ToString() ?? "",
-                CreatedAt = Convert.ToInt64(r["created_at"] ?? 0),
-                UpdatedAt = Convert.ToInt64(r["updated_at"] ?? 0)
+                Id = row["id"]?.ToString() ?? string.Empty,
+                UserId = row["user_id"]?.ToString() ?? string.Empty,
+                SlotNumber = Convert.ToInt32(row["slot_number"] ?? 0),
+                Data = row["data"]?.ToString() ?? "",
+                CreatedAt = Convert.ToInt64(row["created_at"] ?? 0),
+                UpdatedAt = Convert.ToInt64(row["updated_at"] ?? 0)
             });
         }
         return Task.FromResult(list);

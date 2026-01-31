@@ -1157,7 +1157,7 @@
           "13",
           "19"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611834+00:00"
@@ -1334,7 +1334,7 @@
         "dependencies": [
           "35"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611850+00:00"
@@ -1418,7 +1418,7 @@
           "38",
           "32"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611864+00:00"
@@ -1449,7 +1449,7 @@
           "25",
           "27"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611867+00:00"
@@ -1478,7 +1478,7 @@
           "40",
           "27"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611871+00:00"

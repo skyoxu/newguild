@@ -262,7 +262,7 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
 
             for (var attempt = 0; attempt < 2; attempt++)
             {
-                var prevHash = _lastEntryHashByLogicalPath.TryGetValue(writeLogicalPath, out var h) ? h : "";
+                var prevHash = _lastEntryHashByLogicalPath.TryGetValue(writeLogicalPath, out var previousHash) ? previousHash : "";
                 var material = new SecurityAuditFormat.AuditEntryMaterial(
                     ts: eventTs.ToString("o"),
                     action: req.Event.Type,
@@ -454,9 +454,9 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
                 using var doc = JsonDocument.Parse(dataJson);
                 if (doc.RootElement.ValueKind == JsonValueKind.Object)
                 {
-                    if (TryGetString(doc.RootElement, "reason", "Reason", out var r)) dataReason = r;
-                    if (TryGetString(doc.RootElement, "target", "Target", out var t)) dataTarget = t;
-                    if (TryGetString(doc.RootElement, "caller", "Caller", out var c)) dataCaller = c;
+                    if (TryGetString(doc.RootElement, "reason", "Reason", out var reasonValue)) dataReason = reasonValue;
+                    if (TryGetString(doc.RootElement, "target", "Target", out var targetValue)) dataTarget = targetValue;
+                    if (TryGetString(doc.RootElement, "caller", "Caller", out var callerValue)) dataCaller = callerValue;
                 }
             }
         }

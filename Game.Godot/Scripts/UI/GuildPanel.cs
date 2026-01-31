@@ -349,7 +349,7 @@ public partial class GuildPanel : Control
                 guildId.GetString() == _currentGuildId &&
                 root.TryGetProperty("userId", out var userId))
             {
-                string role = root.TryGetProperty("role", out var r) ? r.GetString() ?? "member" : "member";
+                string role = root.TryGetProperty("role", out var roleElement) ? roleElement.GetString() ?? "member" : "member";
                 _membersList.AddItem($"{userId.GetString()} ({FormatRoleDisplay(role)})", null, true);
                 _memberCountLabel.Text = $"Members: {_membersList.ItemCount}";
             }
@@ -401,7 +401,7 @@ public partial class GuildPanel : Control
                 root.TryGetProperty("userId", out var userId))
             {
                 string userIdStr = userId.GetString() ?? "";
-                string newRole = root.TryGetProperty("newRole", out var r) ? r.GetString() ?? "member" : "member";
+                string newRole = root.TryGetProperty("newRole", out var roleElement) ? roleElement.GetString() ?? "member" : "member";
 
                 for (int i = 0; i < _membersList.ItemCount; i++)
                 {
@@ -455,9 +455,9 @@ public partial class GuildPanel : Control
             if (!root.TryGetProperty("guildId", out var guildId) || guildId.GetString() != _currentGuildId)
                 return;
 
-            var offerId = root.TryGetProperty("offerId", out var o) ? o.GetString() ?? "" : "";
-            var candidateId = root.TryGetProperty("candidateId", out var c) ? c.GetString() ?? "" : "";
-            var role = root.TryGetProperty("role", out var r) ? r.GetString() ?? "member" : "member";
+            var offerId = root.TryGetProperty("offerId", out var offerIdElement) ? offerIdElement.GetString() ?? "" : "";
+            var candidateId = root.TryGetProperty("candidateId", out var candidateIdElement) ? candidateIdElement.GetString() ?? "" : "";
+            var role = root.TryGetProperty("role", out var roleElement) ? roleElement.GetString() ?? "member" : "member";
 
             if (string.IsNullOrWhiteSpace(offerId))
                 return;
@@ -480,7 +480,7 @@ public partial class GuildPanel : Control
             if (!root.TryGetProperty("guildId", out var guildId) || guildId.GetString() != _currentGuildId)
                 return;
 
-            var offerId = root.TryGetProperty("offerId", out var o) ? o.GetString() ?? "" : "";
+            var offerId = root.TryGetProperty("offerId", out var offerIdElement) ? offerIdElement.GetString() ?? "" : "";
             if (string.IsNullOrWhiteSpace(offerId))
                 return;
 

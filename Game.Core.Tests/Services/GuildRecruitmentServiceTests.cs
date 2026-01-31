@@ -397,9 +397,9 @@ public sealed partial class GuildRecruitmentServiceTests
 
             foreach (var name in CandidateTypeNames)
             {
-                var t = asm.GetType(name, throwOnError: false, ignoreCase: false);
-                if (t != null)
-                    return t;
+                var candidateType = asm.GetType(name, throwOnError: false, ignoreCase: false);
+                if (candidateType != null)
+                    return candidateType;
             }
 
             var fallback = asm.GetTypes()

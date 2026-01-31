@@ -118,7 +118,7 @@ public class GuildRosterAcceptanceTests
         var result = method.Invoke(instance, args);
 
         if (result is Task<bool> taskBool) return await taskBool;
-        if (result is bool b) return b;
+        if (result is bool boolResult) return boolResult;
 
         throw new InvalidOperationException(
             $"Expected {type.FullName}.{methodName} to return bool or Task<bool>, but got {result?.GetType().FullName ?? "null"}");

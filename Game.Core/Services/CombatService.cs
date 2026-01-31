@@ -45,7 +45,7 @@ public class CombatService
         config ??= CombatConfig.Default;
         var amount = Math.Max(0, damage.EffectiveAmount);
         double mult = 1.0;
-        if (config.Resistances.TryGetValue(damage.Type, out var r)) mult *= r;
+        if (config.Resistances.TryGetValue(damage.Type, out var resistanceMultiplier)) mult *= resistanceMultiplier;
         if (damage.IsCritical) mult *= Math.Max(1.0, config.CritMultiplier);
         var result = (int)Math.Round(amount * mult);
         return Math.Max(0, result);

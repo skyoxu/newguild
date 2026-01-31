@@ -53,11 +53,11 @@ public partial class ScorePanel : Control
             try
             {
                 using var doc = JsonDocument.Parse(dataJson);
-                int v = 0;
-                if (doc.RootElement.TryGetProperty("score", out var sc)) v = sc.GetInt32();
-                else if (doc.RootElement.TryGetProperty("value", out var val)) v = val.GetInt32();
-                _scoreValue = v;
-                _score.Text = v.ToString();
+                int scoreValue = 0;
+                if (doc.RootElement.TryGetProperty("score", out var sc)) scoreValue = sc.GetInt32();
+                else if (doc.RootElement.TryGetProperty("value", out var val)) scoreValue = val.GetInt32();
+                _scoreValue = scoreValue;
+                _score.Text = scoreValue.ToString();
             }
             catch (Exception ex)
             {
