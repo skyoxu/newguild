@@ -1037,7 +1037,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-UI-INTERACTION",
     "title": "阶段2：交互模式统一（Loading/Error/Disable/Retry）",
     "description": "为按钮与异步操作建立统一交互：点击后进入 loading、错误可重试、成功自动刷新；错误信息遵循 ADR-0019 脱敏与审计。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -1100,7 +1100,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-ACTIVITY-FEED",
     "title": "阶段2：活动反馈系统（Activity Feed / Timeline）",
     "description": "提供一个玩家可见的“发生了什么”面板：订阅 DomainEventEmitted，将关键事件（副本/声望/社交/奖励）按时间线展示，便于测试与玩家理解。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -1196,7 +1196,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-TACTICAL-CENTER",
     "title": "阶段2：战术中心（Tactical Center）入口与最小编成",
     "description": "为 PVE 副本建立一个统一入口：最小队伍编成/校验/自动分配（基于现有 roster），并驱动现有 RaidEncounter demo/事件输出。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -1264,7 +1264,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-REWARDS",
     "title": "阶段2：奖励发放统一（Reward Ledger）",
     "description": "如果没有其他任务负责战斗奖励发放，则在本阶段实现统一奖励账本：监听副本/媒体/事件结果并发放奖励（金币/声望/经验等的最小集合），可 Save/Load 回放。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -1408,7 +1408,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-XP",
     "title": "阶段2：经验系统（XP/Level）与奖励对齐",
     "description": "实现最小经验/等级曲线（确定性），并作为 Reward Ledger 的一种奖励类型展示与持久化。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -1479,7 +1479,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-OFFICERS",
     "title": "阶段2：官员系统（Officer Slots + Assignment）",
     "description": "在 Guild roster 之上增加最小官员槽位与任命规则（确定性），并落库/随存档持久化。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -1556,7 +1556,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-OFFICERS-UI",
     "title": "阶段2：官员 UI 入口（Simplified Officer UI）",
     "description": "提供官员管理的最小 UI：列表展示、任命/撤销、状态提示；交互模式复用统一组件。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
