@@ -243,6 +243,28 @@ public class Guild
     }
 
     /// <summary>
+    /// Revokes an existing officer assignment from a specific slot.
+    /// </summary>
+    /// <param name="slot">Officer slot to revoke</param>
+    /// <param name="userId">User ID that was revoked from the slot</param>
+    /// <returns>True if an assignment existed and was removed; false otherwise</returns>
+    public bool TryRevokeOfficer(OfficerSlot slot, out string? userId)
+    {
+        lock (_officerLock)
+        {
+            if (!_officerAssignments.TryGetValue(slot, out var existing))
+            {
+                userId = null;
+                return false;
+            }
+
+            _officerAssignments.Remove(slot);
+            userId = existing;
+            return true;
+        }
+    }
+
+    /// <summary>
     /// Retrieves the user ID assigned to an officer slot.
     /// </summary>
     /// <param name="slot">Officer slot to query</param>

@@ -48,6 +48,161 @@ public class GuildOfficerServiceTests
         payload.AssignedByUserId.Should().Be("u-admin");
     }
 
+    // ACC:T39.4
+    // ACC:T39.8
+    [Fact]
+    public async Task RevokeOfficerAsync_Publishes_And_Delivers_OfficerRevoked_Event()
+    {
+        var repo = new InMemoryGuildRepository();
+        var bus = new InMemoryEventBus();
+        DomainEvent? received = null;
+
+        using var sub = bus.Subscribe(evt =>
+        {
+            received = evt;
+            return Task.CompletedTask;
+        });
+
+        var service = new GuildOfficerService(repo, bus);
+        var guild = new Guild("g7", "u-admin", "Officers");
+        guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
+        guild.AssignOfficer(OfficerSlot.Commander, "u1");
+        await repo.CreateAsync(guild);
+
+        var revokedAt = DateTimeOffset.Parse("2026-01-07T00:00:00Z");
+        var ok = await service.RevokeOfficerAsync(guild, OfficerSlot.Commander, "u-admin", revokedAt);
+
+        ok.Should().BeTrue();
+        guild.GetOfficerAssignment(OfficerSlot.Commander).Should().BeNull();
+        received.Should().NotBeNull();
+        received!.Type.Should().Be(GuildOfficerRevoked.EventType);
+
+        var payload = received.Data.Should().BeOfType<GuildOfficerRevoked>().Subject;
+        payload.GuildId.Should().Be("g7");
+        payload.UserId.Should().Be("u1");
+        payload.Slot.Should().Be("commander");
+        payload.RevokedAt.Should().Be(revokedAt);
+        payload.RevokedByUserId.Should().Be("u-admin");
+    }
+
+    [Fact]
+    public async Task RevokeOfficerAsync_ReturnsFalse_When_NoAssignment()
+    {
+        var repository = new InMemoryGuildRepository();
+        var eventBus = new InMemoryEventBus();
+        DomainEvent? received = null;
+
+        using var sub = eventBus.Subscribe(evt =>
+        {
+            received = evt;
+            return Task.CompletedTask;
+        });
+
+        var service = new GuildOfficerService(repository, eventBus);
+        var guild = new Guild("g8", "u-admin", "Officers");
+        await repository.CreateAsync(guild);
+
+        var ok = await service.RevokeOfficerAsync(
+            guild,
+            OfficerSlot.Commander,
+            "u-admin",
+            DateTimeOffset.Parse("2026-01-08T00:00:00Z"));
+
+        ok.Should().BeFalse();
+        received.Should().BeNull();
+        guild.GetOfficerAssignment(OfficerSlot.Commander).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task RevokeOfficerAsync_ReturnsFalse_When_RevokedByMissing()
+    {
+        var repository = new InMemoryGuildRepository();
+        var eventBus = new InMemoryEventBus();
+        DomainEvent? received = null;
+
+        using var sub = eventBus.Subscribe(evt =>
+        {
+            received = evt;
+            return Task.CompletedTask;
+        });
+
+        var service = new GuildOfficerService(repository, eventBus);
+        var guild = new Guild("g9", "u-admin", "Officers");
+        guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
+        guild.AssignOfficer(OfficerSlot.Commander, "u1");
+        await repository.CreateAsync(guild);
+
+        var ok = await service.RevokeOfficerAsync(
+            guild,
+            OfficerSlot.Commander,
+            "  ",
+            DateTimeOffset.Parse("2026-01-09T00:00:00Z"));
+
+        ok.Should().BeFalse();
+        received.Should().BeNull();
+        guild.GetOfficerAssignment(OfficerSlot.Commander).Should().Be("u1");
+    }
+
+    [Fact]
+    public async Task RevokeOfficerAsync_ReturnsFalse_When_RevokedByIsNotAdmin()
+    {
+        var repository = new InMemoryGuildRepository();
+        var eventBus = new InMemoryEventBus();
+        DomainEvent? received = null;
+
+        using var sub = eventBus.Subscribe(evt =>
+        {
+            received = evt;
+            return Task.CompletedTask;
+        });
+
+        var service = new GuildOfficerService(repository, eventBus);
+        var guild = new Guild("g10", "u-admin", "Officers");
+        guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
+        guild.AddMember(new GuildMember("u-member", "Bob", GuildRole.Member));
+        guild.AssignOfficer(OfficerSlot.Commander, "u1");
+        await repository.CreateAsync(guild);
+
+        var ok = await service.RevokeOfficerAsync(
+            guild,
+            OfficerSlot.Commander,
+            "u-member",
+            DateTimeOffset.Parse("2026-01-10T00:00:00Z"));
+
+        ok.Should().BeFalse();
+        received.Should().BeNull();
+        guild.GetOfficerAssignment(OfficerSlot.Commander).Should().Be("u1");
+    }
+
+    [Fact]
+    public async Task RevokeOfficerAsync_RollsBack_When_PersistFails()
+    {
+        var repository = new FailingUpdateGuildRepository();
+        var eventBus = new InMemoryEventBus();
+        DomainEvent? received = null;
+
+        using var sub = eventBus.Subscribe(evt =>
+        {
+            received = evt;
+            return Task.CompletedTask;
+        });
+
+        var service = new GuildOfficerService(repository, eventBus);
+        var guild = new Guild("g11", "u-admin", "Officers");
+        guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
+        guild.AssignOfficer(OfficerSlot.Commander, "u1");
+
+        var ok = await service.RevokeOfficerAsync(
+            guild,
+            OfficerSlot.Commander,
+            "u-admin",
+            DateTimeOffset.Parse("2026-01-11T00:00:00Z"));
+
+        ok.Should().BeFalse();
+        received.Should().BeNull();
+        guild.GetOfficerAssignment(OfficerSlot.Commander).Should().Be("u1");
+    }
+
     [Fact]
     public async Task AssignOfficerAsync_ReturnsFalse_When_UserIdMissing()
     {

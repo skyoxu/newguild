@@ -413,6 +413,11 @@ public partial class GuildManager : Node
         _ = AssignOfficerAsync(guildId, userId, slotValue);
     }
 
+    public void RevokeOfficer(string guildId, int slotValue)
+    {
+        _ = RevokeOfficerAsync(guildId, slotValue);
+    }
+
     private async Task AssignOfficerAsync(string guildId, string userId, int slotValue)
     {
         try
@@ -454,6 +459,49 @@ public partial class GuildManager : Node
         catch (Exception ex)
         {
             DebugError("AssignOfficer failed", ex);
+        }
+    }
+
+    private async Task RevokeOfficerAsync(string guildId, int slotValue)
+    {
+        try
+        {
+            if (_currentGuild == null || _currentGuild.GuildId != guildId)
+            {
+                GD.PushWarning($"[GuildManager] Guild {guildId} not found");
+                return;
+            }
+
+            if (!TryGetCurrentUserId(out var revokedByUserId))
+            {
+                DebugWarn("RevokeOfficer denied: PlayerSession.CurrentUserId missing");
+                return;
+            }
+
+            if (!Enum.IsDefined(typeof(OfficerSlot), slotValue))
+            {
+                DebugWarn($"RevokeOfficer denied: invalid slot value {slotValue}");
+                return;
+            }
+
+            var ok = await _officers.RevokeOfficerAsync(
+                _currentGuild,
+                (OfficerSlot)slotValue,
+                revokedByUserId: revokedByUserId,
+                revokedAt: DateTimeOffset.UtcNow);
+
+            if (!ok)
+            {
+                GD.PushWarning($"[GuildManager] RevokeOfficer denied for slot {slotValue}");
+                DebugWarn($"RevokeOfficer denied_or_persist_failed slot={slotValue} requestedByUserId={revokedByUserId}");
+                return;
+            }
+
+            GD.Print($"[GuildManager] Revoked officer slot {slotValue} in guild {guildId}");
+        }
+        catch (Exception ex)
+        {
+            DebugError("RevokeOfficer failed", ex);
         }
     }
 

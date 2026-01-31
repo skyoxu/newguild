@@ -43,6 +43,7 @@ public class Phase2ContentAndEventsContractsTests
     {
         GuildCreated.EventType.Should().Be("core.guild.created");
         GuildOfficerAssigned.EventType.Should().Be("core.guild.officer.assigned");
+        GuildOfficerRevoked.EventType.Should().Be("core.guild.officer.revoked");
         MediaBeatTriggered.EventType.Should().Be("core.media.beat.triggered");
         RaidResolved.EventType.Should().Be("core.raid.resolved");
         RecruitmentOfferResolved.EventType.Should().Be("core.recruitment.offer.resolved");

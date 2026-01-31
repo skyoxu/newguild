@@ -145,6 +145,41 @@ text = "Kick"
 [node name="HSeparator4" type="HSeparator" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 
+[node name="OfficersSection" type="VBoxContainer" parent="Scroll/Margin/VBox"]
+layout_mode = 2
+
+[node name="OfficersLabel" type="Label" parent="Scroll/Margin/VBox/OfficersSection"]
+layout_mode = 2
+text = "Officers"
+horizontal_alignment = 1
+
+[node name="OfficersList" type="ItemList" parent="Scroll/Margin/VBox/OfficersSection"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="OfficerSlotOption" type="OptionButton" parent="Scroll/Margin/VBox/OfficersSection"]
+layout_mode = 2
+
+[node name="OfficerUserIdInput" type="LineEdit" parent="Scroll/Margin/VBox/OfficersSection"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "u1"
+
+[node name="Actions" type="HBoxContainer" parent="Scroll/Margin/VBox/OfficersSection"]
+layout_mode = 2
+
+[node name="AssignOfficerButton" type="Button" parent="Scroll/Margin/VBox/OfficersSection/Actions"]
+layout_mode = 2
+text = "Assign Officer"
+
+[node name="RevokeOfficerButton" type="Button" parent="Scroll/Margin/VBox/OfficersSection/Actions"]
+layout_mode = 2
+text = "Revoke Officer"
+
+[node name="OfficerStatusLabel" type="Label" parent="Scroll/Margin/VBox/OfficersSection"]
+layout_mode = 2
+text = "Officer status: ready"
+
 [node name="RecruitmentSection" type="VBoxContainer" parent="Scroll/Margin/VBox"]
 layout_mode = 2
 

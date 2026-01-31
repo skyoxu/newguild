@@ -1,10 +1,12 @@
 using Godot;
 using Game.Core.Contracts.Guild;
 using Game.Core.Contracts.Recruitment;
+using Game.Core.Domain;
 using Game.Godot.Adapters;
 using Game.Godot.Scripts.Autoload;
 using Game.Godot.Scripts.UI.Components;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -50,6 +52,14 @@ public partial class GuildPanel : Control
     private Button _approveButton = default!;
     private Button _rejectButton = default!;
 
+    private ItemList? _officersList;
+    private OptionButton? _officerSlotOption;
+    private LineEdit? _officerUserIdInput;
+    private Button? _assignOfficerButton;
+    private Button? _revokeOfficerButton;
+    private Label? _officerStatusLabel;
+    private readonly Dictionary<string, int> _officerSlotItemIndex = new(StringComparer.OrdinalIgnoreCase);
+
     private string? _currentGuildId;
     private EventBusAdapter? _eventBus;
     private Callable _domainEventCallable;
@@ -70,6 +80,90 @@ public partial class GuildPanel : Control
     {
         SetInteractionState(InteractionStateReady, message, retryAsync: null);
         GD.Print($"[GuildPanel] {message}");
+    }
+
+    private void SetOfficerStatus(string message)
+    {
+        if (_officerStatusLabel != null)
+            _officerStatusLabel.Text = message;
+        else
+            SetGuildStatus(message);
+    }
+
+    private void InitializeOfficersSection()
+    {
+        InitializeOfficerSlotOptions();
+        InitializeOfficersList();
+        if (_officerStatusLabel != null && string.IsNullOrWhiteSpace(_officerStatusLabel.Text))
+            _officerStatusLabel.Text = "Officer status: ready";
+    }
+
+    private void InitializeOfficerSlotOptions()
+    {
+        if (_officerSlotOption == null)
+            return;
+
+        _officerSlotOption.Clear();
+        foreach (OfficerSlot slot in Enum.GetValues(typeof(OfficerSlot)))
+        {
+            _officerSlotOption.AddItem(slot.ToString(), (int)slot);
+        }
+        if (_officerSlotOption.ItemCount > 0)
+            _officerSlotOption.Selected = 0;
+    }
+
+    private void InitializeOfficersList()
+    {
+        if (_officersList == null)
+            return;
+
+        _officersList.Clear();
+        _officerSlotItemIndex.Clear();
+
+        foreach (OfficerSlot slot in Enum.GetValues(typeof(OfficerSlot)))
+        {
+            var slotLabel = slot.ToString().ToLowerInvariant();
+            _officerSlotItemIndex[slotLabel] = _officersList.ItemCount;
+            _officersList.AddItem($"{slotLabel}: (unassigned)", null, selectable: false);
+        }
+    }
+
+    private void UpdateOfficerListSlot(string slotLabel, string? userId)
+    {
+        if (_officersList == null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(slotLabel))
+            return;
+
+        var normalized = slotLabel.Trim().ToLowerInvariant();
+        if (!_officerSlotItemIndex.TryGetValue(normalized, out var index))
+        {
+            _officerSlotItemIndex[normalized] = _officersList.ItemCount;
+            _officersList.AddItem($"{normalized}: {(string.IsNullOrWhiteSpace(userId) ? "(unassigned)" : userId)}", null, selectable: false);
+            return;
+        }
+
+        var value = string.IsNullOrWhiteSpace(userId) ? "(unassigned)" : userId;
+        _officersList.SetItemText(index, $"{normalized}: {value}");
+    }
+
+    private int? TryGetSelectedOfficerSlotValueOrReport()
+    {
+        if (_officerSlotOption == null)
+        {
+            SetOfficerStatus("Officer UI missing: slot picker not found.");
+            return null;
+        }
+
+        var selectedIndex = _officerSlotOption.Selected;
+        if (selectedIndex < 0)
+        {
+            SetOfficerStatus("Assign/Revoke denied: slot not selected.");
+            return null;
+        }
+
+        return _officerSlotOption.GetItemId(selectedIndex);
     }
 
     private void ShowError(string title, string message)
@@ -177,6 +271,13 @@ public partial class GuildPanel : Control
         _approveButton = GetNode<Button>("Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow/ApproveButton");
         _rejectButton = GetNode<Button>("Scroll/Margin/VBox/RecruitmentSection/RecruitmentActionsRow/RejectButton");
 
+        _officersList = GetNodeOrNull<ItemList>("Scroll/Margin/VBox/OfficersSection/OfficersList");
+        _officerSlotOption = GetNodeOrNull<OptionButton>("Scroll/Margin/VBox/OfficersSection/OfficerSlotOption");
+        _officerUserIdInput = GetNodeOrNull<LineEdit>("Scroll/Margin/VBox/OfficersSection/OfficerUserIdInput");
+        _assignOfficerButton = GetNodeOrNull<Button>("Scroll/Margin/VBox/OfficersSection/Actions/AssignOfficerButton");
+        _revokeOfficerButton = GetNodeOrNull<Button>("Scroll/Margin/VBox/OfficersSection/Actions/RevokeOfficerButton");
+        _officerStatusLabel = GetNodeOrNull<Label>("Scroll/Margin/VBox/OfficersSection/OfficerStatusLabel");
+
         // Connect button signals
         _createGuildButton.Pressed += OnCreateGuildPressed;
         _disbandGuildButton.Pressed += OnDisbandGuildPressed;
@@ -188,6 +289,13 @@ public partial class GuildPanel : Control
         _applyButton.Pressed += OnApplyPressed;
         _approveButton.Pressed += OnApprovePressed;
         _rejectButton.Pressed += OnRejectPressed;
+
+        if (_assignOfficerButton != null)
+            _assignOfficerButton.Pressed += OnAssignOfficerPressed;
+        if (_revokeOfficerButton != null)
+            _revokeOfficerButton.Pressed += OnRevokeOfficerPressed;
+
+        InitializeOfficersSection();
 
         if (_statusPanel != null)
             _statusPanel.SetStatus("Guild", string.Empty);
@@ -273,6 +381,9 @@ public partial class GuildPanel : Control
             case GuildOfficerAssigned.EventType:
                 HandleOfficerAssigned(dataJson);
                 break;
+            case GuildOfficerRevoked.EventType:
+                HandleOfficerRevoked(dataJson);
+                break;
             case RecruitmentOfferPresented.EventType:
                 HandleRecruitmentOfferPresented(dataJson);
                 break;
@@ -300,6 +411,8 @@ public partial class GuildPanel : Control
                 _guildNameInput.Text = guildName;
             UpdateUIState(hasGuild: true);
             SetGuildStatus($"Created: {guildName}");
+            InitializeOfficersList();
+            SetOfficerStatus("Officer status: ready");
 
             // Add creator as first member
             if (root.TryGetProperty("creatorId", out var creatorId))
@@ -328,6 +441,8 @@ public partial class GuildPanel : Control
                     _guildNameInput.Text = string.Empty;
                 _membersList.Clear();
                 _memberCountLabel.Text = "Members: 0";
+                InitializeOfficersList();
+                SetOfficerStatus("Officer status: no guild selected");
                 UpdateUIState(hasGuild: false);
                 SetGuildStatus("Disbanded.");
             }
@@ -436,6 +551,36 @@ public partial class GuildPanel : Control
                 if (!string.IsNullOrWhiteSpace(userIdStr) && !string.IsNullOrWhiteSpace(slotStr))
                 {
                     SetGuildStatus($"Officer assigned: {userIdStr} ({slotStr})");
+                    SetOfficerStatus($"Officer assigned: {userIdStr} ({slotStr})");
+                    UpdateOfficerListSlot(slotStr, userIdStr);
+                }
+            }
+        }
+        catch
+        {
+            // Ignore malformed events
+        }
+    }
+
+    private void HandleOfficerRevoked(string dataJson)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("guildId", out var guildId) &&
+                guildId.GetString() == _currentGuildId &&
+                root.TryGetProperty("userId", out var userId) &&
+                root.TryGetProperty("slot", out var slot))
+            {
+                var userIdStr = userId.GetString() ?? string.Empty;
+                var slotStr = slot.GetString() ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(slotStr))
+                {
+                    SetGuildStatus($"Officer revoked: {userIdStr} ({slotStr})");
+                    SetOfficerStatus($"Officer revoked: {userIdStr} ({slotStr})");
+                    UpdateOfficerListSlot(slotStr, userId: null);
                 }
             }
         }
@@ -754,6 +899,71 @@ public partial class GuildPanel : Control
         guildManager.Call("RejectOffer", _currentGuildId, offerId, "rejected");
     }
 
+    private void OnAssignOfficerPressed()
+    {
+        var slotValue = TryGetSelectedOfficerSlotValueOrReport();
+        if (slotValue == null)
+            return;
+
+        var userId = _officerUserIdInput?.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            SetOfficerStatus("AssignOfficer denied: user id missing.");
+            return;
+        }
+
+        if (_currentGuildId == null)
+        {
+            SetOfficerStatus("AssignOfficer denied: no guild selected.");
+            return;
+        }
+
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+        {
+            SetOfficerStatus("AssignOfficer denied: GuildManager not found.");
+            return;
+        }
+
+        if (!guildManager.HasMethod("AssignOfficer"))
+        {
+            SetOfficerStatus("ERROR: GuildManager.AssignOfficer missing.");
+            return;
+        }
+
+        guildManager.Call("AssignOfficer", _currentGuildId, userId, slotValue.Value);
+        SetOfficerStatus($"AssignOfficer requested: {userId} (slot={slotValue.Value}).");
+    }
+
+    private void OnRevokeOfficerPressed()
+    {
+        var slotValue = TryGetSelectedOfficerSlotValueOrReport();
+        if (slotValue == null)
+            return;
+
+        if (_currentGuildId == null)
+        {
+            SetOfficerStatus("RevokeOfficer denied: no guild selected.");
+            return;
+        }
+
+        var guildManager = GetGuildManagerOrReport();
+        if (guildManager == null)
+        {
+            SetOfficerStatus("RevokeOfficer denied: GuildManager not found.");
+            return;
+        }
+
+        if (!guildManager.HasMethod("RevokeOfficer"))
+        {
+            SetOfficerStatus("ERROR: GuildManager.RevokeOfficer missing.");
+            return;
+        }
+
+        guildManager.Call("RevokeOfficer", _currentGuildId, slotValue.Value);
+        SetOfficerStatus($"RevokeOfficer requested: slot={slotValue.Value}.");
+    }
+
     private bool TryGetOfferId(out string offerId)
     {
         offerId = _offerIdInput.Text?.Trim() ?? string.Empty;
@@ -805,6 +1015,16 @@ public partial class GuildPanel : Control
         _applyButton.Disabled = !hasGuild;
         _approveButton.Disabled = !hasGuild;
         _rejectButton.Disabled = !hasGuild;
+
+        if (_assignOfficerButton != null)
+            _assignOfficerButton.Disabled = !hasGuild;
+        if (_revokeOfficerButton != null)
+            _revokeOfficerButton.Disabled = !hasGuild;
+        if (_officerSlotOption != null)
+            _officerSlotOption.Disabled = !hasGuild;
+        if (_officerUserIdInput != null)
+            _officerUserIdInput.Editable = hasGuild;
+
         if (_guildNameInput != null)
             _guildNameInput.Editable = !hasGuild;
     }

@@ -55,6 +55,35 @@ public sealed class GuildOfficerService
         return true;
     }
 
+    public async Task<bool> RevokeOfficerAsync(
+        Guild guild,
+        OfficerSlot slot,
+        string revokedByUserId,
+        DateTimeOffset revokedAt)
+    {
+        if (guild == null) throw new ArgumentNullException(nameof(guild));
+        if (string.IsNullOrWhiteSpace(revokedByUserId)) return false;
+        if (!IsAdmin(guild, revokedByUserId)) return false;
+
+        var snapshot = new Dictionary<OfficerSlot, string>(guild.OfficerAssignments);
+        if (!guild.TryRevokeOfficer(slot, out var revokedUserId) || string.IsNullOrWhiteSpace(revokedUserId))
+            return false;
+
+        if (!await PersistOrRollbackAsync(guild, snapshot).ConfigureAwait(false))
+            return false;
+
+        var evt = new GuildOfficerRevoked(
+            GuildId: guild.GuildId,
+            UserId: revokedUserId,
+            Slot: ToSlotLabel(slot),
+            RevokedAt: revokedAt,
+            RevokedByUserId: revokedByUserId);
+
+        await _eventBus.PublishAsync(ToDomainEvent(GuildOfficerRevoked.EventType, evt, revokedAt))
+            .ConfigureAwait(false);
+        return true;
+    }
+
     private async Task<bool> PersistOrRollbackAsync(Guild guild, Dictionary<OfficerSlot, string> snapshot)
     {
         try

@@ -1584,7 +1584,9 @@
     ],
     "contractRefs": [
       "core.guild.created",
-      "core.guild.member.role_changed"
+      "core.guild.member.role_changed",
+      "core.guild.officer.assigned",
+      "core.guild.officer.revoked"
     ],
     "artifactRefs": [
       "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
@@ -1593,11 +1595,11 @@
       "提供官员 UI 入口，能任命/撤销并显示状态；交互模式复用统一组件。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
       "应完成：阶段2：官员 UI 入口（Simplified Officer UI） Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
       "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
-      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Services/GuildOfficerServiceTests.cs",
       "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
       "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
       "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
-      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Services/GuildOfficerServiceTests.cs"
     ],
     "test_strategy": [
       "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
@@ -1607,10 +1609,8 @@
       "Optional: Rewrite-Intent: UI should call Core services via adapters; no direct SQL in scenes."
     ],
     "test_refs": [
-      "Tests.Godot/tests/UI/test_officer_ui_smoke.gd",
       "Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
-      "Game.Core.Tests/Domain/GuildRosterServiceTests.cs",
-      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+      "Game.Core.Tests/Services/GuildOfficerServiceTests.cs"
     ],
     "taskmaster_id": 39,
     "taskmaster_exported": false
