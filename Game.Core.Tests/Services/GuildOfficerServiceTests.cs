@@ -5,6 +5,7 @@ using FluentAssertions;
 using Game.Core.Contracts;
 using Game.Core.Contracts.Guild;
 using Game.Core.Domain;
+using Game.Core.Ports;
 using Game.Core.Repositories;
 using Game.Core.Services;
 using Game.Core.Tests.Repositories;
@@ -28,7 +29,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repo, bus);
+        var service = new GuildOfficerService(repo, bus, new NoopLogger());
         var guild = new Guild("g1", "u-admin", "Officers");
         guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
         await repo.CreateAsync(guild);
@@ -63,7 +64,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repo, bus);
+        var service = new GuildOfficerService(repo, bus, new NoopLogger());
         var guild = new Guild("g7", "u-admin", "Officers");
         guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
         guild.AssignOfficer(OfficerSlot.Commander, "u1");
@@ -98,7 +99,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repository, eventBus);
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
         var guild = new Guild("g8", "u-admin", "Officers");
         await repository.CreateAsync(guild);
 
@@ -126,7 +127,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repository, eventBus);
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
         var guild = new Guild("g9", "u-admin", "Officers");
         guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
         guild.AssignOfficer(OfficerSlot.Commander, "u1");
@@ -156,7 +157,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repository, eventBus);
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
         var guild = new Guild("g10", "u-admin", "Officers");
         guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
         guild.AddMember(new GuildMember("u-member", "Bob", GuildRole.Member));
@@ -187,7 +188,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repository, eventBus);
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
         var guild = new Guild("g11", "u-admin", "Officers");
         guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
         guild.AssignOfficer(OfficerSlot.Commander, "u1");
@@ -216,7 +217,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repository, eventBus);
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
         var guild = new Guild("g2", "u-admin", "Officers");
         await repository.CreateAsync(guild);
 
@@ -245,7 +246,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repository, eventBus);
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
         var guild = new Guild("g3", "u-admin", "Officers");
         guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
         await repository.CreateAsync(guild);
@@ -275,7 +276,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repository, eventBus);
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
         var guild = new Guild("g4", "u-admin", "Officers");
         guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
         guild.AddMember(new GuildMember("u-member", "Bob", GuildRole.Member));
@@ -306,7 +307,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repository, eventBus);
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
         var guild = new Guild("g5", "u-admin", "Officers");
         await repository.CreateAsync(guild);
 
@@ -335,7 +336,7 @@ public class GuildOfficerServiceTests
             return Task.CompletedTask;
         });
 
-        var service = new GuildOfficerService(repository, eventBus);
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
         var guild = new Guild("g6", "u-admin", "Officers");
         guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
 
@@ -351,6 +352,66 @@ public class GuildOfficerServiceTests
         guild.GetOfficerAssignment(OfficerSlot.Commander).Should().BeNull();
     }
 
+    [Fact]
+    public async Task AssignOfficerAsync_ReturnsFalse_When_AssignedByIsNotMember()
+    {
+        var repository = new InMemoryGuildRepository();
+        var eventBus = new InMemoryEventBus();
+        DomainEvent? received = null;
+
+        using var sub = eventBus.Subscribe(evt =>
+        {
+            received = evt;
+            return Task.CompletedTask;
+        });
+
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
+        var guild = new Guild("g12", "u-admin", "Officers");
+        guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
+        await repository.CreateAsync(guild);
+
+        var ok = await service.AssignOfficerAsync(
+            guild,
+            OfficerSlot.Commander,
+            "u1",
+            "u-missing-admin",
+            DateTimeOffset.Parse("2026-01-12T00:00:00Z"));
+
+        ok.Should().BeFalse();
+        received.Should().BeNull();
+        guild.GetOfficerAssignment(OfficerSlot.Commander).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task AssignOfficerAsync_Throws_When_SlotIsInvalid()
+    {
+        var repository = new InMemoryGuildRepository();
+        var eventBus = new InMemoryEventBus();
+        DomainEvent? received = null;
+
+        using var sub = eventBus.Subscribe(evt =>
+        {
+            received = evt;
+            return Task.CompletedTask;
+        });
+
+        var service = new GuildOfficerService(repository, eventBus, new NoopLogger());
+        var guild = new Guild("g13", "u-admin", "Officers");
+        guild.AddMember(new GuildMember("u1", "Alice", GuildRole.Member));
+        await repository.CreateAsync(guild);
+
+        Func<Task> act = async () => await service.AssignOfficerAsync(
+            guild,
+            (OfficerSlot)999,
+            "u1",
+            "u-admin",
+            DateTimeOffset.Parse("2026-01-13T00:00:00Z"));
+
+        await act.Should().ThrowAsync<ArgumentOutOfRangeException>();
+        received.Should().BeNull();
+        guild.GetOfficerAssignment(OfficerSlot.Commander).Should().BeNull();
+    }
+
     private sealed class FailingUpdateGuildRepository : IGuildRepository
     {
         public Task<Guild> CreateAsync(Guild guild) => Task.FromResult(guild);
@@ -362,5 +423,13 @@ public class GuildOfficerServiceTests
             Task.FromResult<IReadOnlyList<Guild>>(Array.Empty<Guild>());
         public Task<IReadOnlyList<Guild>> FindByMemberAsync(string userId) =>
             Task.FromResult<IReadOnlyList<Guild>>(Array.Empty<Guild>());
+    }
+
+    private sealed class NoopLogger : ILogger
+    {
+        public void Info(string message) { }
+        public void Warn(string message) { }
+        public void Error(string message) { }
+        public void Error(string message, Exception ex) { }
     }
 }

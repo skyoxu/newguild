@@ -17,9 +17,9 @@ public class SQLiteGuildRepositoryGuardTests
     }
 
     [Fact]
-    public void Should_Throw_When_DbPath_Is_Empty()
+    public void Should_Throw_When_FileSQLiteDatabase_Path_Is_Empty()
     {
-        Action act = () => new SQLiteGuildRepository("   ");
+        Action act = () => new FileSQLiteDatabase("   ");
 
         act.Should().Throw<ArgumentException>();
     }

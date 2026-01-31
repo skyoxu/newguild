@@ -8,8 +8,8 @@ using Microsoft.Data.Sqlite;
 namespace Game.Core.Repositories;
 
 /// <summary>
-/// File-backed SQLite implementation for deterministic core tests.
-/// Follows ADR-0018 (pure C# implementation, zero Godot dependencies).
+/// File-backed SQLite implementation for deterministic tests.
+/// This type is intentionally test-only and MUST NOT be referenced by runtime code.
 /// </summary>
 internal sealed class FileSQLiteDatabase : ISQLiteDatabase, IDisposable
 {
@@ -30,7 +30,12 @@ internal sealed class FileSQLiteDatabase : ISQLiteDatabase, IDisposable
         if (_isOpen)
             return Task.CompletedTask;
 
-        _connection = new SqliteConnection($"Data Source={_dbPath}");
+        var builder = new SqliteConnectionStringBuilder
+        {
+            DataSource = _dbPath,
+        };
+
+        _connection = new SqliteConnection(builder.ConnectionString);
         _connection.Open();
         _isOpen = true;
         return Task.CompletedTask;
@@ -109,3 +114,4 @@ internal sealed class FileSQLiteDatabase : ISQLiteDatabase, IDisposable
         _isOpen = false;
     }
 }
+

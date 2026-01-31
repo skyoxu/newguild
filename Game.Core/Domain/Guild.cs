@@ -22,7 +22,16 @@ public class Guild
     public string Name { get; private set; }
     public List<GuildMember> Members { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
-    public IReadOnlyDictionary<OfficerSlot, string> OfficerAssignments => _officerAssignments;
+    public IReadOnlyDictionary<OfficerSlot, string> OfficerAssignments
+    {
+        get
+        {
+            lock (_officerLock)
+            {
+                return new Dictionary<OfficerSlot, string>(_officerAssignments);
+            }
+        }
+    }
 
     /// <summary>
     /// Private parameterless constructor for database reconstruction.
@@ -229,16 +238,19 @@ public class Guild
         if (string.IsNullOrWhiteSpace(userId))
             throw new ArgumentException("UserId cannot be empty.", nameof(userId));
 
-        lock (_officerLock)
+        lock (_memberLock)
         {
-            if (_officerAssignments.ContainsKey(slot))
-                return false;
-
             if (!Members.Any(m => m.UserId == userId))
                 return false;
 
-            _officerAssignments[slot] = userId;
-            return true;
+            lock (_officerLock)
+            {
+                if (_officerAssignments.ContainsKey(slot))
+                    return false;
+
+                _officerAssignments[slot] = userId;
+                return true;
+            }
         }
     }
 

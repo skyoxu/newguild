@@ -11,9 +11,21 @@ namespace Game.Core.Tests.Services
 {
     public class OfficerAssignmentPersistenceTests
     {
-        private static SQLiteGuildRepository CreateRepository(string dbPath)
+        private sealed class RepositoryFixture : IDisposable
         {
-            return new SQLiteGuildRepository(dbPath);
+            private readonly FileSQLiteDatabase _db;
+            public SQLiteGuildRepository Repository { get; }
+
+            public RepositoryFixture(string dbPath)
+            {
+                _db = new FileSQLiteDatabase(dbPath);
+                Repository = new SQLiteGuildRepository(_db);
+            }
+
+            public void Dispose()
+            {
+                _db.Dispose();
+            }
         }
 
         private static Guild CreateGuildWithMembers(string guildId)
@@ -29,7 +41,8 @@ namespace Game.Core.Tests.Services
         public async Task Should_Persist_Officer_Assignments_Across_Save_And_Load()
         {
             var dbPath = Path.Combine(Path.GetTempPath(), $"guild-officers-{Guid.NewGuid():N}.db");
-            var repository = CreateRepository(dbPath);
+            using var fixture = new RepositoryFixture(dbPath);
+            var repository = fixture.Repository;
 
             var guild = CreateGuildWithMembers("g1");
             guild.AssignOfficer(OfficerSlot.Treasurer, "m1");
@@ -47,7 +60,8 @@ namespace Game.Core.Tests.Services
         public async Task Should_Refuse_Officer_Assignment_When_Slot_Occupied_And_Keep_Persisted_State()
         {
             var dbPath = Path.Combine(Path.GetTempPath(), $"guild-officers-{Guid.NewGuid():N}.db");
-            var repository = CreateRepository(dbPath);
+            using var fixture = new RepositoryFixture(dbPath);
+            var repository = fixture.Repository;
 
             var guild = CreateGuildWithMembers("g1");
             guild.AssignOfficer(OfficerSlot.Commander, "m1");
@@ -72,7 +86,8 @@ namespace Game.Core.Tests.Services
         public async Task Should_Return_Null_When_Guild_Is_Missing()
         {
             var dbPath = Path.Combine(Path.GetTempPath(), $"guild-officers-{Guid.NewGuid():N}.db");
-            var repository = CreateRepository(dbPath);
+            using var fixture = new RepositoryFixture(dbPath);
+            var repository = fixture.Repository;
 
             var result = await repository.GetByIdAsync("missing", CancellationToken.None);
 

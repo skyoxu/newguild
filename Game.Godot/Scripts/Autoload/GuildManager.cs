@@ -70,11 +70,11 @@ public partial class GuildManager : Node
             // Get EventBus reference
             _eventBus = GetNode<EventBusAdapter>("/root/EventBus");
             _roster = new GuildRosterService(_repository, _eventBus);
-            _officers = new GuildOfficerService(_repository, _eventBus);
             _session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
             _logger = GetNodeOrNull<LoggerAdapter>("/root/Logger");
 
             var loggerPort = (ILogger?)_logger ?? new DevNullLogger();
+            _officers = new GuildOfficerService(_repository, _eventBus, loggerPort);
             _recruitment = new GuildRecruitmentService(
                 _repository,
                 recruitmentOffers,

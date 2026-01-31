@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Game.Core.Contracts;
 using Game.Core.Contracts.Guild;
 using Game.Core.Domain;
+using Game.Core.Ports;
 using Game.Core.Repositories;
 
 namespace Game.Core.Services;
@@ -17,11 +18,13 @@ public sealed class GuildOfficerService
 {
     private readonly IGuildRepository _repository;
     private readonly IEventBus _eventBus;
+    private readonly ILogger _logger;
 
-    public GuildOfficerService(IGuildRepository repository, IEventBus eventBus)
+    public GuildOfficerService(IGuildRepository repository, IEventBus eventBus, ILogger logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<bool> AssignOfficerAsync(
@@ -36,6 +39,7 @@ public sealed class GuildOfficerService
         if (string.IsNullOrWhiteSpace(assignedByUserId)) return false;
         if (!IsAdmin(guild, assignedByUserId)) return false;
 
+        var slotLabel = ToSlotLabel(slot);
         var snapshot = new Dictionary<OfficerSlot, string>(guild.OfficerAssignments);
         if (!guild.AssignOfficer(slot, userId))
             return false;
@@ -46,7 +50,7 @@ public sealed class GuildOfficerService
         var evt = new GuildOfficerAssigned(
             GuildId: guild.GuildId,
             UserId: userId,
-            Slot: ToSlotLabel(slot),
+            Slot: slotLabel,
             AssignedAt: assignedAt,
             AssignedByUserId: assignedByUserId);
 
@@ -65,6 +69,7 @@ public sealed class GuildOfficerService
         if (string.IsNullOrWhiteSpace(revokedByUserId)) return false;
         if (!IsAdmin(guild, revokedByUserId)) return false;
 
+        var slotLabel = ToSlotLabel(slot);
         var snapshot = new Dictionary<OfficerSlot, string>(guild.OfficerAssignments);
         if (!guild.TryRevokeOfficer(slot, out var revokedUserId) || string.IsNullOrWhiteSpace(revokedUserId))
             return false;
@@ -75,7 +80,7 @@ public sealed class GuildOfficerService
         var evt = new GuildOfficerRevoked(
             GuildId: guild.GuildId,
             UserId: revokedUserId,
-            Slot: ToSlotLabel(slot),
+            Slot: slotLabel,
             RevokedAt: revokedAt,
             RevokedByUserId: revokedByUserId);
 
@@ -91,8 +96,9 @@ public sealed class GuildOfficerService
             await _repository.UpdateAsync(guild).ConfigureAwait(false);
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.Error($"GuildOfficerService persist failed guildId={guild.GuildId}", ex);
             guild.RestoreOfficerAssignments(snapshot);
             return false;
         }
@@ -100,13 +106,17 @@ public sealed class GuildOfficerService
 
     private static bool IsAdmin(Guild guild, string userId)
     {
-        if (string.IsNullOrWhiteSpace(userId))
-            return false;
         var requester = guild.Members.FirstOrDefault(member => member.UserId == userId);
         return requester != null && requester.Role == GuildRole.Admin;
     }
 
-    private static string ToSlotLabel(OfficerSlot slot) => slot.ToString().ToLowerInvariant();
+    private static string ToSlotLabel(OfficerSlot slot) =>
+        slot switch
+        {
+            OfficerSlot.Commander => "commander",
+            OfficerSlot.Treasurer => "treasurer",
+            _ => throw new ArgumentOutOfRangeException(nameof(slot), slot, "Unsupported officer slot."),
+        };
 
     private static DomainEvent ToDomainEvent(string type, object data, DateTimeOffset ts) =>
         new(

@@ -19,6 +19,15 @@ public static class GuildDbSchema
     /// </summary>
     public const int LatestVersion = 3;
 
+    private const string CreateGuildOfficersTableSql =
+        "CREATE TABLE IF NOT EXISTS GuildOfficers (" +
+        " GuildId TEXT NOT NULL," +
+        " Slot INTEGER NOT NULL," +
+        " UserId TEXT NOT NULL," +
+        " PRIMARY KEY (GuildId, Slot)," +
+        " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
+        " )";
+
     public static IReadOnlyDictionary<int, Func<ISQLiteDatabase, Task>> CreateMigrations()
     {
         return new Dictionary<int, Func<ISQLiteDatabase, Task>>
@@ -61,14 +70,7 @@ public static class GuildDbSchema
             [3] = async database =>
             {
                 // Officer assignments (one per slot).
-                await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
-                    "CREATE TABLE IF NOT EXISTS GuildOfficers (" +
-                    " GuildId TEXT NOT NULL," +
-                    " Slot INTEGER NOT NULL," +
-                    " UserId TEXT NOT NULL," +
-                    " PRIMARY KEY (GuildId, Slot)," +
-                    " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
-                    " )"));
+                await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(CreateGuildOfficersTableSql));
             },
         };
     }
@@ -112,14 +114,7 @@ public static class GuildDbSchema
             " )")).ConfigureAwait(false);
 
         // Version 3 tables
-        await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
-            "CREATE TABLE IF NOT EXISTS GuildOfficers (" +
-            " GuildId TEXT NOT NULL," +
-            " Slot INTEGER NOT NULL," +
-            " UserId TEXT NOT NULL," +
-            " PRIMARY KEY (GuildId, Slot)," +
-            " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
-            " )")).ConfigureAwait(false);
+        await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(CreateGuildOfficersTableSql)).ConfigureAwait(false);
     }
 }
 

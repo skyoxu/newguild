@@ -27,16 +27,13 @@ public class SQLiteGuildRepository : IGuildRepository
     private readonly ISQLiteDatabase _db;
     private bool _initialized;
 
+    private static readonly SqlStatement BeginImmediateTransaction = SqlStatement.NoParameters("BEGIN IMMEDIATE");
+    private static readonly SqlStatement CommitTransaction = SqlStatement.NoParameters("COMMIT");
+    private static readonly SqlStatement RollbackTransaction = SqlStatement.NoParameters("ROLLBACK");
+
     public SQLiteGuildRepository(ISQLiteDatabase database)
     {
         _db = database ?? throw new ArgumentNullException(nameof(database));
-    }
-
-    internal SQLiteGuildRepository(string dbPath)
-    {
-        if (string.IsNullOrWhiteSpace(dbPath))
-            throw new ArgumentException("Database path cannot be empty.", nameof(dbPath));
-        _db = new FileSQLiteDatabase(dbPath);
     }
 
     private async Task EnsureInitializedAsync()
@@ -55,33 +52,50 @@ public class SQLiteGuildRepository : IGuildRepository
     {
         await EnsureInitializedAsync();
 
-        // Insert guild
-        await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
-            "INSERT INTO Guilds (GuildId, CreatorId, Name, CreatedAt) VALUES (@GuildId, @CreatorId, @Name, @CreatedAt)",
-            new Dictionary<string, object?>
-            {
-                ["@GuildId"] = guild.GuildId,
-                ["@CreatorId"] = guild.CreatorId,
-                ["@Name"] = guild.Name,
-                ["@CreatedAt"] = guild.CreatedAt.ToString("O") // ISO 8601 format
-            }));
-
-        // Insert members
-        foreach (var member in guild.Members)
+        await _db.ExecuteNonQueryAsync(BeginImmediateTransaction).ConfigureAwait(false);
+        try
         {
+            // Insert guild
             await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
-                "INSERT INTO GuildMembers (GuildId, UserId, Role) VALUES (@GuildId, @UserId, @Role)",
+                "INSERT INTO Guilds (GuildId, CreatorId, Name, CreatedAt) VALUES (@GuildId, @CreatorId, @Name, @CreatedAt)",
                 new Dictionary<string, object?>
                 {
                     ["@GuildId"] = guild.GuildId,
-                    ["@UserId"] = member.UserId,
-                    ["@Role"] = (int)member.Role
-                }));
+                    ["@CreatorId"] = guild.CreatorId,
+                    ["@Name"] = guild.Name,
+                    ["@CreatedAt"] = guild.CreatedAt.ToString("O") // ISO 8601 format
+                })).ConfigureAwait(false);
+
+            // Insert members
+            foreach (var member in guild.Members)
+            {
+                await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
+                    "INSERT INTO GuildMembers (GuildId, UserId, Role) VALUES (@GuildId, @UserId, @Role)",
+                    new Dictionary<string, object?>
+                    {
+                        ["@GuildId"] = guild.GuildId,
+                        ["@UserId"] = member.UserId,
+                        ["@Role"] = (int)member.Role
+                    })).ConfigureAwait(false);
+            }
+
+            await PersistOfficerAssignmentsAsync(guild).ConfigureAwait(false);
+            await _db.ExecuteNonQueryAsync(CommitTransaction).ConfigureAwait(false);
+
+            return guild;
         }
-
-        await PersistOfficerAssignmentsAsync(guild).ConfigureAwait(false);
-
-        return guild;
+        catch
+        {
+            try
+            {
+                await _db.ExecuteNonQueryAsync(RollbackTransaction).ConfigureAwait(false);
+            }
+            catch
+            {
+                // best-effort rollback
+            }
+            throw;
+        }
     }
 
     public async Task<Guild?> GetByIdAsync(string guildId)
@@ -125,36 +139,53 @@ public class SQLiteGuildRepository : IGuildRepository
     {
         await EnsureInitializedAsync();
 
-        // Update guild
-        await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
-            "UPDATE Guilds SET Name = @Name WHERE GuildId = @GuildId",
-            new Dictionary<string, object?>
-            {
-                ["@GuildId"] = guild.GuildId,
-                ["@Name"] = guild.Name
-            }));
-
-        // Delete existing members
-        await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
-            "DELETE FROM GuildMembers WHERE GuildId = @GuildId",
-            new Dictionary<string, object?> { ["@GuildId"] = guild.GuildId }));
-
-        // Insert updated members
-        foreach (var member in guild.Members)
+        await _db.ExecuteNonQueryAsync(BeginImmediateTransaction).ConfigureAwait(false);
+        try
         {
+            // Update guild
             await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
-                "INSERT INTO GuildMembers (GuildId, UserId, Role) VALUES (@GuildId, @UserId, @Role)",
+                "UPDATE Guilds SET Name = @Name WHERE GuildId = @GuildId",
                 new Dictionary<string, object?>
                 {
                     ["@GuildId"] = guild.GuildId,
-                    ["@UserId"] = member.UserId,
-                    ["@Role"] = (int)member.Role
-                }));
+                    ["@Name"] = guild.Name
+                })).ConfigureAwait(false);
+
+            // Delete existing members
+            await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
+                "DELETE FROM GuildMembers WHERE GuildId = @GuildId",
+                new Dictionary<string, object?> { ["@GuildId"] = guild.GuildId })).ConfigureAwait(false);
+
+            // Insert updated members
+            foreach (var member in guild.Members)
+            {
+                await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
+                    "INSERT INTO GuildMembers (GuildId, UserId, Role) VALUES (@GuildId, @UserId, @Role)",
+                    new Dictionary<string, object?>
+                    {
+                        ["@GuildId"] = guild.GuildId,
+                        ["@UserId"] = member.UserId,
+                        ["@Role"] = (int)member.Role
+                    })).ConfigureAwait(false);
+            }
+
+            await PersistOfficerAssignmentsAsync(guild).ConfigureAwait(false);
+            await _db.ExecuteNonQueryAsync(CommitTransaction).ConfigureAwait(false);
+
+            return guild;
         }
-
-        await PersistOfficerAssignmentsAsync(guild).ConfigureAwait(false);
-
-        return guild;
+        catch
+        {
+            try
+            {
+                await _db.ExecuteNonQueryAsync(RollbackTransaction).ConfigureAwait(false);
+            }
+            catch
+            {
+                // best-effort rollback
+            }
+            throw;
+        }
     }
 
     public async Task<bool> DeleteAsync(string guildId)
