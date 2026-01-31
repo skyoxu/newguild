@@ -1,10 +1,51 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
 const GUILD_PANEL_SCENE := preload("res://Game.Godot/Scenes/UI/GuildPanel.tscn")
+const EVENT_BUS_ADAPTER := preload("res://Game.Godot/Adapters/EventBusAdapter.cs")
 
 # ContractRefs (Task 39):
+# - core.guild.created
 # - core.guild.officer.assigned
 # - core.guild.officer.revoked
+
+const EVT_GUILD_CREATED := "core.guild.created"
+const EVT_GUILD_OFFICER_ASSIGNED := "core.guild.officer.assigned"
+const EVT_GUILD_OFFICER_REVOKED := "core.guild.officer.revoked"
+
+var _bus: Node
+var _previous_bus: Node
+var _previous_bus_original_name: String
+var _previous_bus_original_process_mode: Node.ProcessMode
+
+func before() -> void:
+	_bus = EVENT_BUS_ADAPTER.new()
+	_bus.name = "EventBus"
+
+	_previous_bus = get_node_or_null("/root/EventBus")
+	if _previous_bus != null:
+		_previous_bus_original_name = _previous_bus.name
+		_previous_bus_original_process_mode = _previous_bus.process_mode
+		_previous_bus.process_mode = Node.ProcessMode.PROCESS_MODE_DISABLED
+		_previous_bus.name = "_EventBusBackup_%s" % str(_previous_bus.get_instance_id())
+
+	get_tree().get_root().add_child(auto_free(_bus))
+
+func after() -> void:
+	if _bus != null and is_instance_valid(_bus):
+		_bus.name = "_EventBusTemp"
+	_bus = null
+
+	if _previous_bus != null and is_instance_valid(_previous_bus):
+		_previous_bus.name = _previous_bus_original_name
+		_previous_bus.process_mode = _previous_bus_original_process_mode
+	_previous_bus = null
+	_previous_bus_original_name = ""
+	_previous_bus_original_process_mode = Node.ProcessMode.PROCESS_MODE_INHERIT
+
+func after_test() -> void:
+	# Allow queued frees from auto_free() to be processed before orphan detection.
+	await get_tree().process_frame
+	await get_tree().process_frame
 
 func _instantiate_guild_panel() -> Control:
 	var panel := GUILD_PANEL_SCENE.instantiate()
@@ -13,6 +54,35 @@ func _instantiate_guild_panel() -> Control:
 
 func _officers_section(panel: Node) -> Node:
 	return panel.get_node_or_null("Scroll/Margin/VBox/OfficersSection")
+
+func _emit_domain_event(type: String, data_json: String) -> void:
+	assert_object(_bus).is_not_null()
+	assert_bool(_bus.has_signal("DomainEventEmitted")).is_true()
+
+	var source := "Task39GdUnit"
+	var id := "t39"
+	var spec_version := "1.0"
+	var data_content_type := "application/json"
+	var timestamp_iso := "2026-01-01T00:00:00Z"
+
+	_bus.emit_signal(
+		"DomainEventEmitted",
+		type,
+		source,
+		data_json,
+		id,
+		spec_version,
+		data_content_type,
+		timestamp_iso
+	)
+
+func _find_officer_item_index(officers_list: ItemList, slot_label: String) -> int:
+	var wanted := "%s:" % slot_label.strip_edges().to_lower()
+	for i in range(officers_list.get_item_count()):
+		var text := officers_list.get_item_text(i)
+		if str(text).to_lower().begins_with(wanted):
+			return i
+	return -1
 
 # ACC:T39.1
 func test_officers_section_exists() -> void:
@@ -35,32 +105,48 @@ func test_officers_section_has_revoke_button() -> void:
 	assert_object(section.get_node_or_null("Actions/RevokeOfficerButton")).is_not_null()
 
 # ACC:T39.5
-func test_assign_then_revoke_updates_status_label() -> void:
+# ACC:T39.6
+func test_domain_events_assign_then_revoke_update_status_and_list() -> void:
 	var panel := _instantiate_guild_panel()
 	var section := _officers_section(panel)
 	assert_object(section).is_not_null()
 	var status_label := section.get_node_or_null("OfficerStatusLabel") as Label
 	assert_object(status_label).is_not_null()
 
-	var slot_option := section.get_node_or_null("OfficerSlotOption") as OptionButton
-	var user_id_input := section.get_node_or_null("OfficerUserIdInput") as LineEdit
-	var assign_button := section.get_node_or_null("Actions/AssignOfficerButton") as Button
-	var revoke_button := section.get_node_or_null("Actions/RevokeOfficerButton") as Button
-	assert_object(slot_option).is_not_null()
-	assert_object(user_id_input).is_not_null()
-	assert_object(assign_button).is_not_null()
-	assert_object(revoke_button).is_not_null()
+	var officers_list := section.get_node_or_null("OfficersList") as ItemList
+	assert_object(officers_list).is_not_null()
 
-	assert_int(slot_option.get_item_count()).is_greater(0)
-	user_id_input.text = "u1"
+	await get_tree().process_frame
 
-	var initial := status_label.text
-	assign_button.emit_signal("pressed")
-	assert_str(status_label.text).is_not_equal(initial)
+	_emit_domain_event(
+		EVT_GUILD_CREATED,
+		"{\"guildId\":\"g1\",\"creatorId\":\"u-admin\",\"guildName\":\"Officers\"}"
+	)
+	await get_tree().process_frame
 
-	var after_assign := status_label.text
-	revoke_button.emit_signal("pressed")
-	assert_str(status_label.text).is_not_equal(after_assign)
+	var commander_index := _find_officer_item_index(officers_list, "commander")
+	assert_int(commander_index).is_greater_equal(0)
+
+	assert_str(status_label.text).contains("ready")
+	assert_str(officers_list.get_item_text(commander_index)).contains("(unassigned)")
+
+	_emit_domain_event(
+		EVT_GUILD_OFFICER_ASSIGNED,
+		"{\"guildId\":\"g1\",\"userId\":\"u1\",\"slot\":\"commander\"}"
+	)
+	await get_tree().process_frame
+
+	assert_str(status_label.text).contains("Officer assigned")
+	assert_str(officers_list.get_item_text(commander_index)).contains("u1")
+
+	_emit_domain_event(
+		EVT_GUILD_OFFICER_REVOKED,
+		"{\"guildId\":\"g1\",\"userId\":\"u1\",\"slot\":\"commander\"}"
+	)
+	await get_tree().process_frame
+
+	assert_str(status_label.text).contains("Officer revoked")
+	assert_str(officers_list.get_item_text(commander_index)).contains("(unassigned)")
 
 # ACC:T39.6
 func test_section_has_slot_and_user_inputs() -> void:
