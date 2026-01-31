@@ -17,7 +17,7 @@ public static class GuildDbSchema
     /// - Bump whenever table structures or column semantics change.
     /// - Add deterministic, idempotent migration steps for each version.
     /// </summary>
-    public const int LatestVersion = 2;
+    public const int LatestVersion = 3;
 
     public static IReadOnlyDictionary<int, Func<ISQLiteDatabase, Task>> CreateMigrations()
     {
@@ -55,6 +55,18 @@ public static class GuildDbSchema
                     " Role INTEGER NOT NULL," +
                     " PresentedAt TEXT NOT NULL," +
                     " UNIQUE (GuildId, CandidateId)," +
+                    " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
+                    " )"));
+            },
+            [3] = async database =>
+            {
+                // Officer assignments (one per slot).
+                await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
+                    "CREATE TABLE IF NOT EXISTS GuildOfficers (" +
+                    " GuildId TEXT NOT NULL," +
+                    " Slot INTEGER NOT NULL," +
+                    " UserId TEXT NOT NULL," +
+                    " PRIMARY KEY (GuildId, Slot)," +
                     " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
                     " )"));
             },
@@ -96,6 +108,16 @@ public static class GuildDbSchema
             " Role INTEGER NOT NULL," +
             " PresentedAt TEXT NOT NULL," +
             " UNIQUE (GuildId, CandidateId)," +
+            " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
+            " )")).ConfigureAwait(false);
+
+        // Version 3 tables
+        await database.ExecuteNonQueryAsync(SqlStatement.NoParameters(
+            "CREATE TABLE IF NOT EXISTS GuildOfficers (" +
+            " GuildId TEXT NOT NULL," +
+            " Slot INTEGER NOT NULL," +
+            " UserId TEXT NOT NULL," +
+            " PRIMARY KEY (GuildId, Slot)," +
             " FOREIGN KEY (GuildId) REFERENCES Guilds(GuildId) ON DELETE CASCADE" +
             " )")).ConfigureAwait(false);
     }

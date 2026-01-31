@@ -171,4 +171,24 @@ public class GameEngineCoreEventTests
             evt.Source.Should().Be(nameof(GameEngineCore));
         }
     }
+
+    [Fact]
+    public void Should_Not_Throw_When_Bus_Is_Null()
+    {
+        var config = new GameConfig(
+            MaxLevel: 10,
+            InitialHealth: 100,
+            ScoreMultiplier: 1.0,
+            AutoSave: false,
+            Difficulty: Difficulty.Medium
+        );
+
+        var engine = new GameEngineCore(config, new Inventory(), bus: null);
+
+        engine.Start();
+        engine.Move(1.0, 1.0);
+        engine.AddScore(1);
+        engine.ApplyDamage(new Damage(Amount: 1, Type: DamageType.Physical, IsCritical: false));
+        engine.End();
+    }
 }

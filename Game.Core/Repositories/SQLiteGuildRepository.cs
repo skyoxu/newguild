@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Game.Core.Domain;
 using Game.Core.Persistence.Migrations;
@@ -29,6 +30,13 @@ public class SQLiteGuildRepository : IGuildRepository
     public SQLiteGuildRepository(ISQLiteDatabase database)
     {
         _db = database ?? throw new ArgumentNullException(nameof(database));
+    }
+
+    internal SQLiteGuildRepository(string dbPath)
+    {
+        if (string.IsNullOrWhiteSpace(dbPath))
+            throw new ArgumentException("Database path cannot be empty.", nameof(dbPath));
+        _db = new FileSQLiteDatabase(dbPath);
     }
 
     private async Task EnsureInitializedAsync()
@@ -71,6 +79,8 @@ public class SQLiteGuildRepository : IGuildRepository
                 }));
         }
 
+        await PersistOfficerAssignmentsAsync(guild).ConfigureAwait(false);
+
         return guild;
     }
 
@@ -86,6 +96,29 @@ public class SQLiteGuildRepository : IGuildRepository
             return null;
 
         return await ReconstructGuildAsync(rows[0]);
+    }
+
+    public async Task<Guild?> GetByIdAsync(string guildId, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return await GetByIdAsync(guildId).ConfigureAwait(false);
+    }
+
+    public async Task SaveAsync(Guild guild, CancellationToken cancellationToken)
+    {
+        if (guild == null) throw new ArgumentNullException(nameof(guild));
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await EnsureInitializedAsync();
+
+        var existing = await GetByIdAsync(guild.GuildId).ConfigureAwait(false);
+        if (existing == null)
+        {
+            await CreateAsync(guild).ConfigureAwait(false);
+            return;
+        }
+
+        await UpdateAsync(guild).ConfigureAwait(false);
     }
 
     public async Task<Guild> UpdateAsync(Guild guild)
@@ -118,6 +151,8 @@ public class SQLiteGuildRepository : IGuildRepository
                     ["@Role"] = (int)member.Role
                 }));
         }
+
+        await PersistOfficerAssignmentsAsync(guild).ConfigureAwait(false);
 
         return guild;
     }
@@ -197,7 +232,54 @@ public class SQLiteGuildRepository : IGuildRepository
             members.Add(new GuildMember(userId, role));
         }
 
+        var officerAssignments = await LoadOfficerAssignmentsAsync(guildId).ConfigureAwait(false);
+
         // Use static factory method instead of reflection
-        return Guild.ReconstructFromDatabase(guildId, creatorId, name, createdAt, members);
+        var guild = Guild.ReconstructFromDatabase(guildId, creatorId, name, createdAt, members);
+        if (officerAssignments.Count > 0)
+        {
+            guild.RestoreOfficerAssignments(officerAssignments);
+        }
+
+        return guild;
+    }
+
+    private async Task PersistOfficerAssignmentsAsync(Guild guild)
+    {
+        await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
+            "DELETE FROM GuildOfficers WHERE GuildId = @GuildId",
+            new Dictionary<string, object?> { ["@GuildId"] = guild.GuildId })).ConfigureAwait(false);
+
+        foreach (var entry in guild.OfficerAssignments)
+        {
+            await _db.ExecuteNonQueryAsync(SqlStatement.WithParameters(
+                "INSERT INTO GuildOfficers (GuildId, Slot, UserId) VALUES (@GuildId, @Slot, @UserId)",
+                new Dictionary<string, object?>
+                {
+                    ["@GuildId"] = guild.GuildId,
+                    ["@Slot"] = (int)entry.Key,
+                    ["@UserId"] = entry.Value
+                })).ConfigureAwait(false);
+        }
+    }
+
+    private async Task<Dictionary<OfficerSlot, string>> LoadOfficerAssignmentsAsync(string guildId)
+    {
+        var assignments = new Dictionary<OfficerSlot, string>();
+        var rows = await _db.QueryAsync(SqlStatement.WithParameters(
+            "SELECT Slot, UserId FROM GuildOfficers WHERE GuildId = @GuildId",
+            new Dictionary<string, object?> { ["@GuildId"] = guildId })).ConfigureAwait(false);
+
+        foreach (var row in rows)
+        {
+            var slotValue = row["Slot"];
+            var slot = slotValue is long longValue
+                ? (OfficerSlot)(int)longValue
+                : (OfficerSlot)(int)slotValue;
+            var userId = (string)row["UserId"];
+            assignments[slot] = userId;
+        }
+
+        return assignments;
     }
 }

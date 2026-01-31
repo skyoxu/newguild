@@ -144,6 +144,13 @@ public sealed class ObservabilityClientTests
         s.Should().Contain("[path]");
     }
 
+    [Fact]
+    public void PiiDataScrubber_Should_Return_Input_When_Null_Or_Empty()
+    {
+        PiiDataScrubber.Scrub(string.Empty).Should().BeEmpty();
+        PiiDataScrubber.Scrub(null!).Should().BeNull();
+    }
+
     private sealed class NullLogger : ILogger
     {
         public void Info(string message) { }

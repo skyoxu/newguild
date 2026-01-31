@@ -104,3 +104,27 @@ func test_roster_actions_update_member_list_via_events() -> void:
 
 	kick_button.pressed.emit()
 	await _await_until(func() -> bool: return members_list.item_count == 1 and not _list_contains(members_list, "u3"))
+
+# ACC:T38.4
+func test_officer_assignment_emits_event_and_updates_status() -> void:
+	_session.call("SetCurrentUserId", "player1")
+	var screen := await _guild_screen()
+	var panel: Node = screen.get_node("Scroll/GuildPanel")
+
+	var create_button: Button = panel.get_node("Scroll/Margin/VBox/Actions/CreateGuildButton")
+	var members_list: ItemList = panel.get_node("Scroll/Margin/VBox/MembersListPanel/Root/Items")
+	var status_label: Label = panel.get_node("Scroll/Margin/VBox/GuildInfo/StatusPanel/Root/Message")
+
+	create_button.pressed.emit()
+	await _await_until(func() -> bool: return members_list.item_count == 1 and create_button.disabled)
+
+	var summary_json = str(_guild_manager.call("GetCurrentGuildSummaryJson"))
+	var summary = JSON.parse_string(summary_json)
+	assert_object(summary).is_not_null()
+	var guild_id := str(summary.get("guildId", ""))
+	assert_str(guild_id).is_not_empty()
+
+	_guild_manager.call("AssignOfficer", guild_id, "player1", 0)
+	await _await_until(func() -> bool: return status_label.text.find("Officer assigned") != -1)
+	assert_str(status_label.text).contains("player1")
+	assert_str(status_label.text).contains("commander")

@@ -30,6 +30,7 @@ public partial class GuildManager : Node
     private EventBusAdapter _eventBus = default!;
     private Guild? _currentGuild;
     private GuildRosterService _roster = default!;
+    private GuildOfficerService _officers = default!;
     private GuildRecruitmentService _recruitment = default!;
     private PlayerSession? _session;
     private LoggerAdapter? _logger;
@@ -69,6 +70,7 @@ public partial class GuildManager : Node
             // Get EventBus reference
             _eventBus = GetNode<EventBusAdapter>("/root/EventBus");
             _roster = new GuildRosterService(_repository, _eventBus);
+            _officers = new GuildOfficerService(_repository, _eventBus);
             _session = GetNodeOrNull<PlayerSession>("/root/PlayerSession");
             _logger = GetNodeOrNull<LoggerAdapter>("/root/Logger");
 
@@ -403,6 +405,55 @@ public partial class GuildManager : Node
         catch (Exception ex)
         {
             DebugError("AddMember failed", ex);
+        }
+    }
+
+    public void AssignOfficer(string guildId, string userId, int slotValue)
+    {
+        _ = AssignOfficerAsync(guildId, userId, slotValue);
+    }
+
+    private async Task AssignOfficerAsync(string guildId, string userId, int slotValue)
+    {
+        try
+        {
+            if (_currentGuild == null || _currentGuild.GuildId != guildId)
+            {
+                GD.PushWarning($"[GuildManager] Guild {guildId} not found");
+                return;
+            }
+
+            if (!TryGetCurrentUserId(out var assignedByUserId))
+            {
+                DebugWarn("AssignOfficer denied: PlayerSession.CurrentUserId missing");
+                return;
+            }
+
+            if (!Enum.IsDefined(typeof(OfficerSlot), slotValue))
+            {
+                DebugWarn($"AssignOfficer denied: invalid slot value {slotValue}");
+                return;
+            }
+
+            var ok = await _officers.AssignOfficerAsync(
+                _currentGuild,
+                (OfficerSlot)slotValue,
+                userId: userId,
+                assignedByUserId: assignedByUserId,
+                assignedAt: DateTimeOffset.UtcNow);
+
+            if (!ok)
+            {
+                GD.PushWarning($"[GuildManager] AssignOfficer denied for user {userId}");
+                DebugWarn($"AssignOfficer denied_or_persist_failed targetUserId={userId} requestedByUserId={assignedByUserId}");
+                return;
+            }
+
+            GD.Print($"[GuildManager] Assigned officer {userId} to slot {slotValue} in guild {guildId}");
+        }
+        catch (Exception ex)
+        {
+            DebugError("AssignOfficer failed", ex);
         }
     }
 

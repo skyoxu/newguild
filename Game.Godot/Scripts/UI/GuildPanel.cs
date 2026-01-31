@@ -270,6 +270,9 @@ public partial class GuildPanel : Control
             case GuildMemberRoleChanged.EventType:
                 HandleMemberRoleChanged(dataJson);
                 break;
+            case GuildOfficerAssigned.EventType:
+                HandleOfficerAssigned(dataJson);
+                break;
             case RecruitmentOfferPresented.EventType:
                 HandleRecruitmentOfferPresented(dataJson);
                 break;
@@ -407,6 +410,32 @@ public partial class GuildPanel : Control
                         _membersList.SetItemText(i, $"{userIdStr} ({FormatRoleDisplay(newRole)})");
                         break;
                     }
+                }
+            }
+        }
+        catch
+        {
+            // Ignore malformed events
+        }
+    }
+
+    private void HandleOfficerAssigned(string dataJson)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("guildId", out var guildId) &&
+                guildId.GetString() == _currentGuildId &&
+                root.TryGetProperty("userId", out var userId) &&
+                root.TryGetProperty("slot", out var slot))
+            {
+                var userIdStr = userId.GetString() ?? string.Empty;
+                var slotStr = slot.GetString() ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(userIdStr) && !string.IsNullOrWhiteSpace(slotStr))
+                {
+                    SetGuildStatus($"Officer assigned: {userIdStr} ({slotStr})");
                 }
             }
         }
