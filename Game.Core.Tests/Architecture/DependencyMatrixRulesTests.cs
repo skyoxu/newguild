@@ -117,11 +117,11 @@ public sealed class DependencyMatrixRulesTests
                 ["Game.Godot"] = new HashSet<string>(StringComparer.Ordinal),
             };
 
-            foreach (var n in nodes)
+            foreach (var node in nodes)
             {
-                if (!forbidden.ContainsKey(n))
+                if (!forbidden.ContainsKey(node))
                 {
-                    forbidden[n] = new HashSet<string>(StringComparer.Ordinal);
+                    forbidden[node] = new HashSet<string>(StringComparer.Ordinal);
                 }
             }
 

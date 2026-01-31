@@ -58,14 +58,14 @@ public partial class ThemeApplier : Node
 
     private void ApplyFontToControls(Node root, Font font)
     {
-        if (root is Control c)
+        if (root is Control control)
         {
-            c.AddThemeFontOverride("font", font);
+            control.AddThemeFontOverride("font", font);
         }
         foreach (var child in root.GetChildren())
         {
-            if (child is Node n)
-                ApplyFontToControls(n, font);
+            if (child is Node node)
+                ApplyFontToControls(node, font);
         }
     }
 }

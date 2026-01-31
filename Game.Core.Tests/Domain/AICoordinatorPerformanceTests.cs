@@ -49,21 +49,21 @@ public sealed class AICoordinatorPerformanceTests
     private static AiWorldSnapshot CreateLargeWorld(SaveIdValue saveId, int memberCount, int guildCount)
     {
         var guilds = new Dictionary<string, AiWorldGuild>(StringComparer.Ordinal);
-        for (var g = 0; g < guildCount; g++)
+        for (var i = 0; i < guildCount; i++)
         {
-            var id = $"npc-guild-{g:D3}";
+            var id = $"npc-guild-{i:D3}";
             guilds[id] = new AiWorldGuild(id, CurrentMembers: 0, MaxMembers: 10_000);
         }
 
         var members = new Dictionary<string, AiWorldMember>(StringComparer.Ordinal);
         var affinity = new Dictionary<string, IReadOnlyDictionary<string, int>>(StringComparer.Ordinal);
 
-        for (var m = 0; m < memberCount; m++)
+        for (var i = 0; i < memberCount; i++)
         {
-            var memberId = $"npc-{m:D6}";
+            var memberId = $"npc-{i:D6}";
             members[memberId] = new AiWorldMember(memberId, CurrentGuildId: null);
 
-            var preferred = $"npc-guild-{(m % guildCount):D3}";
+            var preferred = $"npc-guild-{(i % guildCount):D3}";
             affinity[memberId] = new Dictionary<string, int>(StringComparer.Ordinal)
             {
                 [preferred] = 100,

@@ -20,16 +20,16 @@ public partial class RepositoryTestBridge : Node
     public bool UpsertUser(string username)
     {
         var repo = new UserRepository(GetDb());
-        var u = new User { Username = username, CreatedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds() };
-        repo.UpsertAsync(u).GetAwaiter().GetResult();
+        var user = new User { Username = username, CreatedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds() };
+        repo.UpsertAsync(user).GetAwaiter().GetResult();
         return true;
     }
 
     public string? FindUser(string username)
     {
         var repo = new UserRepository(GetDb());
-        var u = repo.FindByUsernameAsync(username).GetAwaiter().GetResult();
-        return u?.Username;
+        var user = repo.FindByUsernameAsync(username).GetAwaiter().GetResult();
+        return user?.Username;
     }
 
     public string? FindUserId(string username)
@@ -67,8 +67,8 @@ public partial class RepositoryTestBridge : Node
     public string? GetSaveData(string userId, int slot)
     {
         var repo = new SaveGameRepository(GetDb());
-        var s = repo.GetAsync(userId, slot).GetAwaiter().GetResult();
-        return s?.Data;
+        var saveGame = repo.GetAsync(userId, slot).GetAwaiter().GetResult();
+        return saveGame?.Data;
     }
 
     public string[] ListSaveJsonByUser(string userId)

@@ -36,7 +36,7 @@ public sealed class IntimacySystem
         var key = GuildPairKey.Create(guildId, subjectId, otherId);
         lock (_gate)
         {
-            return _values.TryGetValue(key, out var v) ? v : MinIntimacy;
+            return _values.TryGetValue(key, out var value) ? value : MinIntimacy;
         }
     }
 
@@ -49,7 +49,7 @@ public sealed class IntimacySystem
         int newValue;
         lock (_gate)
         {
-            oldValue = _values.TryGetValue(key, out var v) ? v : MinIntimacy;
+            oldValue = _values.TryGetValue(key, out var value) ? value : MinIntimacy;
             newValue = IntimacyRules.Clamp(oldValue + delta);
             _values[key] = newValue;
         }

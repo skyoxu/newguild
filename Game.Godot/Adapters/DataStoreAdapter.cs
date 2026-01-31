@@ -18,9 +18,9 @@ public partial class DataStoreAdapter : Node, IDataStore
 
     private static string? GetEnv(string key)
     {
-        var v = OS.GetEnvironment(key);
-        if (!string.IsNullOrWhiteSpace(v))
-            return v;
+        var envValue = OS.GetEnvironment(key);
+        if (!string.IsNullOrWhiteSpace(envValue))
+            return envValue;
         return System.Environment.GetEnvironmentVariable(key);
     }
 
@@ -47,8 +47,8 @@ public partial class DataStoreAdapter : Node, IDataStore
 
     private static string MakeSafe(string key)
     {
-        foreach (var c in System.IO.Path.GetInvalidFileNameChars())
-            key = key.Replace(c, '_');
+        foreach (var invalidChar in System.IO.Path.GetInvalidFileNameChars())
+            key = key.Replace(invalidChar, '_');
         return key;
     }
 
@@ -136,7 +136,7 @@ public partial class DataStoreAdapter : Node, IDataStore
             var db = GetSqlDb()!;
             var rows = db.Query(SqlStatement.Positional("SELECT v FROM kv_store WHERE k=@0 LIMIT 1;", key));
             if (rows.Count == 0) return Task.FromResult<string?>(null);
-            return Task.FromResult<string?>(rows[0].TryGetValue("v", out var v) ? v?.ToString() : null);
+            return Task.FromResult<string?>(rows[0].TryGetValue("v", out var value) ? value?.ToString() : null);
         }
 
         return LoadFileAsync(key);
@@ -218,12 +218,12 @@ public partial class DataStoreAdapter : Node, IDataStore
             throw new InvalidOperationException(msg);
         }
 
-        using var f = FileAccess.Open(validatedPath.Value, FileAccess.ModeFlags.Write);
-        if (f == null)
+        using var file = FileAccess.Open(validatedPath.Value, FileAccess.ModeFlags.Write);
+        if (file == null)
             throw new InvalidOperationException("Save write failed.");
 
-        f.StoreString(json);
-        f.Flush();
+        file.StoreString(json);
+        file.Flush();
         return Task.CompletedTask;
     }
 
@@ -246,9 +246,9 @@ public partial class DataStoreAdapter : Node, IDataStore
         if (!FileAccess.FileExists(validatedPath.Value))
             return Task.FromResult<string?>(null);
 
-        using var f = FileAccess.Open(validatedPath.Value, FileAccess.ModeFlags.Read);
-        if (f == null) throw new InvalidOperationException("Load read failed.");
-        return Task.FromResult<string?>(f.GetAsText());
+        using var file = FileAccess.Open(validatedPath.Value, FileAccess.ModeFlags.Read);
+        if (file == null) throw new InvalidOperationException("Load read failed.");
+        return Task.FromResult<string?>(file.GetAsText());
     }
 
     private Task DeleteFileAsync(string key)

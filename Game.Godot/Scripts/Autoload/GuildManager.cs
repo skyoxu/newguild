@@ -316,13 +316,13 @@ public partial class GuildManager : Node
         if (string.IsNullOrWhiteSpace(raw))
             return string.Empty;
 
-        var s = raw.Trim();
+        var trimmed = raw.Trim();
         // Common Windows env var mistake: set GD_GUILD_DB_PATH="data/game.db" includes quotes.
-        if (s.Length >= 2 && ((s.StartsWith("\"", StringComparison.Ordinal) && s.EndsWith("\"", StringComparison.Ordinal)) ||
-                              (s.StartsWith("'", StringComparison.Ordinal) && s.EndsWith("'", StringComparison.Ordinal))))
-            s = s.Substring(1, s.Length - 2);
+        if (trimmed.Length >= 2 && ((trimmed.StartsWith("\"", StringComparison.Ordinal) && trimmed.EndsWith("\"", StringComparison.Ordinal)) ||
+                                    (trimmed.StartsWith("'", StringComparison.Ordinal) && trimmed.EndsWith("'", StringComparison.Ordinal))))
+            trimmed = trimmed.Substring(1, trimmed.Length - 2);
 
-        return s.Trim();
+        return trimmed.Trim();
     }
 
     public async void DisbandGuild(string guildId, string requestingUserId)

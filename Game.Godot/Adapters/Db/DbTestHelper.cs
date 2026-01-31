@@ -58,9 +58,9 @@ public partial class DbTestHelper : Node
         {
             var rows = db.Query(SqlStatement.Positional("SELECT version FROM schema_version WHERE id=@0;", 1));
             if (rows.Count == 0) return -1;
-            var v = rows[0]["version"];
-            if (v == null) return -1;
-            return Convert.ToInt32(v);
+            var versionValue = rows[0]["version"];
+            if (versionValue == null) return -1;
+            return Convert.ToInt32(versionValue);
         }
         catch
         {

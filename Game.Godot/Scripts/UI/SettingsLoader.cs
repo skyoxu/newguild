@@ -19,18 +19,18 @@ public partial class SettingsLoader : Node
                 "SELECT audio_volume, graphics_quality, language FROM settings WHERE user_id=@0;",
                 UserId));
             if (rows.Count == 0) return;
-            var r = rows[0];
-            if (r.TryGetValue("audio_volume", out var v) && v != null)
+            var row = rows[0];
+            if (row.TryGetValue("audio_volume", out var volumeValue) && volumeValue != null)
             {
-                ApplyVolume((float)Convert.ToSingle(v));
+                ApplyVolume((float)Convert.ToSingle(volumeValue));
             }
-            if (r.TryGetValue("language", out var l) && l != null)
+            if (row.TryGetValue("language", out var languageValue) && languageValue != null)
             {
-                ApplyLanguage(l.ToString() ?? "");
+                ApplyLanguage(languageValue.ToString() ?? "");
             }
-            if (r.TryGetValue("graphics_quality", out var g) && g != null)
+            if (row.TryGetValue("graphics_quality", out var qualityValue) && qualityValue != null)
             {
-                ApplyGraphicsQuality(g.ToString() ?? "medium");
+                ApplyGraphicsQuality(qualityValue.ToString() ?? "medium");
             }
         }
         catch { }

@@ -14,7 +14,7 @@ internal sealed class InMemoryDataStore : IDataStore
 {
     private readonly Dictionary<string,string> _dict = new();
     public Task SaveAsync(string key, string json) { _dict[key] = json; return Task.CompletedTask; }
-    public Task<string?> LoadAsync(string key) { _dict.TryGetValue(key, out var v); return Task.FromResult(v); }
+    public Task<string?> LoadAsync(string key) { _dict.TryGetValue(key, out var value); return Task.FromResult(value); }
     public Task DeleteAsync(string key) { _dict.Remove(key); return Task.CompletedTask; }
     public IReadOnlyDictionary<string,string> Snapshot => _dict;
 }

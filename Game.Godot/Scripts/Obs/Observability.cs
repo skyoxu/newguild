@@ -37,17 +37,17 @@ public partial class Observability : Node
 
     private static bool IsOfflineMode()
     {
-        var v = System.Environment.GetEnvironmentVariable("GD_OFFLINE_MODE") ?? string.Empty;
-        return v.Trim() == "1" || v.Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+        var rawValue = System.Environment.GetEnvironmentVariable("GD_OFFLINE_MODE") ?? string.Empty;
+        return rawValue.Trim() == "1" || rawValue.Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string? ReadFirstNonEmptyEnv(params string[] keys)
     {
         foreach (var key in keys)
         {
-            var v = System.Environment.GetEnvironmentVariable(key);
-            if (!string.IsNullOrWhiteSpace(v))
-                return v.Trim();
+            var envValue = System.Environment.GetEnvironmentVariable(key);
+            if (!string.IsNullOrWhiteSpace(envValue))
+                return envValue.Trim();
         }
 
         return null;

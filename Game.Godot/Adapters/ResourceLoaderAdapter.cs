@@ -17,9 +17,9 @@ public partial class ResourceLoaderAdapter : Node, IResourceLoader
         try
         {
             // SafeResourcePath guarantees path safety at type level
-            using var f = FileAccess.Open(path.Value, FileAccess.ModeFlags.Read);
-            if (f == null) return null;
-            return f.GetAsText();
+            using var file = FileAccess.Open(path.Value, FileAccess.ModeFlags.Read);
+            if (file == null) return null;
+            return file.GetAsText();
         }
         catch
         {
@@ -40,9 +40,9 @@ public partial class ResourceLoaderAdapter : Node, IResourceLoader
         try
         {
             // SafeResourcePath guarantees path safety at type level
-            using var f = FileAccess.Open(path.Value, FileAccess.ModeFlags.Read);
-            if (f == null) return null;
-            return f.GetBuffer((long)f.GetLength());
+            using var file = FileAccess.Open(path.Value, FileAccess.ModeFlags.Read);
+            if (file == null) return null;
+            return file.GetBuffer((long)file.GetLength());
         }
         catch
         {

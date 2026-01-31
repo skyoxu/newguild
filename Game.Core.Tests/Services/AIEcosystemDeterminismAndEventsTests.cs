@@ -40,11 +40,11 @@ public class AIEcosystemDeterminismAndEventsTests
             MaxMembers: 10,
             CandidateCount: 0);
 
-        var a = new AIEcosystem(new FixedTime(now), new SequenceIdGenerator(), seed: 1);
-        var b = new AIEcosystem(new FixedTime(now), new SequenceIdGenerator(), seed: 1);
+        var first = new AIEcosystem(new FixedTime(now), new SequenceIdGenerator(), seed: 1);
+        var second = new AIEcosystem(new FixedTime(now), new SequenceIdGenerator(), seed: 1);
 
-        var eventsA = a.Advance(input);
-        var eventsB = b.Advance(input);
+        var eventsA = first.Advance(input);
+        var eventsB = second.Advance(input);
 
         eventsA.Should().Equal(eventsB);
     }

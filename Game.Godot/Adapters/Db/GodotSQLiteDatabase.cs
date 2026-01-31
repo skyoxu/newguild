@@ -191,9 +191,9 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
                     }
                 }
 
-                var v = command.ExecuteScalar();
+                var scalarValue = command.ExecuteScalar();
                 _scalarCount++;
-                return v;
+                return scalarValue;
             });
 
         return Task.FromResult(result == DBNull.Value ? null : result);
@@ -349,9 +349,9 @@ public sealed class GodotSQLiteDatabase : ISQLiteDatabase, IDisposable
         // Configurable command timeout (seconds). Default: 30s in sanitized mode; unlimited in debug.
         // Note: Microsoft.Data.Sqlite uses CommandTimeout for ADO.NET timeouts.
         var timeoutEnv = System.Environment.GetEnvironmentVariable("GD_DB_COMMAND_TIMEOUT_SEC");
-        if (!string.IsNullOrWhiteSpace(timeoutEnv) && int.TryParse(timeoutEnv, out var v))
+        if (!string.IsNullOrWhiteSpace(timeoutEnv) && int.TryParse(timeoutEnv, out var timeoutSeconds))
         {
-            if (v >= 0) command.CommandTimeout = v;
+            if (timeoutSeconds >= 0) command.CommandTimeout = timeoutSeconds;
             return;
         }
 

@@ -98,7 +98,7 @@ public sealed class SQLiteRecruitmentOfferRepository : IRecruitmentOfferReposito
         var candidateId = (string)row["CandidateId"];
 
         var roleValue = row["Role"];
-        var role = roleValue is long l ? (GuildRole)(int)l : (GuildRole)(int)roleValue;
+        var role = roleValue is long roleLong ? (GuildRole)(int)roleLong : (GuildRole)(int)roleValue;
 
         var presentedAt = DateTimeOffset.Parse((string)row["PresentedAt"]);
         return new RecruitmentOffer(offerId, guildId, candidateId, role, presentedAt);

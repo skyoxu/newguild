@@ -46,12 +46,12 @@ public sealed class DependencyGuardSummaryFormatTests
         }
 
         sb.AppendLine("Violations:");
-        foreach (var v in normalized)
+        foreach (var violation in normalized)
         {
-            var rule = v.RuleId.Length == 0 ? "<unknown-rule>" : v.RuleId;
-            var from = v.From.Length == 0 ? "<unknown-from>" : v.From;
-            var to = v.To.Length == 0 ? "<unknown-to>" : v.To;
-            var details = v.Details.Length == 0 ? "" : $" ({v.Details})";
+            var rule = violation.RuleId.Length == 0 ? "<unknown-rule>" : violation.RuleId;
+            var from = violation.From.Length == 0 ? "<unknown-from>" : violation.From;
+            var to = violation.To.Length == 0 ? "<unknown-to>" : violation.To;
+            var details = violation.Details.Length == 0 ? "" : $" ({violation.Details})";
             sb.AppendLine($"- [{rule}] {from} -> {to}{details}");
         }
 

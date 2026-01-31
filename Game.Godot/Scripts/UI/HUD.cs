@@ -181,16 +181,16 @@ public partial class HUD : Control
             try
             {
                 using var doc = JsonDocument.Parse(dataJson, JsonOptions);
-                int v;
-                if (doc.RootElement.TryGetProperty("score", out var sc) && sc.TryGetInt32(out v)) { }
-                else if (doc.RootElement.TryGetProperty("value", out var val) && val.TryGetInt32(out v)) { }
+                int scoreValue;
+                if (doc.RootElement.TryGetProperty("score", out var sc) && sc.TryGetInt32(out scoreValue)) { }
+                else if (doc.RootElement.TryGetProperty("value", out var val) && val.TryGetInt32(out scoreValue)) { }
                 else
                 {
                     GD.PushWarning($"[HUD] invalid payload for {type} (expected int score/value).");
                     return;
                 }
-                _demoScore = v;
-                _score.Text = $"Score: {v}";
+                _demoScore = scoreValue;
+                _score.Text = $"Score: {scoreValue}";
             }
             catch (Exception ex)
             {
@@ -202,15 +202,15 @@ public partial class HUD : Control
             try
             {
                 using var doc = JsonDocument.Parse(dataJson, JsonOptions);
-                int v;
-                if (doc.RootElement.TryGetProperty("value", out var val) && val.TryGetInt32(out v)) { }
-                else if (doc.RootElement.TryGetProperty("health", out var hp) && hp.TryGetInt32(out v)) { }
+                int healthValue;
+                if (doc.RootElement.TryGetProperty("value", out var val) && val.TryGetInt32(out healthValue)) { }
+                else if (doc.RootElement.TryGetProperty("health", out var hp) && hp.TryGetInt32(out healthValue)) { }
                 else
                 {
                     GD.PushWarning($"[HUD] invalid payload for {type} (expected int value/health).");
                     return;
                 }
-                _health.Text = $"HP: {v}";
+                _health.Text = $"HP: {healthValue}";
             }
             catch (Exception ex)
             {
@@ -225,16 +225,16 @@ public partial class HUD : Control
             try
             {
                 using var doc = JsonDocument.Parse(dataJson, JsonOptions);
-                int v;
-                if (doc.RootElement.TryGetProperty("newValue", out var newValue) && newValue.TryGetInt32(out v)) { }
-                else if (doc.RootElement.TryGetProperty("value", out var value) && value.TryGetInt32(out v)) { }
+                int reputationValue;
+                if (doc.RootElement.TryGetProperty("newValue", out var newValue) && newValue.TryGetInt32(out reputationValue)) { }
+                else if (doc.RootElement.TryGetProperty("value", out var value) && value.TryGetInt32(out reputationValue)) { }
                 else
                 {
                     GD.PushWarning($"[HUD] invalid payload for {type} (expected int newValue/value).");
                     return;
                 }
 
-                _reputation.Text = FormatReputationText(v);
+                _reputation.Text = FormatReputationText(reputationValue);
             }
             catch (Exception ex)
             {
@@ -583,8 +583,8 @@ public partial class HUD : Control
         if (safePath is null || safePath.Type != PathType.ReadOnly)
             throw new InvalidOperationException($"Event catalog path must be a res:// path. path='{EventCatalogPath}'");
 
-        using var f = FileAccess.Open(safePath.Value, FileAccess.ModeFlags.Read);
-        var json = f?.GetAsText();
+        using var file = FileAccess.Open(safePath.Value, FileAccess.ModeFlags.Read);
+        var json = file?.GetAsText();
         if (string.IsNullOrWhiteSpace(json))
             throw new InvalidOperationException($"Event catalog is missing or empty. path='{EventCatalogPath}'");
 

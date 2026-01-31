@@ -33,9 +33,9 @@ public partial class SqliteDataStore : Node, ISqlDatabase
 
     private static string? GetEnv(string key)
     {
-        var v = OS.GetEnvironment(key);
-        if (!string.IsNullOrWhiteSpace(v))
-            return v;
+        var envValue = OS.GetEnvironment(key);
+        if (!string.IsNullOrWhiteSpace(envValue))
+            return envValue;
         return System.Environment.GetEnvironmentVariable(key);
     }
 
@@ -228,15 +228,15 @@ public partial class SqliteDataStore : Node, ISqlDatabase
             var cols = Query(SqlStatement.NoParameters("PRAGMA table_info(schema_version);"));
             var hasId = cols.Any(r =>
             {
-                if (!r.TryGetValue("name", out var n) || n is null) return false;
-                return string.Equals(n.ToString(), "id", StringComparison.OrdinalIgnoreCase);
+                if (!r.TryGetValue("name", out var nameValue) || nameValue is null) return false;
+                return string.Equals(nameValue.ToString(), "id", StringComparison.OrdinalIgnoreCase);
             });
             if (hasId)
                 return;
 
             // Legacy schema_version: version INTEGER PRIMARY KEY (and optional extra columns).
             var rows = Query(SqlStatement.NoParameters("SELECT MAX(version) AS v FROM schema_version;"));
-            var vObj = rows.Count > 0 && rows[0].TryGetValue("v", out var v) ? v : null;
+            var vObj = rows.Count > 0 && rows[0].TryGetValue("v", out var maxVersionValue) ? maxVersionValue : null;
             var maxVersion = 1;
             if (vObj != null)
             {
@@ -307,8 +307,8 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         {
             try
             {
-                var s = FormatSqlWithParameters(sql, parameters);
-                var ok = _pluginDb!.Call("Query", s).AsBool();
+                var formattedSql = FormatSqlWithParameters(sql, parameters);
+                var ok = _pluginDb!.Call("Query", formattedSql).AsBool();
                 if (!ok)
                     throw new InvalidOperationException("SQL execution failed (plugin)");
 
@@ -361,8 +361,8 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         {
             try
             {
-                var s = FormatSqlWithParameters(sql, parameters);
-                var ok = _pluginDb!.Call("Query", s).AsBool();
+                var formattedSql = FormatSqlWithParameters(sql, parameters);
+                var ok = _pluginDb!.Call("Query", formattedSql).AsBool();
                 if (!ok)
                     throw new InvalidOperationException("SQL query failed (plugin)");
 
@@ -375,8 +375,8 @@ public partial class SqliteDataStore : Node, ISqlDatabase
                     var dict = new System.Collections.Generic.Dictionary<string, object?>();
                     foreach (var key in row.Keys)
                     {
-                        var k = key.AsStringName();
-                        dict[k] = row[key];
+                        var keyName = key.AsStringName();
+                        dict[keyName] = row[key];
                     }
                     list.Add(dict);
                 }
@@ -519,8 +519,8 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     {
         try
         {
-            var v = ProjectSettings.GetSetting("application/config/name");
-            return v.VariantType == Variant.Type.Nil ? "GodotGame" : v.AsString();
+            var value = ProjectSettings.GetSetting("application/config/name");
+            return value.VariantType == Variant.Type.Nil ? "GodotGame" : value.AsString();
         }
         catch { return "GodotGame"; }
     }
@@ -536,9 +536,9 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     {
         try
         {
-            var v = ClassDB.Instantiate("SQLite");
-            if (v.VariantType != Variant.Type.Object) return false;
-            var obj = v.As<GodotObject>();
+            var instance = ClassDB.Instantiate("SQLite");
+            if (instance.VariantType != Variant.Type.Object) return false;
+            var obj = instance.As<GodotObject>();
             _pluginDb = obj;
             // Prefer setting Path then calling OpenDb, if exposed
             try { _pluginDb.Set("Path", absPath); } catch { }
@@ -578,14 +578,14 @@ public partial class SqliteDataStore : Node, ISqlDatabase
                 return;
             }
 
-            using var f = FileAccess.Open(validatedSchemaPath.Value, FileAccess.ModeFlags.Read);
-            if (f == null) return;
-            var script = f.GetAsText();
+            using var file = FileAccess.Open(validatedSchemaPath.Value, FileAccess.ModeFlags.Read);
+            if (file == null) return;
+            var script = file.GetAsText();
             foreach (var stmt in SplitSql(script))
             {
-                var s = StripSqlComments(stmt).Trim();
-                if (string.IsNullOrWhiteSpace(s)) continue;
-                Execute(SqlStatement.NoParameters(s));
+                var statementSql = StripSqlComments(stmt).Trim();
+                if (string.IsNullOrWhiteSpace(statementSql)) continue;
+                Execute(SqlStatement.NoParameters(statementSql));
             }
         }
         catch (Exception ex)
@@ -616,7 +616,7 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     {
         // naive split by ';' keeping simple cases; ignores ';' inside strings (acceptable for our schema)
         var parts = sql.Split(';');
-        foreach (var p in parts) yield return p;
+        foreach (var part in parts) yield return part;
     }
 
     private static string FormatSqlWithParameters(string sql, object[] parameters)
@@ -625,19 +625,19 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         // Replace in reverse order to avoid replacing "@1" inside "@10".
         for (int i = parameters.Length - 1; i >= 0; i--)
         {
-            var v = parameters[i];
-            if (v is DBNull) v = null;
-            var s = v switch
+            var parameterValue = parameters[i];
+            if (parameterValue is DBNull) parameterValue = null;
+            var literal = parameterValue switch
             {
                 null => "NULL",
                 string str => $"'{str.Replace("'", "''")}'",
-                bool b => b ? "1" : "0",
-                float f => f.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                double d => d.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                bool boolValue => boolValue ? "1" : "0",
+                float floatValue => floatValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                double doubleValue => doubleValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 IFormattable fmt => fmt.ToString(null, System.Globalization.CultureInfo.InvariantCulture),
-                _ => $"'{v.ToString()?.Replace("'", "''")}'"
+                _ => $"'{parameterValue.ToString()?.Replace("'", "''")}'"
             };
-            sql = sql.Replace($"@{i}", s);
+            sql = sql.Replace($"@{i}", literal);
         }
         // Ensure no unresolved positional placeholders remain.
         for (var i = 0; i < sql.Length; i++)
@@ -659,10 +659,10 @@ public partial class SqliteDataStore : Node, ISqlDatabase
         {
             for (int i = 0; i < parameters.Length; i++)
             {
-                var p = cmd.CreateParameter();
-                p.ParameterName = $"@{i}";
-                p.Value = parameters[i] ?? DBNull.Value;
-                cmd.Parameters.Add(p);
+                var parameter = cmd.CreateParameter();
+                parameter.ParameterName = $"@{i}";
+                parameter.Value = parameters[i] ?? DBNull.Value;
+                cmd.Parameters.Add(parameter);
             }
         }
         return cmd;
@@ -671,9 +671,9 @@ public partial class SqliteDataStore : Node, ISqlDatabase
     private static void ApplyCommandTimeout(SqliteCommand cmd)
     {
         var timeoutEnv = System.Environment.GetEnvironmentVariable("GD_DB_COMMAND_TIMEOUT_SEC");
-        if (!string.IsNullOrWhiteSpace(timeoutEnv) && int.TryParse(timeoutEnv, out var v) && v >= 0)
+        if (!string.IsNullOrWhiteSpace(timeoutEnv) && int.TryParse(timeoutEnv, out var timeoutSeconds) && timeoutSeconds >= 0)
         {
-            cmd.CommandTimeout = v;
+            cmd.CommandTimeout = timeoutSeconds;
             return;
         }
 

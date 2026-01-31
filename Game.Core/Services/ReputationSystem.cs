@@ -38,7 +38,7 @@ public sealed class ReputationSystem
         guildId = guildId.Trim();
         lock (_gate)
         {
-            return _valuesByGuildId.TryGetValue(guildId, out var v) ? v : MinReputation;
+            return _valuesByGuildId.TryGetValue(guildId, out var value) ? value : MinReputation;
         }
     }
 
@@ -74,7 +74,7 @@ public sealed class ReputationSystem
         int newValue;
         lock (_gate)
         {
-            oldValue = _valuesByGuildId.TryGetValue(guildId, out var v) ? v : MinReputation;
+            oldValue = _valuesByGuildId.TryGetValue(guildId, out var value) ? value : MinReputation;
             newValue = Clamp(oldValue + delta);
             _valuesByGuildId[guildId] = newValue;
 

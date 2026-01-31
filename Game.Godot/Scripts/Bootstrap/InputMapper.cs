@@ -19,9 +19,9 @@ public partial class InputMapper : Node
         if (!InputMap.HasAction(action))
             InputMap.AddAction(action);
         // do not duplicate events if already added
-        foreach (var k in keys)
+        foreach (var key in keys)
         {
-            var ev = new InputEventKey { Keycode = k };
+            var ev = new InputEventKey { Keycode = key };
             InputMap.ActionAddEvent(action, ev);
         }
     }

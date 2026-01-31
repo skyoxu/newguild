@@ -132,14 +132,14 @@ public sealed class AICoordinator : IAICoordinator
         var bestGuildId = (string?)null;
         var bestScore = int.MinValue;
 
-        foreach (var (guildId, g) in snapshot.Guilds)
+        foreach (var (guildId, guild) in snapshot.Guilds)
         {
-            if (g.CurrentMembers >= g.MaxMembers)
+            if (guild.CurrentMembers >= guild.MaxMembers)
                 continue;
 
             var score = 0;
-            if (affinityMap is not null && affinityMap.TryGetValue(guildId, out var s))
-                score = s;
+            if (affinityMap is not null && affinityMap.TryGetValue(guildId, out var affinityScore))
+                score = affinityScore;
 
             if (score > bestScore)
             {
@@ -170,18 +170,18 @@ public sealed class AICoordinator : IAICoordinator
 
             for (var i = 1; i < contenders.Count; i++)
             {
-                var c = contenders[i];
-                var score = GetAffinity(snapshot, c.ActorId, targetId);
+                var contender = contenders[i];
+                var score = GetAffinity(snapshot, contender.ActorId, targetId);
 
                 if (score > winnerScore)
                 {
-                    winner = c;
+                    winner = contender;
                     winnerScore = score;
                     continue;
                 }
 
-                if (score == winnerScore && string.CompareOrdinal(c.ActorId, winner.ActorId) < 0)
-                    winner = c;
+                if (score == winnerScore && string.CompareOrdinal(contender.ActorId, winner.ActorId) < 0)
+                    winner = contender;
             }
 
             winners.Add(winner);
@@ -199,11 +199,11 @@ public sealed class AICoordinator : IAICoordinator
         var winnerSet = new HashSet<string>(winners.Select(w => $"{w.ActorId}|{w.TargetId}"), StringComparer.Ordinal);
         var deltas = new List<AiAffinityDelta>(allDecisions.Count);
 
-        foreach (var d in allDecisions)
+        foreach (var decision in allDecisions)
         {
-            var key = $"{d.ActorId}|{d.TargetId}";
+            var key = $"{decision.ActorId}|{decision.TargetId}";
             var delta = winnerSet.Contains(key) ? 1 : -1;
-            deltas.Add(new AiAffinityDelta(d.ActorId, d.TargetId, delta));
+            deltas.Add(new AiAffinityDelta(decision.ActorId, decision.TargetId, delta));
         }
 
         return deltas;

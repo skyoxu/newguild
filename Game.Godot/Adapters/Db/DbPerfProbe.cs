@@ -241,12 +241,12 @@ public partial class DbPerfProbe : Node
     {
         try
         {
-            var s = System.Environment.GetEnvironmentVariable(name);
-            if (!string.IsNullOrWhiteSpace(s) && int.TryParse(s, out var v))
+            var rawValue = System.Environment.GetEnvironmentVariable(name);
+            if (!string.IsNullOrWhiteSpace(rawValue) && int.TryParse(rawValue, out var parsedValue))
             {
-                if (v < min) return min;
-                if (v > max) return max;
-                return v;
+                if (parsedValue < min) return min;
+                if (parsedValue > max) return max;
+                return parsedValue;
             }
         }
         catch { }

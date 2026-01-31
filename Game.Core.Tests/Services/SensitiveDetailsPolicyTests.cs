@@ -9,7 +9,7 @@ namespace Game.Core.Tests.Services;
 public class SensitiveDetailsPolicyTests
 {
     private static Func<string, string?> EnvFrom(Dictionary<string, string?> map)
-        => key => map.TryGetValue(key, out var v) ? v : null;
+        => key => map.TryGetValue(key, out var value) ? value : null;
 
     [Theory]
     [InlineData(false, null, null, false)]

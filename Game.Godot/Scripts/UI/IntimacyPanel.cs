@@ -55,8 +55,8 @@ public partial class IntimacyPanel : Control
             if (!doc.RootElement.TryGetProperty("newValue", out var newValue))
                 return;
 
-            var v = newValue.GetInt32();
-            _valueLabel.Text = $"Intimacy: {v}";
+            var intimacyValue = newValue.GetInt32();
+            _valueLabel.Text = $"Intimacy: {intimacyValue}";
         }
         catch
         {

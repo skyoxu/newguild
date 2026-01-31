@@ -88,13 +88,13 @@ public partial class FeatureFlags : Node
             }
 
             // FEATURE_<NAME>=1|0|true|false to force a value
-            foreach (System.Collections.DictionaryEntry e in System.Environment.GetEnvironmentVariables())
+            foreach (System.Collections.DictionaryEntry entry in System.Environment.GetEnvironmentVariables())
             {
-                var key = e.Key?.ToString() ?? string.Empty;
+                var key = entry.Key?.ToString() ?? string.Empty;
                 if (key.StartsWith("FEATURE_", StringComparison.OrdinalIgnoreCase))
                 {
                     var name = key.Substring("FEATURE_".Length);
-                    var value = e.Value?.ToString() ?? string.Empty;
+                    var value = entry.Value?.ToString() ?? string.Empty;
                     _flags[name] = ParseBool(value);
                 }
             }
@@ -105,7 +105,7 @@ public partial class FeatureFlags : Node
     private static bool ParseBool(string value)
     {
         if (string.IsNullOrWhiteSpace(value)) return false;
-        var v = value.Trim().ToLowerInvariant();
-        return v is "1" or "true" or "on" or "yes";
+        var normalized = value.Trim().ToLowerInvariant();
+        return normalized is "1" or "true" or "on" or "yes";
     }
 }

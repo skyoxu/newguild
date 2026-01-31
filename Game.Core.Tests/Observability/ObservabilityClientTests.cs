@@ -139,9 +139,9 @@ public sealed class ObservabilityClientTests
     [Fact]
     public void PiiDataScrubber_Should_Scrub_Windows_Absolute_Paths()
     {
-        var s = PiiDataScrubber.Scrub(@"failed at C:\Users\me\secret.txt");
-        s.Should().NotContain(@"C:\Users\me\secret.txt");
-        s.Should().Contain("[path]");
+        var scrubbed = PiiDataScrubber.Scrub(@"failed at C:\Users\me\secret.txt");
+        scrubbed.Should().NotContain(@"C:\Users\me\secret.txt");
+        scrubbed.Should().Contain("[path]");
     }
 
     [Fact]

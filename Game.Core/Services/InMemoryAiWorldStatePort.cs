@@ -25,10 +25,10 @@ public sealed class InMemoryAiWorldStatePort : IAiWorldStatePort
             _members.Clear();
             _affinityByMember.Clear();
 
-            foreach (var (id, g) in snapshot.Guilds)
-                _guilds[id] = g;
-            foreach (var (id, m) in snapshot.Members)
-                _members[id] = m;
+            foreach (var (id, guild) in snapshot.Guilds)
+                _guilds[id] = guild;
+            foreach (var (id, member) in snapshot.Members)
+                _members[id] = member;
             foreach (var (memberId, map) in snapshot.AffinityByMember)
             {
                 var copy = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -72,16 +72,16 @@ public sealed class InMemoryAiWorldStatePort : IAiWorldStatePort
             if (_saveId != saveId)
                 return;
 
-            foreach (var d in delta.AffinityDeltas)
+            foreach (var affinityDelta in delta.AffinityDeltas)
             {
-                if (!_affinityByMember.TryGetValue(d.MemberId, out var map))
+                if (!_affinityByMember.TryGetValue(affinityDelta.MemberId, out var map))
                 {
                     map = new Dictionary<string, int>(StringComparer.Ordinal);
-                    _affinityByMember[d.MemberId] = map;
+                    _affinityByMember[affinityDelta.MemberId] = map;
                 }
 
-                map.TryGetValue(d.GuildId, out var current);
-                map[d.GuildId] = current + d.Delta;
+                map.TryGetValue(affinityDelta.GuildId, out var current);
+                map[affinityDelta.GuildId] = current + affinityDelta.Delta;
             }
 
             foreach (var join in delta.MemberJoins)

@@ -138,16 +138,16 @@ public sealed class SchemaMigrationTests
                 SchemaVersionTableExists = true;
                 SchemaVersionRowExists = true;
 
-                if (TryGetVersionValue(stmt, out var v))
-                    SchemaVersion = v;
+                if (TryGetVersionValue(stmt, out var versionValue))
+                    SchemaVersion = versionValue;
 
                 return Task.FromResult(1);
             }
 
             if (normalized.StartsWith("update", StringComparison.Ordinal) && normalized.Contains("schema_version") && normalized.Contains("set") && normalized.Contains("version"))
             {
-                if (TryGetVersionValue(stmt, out var v))
-                    SchemaVersion = v;
+                if (TryGetVersionValue(stmt, out var versionValue))
+                    SchemaVersion = versionValue;
                 return Task.FromResult(1);
             }
 
@@ -195,8 +195,8 @@ public sealed class SchemaMigrationTests
             }
 
             var normalized = NormalizeSql(stmt.Text);
-            var m = Regex.Match(normalized, "values\\\\s*\\\\(\\\\s*1\\\\s*,\\\\s*(\\\\d+)\\\\s*\\\\)");
-            if (m.Success && int.TryParse(m.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out version))
+            var match = Regex.Match(normalized, "values\\\\s*\\\\(\\\\s*1\\\\s*,\\\\s*(\\\\d+)\\\\s*\\\\)");
+            if (match.Success && int.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out version))
                 return true;
 
             version = 0;
@@ -216,14 +216,14 @@ public sealed class SchemaMigrationTests
                 case int i:
                     result = i;
                     return true;
-                case long l:
-                    result = checked((int)l);
+                case long longValue:
+                    result = checked((int)longValue);
                     return true;
-                case short s:
-                    result = s;
+                case short shortValue:
+                    result = shortValue;
                     return true;
-                case byte b:
-                    result = b;
+                case byte byteValue:
+                    result = byteValue;
                     return true;
                 case string str when int.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed):
                     result = parsed;

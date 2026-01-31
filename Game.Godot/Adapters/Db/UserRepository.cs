@@ -30,14 +30,14 @@ public class UserRepository : IUserRepository
             "SELECT id, username, created_at, last_login FROM users WHERE username=@0 LIMIT 1;",
             username));
         if (rows.Count == 0) return Task.FromResult<User?>(null);
-        var r = rows[0];
-        var u = new User
+        var row = rows[0];
+        var foundUser = new User
         {
-            Id = (r.TryGetValue("id", out var idVal) ? idVal : null)?.ToString() ?? string.Empty,
-            Username = (r.TryGetValue("username", out var nameVal) ? nameVal : null)?.ToString() ?? string.Empty,
-            CreatedAt = Convert.ToInt64(r.TryGetValue("created_at", out var createdVal) ? (createdVal ?? 0) : 0),
-            LastLogin = (r.TryGetValue("last_login", out var lastVal) && lastVal != null) ? Convert.ToInt64(lastVal) : (long?)null 
+            Id = (row.TryGetValue("id", out var idVal) ? idVal : null)?.ToString() ?? string.Empty,
+            Username = (row.TryGetValue("username", out var nameVal) ? nameVal : null)?.ToString() ?? string.Empty,
+            CreatedAt = Convert.ToInt64(row.TryGetValue("created_at", out var createdVal) ? (createdVal ?? 0) : 0),
+            LastLogin = (row.TryGetValue("last_login", out var lastVal) && lastVal != null) ? Convert.ToInt64(lastVal) : (long?)null 
         };
-        return Task.FromResult<User?>(u);
+        return Task.FromResult<User?>(foundUser);
     }
 }

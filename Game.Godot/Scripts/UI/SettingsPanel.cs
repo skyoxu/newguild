@@ -82,12 +82,12 @@ public partial class SettingsPanel : Control
         }
         try
         {
-            Variant v = cfg.GetValue(ConfigSection, nameof(vol), 0.5f);
-            Variant g = cfg.GetValue(ConfigSection, nameof(gfx), "medium");
-            Variant l = cfg.GetValue(ConfigSection, nameof(lang), "en");
-            vol = v.VariantType == Variant.Type.Nil ? 0.5f : (float)v.AsDouble();
-            gfx = g.VariantType == Variant.Type.Nil ? "medium" : g.AsString();
-            lang = l.VariantType == Variant.Type.Nil ? "en" : l.AsString();
+            Variant volumeVariant = cfg.GetValue(ConfigSection, nameof(vol), 0.5f);
+            Variant graphicsVariant = cfg.GetValue(ConfigSection, nameof(gfx), "medium");
+            Variant languageVariant = cfg.GetValue(ConfigSection, nameof(lang), "en");
+            vol = volumeVariant.VariantType == Variant.Type.Nil ? 0.5f : (float)volumeVariant.AsDouble();
+            gfx = graphicsVariant.VariantType == Variant.Type.Nil ? "medium" : graphicsVariant.AsString();
+            lang = languageVariant.VariantType == Variant.Type.Nil ? "en" : languageVariant.AsString();
             return true;
         }
         catch
@@ -111,14 +111,14 @@ public partial class SettingsPanel : Control
             "SELECT audio_volume, graphics_quality, language FROM settings WHERE user_id=@0;",
             UserId));
         if (rows.Count == 0) return;
-        var r = rows[0];
+        var row = rows[0];
         float vol = 0.5f; string gfx = "medium"; string lang = "en";
-        if (r.TryGetValue("audio_volume", out var v) && v != null)
-            vol = Convert.ToSingle(v);
-        if (r.TryGetValue("graphics_quality", out var g) && g != null)
-            gfx = g.ToString() ?? "medium";
-        if (r.TryGetValue("language", out var l) && l != null)
-            lang = l.ToString() ?? "en";
+        if (row.TryGetValue("audio_volume", out var volumeValue) && volumeValue != null)
+            vol = Convert.ToSingle(volumeValue);
+        if (row.TryGetValue("graphics_quality", out var graphicsValue) && graphicsValue != null)
+            gfx = graphicsValue.ToString() ?? "medium";
+        if (row.TryGetValue("language", out var languageValue) && languageValue != null)
+            lang = languageValue.ToString() ?? "en";
         SaveToConfig(vol, gfx, lang);
     }
 
@@ -206,10 +206,10 @@ public partial class SettingsPanel : Control
     private void ApplyGraphicsQuality(string quality)
     {
         // Map: low -> no vsync, no MSAA; medium -> vsync on, 2x; high -> vsync on, 4x/8x
-        var q = (quality ?? "medium").ToLowerInvariant();
+        var normalizedQuality = (quality ?? "medium").ToLowerInvariant();
         try
         {
-            if (q == "low")
+            if (normalizedQuality == "low")
                 DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
             else
                 DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Enabled);
@@ -220,8 +220,8 @@ public partial class SettingsPanel : Control
         if (vp != null)
         {
             int msaa = 0; // disabled
-            if (q == "medium") msaa = 1; // 2x
-            else if (q == "high") msaa = 2; // 4x (use 8x if needed: 3)
+            if (normalizedQuality == "medium") msaa = 1; // 2x
+            else if (normalizedQuality == "high") msaa = 2; // 4x (use 8x if needed: 3)
             // Set via dynamic property names to avoid API differences
             try { vp.Set("msaa_2d", msaa); } catch { }
             try { vp.Set("msaa_3d", msaa); } catch { }

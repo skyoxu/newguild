@@ -46,10 +46,10 @@ public partial class CombatPanel : Control
             try
             {
                 var doc = JsonDocument.Parse(dataJson);
-                int v = 0;
-                if (doc.RootElement.TryGetProperty("value", out var val)) v = val.GetInt32();
-                else if (doc.RootElement.TryGetProperty("health", out var hp)) v = hp.GetInt32();
-                _hp.Text = v.ToString();
+                int healthValue = 0;
+                if (doc.RootElement.TryGetProperty("value", out var val)) healthValue = val.GetInt32();
+                else if (doc.RootElement.TryGetProperty("health", out var hp)) healthValue = hp.GetInt32();
+                _hp.Text = healthValue.ToString();
             }
             catch { }
         }
