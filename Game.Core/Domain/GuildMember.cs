@@ -9,14 +9,23 @@ namespace Game.Core.Domain;
 public record GuildMember
 {
     public string UserId { get; init; }
+    public string DisplayName { get; init; }
     public GuildRole Role { get; init; }
 
     public GuildMember(string userId, GuildRole role)
+        : this(userId, userId, role)
+    {
+    }
+
+    public GuildMember(string userId, string displayName, GuildRole role)
     {
         if (string.IsNullOrWhiteSpace(userId))
-            throw new ArgumentException("用户ID不能为空", nameof(userId));
+            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
+        if (string.IsNullOrWhiteSpace(displayName))
+            throw new ArgumentException("DisplayName cannot be empty.", nameof(displayName));
 
         UserId = userId;
+        DisplayName = displayName;
         Role = role;
     }
 

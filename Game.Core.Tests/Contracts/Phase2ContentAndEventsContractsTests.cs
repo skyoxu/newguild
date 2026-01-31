@@ -36,10 +36,13 @@ public class Phase2ContentAndEventsContractsTests
 
     // ACC:T36.4
     // ACC:T36.6
+    // ACC:T38.4
+    // ACC:T38.6
     [Fact]
     public void Should_Have_CorePhase2ContractRefs_EventTypes()
     {
         GuildCreated.EventType.Should().Be("core.guild.created");
+        GuildOfficerAssigned.EventType.Should().Be("core.guild.officer.assigned");
         MediaBeatTriggered.EventType.Should().Be("core.media.beat.triggered");
         RaidResolved.EventType.Should().Be("core.raid.resolved");
         RecruitmentOfferResolved.EventType.Should().Be("core.recruitment.offer.resolved");

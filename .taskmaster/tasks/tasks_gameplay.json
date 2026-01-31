@@ -1510,7 +1510,16 @@
     ],
     "contractRefs": [
       "core.guild.created",
-      "core.guild.member.role_changed"
+      "core.guild.member.role_changed",
+      "core.content.manifest.loaded",
+      "core.event_catalog.loaded",
+      "core.experience.changed",
+      "core.level.changed",
+      "core.media.beat.triggered",
+      "core.raid.resolved",
+      "core.recruitment.offer.resolved",
+      "core.reputation.changed",
+      "core.guild.officer.assigned"
     ],
     "artifactRefs": [
       "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
@@ -1519,7 +1528,7 @@
       "官员槽位与任命规则可用且可持久化（随 Save/Load）。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_guild_officers_save_load.gd",
       "应完成：阶段2：官员系统（Officer Slots + Assignment） Refs: Game.Core.Tests/Services/OfficerAssignmentPersistenceTests.cs",
       "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Services/OfficerAssignmentPersistenceTests.cs",
-      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Tests.Godot/tests/UI/test_guild_screen_roster_actions_integration.gd, Game.Core.Tests/Services/GuildOfficerServiceTests.cs, Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
       "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
       "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
     ],
@@ -1531,11 +1540,13 @@
       "Optional: Rewrite-Intent: Extend existing guild persistence; do not add new DB outside SqliteDataStore path."
     ],
     "test_refs": [
-      "Game.Core.Tests/Guild/OfficerAssignmentTests.cs",
       "Tests.Godot/tests/Scenes/Guild/test_scene_guild_officers_save_load.gd",
       "Game.Core.Tests/Services/OfficerAssignmentPersistenceTests.cs",
       "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
-      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "Tests.Godot/tests/UI/test_start_screen_save_load_entry.gd",
+      "Game.Core.Tests/Services/GuildOfficerServiceTests.cs",
+      "Tests.Godot/tests/UI/test_guild_screen_roster_actions_integration.gd"
     ],
     "taskmaster_id": 38,
     "taskmaster_exported": false

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Game.Core.Contracts;
 using Game.Core.Services;
 using Xunit;
@@ -52,5 +53,34 @@ public class EventBusTests
             Id: Guid.NewGuid().ToString()
         ));
         Assert.Equal(1, ok);
+    }
+
+    [Fact]
+    public async Task Subscriber_Exception_Is_Logged_And_Dispose_Is_Idempotent()
+    {
+        var logger = new CapturingLogger();
+        var bus = new InMemoryEventBus(logger);
+        var sub = bus.Subscribe(_ => throw new InvalidOperationException("boom"));
+
+        await bus.PublishAsync(new DomainEvent(
+            Type: "evt",
+            Source: nameof(EventBusTests),
+            Data: null,
+            Timestamp: DateTime.UtcNow,
+            Id: Guid.NewGuid().ToString()
+        ));
+
+        Assert.Single(logger.Errors);
+        sub.Dispose();
+        sub.Dispose();
+    }
+
+    private sealed class CapturingLogger : Game.Core.Ports.ILogger
+    {
+        public List<string> Errors { get; } = new();
+        public void Info(string message) { }
+        public void Warn(string message) { }
+        public void Error(string message) => Errors.Add(message);
+        public void Error(string message, Exception ex) => Errors.Add(message);
     }
 }

@@ -13,6 +13,8 @@ namespace Game.Core.Domain;
 public class Guild
 {
     private readonly object _memberLock = new object();
+    private readonly object _officerLock = new object();
+    private readonly Dictionary<OfficerSlot, string> _officerAssignments = new();
     private static bool IsValidRole(GuildRole role) => role is GuildRole.Member or GuildRole.Admin;
 
     public string GuildId { get; private set; }
@@ -20,6 +22,7 @@ public class Guild
     public string Name { get; private set; }
     public List<GuildMember> Members { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
+    public IReadOnlyDictionary<OfficerSlot, string> OfficerAssignments => _officerAssignments;
 
     /// <summary>
     /// Private parameterless constructor for database reconstruction.
@@ -59,6 +62,29 @@ public class Guild
         {
             new GuildMember(creatorId, GuildRole.Admin)
         };
+    }
+
+    /// <summary>
+    /// Creates a guild without a creator for deterministic persistence tests.
+    /// </summary>
+    /// <param name="guildId">Unique guild identifier</param>
+    /// <param name="name">Guild name</param>
+    /// <param name="createdAt">Creation timestamp</param>
+    /// <exception cref="ArgumentException">Thrown when any parameter is invalid</exception>
+    public Guild(string guildId, string name, DateTimeOffset createdAt)
+    {
+        if (string.IsNullOrWhiteSpace(guildId))
+            throw new ArgumentException("GuildId cannot be empty.", nameof(guildId));
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
+        if (createdAt == DateTimeOffset.MinValue)
+            throw new ArgumentException("CreatedAt cannot be default value.", nameof(createdAt));
+
+        GuildId = guildId;
+        CreatorId = "system";
+        Name = name;
+        CreatedAt = createdAt;
+        Members = new List<GuildMember>();
     }
 
     /// <summary>
@@ -108,18 +134,29 @@ public class Guild
     /// <exception cref="ArgumentException">Thrown when userId is null or whitespace</exception>
     public bool AddMember(string userId, GuildRole role)
     {
-        if (string.IsNullOrWhiteSpace(userId))
-            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
-
         if (!IsValidRole(role))
+            return false;
+        return AddMember(new GuildMember(userId, role));
+    }
+
+    /// <summary>
+    /// Adds a new member to the guild.
+    /// Thread-safe operation.
+    /// </summary>
+    /// <param name="member">Member to add</param>
+    /// <returns>True if member was added; false if user already exists in guild</returns>
+    public bool AddMember(GuildMember member)
+    {
+        if (member == null) throw new ArgumentNullException(nameof(member));
+        if (!IsValidRole(member.Role))
             return false;
 
         lock (_memberLock)
         {
-            if (Members.Any(m => m.UserId == userId))
+            if (Members.Any(m => m.UserId == member.UserId))
                 return false;
 
-            Members.Add(new GuildMember(userId, role));
+            Members.Add(member);
             return true;
         }
     }
@@ -175,8 +212,59 @@ public class Guild
                 return false;
 
             // Record is immutable, so replace with new instance
-            Members[memberIndex] = new GuildMember(userId, newRole);
+            var existing = Members[memberIndex];
+            Members[memberIndex] = new GuildMember(existing.UserId, existing.DisplayName, newRole);
             return true;
+        }
+    }
+
+    /// <summary>
+    /// Assigns a guild member to a specific officer slot.
+    /// </summary>
+    /// <param name="slot">Officer slot to assign</param>
+    /// <param name="userId">Member user ID</param>
+    /// <returns>True if assignment succeeded; false if slot is occupied or member not found</returns>
+    public bool AssignOfficer(OfficerSlot slot, string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
+
+        lock (_officerLock)
+        {
+            if (_officerAssignments.ContainsKey(slot))
+                return false;
+
+            if (!Members.Any(m => m.UserId == userId))
+                return false;
+
+            _officerAssignments[slot] = userId;
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Retrieves the user ID assigned to an officer slot.
+    /// </summary>
+    /// <param name="slot">Officer slot to query</param>
+    /// <returns>User ID if assigned; null otherwise</returns>
+    public string? GetOfficerAssignment(OfficerSlot slot)
+    {
+        lock (_officerLock)
+        {
+            return _officerAssignments.TryGetValue(slot, out var userId) ? userId : null;
+        }
+    }
+
+    internal void RestoreOfficerAssignments(IReadOnlyDictionary<OfficerSlot, string> assignments)
+    {
+        if (assignments == null) throw new ArgumentNullException(nameof(assignments));
+        lock (_officerLock)
+        {
+            _officerAssignments.Clear();
+            foreach (var entry in assignments)
+            {
+                _officerAssignments[entry.Key] = entry.Value;
+            }
         }
     }
 }

@@ -27,6 +27,14 @@ Arch-Refs:
 
 - 事件类型与触发时机以 `Game.Core/Contracts/**` 为准；本页仅提供索引与口径说明。
 
+
+## 契约定义
+
+### 事件
+- **GuildOfficerAssigned** (core.guild.officer.assigned)
+  - 触发时机：官员任命成功并持久化后
+  - 字段：GuildId, UserId, Slot, AssignedAt, AssignedByUserId
+  - 契约位置：Game.Core/Contracts/Guild/GuildOfficerAssigned.cs
 ## 验收与证据链（Draft）
 
 - 本页为 Draft：当对应任务进入实现阶段时，将通过 view 任务 `acceptance[]` 的 `Refs:` 与测试文件内 `ACC:T<id>.<n>` anchors 建立确定性证据链。
