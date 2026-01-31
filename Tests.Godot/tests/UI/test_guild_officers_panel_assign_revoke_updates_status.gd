@@ -11,6 +11,7 @@ const EVENT_BUS_ADAPTER := preload("res://Game.Godot/Adapters/EventBusAdapter.cs
 const EVT_GUILD_CREATED := "core.guild.created"
 const EVT_GUILD_OFFICER_ASSIGNED := "core.guild.officer.assigned"
 const EVT_GUILD_OFFICER_REVOKED := "core.guild.officer.revoked"
+const EVT_GUILD_MEMBER_ROLE_CHANGED := "core.guild.member.role_changed"
 
 var _bus: Node
 var _previous_bus: Node
@@ -147,6 +148,39 @@ func test_domain_events_assign_then_revoke_update_status_and_list() -> void:
 
 	assert_str(status_label.text).contains("Officer revoked")
 	assert_str(officers_list.get_item_text(commander_index)).contains("(unassigned)")
+
+func _members_list(panel: Node) -> ItemList:
+	return panel.get_node_or_null("Scroll/Margin/VBox/MembersListPanel/Root/Items") as ItemList
+
+# ContractRefs coverage: core.guild.member.role_changed
+func test_domain_event_member_role_changed_updates_roster_item() -> void:
+	var panel := _instantiate_guild_panel()
+
+	await get_tree().process_frame
+
+	var members_list := _members_list(panel)
+	assert_object(members_list).is_not_null()
+
+	_emit_domain_event(
+		EVT_GUILD_CREATED,
+		"{\"guildId\":\"g1\",\"creatorId\":\"u-admin\",\"guildName\":\"Officers\"}"
+	)
+	await get_tree().process_frame
+
+	assert_int(members_list.get_item_count()).is_greater(0)
+	var before := members_list.get_item_text(0)
+	assert_str(before).contains("u-admin")
+	assert_str(before).contains("(Admin)")
+
+	_emit_domain_event(
+		EVT_GUILD_MEMBER_ROLE_CHANGED,
+		"{\"guildId\":\"g1\",\"userId\":\"u-admin\",\"oldRole\":\"admin\",\"newRole\":\"member\",\"changedAt\":\"2026-01-01T00:00:00Z\",\"changedByUserId\":\"u-admin\"}"
+	)
+	await get_tree().process_frame
+
+	var after := members_list.get_item_text(0)
+	assert_str(after).contains("u-admin")
+	assert_str(after).contains("(Member)")
 
 # ACC:T39.6
 func test_section_has_slot_and_user_inputs() -> void:
