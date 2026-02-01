@@ -18,10 +18,18 @@ public class Phase2ContentAndEventsContractsTests
     // ACC:T33.4
     // ACC:T35.4
     // ACC:T36.2
+    // ACC:T41.2
     [Fact]
     public void Should_Have_CoreContentManifestLoaded_EventType()
     {
         ContentManifestLoaded.EventType.Should().Be("core.content.manifest.loaded");
+    }
+
+    // ACC:T41.4
+    [Fact]
+    public void Should_Have_CoreContentNpcGuildArchetypesLoaded_EventType()
+    {
+        NpcGuildArchetypesLoaded.EventType.Should().Be("core.content.npc_guild_archetypes.loaded");
     }
 
     // ACC:T27.9
@@ -38,6 +46,8 @@ public class Phase2ContentAndEventsContractsTests
     // ACC:T36.6
     // ACC:T38.4
     // ACC:T38.6
+    // ACC:T41.4
+    // ACC:T41.6
     [Fact]
     public void Should_Have_CorePhase2ContractRefs_EventTypes()
     {

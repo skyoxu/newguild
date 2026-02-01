@@ -1716,7 +1716,17 @@
       "json"
     ],
     "contractRefs": [
-      "core.content.manifest.loaded"
+      "core.content.manifest.loaded",
+      "core.content.npc_guild_archetypes.loaded",
+      "core.event_catalog.loaded",
+      "core.experience.changed",
+      "core.guild.created",
+      "core.guild.officer.assigned",
+      "core.level.changed",
+      "core.media.beat.triggered",
+      "core.raid.resolved",
+      "core.recruitment.offer.resolved",
+      "core.reputation.changed"
     ],
     "artifactRefs": [
       "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
@@ -1739,7 +1749,8 @@
     "test_refs": [
       "Game.Core.Tests/World/NpcGuildArchetypeTests.cs",
       "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
-      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "Tests.Godot/tests/Content/test_npc_guild_archetypes_emits_loaded_event.gd"
     ],
     "taskmaster_id": 41,
     "taskmaster_exported": false
