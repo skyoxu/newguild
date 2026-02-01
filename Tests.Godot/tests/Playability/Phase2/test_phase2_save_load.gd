@@ -1,6 +1,6 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
-## Phase 2 playability: start screen Save+Load entry must work and emit expected events.
+## Phase 2 playability: Save/Load entry must work and emit expected events.
 
 const MAIN_SCENE := "res://Game.Godot/Scenes/Main.tscn"
 
@@ -10,7 +10,7 @@ func before() -> void:
 	OS.set_environment("SECURITY_TEST_MODE", "1")
 	_events = []
 
-func _ensure_autoload_node(script_path: String, node_name: String) -> void:
+func _ensure_root_node(script_path: String, node_name: String) -> void:
 	var root := get_tree().get_root()
 	var existing := root.get_node_or_null(node_name)
 	if existing != null:
@@ -58,7 +58,7 @@ func _wait_for_start_screen(main: Node, max_frames: int = 240) -> Node:
 		await get_tree().process_frame
 	return null
 
-func test_save_load_emits_events_and_updates_status() -> void:
+func test_phase2_save_load_emits_events_and_updates_status() -> void:
 	var main := await _spawn_main_on_root()
 	var nav := main.get_node_or_null("ScreenNavigator")
 	if nav != null and nav.has_method("set"):
@@ -66,7 +66,7 @@ func test_save_load_emits_events_and_updates_status() -> void:
 	_connect_domain_events()
 
 	# StartScreen expects /root/DataStore; ensure it exists in the test runtime.
-	await _ensure_autoload_node("res://Game.Godot/Adapters/DataStoreAdapter.cs", "DataStore")
+	await _ensure_root_node("res://Game.Godot/Adapters/DataStoreAdapter.cs", "DataStore")
 
 	var menu: Control = main.get_node("MainMenu")
 	var btn_play: Button = menu.get_node("VBox/BtnPlay")

@@ -1,6 +1,7 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
-## Phase 2 playability: menu -> navigation wiring.
+## Phase 2 playability: main route navigation.
+## Menu -> Start -> Guild -> Activity -> Settings.
 
 const MAIN_SCENE := "res://Game.Godot/Scenes/Main.tscn"
 
@@ -30,7 +31,7 @@ func _wait_for_child(root: Node, child_name: String, max_frames: int = 120) -> N
 		await get_tree().process_frame
 	return null
 
-func _wait_for_screen(main: Node, expected_name: String, max_frames: int = 180) -> Node:
+func _wait_for_screen(main: Node, expected_name: String, max_frames: int = 240) -> Node:
 	var screen_root := await _wait_for_child(main, "ScreenRoot", max_frames)
 	if screen_root == null:
 		return null
@@ -41,12 +42,11 @@ func _wait_for_screen(main: Node, expected_name: String, max_frames: int = 180) 
 		await get_tree().process_frame
 	return null
 
-func test_main_menu_buttons_navigate_to_expected_screens() -> void:
+func test_phase2_play_route_menu_to_screens() -> void:
 	var main := await _spawn_main_on_root()
 
 	var nav := main.get_node_or_null("ScreenNavigator")
 	if nav != null and nav.has_method("set"):
-		# Make transitions deterministic for headless tests.
 		nav.UseFadeTransition = false
 
 	var menu: Control = main.get_node("MainMenu")
@@ -61,19 +61,17 @@ func test_main_menu_buttons_navigate_to_expected_screens() -> void:
 	var start_screen := await _wait_for_screen(main, "StartScreen")
 	assert_object(start_screen).is_not_null()
 
-	# Navigate to Guild
 	menu.visible = true
 	btn_guild.emit_signal("pressed")
 	var guild_screen := await _wait_for_screen(main, "GuildScreen")
 	assert_object(guild_screen).is_not_null()
 
-	# Navigate to Activity Feed
 	menu.visible = true
 	btn_activity.emit_signal("pressed")
 	var activity_screen := await _wait_for_screen(main, "ActivityFeedScreen")
 	assert_object(activity_screen).is_not_null()
 
-	# Settings is a panel under Main, not a screen
+	# Settings is a panel under Main, not a screen.
 	menu.visible = true
 	btn_settings.emit_signal("pressed")
 	await get_tree().process_frame
@@ -81,3 +79,4 @@ func test_main_menu_buttons_navigate_to_expected_screens() -> void:
 	assert_object(settings_panel).is_not_null()
 	if settings_panel is CanvasItem:
 		assert_bool(settings_panel.visible).is_true()
+

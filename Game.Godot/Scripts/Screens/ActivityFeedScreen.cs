@@ -73,6 +73,7 @@ public partial class ActivityFeedScreen : Control
         {
             _domainEventCallable = new Callable(this, nameof(OnDomainEventEmitted));
             _bus.Connect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
+            BackfillFromRecentEvents(_bus);
         }
 
         UpdateStatus();
@@ -115,6 +116,34 @@ public partial class ActivityFeedScreen : Control
         var preview = BuildPreview(dataJson);
 
         AddEntry(new ActivityFeedEntry(id, kind, type, source, ts, preview));
+    }
+
+    private void BackfillFromRecentEvents(EventBusAdapter bus)
+    {
+        try
+        {
+            var recentArgs = bus.GetRecentSignalArgs(MaxEntries);
+            foreach (var item in recentArgs)
+            {
+                if (item.VariantType != Variant.Type.Array)
+                    continue;
+                var args = item.AsGodotArray();
+                if (args.Count < 7)
+                    continue;
+                OnDomainEventEmitted(
+                    args[0].AsString(),
+                    args[1].AsString(),
+                    args[2].AsString(),
+                    args[3].AsString(),
+                    args[4].AsString(),
+                    args[5].AsString(),
+                    args[6].AsString());
+            }
+        }
+        catch
+        {
+            // Best-effort only: activity feed should never crash on backfill.
+        }
     }
 
     private void AddEntry(ActivityFeedEntry entry)
