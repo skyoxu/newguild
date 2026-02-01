@@ -4,6 +4,7 @@ using Game.Core.Domain;
 using Game.Core.Domain.ValueObjects;
 using Game.Core.Ports;
 using Game.Core.Services;
+using Game.Core.World;
 
 namespace Game.Core.Engine;
 
@@ -46,12 +47,21 @@ public class GameEngineCore
             Inventory: new List<string>(),
             Position: new Position(0, 0),
             Timestamp: DateTime.UtcNow
-        );
+        )
+        {
+            Seed = _seed,
+            NpcGuildIds = Array.Empty<string>(),
+        };
     }
 
     public GameState Start()
     {
         _startUtc = DateTime.UtcNow;
+
+        var worldGenerationSystem = new WorldGenerationSystem(_seed);
+        var npcGuildIds = worldGenerationSystem.GenerateNpcGuildIds(count: 5);
+        State = State with { Seed = _seed, NpcGuildIds = npcGuildIds };
+
         var evt = new GameStarted(State.Id, _seed);
         Publish(GameStarted.EventType, evt);
         return State;

@@ -47,5 +47,9 @@ public record GameState(
     IReadOnlyList<string> Inventory,
     Position Position,
     DateTime Timestamp
-);
+)
+{
+    public string Seed { get; init; } = string.Empty;
+    public IReadOnlyList<string> NpcGuildIds { get; init; } = Array.Empty<string>();
+}
 

@@ -41,6 +41,11 @@ public class GameEngineCoreEventTests
 
     private static GameEngineCore CreateEngineAndBus(out CapturingEventBus bus)
     {
+        return CreateEngineAndBus(seed: "test-seed", out bus);
+    }
+
+    private static GameEngineCore CreateEngineAndBus(string seed, out CapturingEventBus bus)
+    {
         var config = new GameConfig(
             MaxLevel: 10,
             InitialHealth: 100,
@@ -50,7 +55,7 @@ public class GameEngineCoreEventTests
         );
         var inventory = new Inventory();
         bus = new CapturingEventBus();
-        return new GameEngineCore(config, inventory, seed: "test-seed", bus: bus);
+        return new GameEngineCore(config, inventory, seed: seed, bus: bus);
     }
 
     // ACC:T42.2
@@ -119,6 +124,29 @@ public class GameEngineCoreEventTests
             evt.Type.Should().Be(PlayerHealthChanged.EventType);
             evt.Source.Should().Be(nameof(GameEngineCore));
             evt.Data.Should().NotBeNull();
+        }
+    }
+
+    // ACC:T40.4
+    [Fact]
+    public void Should_Publish_GameStarted_Event_With_Seed_From_Input()
+    {
+        // Arrange
+        const string expectedSeed = "seed-abc-123";
+        var engine = CreateEngineAndBus(seed: expectedSeed, out var bus);
+
+        using (bus)
+        {
+            // Act
+            engine.Start();
+
+            // Assert
+            bus.Published.Should().ContainSingle();
+            var domainEvent = bus.Published[0];
+            domainEvent.Type.Should().Be(GameStarted.EventType);
+
+            var data = domainEvent.Data.Should().BeOfType<GameStarted>().Subject;
+            data.Seed.Should().Be(expectedSeed);
         }
     }
 
