@@ -21,6 +21,8 @@ namespace Game.Godot.Adapters;
 /// </remarks>
 public partial class EventBusAdapter : Node, IEventBus
 {
+    private const int DefaultRecentEventsMax = 200;
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -44,11 +46,22 @@ public partial class EventBusAdapter : Node, IEventBus
         string TimestampIso,
         TaskCompletionSource<bool> Completion);
 
+    private sealed record RecentDomainEvent(
+        string Type,
+        string Source,
+        string DataJson,
+        string Id,
+        string SpecVersion,
+        string DataContentType,
+        string TimestampIso);
+
     [Signal]
     public delegate void DomainEventEmittedEventHandler(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso);
 
     private readonly List<Func<DomainEvent, Task>> _handlers = new();
     private readonly object _gate = new();
+    private readonly List<RecentDomainEvent> _recent = new();
+    private readonly object _recentGate = new();
 
     public override void _Ready()
     {
@@ -137,12 +150,67 @@ public partial class EventBusAdapter : Node, IEventBus
 
     private Task PublishOnMainThread(DomainEvent evt, string dataJson)
     {
-        EmitSignal(SignalName.DomainEventEmitted, evt.Type, evt.Source, dataJson, evt.Id, evt.SpecVersion, evt.DataContentType, evt.Timestamp.ToString("o"));
+        var timestampIso = evt.Timestamp.ToString("o");
+        EmitSignal(SignalName.DomainEventEmitted, evt.Type, evt.Source, dataJson, evt.Id, evt.SpecVersion, evt.DataContentType, timestampIso);
         _securityAudit?.TryEnqueue(evt, dataJson);
+        RememberRecent(evt.Type, evt.Source, dataJson, evt.Id, evt.SpecVersion, evt.DataContentType, timestampIso);
 
         List<Func<DomainEvent, Task>> snapshot;
         lock (_gate) snapshot = _handlers.ToList();
         return Task.WhenAll(snapshot.Select(h => SafeInvoke(h, evt)));
+    }
+
+    private void RememberRecent(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso)
+    {
+        lock (_recentGate)
+        {
+            _recent.Add(new RecentDomainEvent(type, source, dataJson, id, specVersion, dataContentType, timestampIso));
+            if (_recent.Count > DefaultRecentEventsMax)
+                _recent.RemoveRange(0, _recent.Count - DefaultRecentEventsMax);
+        }
+    }
+
+    public IReadOnlyList<(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso)> GetRecentEvents(int max = DefaultRecentEventsMax)
+    {
+        if (max <= 0) return Array.Empty<(string, string, string, string, string, string, string)>();
+
+        lock (_recentGate)
+        {
+            var take = Math.Min(Math.Max(0, max), _recent.Count);
+            var slice = _recent.Skip(Math.Max(0, _recent.Count - take)).ToList();
+            return slice.Select(x => (x.Type, x.Source, x.DataJson, x.Id, x.SpecVersion, x.DataContentType, x.TimestampIso)).ToList();
+        }
+    }
+
+    public int GetRecentCount()
+    {
+        lock (_recentGate) return _recent.Count;
+    }
+
+    public Godot.Collections.Array GetRecentSignalArgs(int max = DefaultRecentEventsMax)
+    {
+        var arr = new Godot.Collections.Array();
+        if (max <= 0) return arr;
+
+        lock (_recentGate)
+        {
+            var take = Math.Min(Math.Max(0, max), _recent.Count);
+            foreach (var e in _recent.Skip(Math.Max(0, _recent.Count - take)))
+            {
+                arr.Add(new Godot.Collections.Array
+                {
+                    e.Type,
+                    e.Source,
+                    e.DataJson,
+                    e.Id,
+                    e.SpecVersion,
+                    e.DataContentType,
+                    e.TimestampIso,
+                });
+            }
+        }
+
+        return arr;
     }
 
     private static DateTime ParseTimestampOrNow(string timestampIso)

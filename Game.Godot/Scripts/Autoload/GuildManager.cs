@@ -7,6 +7,8 @@ using Game.Core.Services;
 using Game.Godot.Adapters;
 using Game.Godot.Adapters.Db;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -311,6 +313,42 @@ public partial class GuildManager : Node
 
     public string GetLastError() => _lastError ?? string.Empty;
 
+    /// <summary>
+    /// Loads a guild from the repository and publishes a minimal snapshot for UI replay (events only).
+    /// This is intended for playability/CI routes where the UI must be re-hydrated from persisted state.
+    /// </summary>
+    /// <param name="guildId">Guild id to load</param>
+    public async void LoadGuild(string guildId)
+    {
+        try
+        {
+            if (!_initializedOk)
+            {
+                DebugWarn("LoadGuild denied: not initialized");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(guildId))
+            {
+                DebugWarn("LoadGuild denied: empty guildId");
+                return;
+            }
+
+            var loaded = await _repository.GetByIdAsync(guildId.Trim()).ConfigureAwait(false);
+            if (loaded == null)
+            {
+                DebugWarn($"LoadGuild: not found guildId={guildId}");
+                return;
+            }
+
+            _currentGuild = loaded;
+            await PublishReplaySnapshotAsync(loaded).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            DebugError("LoadGuild failed", ex);
+        }
+    }
+
     private static string SanitizeEnvPath(string raw)
     {
         if (string.IsNullOrWhiteSpace(raw))
@@ -323,6 +361,53 @@ public partial class GuildManager : Node
             trimmed = trimmed.Substring(1, trimmed.Length - 2);
 
         return trimmed.Trim();
+    }
+
+    private async Task PublishReplaySnapshotAsync(Guild guild)
+    {
+        // This method intentionally publishes only the minimal set of events needed for UI replay,
+        // and avoids duplicating the creator member which GuildPanel already seeds during create flow.
+        try
+        {
+            await PublishGuildCreatedSnapshotAsync(guild).ConfigureAwait(false);
+
+            foreach (var member in guild.Members.Where(m => !string.Equals(m.UserId, guild.CreatorId, StringComparison.Ordinal)))
+            {
+                var joined = new GuildMemberJoined(
+                    member.UserId,
+                    guild.GuildId,
+                    DateTimeOffset.UtcNow,
+                    member.Role == GuildRole.Admin ? "admin" : "member");
+
+                await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
+                    GuildMemberJoined.EventType,
+                    nameof(GuildManager),
+                    joined,
+                    DateTime.UtcNow,
+                    Guid.NewGuid().ToString("N"))).ConfigureAwait(false);
+            }
+
+            foreach (var (slot, userId) in guild.OfficerAssignments)
+            {
+                var assigned = new GuildOfficerAssigned(
+                    guild.GuildId,
+                    userId,
+                    slot.ToString().ToLowerInvariant(),
+                    DateTimeOffset.UtcNow,
+                    assignedByUserId: guild.CreatorId);
+
+                await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
+                    GuildOfficerAssigned.EventType,
+                    nameof(GuildManager),
+                    assigned,
+                    DateTime.UtcNow,
+                    Guid.NewGuid().ToString("N"))).ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugError("PublishReplaySnapshot failed", ex);
+        }
     }
 
     public async void DisbandGuild(string guildId, string requestingUserId)
