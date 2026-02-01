@@ -24,8 +24,11 @@ public class GameEngineCore
     public GameConfig Config { get; private set; }
     public GameState State { get; private set; }
 
-    public GameEngineCore(GameConfig config, Inventory inventory, IEventBus? bus = null, ITime? time = null)
+    public GameEngineCore(GameConfig config, Inventory inventory, string seed, IEventBus? bus = null, ITime? time = null)
     {
+        if (string.IsNullOrWhiteSpace(seed))
+            throw new ArgumentException("Seed cannot be null or whitespace.", nameof(seed));
+
         Config = config;
         _score = new ScoreService();
         _combat = new CombatService(bus);
@@ -33,6 +36,7 @@ public class GameEngineCore
         _bus = bus;
         _time = time;
         _enemiesDefeated = 0;
+        _seed = seed;
 
         State = new GameState(
             Id: Guid.NewGuid().ToString("N"),
@@ -43,10 +47,6 @@ public class GameEngineCore
             Position: new Position(0, 0),
             Timestamp: DateTime.UtcNow
         );
-
-        // Task 40: expose an explicit seed surface (SSoT for deterministic replay).
-        // Default to the state id when no external seed is wired yet.
-        _seed = State.Id;
     }
 
     public GameState Start()

@@ -31,6 +31,15 @@ public sealed class LogArtifactsConventionsTests
         if (parts.Length < 4)
             return false;
 
+        foreach (var segment in parts)
+        {
+            if (string.Equals(segment, ".", StringComparison.Ordinal) ||
+                string.Equals(segment, "..", StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
         var suite = parts[1];
         if (string.IsNullOrWhiteSpace(suite))
             return false;
