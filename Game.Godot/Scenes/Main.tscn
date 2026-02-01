@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://Game.Godot/Scripts/Navigation/ScreenNavigator.cs" id="13"]
 [ext_resource type="Script" path="res://Game.Godot/Scripts/Bootstrap/InputMapper.cs" id="12"]
 [ext_resource type="Script" path="res://Game.Godot/Scripts/Bootstrap/ContentManifestBootstrapper.cs" id="14"]
+[ext_resource type="Script" path="res://Game.Godot/Scripts/Bootstrap/NpcGuildArchetypesBootstrapper.cs" id="15"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -28,6 +29,10 @@ theme = ExtResource("5")
 
 [node name="ContentManifestBootstrapper" type="Node" parent="."]
 script = ExtResource("14")
+theme = ExtResource("5")
+
+[node name="NpcGuildArchetypesBootstrapper" type="Node" parent="."]
+script = ExtResource("15")
 theme = ExtResource("5")
 
 [node name="SettingsLoader" type="Node" parent="."]
