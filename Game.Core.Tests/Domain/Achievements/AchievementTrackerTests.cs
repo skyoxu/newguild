@@ -55,7 +55,7 @@ public class AchievementTrackerTests
         var bus = new InMemoryEventBus();
         using var tracker = new AchievementTracker(bus);
 
-        await bus.PublishAsync(BuildEvent("core.non.trigger.event"));
+        await bus.PublishAsync(BuildEvent("core.test.non.trigger.event"));
 
         tracker.UnlockedCount.Should().Be(0);
     }

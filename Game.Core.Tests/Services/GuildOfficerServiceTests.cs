@@ -15,6 +15,7 @@ namespace Game.Core.Tests.Services;
 public class GuildOfficerServiceTests
 {
     // ACC:T38.4
+    // ACC:T39.4
     [Fact]
     public async Task AssignOfficerAsync_Publishes_And_Delivers_OfficerAssigned_Event()
     {

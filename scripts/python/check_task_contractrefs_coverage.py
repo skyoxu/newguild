@@ -33,6 +33,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from _anchored_contractrefs import extract_event_occurrences_for_task
+
 
 def _today() -> str:
     return dt.date.today().strftime("%Y-%m-%d")
@@ -305,7 +307,7 @@ def _run_for_view(*, root: Path, task_id: str, which: str, strict: bool) -> dict
         except OSError:
             continue
         rel = str(p.relative_to(root)).replace("\\", "/")
-        occ.extend(_extract_event_types_from_text(text=text, file_rel=rel, eventtype_map=eventtype_map))
+        occ.extend(extract_event_occurrences_for_task(text=text, file_rel=rel, task_id=str(task_id), eventtype_map=eventtype_map))
 
     used_event_types = sorted(set(o.event_type for o in occ))
     missing_in_contractrefs = sorted([t for t in used_event_types if t not in contract_refs])

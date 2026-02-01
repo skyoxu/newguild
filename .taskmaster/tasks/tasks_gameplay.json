@@ -923,7 +923,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-UI-RESPONSIVE",
     "title": "阶段2：UI 响应式布局与可点击性收口（Scroll/Anchor/MouseFilter）",
     "description": "把当前 UI 超出窗口/被透明层遮挡等问题系统性收口：统一 ScrollContainer、Anchor、Container size flags 与 Control.mouse_filter，确保 HUD/Guild/Settings 可完整操作。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "adapter",
     "depends_on": [
@@ -1037,7 +1037,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-UI-INTERACTION",
     "title": "阶段2：交互模式统一（Loading/Error/Disable/Retry）",
     "description": "为按钮与异步操作建立统一交互：点击后进入 loading、错误可重试、成功自动刷新；错误信息遵循 ADR-0019 脱敏与审计。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -1100,7 +1100,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-ACTIVITY-FEED",
     "title": "阶段2：活动反馈系统（Activity Feed / Timeline）",
     "description": "提供一个玩家可见的“发生了什么”面板：订阅 DomainEventEmitted，将关键事件（副本/声望/社交/奖励）按时间线展示，便于测试与玩家理解。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -1196,7 +1196,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-TACTICAL-CENTER",
     "title": "阶段2：战术中心（Tactical Center）入口与最小编成",
     "description": "为 PVE 副本建立一个统一入口：最小队伍编成/校验/自动分配（基于现有 roster），并驱动现有 RaidEncounter demo/事件输出。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -1264,7 +1264,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-REWARDS",
     "title": "阶段2：奖励发放统一（Reward Ledger）",
     "description": "如果没有其他任务负责战斗奖励发放，则在本阶段实现统一奖励账本：监听副本/媒体/事件结果并发放奖励（金币/声望/经验等的最小集合），可 Save/Load 回放。",
-    "status": "pending",
+    "status": "done",
     "priority": "P1",
     "layer": "core",
     "depends_on": [
@@ -1338,7 +1338,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-ACHIEVEMENTS",
     "title": "阶段2：成就系统（Achievement Definitions + Tracker）",
     "description": "建立最小成就定义与追踪：由 DomainEvent 驱动达成判定，并在 UI 中可查看；与奖励账本对齐。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -1408,7 +1408,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-XP",
     "title": "阶段2：经验系统（XP/Level）与奖励对齐",
     "description": "实现最小经验/等级曲线（确定性），并作为 Reward Ledger 的一种奖励类型展示与持久化。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -1479,7 +1479,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-OFFICERS",
     "title": "阶段2：官员系统（Officer Slots + Assignment）",
     "description": "在 Guild roster 之上增加最小官员槽位与任命规则（确定性），并落库/随存档持久化。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -1556,7 +1556,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-OFFICERS-UI",
     "title": "阶段2：官员 UI 入口（Simplified Officer UI）",
     "description": "提供官员管理的最小 UI：列表展示、任命/撤销、状态提示；交互模式复用统一组件。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
@@ -1584,7 +1584,8 @@
     ],
     "contractRefs": [
       "core.guild.created",
-      "core.guild.member.role_changed"
+      "core.guild.officer.assigned",
+      "core.guild.officer.revoked"
     ],
     "artifactRefs": [
       "logs/ci/<YYYY-MM-DD>/tasks-gameplay-sync/report.json"
@@ -1593,11 +1594,10 @@
       "提供官员 UI 入口，能任命/撤销并显示状态；交互模式复用统一组件。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
       "应完成：阶段2：官员 UI 入口（Simplified Officer UI） Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
       "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
-      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.guild.created, core.guild.officer.assigned, core.guild.officer.revoked）。 Refs: Game.Core.Tests/Services/GuildOfficerServiceTests.cs",
       "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
       "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
-      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
-      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.guild.created, core.guild.member.role_changed）。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd"
     ],
     "test_strategy": [
       "坚持 TDD：red -> green -> refactor；Core 不依赖 Godot API。",
@@ -1609,8 +1609,7 @@
     "test_refs": [
       "Tests.Godot/tests/UI/test_officer_ui_smoke.gd",
       "Tests.Godot/tests/UI/test_guild_officers_panel_assign_revoke_updates_status.gd",
-      "Game.Core.Tests/Domain/GuildRosterServiceTests.cs",
-      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs"
+      "Game.Core.Tests/Services/GuildOfficerServiceTests.cs"
     ],
     "taskmaster_id": 39,
     "taskmaster_exported": false
@@ -1620,7 +1619,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-WORLDGEN",
     "title": "阶段2：世界生成端口（World Generation Port）与开局 Seed",
     "description": "把世界状态初始化收口为一个端口：开局生成 NPC 公会/对手/基础赛季信息，并与 Save/Load 对齐（可重放）。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -1685,7 +1684,7 @@
     "story_id": "PRD-GUILD-MANAGER-PHASE2-NPC-ARCHETYPES",
     "title": "阶段2：NPC 公会原型（Archetypes）数据驱动落地",
     "description": "将 NPC 公会原型从 json 数据驱动（如 base/npc_guilds.json），并与世界生成端口对齐；避免散落硬编码。",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
