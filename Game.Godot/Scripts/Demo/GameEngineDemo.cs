@@ -15,7 +15,8 @@ public partial class GameEngineDemo : Node
         var bus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
         var cfg = new GameConfig(MaxLevel: 10, InitialHealth: 100, ScoreMultiplier: 1.0, AutoSave: false, Difficulty: Difficulty.Medium);
         var inv = new Game.Core.Domain.Inventory();
-        _engine = new GameEngineCore(cfg, inv, bus);
+        var startSeed = "demo-seed";
+        _engine = new GameEngineCore(cfg, inv, seed: startSeed, bus: bus);
         // Defer start until UI emits UiMenuEventTypes.Start
     }
 

@@ -60,8 +60,7 @@ public sealed class NoOneLetterLocalVariableAnalyzer : DiagnosticAnalyzer
         // Exclude fields, events, parameters, etc. Only local/loop variables are in scope.
         if (declarator.Ancestors().Any(a =>
                 a is FieldDeclarationSyntax ||
-                a is EventFieldDeclarationSyntax ||
-                a is PropertyDeclarationSyntax))
+                a is EventFieldDeclarationSyntax))
         {
             return;
         }

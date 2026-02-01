@@ -50,7 +50,7 @@ public class GameEngineCoreEventTests
         );
         var inventory = new Inventory();
         bus = new CapturingEventBus();
-        return new GameEngineCore(config, inventory, bus);
+        return new GameEngineCore(config, inventory, seed: "test-seed", bus: bus);
     }
 
     // ACC:T42.2
@@ -183,7 +183,7 @@ public class GameEngineCoreEventTests
             Difficulty: Difficulty.Medium
         );
 
-        var engine = new GameEngineCore(config, new Inventory(), bus: null);
+        var engine = new GameEngineCore(config, new Inventory(), seed: "test-seed", bus: null);
 
         engine.Start();
         engine.Move(1.0, 1.0);

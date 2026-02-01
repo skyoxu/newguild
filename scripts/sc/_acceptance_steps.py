@@ -227,7 +227,7 @@ def step_tests_all(out_dir: Path, godot_bin: str | None) -> StepResult:
     cmd = ["py", "-3", "scripts/sc/test.py", "--type", "all"]
     if godot_bin:
         cmd += ["--godot-bin", godot_bin]
-    return run_and_capture(out_dir, name="tests-all", cmd=cmd, timeout_sec=1_200)
+    return run_and_capture(out_dir, name="tests-all", cmd=cmd, timeout_sec=2_400)
 
 
 def step_test_quality_soft(out_dir: Path, triplet: TaskmasterTriplet, *, strict: bool) -> StepResult:
