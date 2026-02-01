@@ -17,11 +17,11 @@ func test_activity_feed_updates_on_domain_event() -> void:
 	var feed_screen := await _spawn_activity_feed()
 	var feed_label: RichTextLabel = feed_screen.get_node("Body/Scroll/Feed")
 	var status_label: Label = feed_screen.get_node("Body/Status")
-	assert_str(feed_label.text).contains("Waiting for events")
+	assert_str(feed_label.get_parsed_text()).contains("Waiting for events")
 
 	_bus.PublishSimple("core.raid.resolved", "ut", "{\"raidId\":\"r1\"}")
 	await get_tree().process_frame
 
 	assert_str(status_label.text).contains("Events: 1")
-	assert_str(feed_label.text).contains("core.raid.resolved")
-	assert_str(feed_label.text).contains("[raid]")
+	assert_str(feed_label.get_parsed_text()).contains("core.raid.resolved")
+	assert_str(feed_label.get_parsed_text()).contains("[raid]")
