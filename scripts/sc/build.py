@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from pathlib import Path
 
 from _util import ci_dir, repo_root, run_cmd, write_json, write_text
@@ -27,6 +28,39 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--optimize", action="store_true")
     ap.add_argument("--verbose", action="store_true")
     return ap
+
+
+def dotnet_restore_with_retries(
+    target: Path,
+    out_dir: Path,
+    *,
+    attempts: int = 4,
+    sleep_base_sec: int = 3,
+    verbose: bool = False,
+) -> tuple[int, list[dict]]:
+    logs: list[dict] = []
+
+    cmd = ["dotnet", "restore", str(target), "--disable-parallel"]
+    if verbose:
+        cmd += ["-v", "minimal"]
+
+    last_rc = 1
+    for attempt_index in range(1, attempts + 1):
+        rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=900)
+        log_path = out_dir / f"dotnet-restore.attempt{attempt_index}.log"
+        write_text(log_path, out)
+        logs.append({"name": "dotnet-restore", "cmd": cmd, "rc": rc, "log": str(log_path), "attempt": attempt_index})
+
+        if rc == 0:
+            return 0, logs
+
+        last_rc = rc
+        if attempt_index < attempts:
+            # NuGet restore can fail transiently on CI (network). Retry with backoff.
+            sleep_sec = sleep_base_sec * attempt_index
+            time.sleep(sleep_sec)
+
+    return last_rc, logs
 
 
 def main() -> int:
@@ -74,9 +108,17 @@ def main() -> int:
             print(f"SC_BUILD status=fail out={out_dir}")
             return rc
 
+    rc, restore_logs = dotnet_restore_with_retries(target, out_dir, attempts=4, sleep_base_sec=3, verbose=args.verbose)
+    logs.extend(restore_logs)
+    if rc != 0:
+        summary["logs"] = logs
+        write_json(out_dir / "summary.json", summary)
+        print(f"SC_BUILD status=fail out={out_dir}")
+        return rc
+
     # MSB3101 ("failed to write state file ...AssemblyReference.cache") can be triggered by filesystem
     # restrictions/locks on Windows. It is not a code correctness issue and should not fail -warnaserror gates.
-    cmd = ["dotnet", "build", str(target), "-c", config, "-warnaserror", "-p:WarningsNotAsErrors=MSB3101"]
+    cmd = ["dotnet", "build", str(target), "-c", config, "--no-restore", "-warnaserror", "-p:WarningsNotAsErrors=MSB3101"]
     if args.verbose:
         cmd += ["-v", "normal"]
 
