@@ -43,6 +43,8 @@ ADR-Refs:
 - `core.guild.member.joined` → `Game.Core/Contracts/Guild/GuildMemberJoined.cs`
 - `core.guild.member.left` → `Game.Core/Contracts/Guild/GuildMemberLeft.cs`
 - `core.guild.member.role_changed` → `Game.Core/Contracts/Guild/GuildMemberRoleChanged.cs`
+- `core.guild.officer.assigned` → `Game.Core/Contracts/Guild/GuildOfficerAssigned.cs`
+- `core.guild.officer.revoked` → `Game.Core/Contracts/Guild/GuildOfficerRevoked.cs`
 
 ### Game Loop / Turn
 
