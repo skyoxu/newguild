@@ -3,6 +3,16 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Godot;
+using Game.Core.Contracts.AI;
+using Game.Core.Contracts.Content;
+using Game.Core.Contracts.Events;
+using Game.Core.Contracts.GameLoop;
+using Game.Core.Contracts.Guild;
+using Game.Core.Contracts.Media;
+using Game.Core.Contracts.Persistence;
+using Game.Core.Contracts.Raid;
+using Game.Core.Contracts.Recruitment;
+using Game.Core.Contracts.Social;
 using Game.Godot.Adapters;
 
 namespace Game.Godot.Scripts.Screens;
@@ -10,38 +20,50 @@ namespace Game.Godot.Scripts.Screens;
 public partial class ActivityFeedScreen : Control
 {
     private const int MaxEntries = 200;
+    private const string CoreRaidPrefix = "core.raid.";
+    private const string CoreMediaPrefix = "core.media.";
+    private const string CoreSocialPrefix = "core.social.";
+    private const string CoreReputationPrefix = "core.reputation.";
+    private const string CoreRecruitmentPrefix = "core.recruitment.";
+    private const string CoreGuildPrefix = "core.guild.";
+    private const string CoreGameTurnPrefix = "core.game_turn.";
+    private const string CoreAiPrefix = "core.ai.";
+    private const string CoreSavePrefix = "core.save.";
+    private const string CoreLoadPrefix = "core.load.";
+    private const string CoreContentPrefix = "core.content.";
+    private const string CoreEventCatalogPrefix = "core.event_catalog.";
 
     private static readonly HashSet<string> AllowedEventTypes = new(StringComparer.Ordinal)
     {
-        "core.ai.cycle.completed",
-        "core.ai.cycle.started",
-        "core.ai.ecosystem.step.completed",
-        "core.ai.intent.issued",
-        "core.content.manifest.loaded",
-        "core.event_catalog.loaded",
-        "core.game_turn.phase_changed",
-        "core.game_turn.started",
-        "core.game_turn.week_advanced",
-        "core.guild.created",
-        "core.guild.disbanded",
-        "core.guild.member.joined",
-        "core.guild.member.left",
-        "core.guild.member.role_changed",
-        "core.load.completed",
-        "core.load.failed",
-        "core.load.requested",
-        "core.media.beat.triggered",
-        "core.raid.resolved",
-        "core.raid.scheduled",
-        "core.recruitment.offer.presented",
-        "core.recruitment.offer.resolved",
-        "core.reputation.changed",
-        "core.save.completed",
-        "core.save.failed",
-        "core.save.format.migration.applied",
-        "core.save.requested",
-        "core.social.interaction.triggered",
-        "core.social.relationship.changed"
+        AiCycleCompleted.EventType,
+        AiCycleStarted.EventType,
+        AiEcosystemStepCompleted.EventType,
+        AiIntentIssued.EventType,
+        ContentManifestLoaded.EventType,
+        EventCatalogLoaded.EventType,
+        GameTurnPhaseChanged.EventType,
+        GameTurnStarted.EventType,
+        GameWeekAdvanced.EventType,
+        GuildCreated.EventType,
+        GuildDisbanded.EventType,
+        GuildMemberJoined.EventType,
+        GuildMemberLeft.EventType,
+        GuildMemberRoleChanged.EventType,
+        LoadCompleted.EventType,
+        LoadFailed.EventType,
+        LoadRequested.EventType,
+        MediaBeatTriggered.EventType,
+        RaidResolved.EventType,
+        RaidScheduled.EventType,
+        RecruitmentOfferPresented.EventType,
+        RecruitmentOfferResolved.EventType,
+        ReputationChanged.EventType,
+        SaveCompleted.EventType,
+        SaveFailed.EventType,
+        SaveFormatMigrationApplied.EventType,
+        SaveRequested.EventType,
+        SocialInteractionTriggered.EventType,
+        SocialRelationshipChanged.EventType
     };
 
     private Button? _back;
@@ -228,41 +250,41 @@ public partial class ActivityFeedScreen : Control
         if (AllowedEventTypes.Contains(type))
             return true;
 
-        return type.StartsWith("core.raid.", StringComparison.Ordinal) ||
-               type.StartsWith("core.media.", StringComparison.Ordinal) ||
-               type.StartsWith("core.social.", StringComparison.Ordinal) ||
-               type.StartsWith("core.reputation.", StringComparison.Ordinal) ||
-               type.StartsWith("core.recruitment.", StringComparison.Ordinal) ||
-               type.StartsWith("core.guild.", StringComparison.Ordinal) ||
-               type.StartsWith("core.game_turn.", StringComparison.Ordinal) ||
-               type.StartsWith("core.ai.", StringComparison.Ordinal) ||
-               type.StartsWith("core.save.", StringComparison.Ordinal) ||
-               type.StartsWith("core.load.", StringComparison.Ordinal) ||
-               type.StartsWith("core.content.", StringComparison.Ordinal) ||
-               type.StartsWith("core.event_catalog.", StringComparison.Ordinal);
+        return type.StartsWith(CoreRaidPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreMediaPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreSocialPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreReputationPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreRecruitmentPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreGuildPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreGameTurnPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreAiPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreSavePrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreLoadPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreContentPrefix, StringComparison.Ordinal) ||
+               type.StartsWith(CoreEventCatalogPrefix, StringComparison.Ordinal);
     }
 
     private static string ClassifyKind(string type)
     {
-        if (type.StartsWith("core.raid.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreRaidPrefix, StringComparison.Ordinal))
             return "raid";
-        if (type.StartsWith("core.media.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreMediaPrefix, StringComparison.Ordinal))
             return "media";
-        if (type.StartsWith("core.social.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreSocialPrefix, StringComparison.Ordinal))
             return "social";
-        if (type.StartsWith("core.reputation.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreReputationPrefix, StringComparison.Ordinal))
             return "reputation";
-        if (type.StartsWith("core.recruitment.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreRecruitmentPrefix, StringComparison.Ordinal))
             return "recruitment";
-        if (type.StartsWith("core.guild.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreGuildPrefix, StringComparison.Ordinal))
             return "guild";
-        if (type.StartsWith("core.game_turn.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreGameTurnPrefix, StringComparison.Ordinal))
             return "turn";
-        if (type.StartsWith("core.ai.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreAiPrefix, StringComparison.Ordinal))
             return "ai";
-        if (type.StartsWith("core.save.", StringComparison.Ordinal) || type.StartsWith("core.load.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreSavePrefix, StringComparison.Ordinal) || type.StartsWith(CoreLoadPrefix, StringComparison.Ordinal))
             return "persistence";
-        if (type.StartsWith("core.content.", StringComparison.Ordinal) || type.StartsWith("core.event_catalog.", StringComparison.Ordinal))
+        if (type.StartsWith(CoreContentPrefix, StringComparison.Ordinal) || type.StartsWith(CoreEventCatalogPrefix, StringComparison.Ordinal))
             return "content";
         if (type.Contains("reward", StringComparison.OrdinalIgnoreCase) || type.Contains("score", StringComparison.OrdinalIgnoreCase))
             return "reward";
