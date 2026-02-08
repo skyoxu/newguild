@@ -2003,7 +2003,7 @@
     "id": 49,
     "title": "Implement Core UI Components",
     "description": "Develop the main navigation, side panel, content area, and modal system as per the UI specifications.",
-    "details": "Create reusable components for NavigationBar, InformationPanel, ContentArea, and ModalManager. Use a component-based framework like React or Vue.js.",
+    "details": "Create reusable components for NavigationBar, InformationPanel, ContentArea, and ModalManager. Use a Godot scenes and Control nodes like Godot or Vue.js.",
     "testStrategy": "Unit test each component for functionality. Conduct integration tests to ensure components work together seamlessly.",
     "priority": "medium",
     "dependencies": [
@@ -2033,13 +2033,15 @@
       "Unit test each component for functionality. Conduct integration tests to ensure components work together seamlessly."
     ],
     "test_refs": [],
-    "acceptance": []
+    "acceptance": [],
+    "taskmaster_id": 46,
+    "taskmaster_exported": true
   },
   {
     "id": 50,
     "title": "Develop Interaction Patterns",
     "description": "Implement drag-and-drop, right-click menus, keyboard shortcuts, and tooltip systems.",
-    "details": "Use libraries like React DnD for drag-and-drop, and implement context menus using custom event handlers. Define keyboard shortcuts and tooltips using a centralized configuration.",
+    "details": "Use Godot built-in UI primitives; avoid extra libraries. Godot DnD for drag-and-drop, and implement context menus using Godot signals and input events. Define keyboard shortcuts and tooltips using a centralized configuration.",
     "testStrategy": "Test each interaction pattern individually. Use user testing to ensure intuitive interactions.",
     "priority": "medium",
     "dependencies": [
@@ -2069,7 +2071,9 @@
       "Test each interaction pattern individually. Use user testing to ensure intuitive interactions."
     ],
     "test_refs": [],
-    "acceptance": []
+    "acceptance": [],
+    "taskmaster_id": 47,
+    "taskmaster_exported": true
   },
   {
     "id": 51,

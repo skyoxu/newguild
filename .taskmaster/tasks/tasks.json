@@ -1577,6 +1577,313 @@
         "subtasks": [],
         "recommendedSubtasks": 0,
         "updatedAt": "2026-01-21T17:06:38.611877+00:00"
+      },
+      {
+        "id": "44",
+        "title": "GameLoop 周推进审计日志（F004）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "对应安全审计发现 F004：GameTurnSystem.Advance() 发布 core.game_turn.week_advanced 等事件，但当前 SecurityAuditLogger 未将该关键节点写入 ADR-0019 规定的 security-audit.jsonl。该项为审计可追溯性/合规业务需求（不阻塞 T2），纳入 NG backlog。",
+        "details": "Story: PH06-GAMELOOP-AUDIT-WEEK-ADVANCED\nADR Refs: ADR-0019; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH02; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Godot/Adapters/SecurityAuditLogger.cs",
+        "dependencies": [
+          "9"
+        ],
+        "adrRefs": [
+          "ADR-0019",
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH02",
+          "CH04",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+        "acceptance": [
+          "在 CI/Release/secure 模式下，当产生周推进事件时，security-audit.jsonl 追加一条 ADR-0019 五字段 JSONL 记录（{ts, action, reason, target, caller}）。",
+          "action 使用 core.game_turn.week_advanced（符合 ADR-0004 命名与 validate_audit_logs.py 的 domain.entity.verb 校验）。",
+          "新增至少 1 条集成测试验证：推进一周后审计文件包含 action=core.game_turn.week_advanced 的条目，且不泄露绝对路径等敏感信息。"
+        ],
+        "testRefs": [
+          "Game.Godot/Adapters/SecurityAuditLogger.cs"
+        ],
+        "testStrategy": "['集成测试：在 headless Godot 测试或等价 Runner 中触发 week advance，并校验 logs/ci/<date>/security-audit.jsonl 的条目。', '脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。']",
+        "recommendedSubtasks": 0,
+        "subtasks": [],
+        "updatedAt": "2026-02-05T15:26:29+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "45",
+        "title": "GameLoop 架构骨架收敛：Ports/时间/状态整理",
+        "status": "pending",
+        "priority": "medium",
+        "description": "根据 cifix.txt 的建议，围绕 GameLoop 相关代码完成一轮轻量级架构收敛：将 IAICoordinator/IEventEngine/IGameTurnSystem/IEventBus 等接口统一归档到 Ports 命名空间；移除当前未使用的 ITime/IAICoordinator 依赖或明确使用场景；将 _firstTurnStarted 等可变实例状态迁移到 GameTurnState 等不可变记录类型中；并统一使用 DateTimeOffset 表达时间语义。",
+        "details": "Story: PH07-GAMELOOP-ARCH-REFINE\nADR Refs: ADR-0007; ADR-0005; ADR-0018\nChapters: CH01; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core/Engine/GameTurnSystem.cs; Game.Core/Domain/Turn/GameTurnState.cs; Game.Core/Contracts/DomainEvent.cs; Game.Core.Tests/Domain/GameTurnSystemTests.cs",
+        "dependencies": [
+          "2"
+        ],
+        "adrRefs": [
+          "ADR-0007",
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+        "acceptance": [
+          "所有 GameLoop 相关接口（IGameTurnSystem/IEventEngine/IAICoordinator/IEventBus 及相关仓储接口）统一落盘在 Game.Core.Ports 命名空间或其子命名空间中。",
+          "GameTurnSystem 中不再保留完全未使用的 ITime/IAICoordinator 依赖字段，或在测试中有明确用途并通过测试用例覆盖。",
+          "与首回合相关的状态（如是否已发布 GameTurnStarted）通过 GameTurnState 等不可变 record 表达，而不是隐藏在可变实例字段中。",
+          "DomainEvent 等核心事件类型统一使用 DateTimeOffset 表示时间，避免新的 DateTime 混用进入 GameLoop 关键路径。"
+        ],
+        "testRefs": [
+          "Game.Core/Engine/GameTurnSystem.cs",
+          "Game.Core/Domain/Turn/GameTurnState.cs",
+          "Game.Core/Contracts/DomainEvent.cs",
+          "Game.Core.Tests/Domain/GameTurnSystemTests.cs"
+        ],
+        "testStrategy": "['结构检查：通过现有 dependency_guard.py（或临时脚本）扫描接口文件位置与命名空间，确认 Ports/Domain/Engine 层次符合 ADR-0007。', '回归测试：运行 Game.Core.Tests 全量，确保架构调整后所有 GameLoop 相关测试依旧通过。']",
+        "recommendedSubtasks": 0,
+        "subtasks": [],
+        "updatedAt": "2026-02-05T15:26:29+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "46",
+        "title": "Implement Core UI Components",
+        "status": "pending",
+        "priority": "medium",
+        "description": "Develop the main navigation, side panel, content area, and modal system as per the UI specifications.",
+        "details": "Story: PRD-GUILD-MANAGER\nADR Refs: ADR-0018; ADR-0005\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "dependencies": [],
+        "adrRefs": [
+          "ADR-0018",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "Modal system can open/close deterministically (button + ESC), without node leaks or stuck input focus.",
+          "Context menu/right-click interaction uses Godot input events and is testable in headless GdUnit4."
+        ],
+        "testRefs": [],
+        "testStrategy": "['Unit test each component for functionality. Conduct integration tests to ensure components work together seamlessly.']",
+        "recommendedSubtasks": 0,
+        "subtasks": [],
+        "updatedAt": "2026-02-05T15:26:29+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "47",
+        "title": "Develop Interaction Patterns",
+        "status": "pending",
+        "priority": "medium",
+        "description": "Implement drag-and-drop, right-click menus, keyboard shortcuts, and tooltip systems.",
+        "details": "Story: PRD-GUILD-MANAGER\nADR Refs: ADR-0018; ADR-0005\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "dependencies": [
+          "46"
+        ],
+        "adrRefs": [
+          "ADR-0018",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "Modal system can open/close deterministically (button + ESC), without node leaks or stuck input focus.",
+          "Context menu/right-click interaction uses Godot input events and is testable in headless GdUnit4."
+        ],
+        "testRefs": [],
+        "testStrategy": "['Test each interaction pattern individually. Use user testing to ensure intuitive interactions.']",
+        "recommendedSubtasks": 0,
+        "subtasks": [],
+        "updatedAt": "2026-02-05T15:26:29+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "48",
+        "title": "Playability 路线2：两周推进稳定性（Week 1→3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "验证主流程连续两周推进（Week 1→3）后，跨界面切换仍保持状态一致与可见。",
+        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-2\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs; Game.Core.Tests/Domain/GameLoopTests.cs; Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+        "dependencies": [
+          "4",
+          "46",
+          "47"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md",
+        "acceptance": [
+          "主流程支持连续两次推进回合（Week 1→2→3），并在 UI 可见当前 Week/Phase。 Refs: Game.Core.Tests/Domain/GameLoopTests.cs Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "跨界面切换（Guild/Activity/Settings）后返回主界面，不丢失当前周次与关键状态显示。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "回合推进事件链与 contractRefs 对齐，至少覆盖 started/phase_changed/week_advanced 的发布与消费。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs",
+          "产出可审计工件到 logs/**，用于 CI 回归追踪。 Refs: logs/e2e/<date>/playability-route2-summary.json"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
+          "Game.Core.Tests/Domain/GameLoopTests.cs",
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "testStrategy": "TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks.",
+        "recommendedSubtasks": 0,
+        "subtasks": [],
+        "updatedAt": "2026-02-07T07:31:45+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "49",
+        "title": "Playability 路线14：XP/Level 可视化增长与持久化",
+        "status": "pending",
+        "priority": "medium",
+        "description": "验证 XP/Level 从玩法事件驱动增长、在 HUD 可见，并在 Save/Load 后保持一致。",
+        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-14\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs; Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs; Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+        "dependencies": [
+          "35",
+          "37",
+          "48"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+        "acceptance": [
+          "触发玩法事件后 XP 增长可见，并在达阈值时正确升至下一等级。 Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs",
+          "HUD 中 XP/Level 显示与事件驱动同步，不依赖手工刷新。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+          "Save/Load 后 XP/Level 与加载前一致，且不回退。 Refs: Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs",
+          "对齐 contractRefs（experience/level/raid）的最小覆盖，避免只做显示不接线。 Refs: Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Progression/ExperienceSystemTests.cs",
+          "Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs",
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+        ],
+        "testStrategy": "TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks.",
+        "recommendedSubtasks": 0,
+        "subtasks": [],
+        "updatedAt": "2026-02-07T07:31:45+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "50",
+        "title": "Playability 路线15：Achievement 解锁展示与持久化",
+        "status": "pending",
+        "priority": "medium",
+        "description": "验证成就由领域事件触发解锁、UI 可见、并在 Save/Load 后保持一致。",
+        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-15\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs; Tests.Godot/tests/UI/test_achievements_smoke.gd; Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+        "dependencies": [
+          "36",
+          "49"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+        "acceptance": [
+          "至少一个成就可由确定性事件触发解锁，并在 UI 中显示已解锁数量变化。 Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+          "成就列表/计数展示与事件驱动对齐，避免仅本地临时状态。 Refs: Tests.Godot/tests/UI/test_achievements_smoke.gd",
+          "Save/Load 后已解锁成就保持一致，不重复解锁或丢失。 Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs",
+          "contractRefs 覆盖触发成就的最小事件集合，并在测试中可观测。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs",
+          "Tests.Godot/tests/UI/test_achievements_smoke.gd",
+          "Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd"
+        ],
+        "testStrategy": "TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks.",
+        "recommendedSubtasks": 0,
+        "subtasks": [],
+        "updatedAt": "2026-02-07T07:31:45+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "51",
+        "title": "Playability 路线7：Raid 结算反馈闭环",
+        "status": "pending",
+        "priority": "medium",
+        "description": "验证 Raid 从触发到结算反馈的闭环，包括结果可见、事件可观测与状态一致性。",
+        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-7\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs; Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs; Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd; Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+        "dependencies": [
+          "17",
+          "33",
+          "48"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
+        "acceptance": [
+          "Raid 流程包含 scheduled→resolved 的完整事件链，成功/失败结果可区分。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+          "UI 入口可触发一次遭遇并展示结果摘要，不依赖手工注入才能看到反馈。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
+          "Activity/Feed 中可观测到 raid 结果相关事件，避免接线缺失。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+          "产出 logs/** 证据用于 CI 回归比对。 Refs: logs/e2e/<date>/playability-route7-summary.json"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+          "Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+          "Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+        ],
+        "testStrategy": "TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks.",
+        "recommendedSubtasks": 0,
+        "subtasks": [],
+        "updatedAt": "2026-02-07T07:31:45+00:00",
+        "complexity": 4
       }
     ],
     "metadata": {
