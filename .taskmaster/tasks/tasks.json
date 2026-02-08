@@ -1715,7 +1715,7 @@
         "title": "Implement Core UI Components",
         "status": "pending",
         "priority": "medium",
-        "description": "Develop the main navigation, side panel, content area, and modal system as per the UI specifications.",
+        "description": "Build the shared UI foundation (navigation, side panel, content area, modal system) used by Playability Routes 2/14/15/7 so route entry and status display stay consistent.",
         "details": "Story: PRD-GUILD-MANAGER\nADR Refs: ADR-0018; ADR-0005\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
         "dependencies": [],
         "adrRefs": [
@@ -1771,7 +1771,7 @@
         "title": "Develop Interaction Patterns",
         "status": "pending",
         "priority": "medium",
-        "description": "Implement drag-and-drop, right-click menus, keyboard shortcuts, and tooltip systems.",
+        "description": "Implement core interaction patterns (drag-drop, context menu, keyboard shortcuts, tooltips) as reusable behavior for Playability Routes 2/14/15/7.",
         "details": "Story: PRD-GUILD-MANAGER\nADR Refs: ADR-0018; ADR-0005\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
         "dependencies": [
           "46"
@@ -2082,7 +2082,7 @@
         "status": "pending",
         "priority": "medium",
         "description": "验证 Raid 从触发到结算反馈的闭环，包括结果可见、事件可观测与状态一致性。",
-        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-7\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs; Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs; Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd; Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-7\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs; Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs; Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd; Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
         "dependencies": [
           "17",
           "33",

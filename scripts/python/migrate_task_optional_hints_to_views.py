@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import json
 import pathlib
@@ -12,14 +13,14 @@ def _write_json(path: pathlib.Path, data: Any) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def _extract_optional_hints_from_master(task: dict) -> list[str]:
+def _extract_optional_hints_from_master(task: dict[str, Any]) -> list[str]:
     hints: list[str] = []
 
     details = (task.get("details") or "").strip()
-    test_strategy = (task.get("testStrategy") or "").strip()
-
-    if test_strategy:
-        hints.append(test_strategy)
+    for test_strategy_line in _ensure_list(task.get("testStrategy")):
+        line = test_strategy_line.strip()
+        if line:
+            hints.append(line)
 
     if details:
         # Master details can be written as " / " chunks or as multi-line blocks.
@@ -78,7 +79,24 @@ def _ensure_list(value: Any) -> list[str]:
     return [str(value)]
 
 
-def _apply_to_view_item(view_task: dict, optional_hints: list[str]) -> dict:
+def _parse_task_ids(expr: str) -> set[int]:
+    task_ids: set[int] = set()
+    tokens = [token.strip() for token in expr.split(",") if token.strip()]
+    for token in tokens:
+        if "-" in token:
+            left, right = token.split("-", 1)
+            start = int(left.strip())
+            end = int(right.strip())
+            if start > end:
+                start, end = end, start
+            for task_id in range(start, end + 1):
+                task_ids.add(task_id)
+            continue
+        task_ids.add(int(token))
+    return task_ids
+
+
+def _apply_to_view_item(view_task: dict[str, Any], optional_hints: list[str]) -> dict[str, list[str]]:
     before = _ensure_list(view_task.get("test_strategy"))
 
     # Keep non-optional lines as the stable "mandatory" strategy, and regenerate optional lines
@@ -98,6 +116,19 @@ def _apply_to_view_item(view_task: dict, optional_hints: list[str]) -> dict:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Migrate optional hints from tasks.json master details/testStrategy "
+            "into tasks_back/tasks_gameplay test_strategy with Optional: prefix."
+        )
+    )
+    parser.add_argument(
+        "--task-ids",
+        default="44-51",
+        help="Comma-separated task IDs and ranges. Example: 44-51,60,62",
+    )
+    args = parser.parse_args()
+
     root = pathlib.Path(__file__).resolve().parents[2]
     tasks_path = root / ".taskmaster" / "tasks" / "tasks.json"
     gameplay_path = root / ".taskmaster" / "tasks" / "tasks_gameplay.json"
@@ -114,8 +145,7 @@ def main() -> int:
     if not isinstance(master_tasks, list):
         raise TypeError("Expected tasks.json master.tasks to be a list.")
 
-    # This round: Phase2 (T27..T43).
-    round_ids = set(range(27, 44))
+    round_ids = _parse_task_ids(args.task_ids)
     master_by_id = {int(t["id"]): t for t in master_tasks if str(t.get("id", "")).isdigit()}
 
     gameplay_by_taskmaster_id = {
@@ -129,7 +159,7 @@ def main() -> int:
         if str(t.get("taskmaster_id", "")).isdigit()
     }
 
-    results: list[dict] = []
+    results: list[dict[str, Any]] = []
     skipped: list[dict] = []
 
     for task_id in sorted(round_ids):
@@ -143,31 +173,41 @@ def main() -> int:
             skipped.append({"task_id": task_id, "reason": "no_optional_hints"})
             continue
 
-        view = gameplay_by_taskmaster_id.get(task_id) or back_by_taskmaster_id.get(task_id)
-        if not view:
+        target_views: list[dict[str, Any]] = []
+        gameplay_view = gameplay_by_taskmaster_id.get(task_id)
+        back_view = back_by_taskmaster_id.get(task_id)
+        if gameplay_view is not None:
+            target_views.append(gameplay_view)
+        if back_view is not None:
+            target_views.append(back_view)
+
+        if not target_views:
             skipped.append({"task_id": task_id, "reason": "missing_in_views"})
             continue
 
-        apply_result = _apply_to_view_item(view, optional_hints)
-        before = apply_result["before"]
-        after = apply_result["after"]
-        before_set = set(before)
-        after_set = set(after)
-        added = [line for line in after if line not in before_set]
-        removed = [line for line in before if line not in after_set]
+        for view in target_views:
+            apply_result = _apply_to_view_item(view, optional_hints)
+            before = apply_result["before"]
+            after = apply_result["after"]
+            before_set = set(before)
+            after_set = set(after)
+            added = [line for line in after if line not in before_set]
+            removed = [line for line in before if line not in after_set]
 
-        results.append(
-            {
-                "task_id": task_id,
-                "view_id": view.get("id"),
-                "before_len": len(before),
-                "after_len": len(after),
-                "added": added,
-                "removed": removed,
-                "source_optional_hints": optional_hints,
-                "final_optional_lines": [l for l in after if l.strip().lower().startswith("optional:")],
-            }
-        )
+            results.append(
+                {
+                    "task_id": task_id,
+                    "view_id": view.get("id"),
+                    "before_len": len(before),
+                    "after_len": len(after),
+                    "added": added,
+                    "removed": removed,
+                    "source_optional_hints": optional_hints,
+                    "final_optional_lines": [
+                        line for line in after if line.strip().lower().startswith("optional:")
+                    ],
+                }
+            )
 
     _write_json(gameplay_path, gameplay_obj)
     _write_json(back_path, back_obj)
@@ -178,7 +218,7 @@ def main() -> int:
     report_path.write_text(
         json.dumps(
             {
-                "ts": datetime.datetime.utcnow().isoformat() + "Z",
+                "ts": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "round_task_ids": sorted(round_ids),
                 "results": results,
                 "skipped": skipped,
@@ -190,7 +230,7 @@ def main() -> int:
     )
 
     print(f"Wrote {report_path}")
-    changed_count = sum(1 for r in results if r["added"] or r["removed"])
+    changed_count = sum(1 for result in results if result["added"] or result["removed"])
     print(f"Changed: {changed_count} Skipped: {len(skipped)}")
     return 0
 
