@@ -35,7 +35,7 @@ public class CombatService
             Type: PlayerDamaged.EventType,
             Source: nameof(CombatService),
             Data: evt,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: $"dmg-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
         ));
     }
@@ -76,7 +76,7 @@ public class CombatService
             Type: PlayerDamaged.EventType,
             Source: nameof(CombatService),
             Data: evt,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: $"dmg-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
         ));
     }

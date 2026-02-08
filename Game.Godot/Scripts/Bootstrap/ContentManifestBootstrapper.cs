@@ -65,7 +65,7 @@ public sealed partial class ContentManifestBootstrapper : Node
                 Type: ContentManifestLoaded.EventType,
                 Source: nameof(ContentManifestBootstrapper),
                 Data: evt,
-                Timestamp: DateTime.UtcNow,
+                Timestamp: DateTimeOffset.UtcNow,
                 Id: Guid.NewGuid().ToString("N")));
 
             GD.Print($"[ContentManifestBootstrapper] Loaded manifest id={manifest.ManifestId} entries={manifest.Entries.Count} path={ManifestPath}");

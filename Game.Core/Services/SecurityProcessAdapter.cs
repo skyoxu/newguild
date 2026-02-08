@@ -106,7 +106,7 @@ public class SecurityProcessAdapter
                 arguments = string.Join(" ", args),
                 caller = "SecurityProcessAdapter.ExecuteAsync"
             },
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: Guid.NewGuid().ToString()
         ));
     }
@@ -124,7 +124,7 @@ public class SecurityProcessAdapter
                 exitCode,
                 caller = "SecurityProcessAdapter.ExecuteAsync"
             },
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: Guid.NewGuid().ToString()
         ));
     }

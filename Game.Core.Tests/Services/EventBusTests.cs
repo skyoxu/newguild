@@ -20,7 +20,7 @@ public class EventBusTests
             Type: "test.evt",
             Source: nameof(EventBusTests),
             Data: new { ok = true },
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: Guid.NewGuid().ToString()
         ));
 
@@ -31,7 +31,7 @@ public class EventBusTests
             Type: "test.evt2",
             Source: nameof(EventBusTests),
             Data: null,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: Guid.NewGuid().ToString()
         ));
         Assert.Equal(1, called);
@@ -49,7 +49,7 @@ public class EventBusTests
             Type: "evt",
             Source: nameof(EventBusTests),
             Data: null,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: Guid.NewGuid().ToString()
         ));
         Assert.Equal(1, ok);
@@ -66,7 +66,7 @@ public class EventBusTests
             Type: "evt",
             Source: nameof(EventBusTests),
             Data: null,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: Guid.NewGuid().ToString()
         ));
 

@@ -64,7 +64,7 @@ public class SecurityFileAdapter
                 target = path,
                 caller = "SecurityFileAdapter"
             },
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: Guid.NewGuid().ToString()
         )).Wait();
     }

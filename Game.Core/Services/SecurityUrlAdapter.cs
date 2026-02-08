@@ -93,7 +93,7 @@ public class SecurityUrlAdapter
             Type: SecurityUrlAccessDenied.EventType,
             Source: "SecurityUrlAdapter",
             Data: new { Url = url, Reason = reason },
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: Guid.NewGuid().ToString()
         );
         await _bus.PublishAsync(evt);

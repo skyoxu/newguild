@@ -13,7 +13,7 @@ public class EventBusTests
         var bus = new InMemoryEventBus();
         var received = new List<DomainEvent>();
         using var sub = bus.Subscribe(evt => { received.Add(evt); return Task.CompletedTask; });
-        await bus.PublishAsync(new DomainEvent("test.event", "unit", new { a = 1 }, DateTime.UtcNow, "id-1"));
+        await bus.PublishAsync(new DomainEvent("test.event", "unit", new { a = 1 }, DateTimeOffset.UtcNow, "id-1"));
         received.Should().HaveCount(1);
         received[0].Type.Should().Be("test.event");
     }
@@ -24,10 +24,9 @@ public class EventBusTests
         var bus = new InMemoryEventBus();
         var count = 0;
         var disp = bus.Subscribe(evt => { count++; return Task.CompletedTask; });
-        await bus.PublishAsync(new DomainEvent("a", "", null, DateTime.UtcNow, "1"));
+        await bus.PublishAsync(new DomainEvent("a", "", null, DateTimeOffset.UtcNow, "1"));
         disp.Dispose();
-        await bus.PublishAsync(new DomainEvent("b", "", null, DateTime.UtcNow, "2"));
+        await bus.PublishAsync(new DomainEvent("b", "", null, DateTimeOffset.UtcNow, "2"));
         count.Should().Be(1);
     }
 }
-
