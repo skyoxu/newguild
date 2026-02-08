@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using Game.Core.Contracts.Persistence;
 using Game.Core.Contracts.UI;
 using Game.Core.Ports;
 using Game.Core.Services;
@@ -12,6 +13,7 @@ public partial class StartScreen : Control
 {
     private const string DemoGuildId = "npc-guild-01";
     private const int MaxLogLines = 200;
+    private const string CoreAiPrefix = "core.ai.";
 
     private Button _btnOpenGuild = default!;
     private Button _btnSaveLoad = default!;
@@ -144,7 +146,7 @@ public partial class StartScreen : Control
 
     private static bool IsAiEventType(string type)
     {
-        return type.StartsWith("core.ai.", StringComparison.Ordinal);
+        return type.StartsWith(CoreAiPrefix, StringComparison.Ordinal);
     }
 
     private void AppendAiLogLine(string line)
@@ -205,7 +207,7 @@ public partial class StartScreen : Control
         try
         {
             if (_bus != null && _bus.HasMethod("PublishSimple"))
-                _bus.Call("PublishSimple", "core.save.requested", "ui", payload);
+                _bus.Call("PublishSimple", SaveRequested.EventType, "ui", payload);
 
             var savedOk = false;
             if (ds.HasMethod("TrySaveSync"))
@@ -217,10 +219,10 @@ public partial class StartScreen : Control
             }
 
             if (_bus != null && _bus.HasMethod("PublishSimple"))
-                _bus.Call("PublishSimple", savedOk ? "core.save.completed" : "core.save.failed", "ui", payload);
+                _bus.Call("PublishSimple", savedOk ? SaveCompleted.EventType : SaveFailed.EventType, "ui", payload);
 
             if (_bus != null && _bus.HasMethod("PublishSimple"))
-                _bus.Call("PublishSimple", "core.load.requested", "ui", payload);
+                _bus.Call("PublishSimple", LoadRequested.EventType, "ui", payload);
 
             Variant loaded = default;
             if (ds.HasMethod("TryLoadSync"))
@@ -230,7 +232,7 @@ public partial class StartScreen : Control
 
             var loadedOk = loaded.VariantType != Variant.Type.Nil;
             if (_bus != null && _bus.HasMethod("PublishSimple"))
-                _bus.Call("PublishSimple", loadedOk ? "core.load.completed" : "core.load.failed", "ui", payload);
+                _bus.Call("PublishSimple", loadedOk ? LoadCompleted.EventType : LoadFailed.EventType, "ui", payload);
 
             SetOutput("Save+Load: " + (loadedOk ? "OK" : "FAILED"));
         }

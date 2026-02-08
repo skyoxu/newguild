@@ -9,6 +9,7 @@ using Game.Core.Contracts;
 using Game.Core.Contracts.Achievements;
 using Game.Core.Contracts.Events;
 using Game.Core.Contracts.Engine;
+using Game.Core.Contracts.GameLoop;
 using Game.Core.Contracts.Media;
 using Game.Core.Contracts.Progression;
 using Game.Core.Contracts.Raid;
@@ -28,6 +29,8 @@ public partial class HUD : Control
 {
     public const string DemoResultDenied = "denied";
     public const string DemoResultError = "error";
+    private const string CoreHealthUpdatedEventType = "core.health.updated";
+    private const string PlayerHealthChangedLegacyEventType = "player.health.changed";
     private const string ReputationLabelPrefix = "Reputation";
     private const string ExperienceLabelPrefix = "XP";
     private const string MediaBeatLabelPrefix = "MediaBeat";
@@ -197,7 +200,7 @@ public partial class HUD : Control
                 GD.PushWarning($"[HUD] failed to parse event payload type={type} exType={ex.GetType().Name}");
             }
         }
-        else if (type == "core.health.updated" || type == "player.health.changed")
+        else if (type == CoreHealthUpdatedEventType || type == PlayerHealthChangedLegacyEventType || type == PlayerHealthChanged.EventType)
         {
             try
             {

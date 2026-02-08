@@ -67,6 +67,7 @@ def main():
         'selfcheck': {},
         'perf_db': {},
         'sql_scan': {},
+        'ui_event_literals': {},
         'ui_menu_types': {},
         'task_links': {},
         'encoding': {},
@@ -90,7 +91,7 @@ def main():
     # Always persist dotnet stdout/stderr for forensics; workflow must upload logs/unit/** for root cause.
     try:
         dotnet_out_path = os.path.join("logs", "ci", date, "ci-pipeline-dotnet-stdout.txt")
-        ensure_dir(os.path.dirname(dotnet_out_path))
+        os.makedirs(os.path.dirname(dotnet_out_path), exist_ok=True)
         with io.open(dotnet_out_path, "w", encoding="utf-8") as f:
             f.write(out)
     except Exception as ex:
@@ -223,7 +224,24 @@ def main():
     if rc_content != 0:
         hard_fail = True
 
-    # 7) UI menu event types generation + sync (hard gate)
+    # 7) UI event-type literals check in scripts (hard gate)
+    rc_ui_literals, out_ui_literals = run_cmd(
+        ['py', '-3', 'scripts/python/validate_no_event_type_literals_in_ui_scripts.py'],
+        cwd=root,
+    )
+    with io.open(os.path.join('logs', 'ci', date, 'ui-event-type-literals-stdout.txt'), 'w', encoding='utf-8') as f:
+        f.write(out_ui_literals)
+    ui_literals_report = read_json(os.path.join('logs', 'ci', date, 'ui-event-type-literals', 'report.json')) or {}
+    summary['ui_event_literals'] = {
+        'rc': rc_ui_literals,
+        'status': 'ok' if rc_ui_literals == 0 else 'fail',
+        'out': os.path.join('logs', 'ci', date, 'ui-event-type-literals', 'report.json'),
+        'violations': ui_literals_report.get('violations_count'),
+    }
+    if rc_ui_literals != 0:
+        hard_fail = True
+
+    # 8) UI menu event types generation + sync (hard gate)
     rc_ui_gen, out_ui_gen = run_cmd(['py', '-3', 'scripts/python/generate_ui_menu_event_types.py'], cwd=root)
     with io.open(os.path.join('logs', 'ci', date, 'ui-menu-types-generate-stdout.txt'), 'w', encoding='utf-8') as f:
         f.write(out_ui_gen)
@@ -244,7 +262,7 @@ def main():
     if rc_ui != 0:
         hard_fail = True
 
-    # 8) Task links / view semantics (hard gate)
+    # 9) Task links / view semantics (hard gate)
     rc_links, out_links = run_cmd(['py', '-3', 'scripts/python/task_links_validate.py'], cwd=root)
     with io.open(os.path.join('logs', 'ci', date, 'task-links-stdout.txt'), 'w', encoding='utf-8') as f:
         f.write(out_links)
@@ -267,6 +285,7 @@ def main():
         f"sql_scan={summary['sql_scan'].get('status')} "
         f"perf_db={summary['perf_db'].get('status')} "
         f"content={summary.get('content_validation', {}).get('status')} "
+        f"ui_event_literals={summary.get('ui_event_literals', {}).get('status')} "
         f"ui_menu={summary.get('ui_menu_types', {}).get('status')} "
         f"task_links={summary.get('task_links', {}).get('status')} "
         f"encoding_bad={summary['encoding'].get('bad', 'n/a')}"
