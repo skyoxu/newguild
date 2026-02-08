@@ -1785,9 +1785,16 @@
     "description": "Develop the main navigation, side panel, content area, and modal system as per the UI specifications.",
     "acceptance": [
       "UI interaction is deterministic in headless GdUnit4: modal open/close and context menu open/close are observable via nodes or labels.",
-      "No stuck focus/input: ESC closes modal; right-click menu does not block navigation; actions are idempotent."
+      "No stuck focus/input: ESC closes modal; right-click menu does not block navigation; actions are idempotent.",
+      "应完成：Implement Core UI Components",
+      "应有测试：至少新增/更新 1 个确定性测试并在 test_refs 中引用。",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。",
+      "应留证：在 logs/** 下产出最小审计/门禁证据（可复现、可追溯）。"
     ],
-    "test_strategy": "GdUnit4 playability (headless) + targeted xUnit for pure logic where applicable.",
+    "test_strategy": [
+      "GdUnit4 playability (headless) + targeted xUnit for pure logic where applicable.",
+      "Optional: ['Unit test each component for functionality. Conduct integration tests to ensure components work together seamlessly.']"
+    ],
     "test_refs": [],
     "contractRefs": [],
     "artifactRefs": []
@@ -1825,9 +1832,15 @@
     "description": "Implement drag-and-drop, right-click menus, keyboard shortcuts, and tooltip systems.",
     "acceptance": [
       "UI interaction is deterministic in headless GdUnit4: modal open/close and context menu open/close are observable via nodes or labels.",
-      "No stuck focus/input: ESC closes modal; right-click menu does not block navigation; actions are idempotent."
+      "No stuck focus/input: ESC closes modal; right-click menu does not block navigation; actions are idempotent.",
+      "应完成：Develop Interaction Patterns",
+      "应有测试：至少新增/更新 1 个确定性测试并在 test_refs 中引用。",
+      "应留证：在 logs/** 下产出最小审计/门禁证据（可复现、可追溯）。"
     ],
-    "test_strategy": "GdUnit4 playability (headless) + targeted xUnit for pure logic where applicable.",
+    "test_strategy": [
+      "GdUnit4 playability (headless) + targeted xUnit for pure logic where applicable.",
+      "Optional: ['Test each interaction pattern individually. Use user testing to ensure intuitive interactions.']"
+    ],
     "test_refs": [],
     "contractRefs": [],
     "artifactRefs": []
@@ -1873,11 +1886,18 @@
       "主流程支持连续两次推进回合（Week 1→2→3），并在 UI 可见当前 Week/Phase。 Refs: Game.Core.Tests/Domain/GameLoopTests.cs Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
       "跨界面切换（Guild/Activity/Settings）后返回主界面，不丢失当前周次与关键状态显示。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
       "回合推进事件链与 contractRefs 对齐，至少覆盖 started/phase_changed/week_advanced 的发布与消费。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs",
-      "产出可审计工件到 logs/**，用于 CI 回归追踪。 Refs: logs/e2e/<date>/playability-route2-summary.json"
+      "产出可审计工件到 logs/**，用于 CI 回归追踪。 Refs: logs/e2e/<date>/playability-route2-summary.json",
+      "应完成：Playability 路线2：两周推进稳定性（Week 1→3）",
+      "应有测试：至少包含并通过 test_refs 引用的测试（3 个）。",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.game_turn.started, core.game_turn.phase_changed, core.game_turn.week_advanced）。",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。",
+      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。"
     ],
     "test_strategy": [
       "xUnit: verify turn transitions and week increments deterministically.",
-      "GdUnit4 headless: verify cross-screen navigation keeps Week/Phase visible and consistent."
+      "GdUnit4 headless: verify cross-screen navigation keeps Week/Phase visible and consistent.",
+      "Optional: TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks."
     ],
     "test_refs": [
       "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
@@ -1936,11 +1956,18 @@
       "触发玩法事件后 XP 增长可见，并在达阈值时正确升至下一等级。 Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs",
       "HUD 中 XP/Level 显示与事件驱动同步，不依赖手工刷新。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
       "Save/Load 后 XP/Level 与加载前一致，且不回退。 Refs: Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs",
-      "对齐 contractRefs（experience/level/raid）的最小覆盖，避免只做显示不接线。 Refs: Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs"
+      "对齐 contractRefs（experience/level/raid）的最小覆盖，避免只做显示不接线。 Refs: Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs",
+      "应完成：Playability 路线14：XP/Level 可视化增长与持久化",
+      "应有测试：至少包含并通过 test_refs 引用的测试（3 个）。",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.experience.changed, core.level.changed, core.raid.resolved）。",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。",
+      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。"
     ],
     "test_strategy": [
       "xUnit: deterministic XP/Level progression and threshold checks.",
-      "GdUnit4 headless: verify HUD labels update from domain events and survive Save/Load."
+      "GdUnit4 headless: verify HUD labels update from domain events and survive Save/Load.",
+      "Optional: TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks."
     ],
     "test_refs": [
       "Game.Core.Tests/Progression/ExperienceSystemTests.cs",
@@ -1998,11 +2025,18 @@
       "至少一个成就可由确定性事件触发解锁，并在 UI 中显示已解锁数量变化。 Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
       "成就列表/计数展示与事件驱动对齐，避免仅本地临时状态。 Refs: Tests.Godot/tests/UI/test_achievements_smoke.gd",
       "Save/Load 后已解锁成就保持一致，不重复解锁或丢失。 Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs",
-      "contractRefs 覆盖触发成就的最小事件集合，并在测试中可观测。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd"
+      "contractRefs 覆盖触发成就的最小事件集合，并在测试中可观测。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+      "应完成：Playability 路线15：Achievement 解锁展示与持久化",
+      "应有测试：至少包含并通过 test_refs 引用的测试（3 个）。",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.guild.created, core.raid.resolved, core.reputation.changed）。",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。",
+      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。"
     ],
     "test_strategy": [
       "xUnit: verify deterministic unlock conditions and tracker state transitions.",
-      "GdUnit4 headless: verify achievements UI reflects unlocked count and persistence."
+      "GdUnit4 headless: verify achievements UI reflects unlocked count and persistence.",
+      "Optional: TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks."
     ],
     "test_refs": [
       "Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs",
@@ -2037,6 +2071,7 @@
     "chapter_refs": [
       "CH01",
       "CH04",
+      "CH05",
       "CH06",
       "CH07"
     ],
@@ -2060,11 +2095,18 @@
       "Raid 流程包含 scheduled→resolved 的完整事件链，成功/失败结果可区分。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
       "UI 入口可触发一次遭遇并展示结果摘要，不依赖手工注入才能看到反馈。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
       "Activity/Feed 中可观测到 raid 结果相关事件，避免接线缺失。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
-      "产出 logs/** 证据用于 CI 回归比对。 Refs: logs/e2e/<date>/playability-route7-summary.json"
+      "产出 logs/** 证据用于 CI 回归比对。 Refs: logs/e2e/<date>/playability-route7-summary.json",
+      "应完成：Playability 路线7：Raid 结算反馈闭环",
+      "应有测试：至少包含并通过 test_refs 引用的测试（4 个）。",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.raid.scheduled, core.raid.resolved, core.game_turn.week_advanced）。",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。",
+      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。"
     ],
     "test_strategy": [
       "xUnit: verify raid state machine transitions and domain event emission deterministically.",
-      "GdUnit4 headless: verify raid trigger path updates UI/feed with observable result."
+      "GdUnit4 headless: verify raid trigger path updates UI/feed with observable result.",
+      "Optional: TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks."
     ],
     "test_refs": [
       "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",

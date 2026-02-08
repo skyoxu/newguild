@@ -1805,11 +1805,16 @@
       "所有 GameLoop 相关接口（IGameTurnSystem/IEventEngine/IAICoordinator/IEventBus 及相关仓储接口）统一落盘在 Game.Core.Ports 命名空间或其子命名空间中。",
       "GameTurnSystem 中不再保留完全未使用的 ITime/IAICoordinator 依赖字段，或在测试中有明确用途并通过测试用例覆盖。",
       "与首回合相关的状态（如是否已发布 GameTurnStarted）通过 GameTurnState 等不可变 record 表达，而不是隐藏在可变实例字段中。",
-      "DomainEvent 等核心事件类型统一使用 DateTimeOffset 表示时间，避免新的 DateTime 混用进入 GameLoop 关键路径。"
+      "DomainEvent 等核心事件类型统一使用 DateTimeOffset 表示时间，避免新的 DateTime 混用进入 GameLoop 关键路径。",
+      "应完成：GameLoop 架构骨架收敛：Ports/时间/状态整理",
+      "应有测试：至少包含并通过 test_refs 引用的测试（4 个）。",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.game_turn.started）。",
+      "应留证：在 logs/** 下产出最小审计/门禁证据（可复现、可追溯）。"
     ],
     "test_strategy": [
       "结构检查：通过现有 dependency_guard.py（或临时脚本）扫描接口文件位置与命名空间，确认 Ports/Domain/Engine 层次符合 ADR-0007。",
-      "回归测试：运行 Game.Core.Tests 全量，确保架构调整后所有 GameLoop 相关测试依旧通过。"
+      "回归测试：运行 Game.Core.Tests 全量，确保架构调整后所有 GameLoop 相关测试依旧通过。",
+      "Optional: ['结构检查：通过现有 dependency_guard.py（或临时脚本）扫描接口文件位置与命名空间，确认 Ports/Domain/Engine 层次符合 ADR-0007。', '回归测试：运行 Game.Core.Tests 全量，确保架构调整后所有 GameLoop 相关测试依旧通过。']"
     ],
     "taskmaster_exported": true,
     "contractRefs": [
@@ -2036,11 +2041,18 @@
     "acceptance": [
       "在 CI/Release/secure 模式下，当产生周推进事件时，security-audit.jsonl 追加一条 ADR-0019 五字段 JSONL 记录（{ts, action, reason, target, caller}）。",
       "action 使用 core.game_turn.week_advanced（符合 ADR-0004 命名与 validate_audit_logs.py 的 domain.entity.verb 校验）。",
-      "新增至少 1 条集成测试验证：推进一周后审计文件包含 action=core.game_turn.week_advanced 的条目，且不泄露绝对路径等敏感信息。"
+      "新增至少 1 条集成测试验证：推进一周后审计文件包含 action=core.game_turn.week_advanced 的条目，且不泄露绝对路径等敏感信息。",
+      "应完成：GameLoop 周推进审计日志（F004）",
+      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。",
+      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.game_turn.week_advanced）。",
+      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。",
+      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。",
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。"
     ],
     "test_strategy": [
       "集成测试：在 headless Godot 测试或等价 Runner 中触发 week advance，并校验 logs/ci/<date>/security-audit.jsonl 的条目。",
-      "脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。"
+      "脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。",
+      "Optional: ['集成测试：在 headless Godot 测试或等价 Runner 中触发 week advance，并校验 logs/ci/<date>/security-audit.jsonl 的条目。', '脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。']"
     ],
     "taskmaster_exported": true,
     "contractRefs": [
@@ -2207,6 +2219,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
@@ -2223,7 +2236,8 @@
     ],
     "test_strategy": [
       "xUnit: verify turn transitions and week increments deterministically.",
-      "GdUnit4 headless: verify cross-screen navigation keeps Week/Phase visible and consistent."
+      "GdUnit4 headless: verify cross-screen navigation keeps Week/Phase visible and consistent.",
+      "Optional: TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks."
     ],
     "test_refs": [
       "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
@@ -2270,6 +2284,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
@@ -2285,7 +2300,8 @@
     ],
     "test_strategy": [
       "xUnit: deterministic XP/Level progression and threshold checks.",
-      "GdUnit4 headless: verify HUD labels update from domain events and survive Save/Load."
+      "GdUnit4 headless: verify HUD labels update from domain events and survive Save/Load.",
+      "Optional: TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks."
     ],
     "test_refs": [
       "Game.Core.Tests/Progression/ExperienceSystemTests.cs",
@@ -2332,6 +2348,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
@@ -2347,7 +2364,8 @@
     ],
     "test_strategy": [
       "xUnit: verify deterministic unlock conditions and tracker state transitions.",
-      "GdUnit4 headless: verify achievements UI reflects unlocked count and persistence."
+      "GdUnit4 headless: verify achievements UI reflects unlocked count and persistence.",
+      "Optional: TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks."
     ],
     "test_refs": [
       "Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs",
@@ -2383,6 +2401,7 @@
     "chapter_refs": [
       "CH01",
       "CH04",
+      "CH05",
       "CH06",
       "CH07"
     ],
@@ -2393,6 +2412,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
@@ -2409,7 +2429,8 @@
     ],
     "test_strategy": [
       "xUnit: verify raid state machine transitions and domain event emission deterministically.",
-      "GdUnit4 headless: verify raid trigger path updates UI/feed with observable result."
+      "GdUnit4 headless: verify raid trigger path updates UI/feed with observable result.",
+      "Optional: TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks."
     ],
     "test_refs": [
       "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",

@@ -1,4 +1,5 @@
 import json
+import argparse
 from pathlib import Path
 import re
 
@@ -48,7 +49,16 @@ def collect_overlay_paths(root: Path) -> set[str]:
     return paths
 
 
-def run_check(root: Path) -> bool:
+def _parse_ng_number(task_id: str | None) -> int | None:
+    if not isinstance(task_id, str):
+        return None
+    match = re.fullmatch(r"NG-(\d{4})", task_id)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def run_check(root: Path, id_start: int | None = None, id_end: int | None = None) -> bool:
     """Validate new NG tasks in tasks_back.json against ADR/Overlay maps.
 
     Returns True if everything is consistent, False if any problem is found.
@@ -58,16 +68,24 @@ def run_check(root: Path) -> bool:
     adr_ids = collect_adr_ids(root)
     overlay_paths = collect_overlay_paths(root)
 
-    new_ids = {f"NG-00{i}" for i in range(23, 34)}
-    new_tasks = [t for t in tasks if t.get("id") in new_ids]
+    target_tasks: list[dict] = []
+    for task in tasks:
+        ng_no = _parse_ng_number(task.get("id"))
+        if ng_no is None:
+            continue
+        if id_start is not None and ng_no < id_start:
+            continue
+        if id_end is not None and ng_no > id_end:
+            continue
+        target_tasks.append(task)
 
-    print(f"new_tasks_count: {len(new_tasks)}")
+    print(f"target_tasks_count: {len(target_tasks)}")
     print(f"known ADR ids (sample): {sorted(adr_ids)[:10]} ...")
     print(f"overlay files: {sorted(overlay_paths)}")
 
     has_error = False
 
-    for t in sorted(new_tasks, key=lambda x: x["id"]):
+    for t in sorted(target_tasks, key=lambda x: x["id"]):
         tid = t["id"]
         story_id = t.get("story_id")
         print(f"\n== {tid} ==")
@@ -113,8 +131,25 @@ def run_check(root: Path) -> bool:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Validate tasks_back ADR/chapter/overlay refs for NG tasks.",
+    )
+    parser.add_argument(
+        "--id-start",
+        type=int,
+        default=None,
+        help="Optional lower bound for NG task number (e.g. 44 for NG-0044).",
+    )
+    parser.add_argument(
+        "--id-end",
+        type=int,
+        default=None,
+        help="Optional upper bound for NG task number (e.g. 51 for NG-0051).",
+    )
+    args = parser.parse_args()
+
     root = Path(__file__).resolve().parents[2]
-    ok = run_check(root)
+    ok = run_check(root, id_start=args.id_start, id_end=args.id_end)
     if not ok:
         raise SystemExit(1)
 

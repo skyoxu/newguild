@@ -1611,9 +1611,36 @@
           "Game.Godot/Adapters/SecurityAuditLogger.cs"
         ],
         "testStrategy": "['集成测试：在 headless Godot 测试或等价 Runner 中触发 week advance，并校验 logs/ci/<date>/security-audit.jsonl 的条目。', '脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。']",
-        "recommendedSubtasks": 0,
-        "subtasks": [],
-        "updatedAt": "2026-02-05T15:26:29+00:00",
+        "recommendedSubtasks": 2,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Wire week-advanced audit emission",
+            "description": "Ensure week advance writes ADR-0019 compliant security audit record.",
+            "dependencies": [],
+            "details": "Implement the audit logging hook on core.game_turn.week_advanced and verify required JSONL fields are present.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T44.1 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "44",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 2,
+            "title": "Add deterministic audit verification",
+            "description": "Add deterministic checks for audit output and sanitize-sensitive fields.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind to ACC:T44.1 in tests/scripts and ensure logs/ci/<date>/security-audit.jsonl is produced.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T44.2 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "44",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          }
+        ],
+        "updatedAt": "2026-02-08T09:55:19+00:00",
         "complexity": 3
       },
       {
@@ -1651,9 +1678,36 @@
           "Game.Core.Tests/Domain/GameTurnSystemTests.cs"
         ],
         "testStrategy": "['结构检查：通过现有 dependency_guard.py（或临时脚本）扫描接口文件位置与命名空间，确认 Ports/Domain/Engine 层次符合 ADR-0007。', '回归测试：运行 Game.Core.Tests 全量，确保架构调整后所有 GameLoop 相关测试依旧通过。']",
-        "recommendedSubtasks": 0,
-        "subtasks": [],
-        "updatedAt": "2026-02-05T15:26:29+00:00",
+        "recommendedSubtasks": 2,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Refactor GameLoop ports and state model",
+            "description": "Consolidate interfaces under Game.Core.Ports and remove/justify unused dependencies.",
+            "dependencies": [],
+            "details": "Move contracts and replace mutable first-turn flags with explicit state record usage.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T45.1 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "45",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 2,
+            "title": "Capture regression and guard evidence",
+            "description": "Run regression checks and persist architecture guard evidence under logs/**.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind to ACC:T45.1 and keep dependency guard + core tests green with evidence artifacts.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T45.2 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "45",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          }
+        ],
+        "updatedAt": "2026-02-08T09:55:19+00:00",
         "complexity": 3
       },
       {
@@ -1680,9 +1734,36 @@
         ],
         "testRefs": [],
         "testStrategy": "['Unit test each component for functionality. Conduct integration tests to ensure components work together seamlessly.']",
-        "recommendedSubtasks": 0,
-        "subtasks": [],
-        "updatedAt": "2026-02-05T15:26:29+00:00",
+        "recommendedSubtasks": 2,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement core Godot UI components",
+            "description": "Build NavigationBar, InformationPanel, ContentArea, and ModalManager in Godot Control scene architecture.",
+            "dependencies": [],
+            "details": "Avoid React-oriented wording and keep implementation aligned to Godot+C# stack.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T46.1 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "46",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 2,
+            "title": "Add component-level verification",
+            "description": "Create deterministic UI component tests and smoke evidence for interaction/readability.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind to ACC:T46.1 and attach logs/e2e artifacts for component visibility and signal routing.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T46.2 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "46",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          }
+        ],
+        "updatedAt": "2026-02-08T09:55:19+00:00",
         "complexity": 3
       },
       {
@@ -1711,9 +1792,36 @@
         ],
         "testRefs": [],
         "testStrategy": "['Test each interaction pattern individually. Use user testing to ensure intuitive interactions.']",
-        "recommendedSubtasks": 0,
-        "subtasks": [],
-        "updatedAt": "2026-02-05T15:26:29+00:00",
+        "recommendedSubtasks": 2,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement interaction patterns in Godot",
+            "description": "Deliver drag-drop, context menu, keyboard shortcut, and tooltip flows using Godot signals/input.",
+            "dependencies": [],
+            "details": "Keep interaction entry points explicit and avoid hidden blockers (overlay/click-through issues).",
+            "status": "pending",
+            "testStrategy": "Use ACC:T47.1 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "47",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 2,
+            "title": "Add interaction behavior tests",
+            "description": "Provide deterministic tests for interaction triggers and expected UI feedback.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind to ACC:T47.1 and store headless evidence artifacts under logs/e2e/**.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T47.2 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "47",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          }
+        ],
+        "updatedAt": "2026-02-08T09:55:19+00:00",
         "complexity": 3
       },
       {
@@ -1752,9 +1860,51 @@
           "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
         ],
         "testStrategy": "TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks.",
-        "recommendedSubtasks": 0,
-        "subtasks": [],
-        "updatedAt": "2026-02-07T07:31:45+00:00",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Stabilize Week1->Week3 core progression",
+            "description": "Ensure turn transitions and week increment semantics are deterministic and state-safe.",
+            "dependencies": [],
+            "details": "Cover started/phase_changed/week_advanced pipeline with consistent domain state.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T48.1 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "48",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 2,
+            "title": "Wire cross-screen state continuity",
+            "description": "Guarantee Guild/Activity/Settings navigation preserves week and phase display.",
+            "dependencies": [
+              1
+            ],
+            "details": "Verify UI consume path and avoid state loss after screen switches.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T48.2 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "48",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 3,
+            "title": "Add route-2 playability evidence",
+            "description": "Deliver deterministic route test + artifacts for CI regression tracking.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind to ACC:T48.1/T48.2 and persist summary under logs/e2e/<date>/playability-route2-summary.json.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T48.3 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "48",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          }
+        ],
+        "updatedAt": "2026-02-08T09:55:19+00:00",
         "complexity": 4
       },
       {
@@ -1795,9 +1945,51 @@
           "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
         ],
         "testStrategy": "TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks.",
-        "recommendedSubtasks": 0,
-        "subtasks": [],
-        "updatedAt": "2026-02-07T07:31:45+00:00",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Wire XP/Level event pipeline",
+            "description": "Ensure experience and level events are published/consumed along gameplay flow.",
+            "dependencies": [],
+            "details": "Use contractRefs as minimal coverage set: core.experience.changed/core.level.changed/core.raid.resolved.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T49.1 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "49",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 2,
+            "title": "Implement HUD and save-load continuity",
+            "description": "Keep HUD XP/Level display synchronized and persisted across save/load.",
+            "dependencies": [
+              1
+            ],
+            "details": "Ensure runtime entry and restore path both update UI without manual refresh.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T49.2 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "49",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 3,
+            "title": "Add route-14 evidence",
+            "description": "Deliver deterministic tests and audit artifacts for XP/Level growth path.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind to ACC:T49.1 and persist logs/e2e/<date>/playability-route14-summary.json.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T49.3 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "49",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          }
+        ],
+        "updatedAt": "2026-02-08T09:55:19+00:00",
         "complexity": 4
       },
       {
@@ -1837,9 +2029,51 @@
           "Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd"
         ],
         "testStrategy": "TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks.",
-        "recommendedSubtasks": 0,
-        "subtasks": [],
-        "updatedAt": "2026-02-07T07:31:45+00:00",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement achievement unlock core",
+            "description": "Ensure deterministic achievement trigger and tracker state transitions.",
+            "dependencies": [],
+            "details": "Use event-driven unlock path and prevent duplicate/unintended unlock.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T50.1 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "50",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 2,
+            "title": "Wire achievement UI and persistence",
+            "description": "Display unlocked counts/list and keep consistency after save/load.",
+            "dependencies": [
+              1
+            ],
+            "details": "Ensure UI reflects event consumption instead of local-only state.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T50.2 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "50",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 3,
+            "title": "Add route-15 evidence",
+            "description": "Provide deterministic tests and artifacts for unlock-display-persistence closed loop.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind to ACC:T50.1 and persist logs/e2e/<date>/playability-route15-summary.json.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T50.3 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "50",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          }
+        ],
+        "updatedAt": "2026-02-08T09:55:19+00:00",
         "complexity": 4
       },
       {
@@ -1863,6 +2097,7 @@
         "archRefs": [
           "CH01",
           "CH04",
+          "CH05",
           "CH06",
           "CH07"
         ],
@@ -1880,9 +2115,51 @@
           "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
         ],
         "testStrategy": "TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks.",
-        "recommendedSubtasks": 0,
-        "subtasks": [],
-        "updatedAt": "2026-02-07T07:31:45+00:00",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement raid event lifecycle",
+            "description": "Ensure scheduled->resolved event lifecycle is deterministic and result-distinguishable.",
+            "dependencies": [],
+            "details": "Guarantee success/failure outputs are explicit and observable.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T51.1 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "51",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 2,
+            "title": "Wire raid UI trigger/feed path",
+            "description": "Ensure UI can trigger encounter and feed reflects result events.",
+            "dependencies": [
+              1
+            ],
+            "details": "Avoid hidden manual injection path; keep runtime entry explicit.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T51.2 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "51",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 3,
+            "title": "Add route-7 evidence",
+            "description": "Provide deterministic tests and regression artifacts for raid feedback loop.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind to ACC:T51.1 and persist logs/e2e/<date>/playability-route7-summary.json.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T51.3 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "51",
+            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          }
+        ],
+        "updatedAt": "2026-02-08T09:55:19+00:00",
         "complexity": 4
       }
     ],
