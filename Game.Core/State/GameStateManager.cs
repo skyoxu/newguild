@@ -96,7 +96,7 @@ public class GameStateManager
                 Type: SaveCompleted.EventType,
                 Source: nameof(GameStateManager),
                 Data: new SaveCompleted(saveId, DateTimeOffset.UtcNow),
-                Timestamp: DateTime.UtcNow,
+                Timestamp: DateTimeOffset.UtcNow,
                 Id: $"save-completed-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
             ));
 
@@ -108,7 +108,7 @@ public class GameStateManager
                 Type: SaveFailed.EventType,
                 Source: nameof(GameStateManager),
                 Data: new SaveFailed(saveId, DateTimeOffset.UtcNow, ex.GetType().Name),
-                Timestamp: DateTime.UtcNow,
+                Timestamp: DateTimeOffset.UtcNow,
                 Id: $"save-failed-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
             ));
             throw;
@@ -121,7 +121,7 @@ public class GameStateManager
             Type: LoadRequested.EventType,
             Source: nameof(GameStateManager),
             Data: new LoadRequested(saveId, DateTimeOffset.UtcNow),
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: $"load-request-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
         ));
 
@@ -141,7 +141,7 @@ public class GameStateManager
                 Type: LoadCompleted.EventType,
                 Source: nameof(GameStateManager),
                 Data: new LoadCompleted(saveId, DateTimeOffset.UtcNow),
-                Timestamp: DateTime.UtcNow,
+                Timestamp: DateTimeOffset.UtcNow,
                 Id: $"load-completed-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
             ));
 
@@ -153,7 +153,7 @@ public class GameStateManager
                 Type: LoadFailed.EventType,
                 Source: nameof(GameStateManager),
                 Data: new LoadFailed(saveId, DateTimeOffset.UtcNow, ex.GetType().Name),
-                Timestamp: DateTime.UtcNow,
+                Timestamp: DateTimeOffset.UtcNow,
                 Id: $"load-failed-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
             ));
             throw;
@@ -309,7 +309,7 @@ public class GameStateManager
                 ToVersion: to,
                 AppliedAt: DateTimeOffset.UtcNow
             ),
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: $"save-format-migration-applied-{Guid.NewGuid():N}"
         ));
 

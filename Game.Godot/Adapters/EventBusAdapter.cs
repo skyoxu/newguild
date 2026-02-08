@@ -254,7 +254,7 @@ public partial class EventBusAdapter : Node, IEventBus
         if (string.IsNullOrWhiteSpace(data_json))
             data_json = "{}";
 
-        var evt = new DomainEvent(type.Trim(), source.Trim(), data_json, DateTime.UtcNow, Guid.NewGuid().ToString("N"));
+        var evt = new DomainEvent(type.Trim(), source.Trim(), data_json, DateTimeOffset.UtcNow, Guid.NewGuid().ToString("N"));
         _ = PublishAsync(evt);
     }
 

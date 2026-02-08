@@ -4,7 +4,7 @@ namespace Game.Core.Contracts
         string Type,
         string Source,
         object? Data,
-        DateTime Timestamp,
+        DateTimeOffset Timestamp,
         string Id,
         string SpecVersion = "1.0",
         string DataContentType = "application/json"

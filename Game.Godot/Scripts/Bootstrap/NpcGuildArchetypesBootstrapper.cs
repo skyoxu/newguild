@@ -66,7 +66,7 @@ public sealed partial class NpcGuildArchetypesBootstrapper : Node
                 Type: NpcGuildArchetypesLoaded.EventType,
                 Source: nameof(NpcGuildArchetypesBootstrapper),
                 Data: evt,
-                Timestamp: DateTime.UtcNow,
+                Timestamp: DateTimeOffset.UtcNow,
                 Id: Guid.NewGuid().ToString("N")));
 
             GD.Print($"[NpcGuildArchetypesBootstrapper] Loaded npc guild archetypes count={catalog.Count} path={NpcGuildsPath}");

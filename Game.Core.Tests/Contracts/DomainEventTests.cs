@@ -10,13 +10,23 @@ namespace Game.Core.Tests.Contracts;
 public class DomainEventTests
 {
     [Fact]
+    public void DomainEvent_Timestamp_Should_Be_DateTimeOffset()
+    {
+        typeof(DomainEvent)
+            .GetProperty(nameof(DomainEvent.Timestamp))!
+            .PropertyType
+            .Should()
+            .Be(typeof(DateTimeOffset));
+    }
+
+    [Fact]
     public void Constructor_WithAllParameters_CreatesValidEvent()
     {
         // Arrange
         var type = "test.event.created";
         var source = "TestSource";
         var data = new { Value = "test-data" };
-        var timestamp = DateTime.UtcNow;
+        var timestamp = DateTimeOffset.UtcNow;
         var id = Guid.NewGuid().ToString();
 
         // Act
@@ -46,7 +56,7 @@ public class DomainEventTests
             Type: "test.event",
             Source: "TestSource",
             Data: null,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: "test-id"
         );
 
@@ -63,7 +73,7 @@ public class DomainEventTests
             Type: "test.event",
             Source: "TestSource",
             Data: null,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: "test-id",
             SpecVersion: "2.0"
         );
@@ -80,7 +90,7 @@ public class DomainEventTests
             Type: "test.event",
             Source: "TestSource",
             Data: null,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: "test-id",
             DataContentType: "application/xml"
         );
@@ -97,7 +107,7 @@ public class DomainEventTests
             Type: "test.event",
             Source: "TestSource",
             Data: null,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: "test-id"
         );
 
@@ -109,7 +119,7 @@ public class DomainEventTests
     public void Equality_WithSameValues_ReturnsTrue()
     {
         // Arrange
-        var timestamp = DateTime.UtcNow;
+        var timestamp = DateTimeOffset.UtcNow;
         var event1 = new DomainEvent(
             Type: "test.event",
             Source: "TestSource",
@@ -135,7 +145,7 @@ public class DomainEventTests
     public void Equality_WithDifferentType_ReturnsFalse()
     {
         // Arrange
-        var timestamp = DateTime.UtcNow;
+        var timestamp = DateTimeOffset.UtcNow;
         var event1 = new DomainEvent(
             Type: "test.event.one",
             Source: "TestSource",
@@ -165,7 +175,7 @@ public class DomainEventTests
             Type: "test.event",
             Source: "TestSource",
             Data: "test-data",
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: "test-id"
         );
 

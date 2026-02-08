@@ -45,7 +45,7 @@ public static class DatabaseErrorHandling
             Type: type,
             Source: source,
             Data: data,
-            Timestamp: DateTime.UtcNow,
+            Timestamp: DateTimeOffset.UtcNow,
             Id: Guid.NewGuid().ToString());
     }
 
