@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using Game.Contracts.GameLoop;
 using Game.Core.Contracts;
 using Godot;
 
@@ -72,7 +73,7 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
     {
         if (!IsEnabled())
             return false;
-        if (!evt.Type.StartsWith("security.", StringComparison.OrdinalIgnoreCase))
+        if (!ShouldAuditEvent(evt.Type))
             return false;
 
         var now = DateTimeOffset.UtcNow;
@@ -97,6 +98,20 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
         if (accepted) Interlocked.Increment(ref _enqueued);
         else Interlocked.Increment(ref _dropped);
         return accepted;
+    }
+
+    private static bool ShouldAuditEvent(string eventType)
+    {
+        if (string.IsNullOrWhiteSpace(eventType))
+            return false;
+
+        if (eventType.StartsWith("security.", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (string.Equals(eventType, GameTurnPhaseChanged.EventType, StringComparison.Ordinal))
+            return true;
+
+        return string.Equals(eventType, GameWeekAdvanced.EventType, StringComparison.Ordinal);
     }
 
     private static bool IsEnabled()

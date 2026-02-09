@@ -1,26 +1,29 @@
+"""Test Naming Convention Validator.
+
+This validator enforces naming conventions for:
+1) xUnit tests in ``Game.Core.Tests``
+2) GdUnit tests in ``Tests.Godot/tests``
+
+Rules:
+- C# xUnit methods:
+  - PascalCase
+  - PascalCase_With_Underscores (for readable scenario-style names)
+- GdUnit methods:
+  - test_snake_case (method name starts with ``test_``)
+
+The script supports legacy CI invocations like:
+    py -3 scripts/python/check_test_naming.py --task-id 44 --style strict
+
+Unknown CLI arguments are ignored for backward compatibility.
 """
-Test Naming Convention Validator for Game.Core.Tests
 
-This script validates that all test methods in Game.Core.Tests follow the repository-approved
-test naming conventions and prevents regression to snake_case naming.
-
-Usage:
-    py -3 scripts/python/check_test_naming.py
-
-Exit codes:
-    0 - All test methods follow approved conventions
-    1 - Violations found (snake_case or other non-approved patterns)
-
-Requirements:
-    - Scans all *Tests.cs files in Game.Core.Tests/
-    - Checks methods marked with [Fact] or [Theory]
-    - Reports violations with file path and line number
-"""
-
+import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Dict, List, Sequence, Tuple
+
+Violation = Tuple[int, str, str]
 
 
 def is_pascal_case(name: str) -> bool:
@@ -111,7 +114,7 @@ def extract_test_methods(file_path: Path) -> List[Tuple[int, str]]:
     return test_methods
 
 
-def scan_test_files(test_dir: Path) -> dict:
+def scan_csharp_test_files(test_dir: Path) -> Dict[Path, List[Violation]]:
     """
     Scan all test files and find naming violations.
 
@@ -121,18 +124,24 @@ def scan_test_files(test_dir: Path) -> dict:
     Returns:
         Dictionary mapping file paths to list of violations (line_number, method_name)
     """
-    violations = {}
+    violations: Dict[Path, List[Violation]] = {}
 
     # Find all *Tests.cs files
     test_files = list(test_dir.rglob('*Tests.cs'))
 
-    for test_file in test_files:
+    for test_file in sorted(test_files):
         test_methods = extract_test_methods(test_file)
-        file_violations = []
+        file_violations: List[Violation] = []
 
         for line_num, method_name in test_methods:
             if not is_allowed_test_method_name(method_name):
-                file_violations.append((line_num, method_name))
+                file_violations.append(
+                    (
+                        line_num,
+                        method_name,
+                        "not approved; expected PascalCase or PascalCase_With_Underscores",
+                    )
+                )
 
         if file_violations:
             violations[test_file] = file_violations
@@ -140,25 +149,108 @@ def scan_test_files(test_dir: Path) -> dict:
     return violations
 
 
+def extract_gdscript_functions(file_path: Path) -> List[Tuple[int, str]]:
+    """Extract GDScript function names with line numbers."""
+    functions: List[Tuple[int, str]] = []
+
+    try:
+        lines = file_path.read_text(encoding='utf-8').splitlines()
+    except Exception as exception:  # pragma: no cover - defensive
+        print(f"Error reading {file_path}: {exception}", file=sys.stderr)
+        return functions
+
+    func_pattern = re.compile(r'^\s*func\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(')
+    for index, raw_line in enumerate(lines, start=1):
+        match = func_pattern.match(raw_line)
+        if match:
+            functions.append((index, match.group(1)))
+
+    return functions
+
+
+def is_allowed_gdunit_test_name(name: str) -> bool:
+    """Return True when GdUnit test function name follows test_snake_case."""
+    return bool(re.match(r'^test_[a-z0-9_]+$', name))
+
+
+def scan_gdunit_test_files(test_dir: Path) -> Dict[Path, List[Violation]]:
+    """Scan GdUnit files and validate test function naming."""
+    violations: Dict[Path, List[Violation]] = {}
+
+    gd_files = sorted(test_dir.rglob('*.gd'))
+    for gd_file in gd_files:
+        functions = extract_gdscript_functions(gd_file)
+        file_violations: List[Violation] = []
+
+        for line_num, function_name in functions:
+            # Only validate test functions here; helpers/lifecycle hooks are allowed.
+            if not function_name.lower().startswith('test'):
+                continue
+
+            if not is_allowed_gdunit_test_name(function_name):
+                file_violations.append(
+                    (
+                        line_num,
+                        function_name,
+                        "not approved for GdUnit; expected test_snake_case (test_*)",
+                    )
+                )
+
+        if file_violations:
+            violations[gd_file] = file_violations
+
+    return violations
+
+
+def merge_violations(*groups: Dict[Path, List[Violation]]) -> Dict[Path, List[Violation]]:
+    """Merge multiple violation dictionaries into one."""
+    merged: Dict[Path, List[Violation]] = {}
+    for group in groups:
+        for file_path, issues in group.items():
+            merged.setdefault(file_path, []).extend(issues)
+    return merged
+
+
+def parse_args(argv: Sequence[str]) -> argparse.Namespace:
+    """Parse CLI arguments while keeping backward compatibility."""
+    parser = argparse.ArgumentParser(description='Validate test naming conventions.')
+    parser.add_argument('--task-id', default=None, help='Optional task id for CI compatibility.')
+    parser.add_argument('--style', default='strict', help='Naming style mode (kept for compatibility).')
+    args, _unknown = parser.parse_known_args(argv)
+    return args
+
+
 def main():
     """Main entry point for the script."""
+    _args = parse_args(sys.argv[1:])
+
     # Determine project root (script is in scripts/python/)
     script_dir = Path(__file__).parent
     project_root = script_dir.parent.parent
-    test_dir = project_root / 'Game.Core.Tests'
+    csharp_test_dir = project_root / 'Game.Core.Tests'
+    gdunit_test_dir = project_root / 'Tests.Godot' / 'tests'
 
-    if not test_dir.exists():
-        print(f"Error: Test directory not found: {test_dir}", file=sys.stderr)
+    if not csharp_test_dir.exists():
+        print(f"Error: C# test directory not found: {csharp_test_dir}", file=sys.stderr)
         return 1
 
-    print("Scanning Game.Core.Tests for test method naming violations...")
-    print(f"Test directory: {test_dir}")
+    print('Scanning test naming conventions...')
+    print(f'C# test directory: {csharp_test_dir}')
+    print(f'GdUnit test directory: {gdunit_test_dir}')
     print()
 
-    violations = scan_test_files(test_dir)
+    csharp_violations = scan_csharp_test_files(csharp_test_dir)
+    gdunit_violations: Dict[Path, List[Violation]] = {}
+
+    if gdunit_test_dir.exists():
+        gdunit_violations = scan_gdunit_test_files(gdunit_test_dir)
+
+    violations = merge_violations(csharp_violations, gdunit_violations)
 
     if not violations:
-        print("[OK] All test methods follow approved naming conventions")
+        print('[OK] All test methods follow approved naming conventions')
+        print('[OK] C# tests: PascalCase or PascalCase_With_Underscores')
+        print('[OK] GdUnit tests: test_snake_case (test_*)')
         print("[OK] No violations found")
         return 0
 
@@ -170,16 +262,17 @@ def main():
     for file_path, file_violations in sorted(violations.items()):
         rel_path = file_path.relative_to(project_root)
         print(f"{rel_path}:")
-        for line_num, method_name in file_violations:
-            print(f"  Line {line_num}: {method_name} (not approved; avoid snake_case)")
+        for line_num, method_name, reason in file_violations:
+            print(f"  Line {line_num}: {method_name} ({reason})")
             total_violations += 1
         print()
 
     print(f"Total violations: {total_violations}")
     print()
-    print("Fix these violations by renaming methods to an approved pattern:")
-    print("  - PascalCase: GivenNoState_WhenSaveGame_ThenThrowsInvalidOperationException")
-    print("  - PascalCase_With_Underscores: SaveGame_WhenStateMissing_ShouldThrowInvalidOperationException")
+    print('Fix these violations by renaming methods to an approved pattern:')
+    print('  - C# PascalCase: GivenNoState_WhenSaveGame_ThenThrowsInvalidOperationException')
+    print('  - C# PascalCase_With_Underscores: SaveGame_WhenStateMissing_ShouldThrowInvalidOperationException')
+    print('  - GdUnit test_snake_case: test_save_load_roundtrip_persists_state')
 
     return 1
 

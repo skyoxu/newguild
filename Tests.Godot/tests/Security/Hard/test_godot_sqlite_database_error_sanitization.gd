@@ -110,7 +110,7 @@ func test_debug_mode_keeps_details_for_query_error_and_does_not_write_audit_log(
 	assert_bool(FileAccess.file_exists(_audit_path_res())).is_false()
 
 
-func test_DebugMode_IncludesSensitiveDetails() -> void:
+func test_debug_mode_includes_sensitive_details() -> void:
 	_remove_audit_file()
 
 	var probe = await _load_probe()
@@ -138,7 +138,7 @@ func test_DebugMode_IncludesSensitiveDetails() -> void:
 	assert_bool(FileAccess.file_exists(_audit_path_res())).is_false()
 
 
-func test_ReleaseMode_SanitizesErrorMessages() -> void:
+func test_release_mode_sanitizes_error_messages() -> void:
 	_remove_audit_file()
 
 	var probe = await _load_probe()
@@ -188,7 +188,7 @@ func test_ReleaseMode_SanitizesErrorMessages() -> void:
 	assert_bool(found).is_true()
 
 
-func test_SecureMode_NeverLeaksPaths() -> void:
+func test_secure_mode_never_leaks_paths() -> void:
 	_remove_audit_file()
 
 	var probe = await _load_probe()
