@@ -9,7 +9,7 @@ using Game.Core.Contracts;
 using Game.Core.Contracts.Achievements;
 using Game.Core.Contracts.Events;
 using Game.Core.Contracts.Engine;
-using Game.Core.Contracts.GameLoop;
+using Game.Contracts.GameLoop;
 using Game.Core.Contracts.Media;
 using Game.Core.Contracts.Progression;
 using Game.Core.Contracts.Raid;

@@ -187,25 +187,25 @@ public partial class EventBusAdapter : Node, IEventBus
         lock (_recentGate) return _recent.Count;
     }
 
-    public Godot.Collections.Array GetRecentSignalArgs(int max = DefaultRecentEventsMax)
+    public global::Godot.Collections.Array GetRecentSignalArgs(int max = DefaultRecentEventsMax)
     {
-        var arr = new Godot.Collections.Array();
+        var arr = new global::Godot.Collections.Array();
         if (max <= 0) return arr;
 
         lock (_recentGate)
         {
             var take = Math.Min(Math.Max(0, max), _recent.Count);
-            foreach (var e in _recent.Skip(Math.Max(0, _recent.Count - take)))
+            foreach (var recentEvent in _recent.Skip(Math.Max(0, _recent.Count - take)))
             {
-                arr.Add(new Godot.Collections.Array
+                arr.Add(new global::Godot.Collections.Array
                 {
-                    e.Type,
-                    e.Source,
-                    e.DataJson,
-                    e.Id,
-                    e.SpecVersion,
-                    e.DataContentType,
-                    e.TimestampIso,
+                    recentEvent.Type,
+                    recentEvent.Source,
+                    recentEvent.DataJson,
+                    recentEvent.Id,
+                    recentEvent.SpecVersion,
+                    recentEvent.DataContentType,
+                    recentEvent.TimestampIso,
                 });
             }
         }

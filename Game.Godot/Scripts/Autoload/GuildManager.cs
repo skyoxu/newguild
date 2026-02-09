@@ -394,7 +394,7 @@ public partial class GuildManager : Node
                     userId,
                     slot.ToString().ToLowerInvariant(),
                     DateTimeOffset.UtcNow,
-                    assignedByUserId: guild.CreatorId);
+                    AssignedByUserId: guild.CreatorId);
 
                 await _eventBus.PublishAsync(new Game.Core.Contracts.DomainEvent(
                     GuildOfficerAssigned.EventType,

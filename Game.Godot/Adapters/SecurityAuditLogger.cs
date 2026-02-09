@@ -155,7 +155,7 @@ public partial class SecurityAuditLogger : Node
     /// </summary>
     private sealed record AuditLogEntry
     {
-        public DateTime Timestamp { get; init; }
+        public DateTimeOffset Timestamp { get; init; }
         public string EventType { get; init; } = string.Empty;
         public string EventId { get; init; } = string.Empty;
         public string Source { get; init; } = string.Empty;
