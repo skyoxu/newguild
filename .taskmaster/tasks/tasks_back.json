@@ -2053,9 +2053,10 @@
       "Optional: ['集成测试：在 headless Godot 测试或等价 Runner 中触发 week advance，并校验 logs/ci/<date>/security-audit.jsonl 的条目。', '脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。']"
     ],
     "taskmaster_exported": true,
-    "contractRefs": [
-      "core.game_turn.week_advanced"
-    ],
+  "contractRefs": [
+    "core.game_turn.phase_changed",
+    "core.game_turn.week_advanced"
+  ],
     "artifactRefs": [
       "logs/ci/<date>/security-audit.jsonl"
     ],
