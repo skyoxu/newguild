@@ -75,7 +75,7 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
         if (!evt.Type.StartsWith("security.", StringComparison.OrdinalIgnoreCase))
             return false;
 
-        var now = DateTime.UtcNow;
+        var now = DateTimeOffset.UtcNow;
         var ts = evt.Timestamp.ToUniversalTime();
         if (ts < now.AddDays(-1) || ts > now.AddDays(1))
             ts = now;
@@ -487,7 +487,7 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
         return false;
     }
 
-    private sealed record AuditWriteRequest(DomainEvent Event, string DataJson, string LogicalPath, string FullPath, DateTime WrittenAt);
+    private sealed record AuditWriteRequest(DomainEvent Event, string DataJson, string LogicalPath, string FullPath, DateTimeOffset WrittenAt);
 
     private void WriteMetaFilesIfAny()
     {

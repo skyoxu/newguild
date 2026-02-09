@@ -7,10 +7,10 @@ internal static class SecurityAuditFormat
     public const int MaxReasonChars = 500;
     public const int MaxTargetChars = 1000;
 
-    public static DateTime SanitizeEventTimestamp(DateTime eventTimestamp, DateTime writtenAt)
+    public static DateTimeOffset SanitizeEventTimestamp(DateTimeOffset eventTimestamp, DateTimeOffset writtenAt)
     {
-        var now = writtenAt.Kind == DateTimeKind.Utc ? writtenAt : writtenAt.ToUniversalTime();
-        var ts = eventTimestamp.Kind == DateTimeKind.Utc ? eventTimestamp : eventTimestamp.ToUniversalTime();
+        var now = writtenAt.ToUniversalTime();
+        var ts = eventTimestamp.ToUniversalTime();
         if (ts < now.AddDays(-1) || ts > now.AddDays(1))
             return now;
         return ts;

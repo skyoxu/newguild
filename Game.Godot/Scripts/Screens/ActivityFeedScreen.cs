@@ -6,7 +6,7 @@ using Godot;
 using Game.Core.Contracts.AI;
 using Game.Core.Contracts.Content;
 using Game.Core.Contracts.Events;
-using Game.Core.Contracts.GameLoop;
+using Game.Contracts.GameLoop;
 using Game.Core.Contracts.Guild;
 using Game.Core.Contracts.Media;
 using Game.Core.Contracts.Persistence;
