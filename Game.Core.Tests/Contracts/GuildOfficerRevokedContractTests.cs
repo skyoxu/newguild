@@ -7,13 +7,13 @@ namespace Game.Core.Tests.Contracts;
 public class GuildOfficerRevokedContractTests
 {
     [Fact]
-    public void EventType_constant_is_expected()
+    public void EventTypeConstant_ShouldMatchExpectedValue()
     {
         GuildOfficerRevoked.EventType.Should().Be("core.guild.officer.revoked");
     }
 
     [Fact]
-    public void Contract_is_constructible()
+    public void Contract_ShouldBeConstructible()
     {
         var evt = new GuildOfficerRevoked(
             GuildId: "g1",
@@ -29,4 +29,3 @@ public class GuildOfficerRevokedContractTests
         evt.RevokedByUserId.Should().Be("admin1");
     }
 }
-
