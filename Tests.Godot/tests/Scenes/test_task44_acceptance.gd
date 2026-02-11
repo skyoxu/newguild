@@ -35,7 +35,7 @@ func _has_required_audit_fields(entry: Dictionary) -> bool:
 	for key in required_keys:
 		if not entry.has(key):
 			return false
-		var value := entry[key]
+		var value: Variant = entry[key]
 		if typeof(value) != TYPE_STRING:
 			return false
 		if str(value).strip_edges().is_empty():
