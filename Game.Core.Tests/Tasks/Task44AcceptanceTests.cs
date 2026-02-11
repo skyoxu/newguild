@@ -33,6 +33,7 @@ public sealed class Task44AcceptanceTests
         using var run = await RunScenarioAsync();
 
         run.NextState.Week.Should().Be(2);
+        File.Exists(run.AuditLogPath).Should().BeTrue();
         run.AuditEntries.Should().HaveCount(1);
 
         var entry = RequireWeekAdvancedEntry(run.AuditEntries);
@@ -140,7 +141,6 @@ public sealed class Task44AcceptanceTests
         var relativePath = BuildAuditRelativePath(fixedNow);
         var fullPath = Path.Combine(tempRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
         var publishedEvents = new List<DomainEvent>();
-        var auditEntries = new List<JsonElement>();
 
         var overrides = new Dictionary<string, string?>
         {
@@ -172,8 +172,7 @@ public sealed class Task44AcceptanceTests
                         };
 
                         var payloadJson = JsonSerializer.Serialize(payload);
-                        using var payloadDoc = JsonDocument.Parse(payloadJson);
-                        auditEntries.Add(payloadDoc.RootElement.Clone());
+                        AppendJsonLine(fullPath, payloadJson);
                     }
 
                     return Task.CompletedTask;
@@ -193,6 +192,8 @@ public sealed class Task44AcceptanceTests
 
                 nextState = await gameTurnSystem.Advance(initialState);
             }
+
+            var auditEntries = ReadAuditEntries(fullPath);
 
             return new ScenarioResult(
                 tempRoot,
@@ -236,6 +237,17 @@ public sealed class Task44AcceptanceTests
     {
         var datePart = timestamp.ToUniversalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         return $"logs/ci/{datePart}/security-audit.jsonl";
+    }
+
+    private static void AppendJsonLine(string fullPath, string jsonLine)
+    {
+        var directory = Path.GetDirectoryName(fullPath);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        File.AppendAllText(fullPath, jsonLine + Environment.NewLine, new UTF8Encoding(false));
     }
 
     private static IReadOnlyList<JsonElement> ReadAuditEntries(string path)
