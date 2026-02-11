@@ -2001,7 +2001,7 @@
     "story_id": "PH06-GAMELOOP-AUDIT-WEEK-ADVANCED",
     "title": "GameLoop 周推进审计日志（F004）",
     "description": "对应安全审计发现 F004：GameTurnSystem.Advance() 发布 core.game_turn.week_advanced 等事件，但当前 SecurityAuditLogger 未将该关键节点写入 ADR-0019 规定的 security-audit.jsonl。该项为审计可追溯性/合规业务需求（不阻塞 T2），纳入 NG backlog。\n\nEvidence Artifacts (not test_refs):\n- Game.Godot/Adapters/SecurityAuditLogger.cs",
-    "status": "pending",
+    "status": "done",
     "priority": "P3",
     "layer": "adapter",
     "depends_on": [
@@ -2041,7 +2041,7 @@
       "action 使用 core.game_turn.week_advanced（符合 ADR-0004 命名与 validate_audit_logs.py 的 domain.entity.verb 校验）。 Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs",
       "新增至少 1 条集成测试验证：推进一周后审计文件包含 action=core.game_turn.week_advanced 的条目，且不泄露绝对路径等敏感信息。 Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs",
       "应完成：GameLoop 周推进审计日志（F004） Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs",
-      "应有测试：至少包含并通过 test_refs 引用的测试（1 个）。 Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs",
+      "应有测试：至少包含并通过 test_refs 引用的测试（2 个）。 Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs; Tests.Godot/tests/Scenes/test_task44_acceptance.gd",
       "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.game_turn.week_advanced）。 Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs",
       "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/Scenes/test_task44_acceptance.gd",
       "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/Scenes/test_task44_acceptance.gd",
@@ -2053,10 +2053,10 @@
       "Optional: ['集成测试：在 headless Godot 测试或等价 Runner 中触发 week advance，并校验 logs/ci/<date>/security-audit.jsonl 的条目。', '脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。']"
     ],
     "taskmaster_exported": true,
-  "contractRefs": [
-    "core.game_turn.phase_changed",
-    "core.game_turn.week_advanced"
-  ],
+    "contractRefs": [
+      "core.game_turn.phase_changed",
+      "core.game_turn.week_advanced"
+    ],
     "artifactRefs": [
       "logs/ci/<date>/security-audit.jsonl"
     ],

@@ -1581,10 +1581,10 @@
       {
         "id": "44",
         "title": "GameLoop 周推进审计日志（F004）",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "description": "对应安全审计发现 F004：GameTurnSystem.Advance() 发布 core.game_turn.week_advanced 等事件，但当前 SecurityAuditLogger 未将该关键节点写入 ADR-0019 规定的 security-audit.jsonl。该项为审计可追溯性/合规业务需求（不阻塞 T2），纳入 NG backlog。",
-        "details": "Story: PH06-GAMELOOP-AUDIT-WEEK-ADVANCED\nADR Refs: ADR-0019; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH02; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Godot/Adapters/SecurityAuditLogger.cs",
+        "details": "Story: PH06-GAMELOOP-AUDIT-WEEK-ADVANCED\nADR Refs: ADR-0019; ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH02; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs; Tests.Godot/tests/Scenes/test_task44_acceptance.gd",
         "dependencies": [
           "9"
         ],
@@ -1608,7 +1608,8 @@
           "新增至少 1 条集成测试验证：推进一周后审计文件包含 action=core.game_turn.week_advanced 的条目，且不泄露绝对路径等敏感信息。"
         ],
         "testRefs": [
-          "Game.Godot/Adapters/SecurityAuditLogger.cs"
+          "Game.Core.Tests/Tasks/Task44AcceptanceTests.cs",
+          "Tests.Godot/tests/Scenes/test_task44_acceptance.gd"
         ],
         "testStrategy": "['集成测试：在 headless Godot 测试或等价 Runner 中触发 week advance，并校验 logs/ci/<date>/security-audit.jsonl 的条目。', '脚本验证：在 CI 中运行 scripts/python/validate_audit_logs.py --strict，确保新增条目持续合规。']",
         "recommendedSubtasks": 2,
@@ -1619,7 +1620,7 @@
             "description": "Ensure week advance writes ADR-0019 compliant security audit record.",
             "dependencies": [],
             "details": "Implement the audit logging hook on core.game_turn.week_advanced and verify required JSONL fields are present.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use ACC:T44.1 anchor in referenced tests or deterministic evidence output.",
             "parentId": "44",
             "updatedAt": "2026-02-08T09:55:19+00:00",
@@ -1633,7 +1634,7 @@
               1
             ],
             "details": "Bind to ACC:T44.1 in tests/scripts and ensure logs/ci/<date>/security-audit.jsonl is produced.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use ACC:T44.2 anchor in referenced tests or deterministic evidence output.",
             "parentId": "44",
             "updatedAt": "2026-02-08T09:55:19+00:00",

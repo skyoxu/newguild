@@ -1,6 +1,8 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
 const HUD_SCENE_PATH: String = "res://Game.Godot/Scenes/UI/HUD.tscn"
+const EVENT_WEEK_ADVANCED: String = "core.game_turn.week_advanced"
+const EVENT_PHASE_CHANGED: String = "core.game_turn.phase_changed"
 
 var _previous_secure_mode: String = ""
 var _previous_security_test_mode: String = ""
@@ -28,14 +30,57 @@ func _wait_for_event_count(event_type: String, min_count: int, frames: int = 240
 	return false
 
 
-func _wait_for_audit_contains(path: String, token: String, frames: int = 240) -> bool:
+func _has_required_audit_fields(entry: Dictionary) -> bool:
+	var required_keys := ["ts", "action", "reason", "target", "caller"]
+	for key in required_keys:
+		if not entry.has(key):
+			return false
+		var value := entry[key]
+		if typeof(value) != TYPE_STRING:
+			return false
+		if str(value).strip_edges().is_empty():
+			return false
+	return true
+
+
+func _read_audit_entries(path: String) -> Dictionary:
+	var result := {
+		"entries": [],
+		"parse_errors": 0,
+	}
+	if not FileAccess.file_exists(path):
+		return result
+
+	var text := FileAccess.get_file_as_string(path)
+	for line in text.split("\n", false):
+		var trimmed := line.strip_edges()
+		if trimmed.is_empty():
+			continue
+		var parsed = JSON.parse_string(trimmed)
+		if typeof(parsed) == TYPE_DICTIONARY:
+			(result["entries"] as Array).append(parsed)
+		else:
+			result["parse_errors"] = int(result["parse_errors"]) + 1
+
+	return result
+
+
+func _wait_for_audit_entry(path: String, action: String, frames: int = 240) -> Dictionary:
+	var parse_errors := 0
 	for _index in range(frames):
-		if FileAccess.file_exists(path):
-			var text := FileAccess.get_file_as_string(path)
-			if text.contains(token):
-				return true
+		var read_result := _read_audit_entries(path)
+		parse_errors = int(read_result.get("parse_errors", 0))
+		var entries = read_result.get("entries", []) as Array
+		if parse_errors > 0:
+			await get_tree().process_frame
+			continue
+		for entry in entries:
+			if str(entry.get("action", "")) == action and _has_required_audit_fields(entry):
+				return entry
 		await get_tree().process_frame
-	return false
+	if parse_errors > 0:
+		return {"__parse_errors__": parse_errors}
+	return {}
 
 
 func before() -> void:
@@ -126,21 +171,28 @@ func test_ui_state_changes_are_event_driven_by_real_event_bus() -> void:
 	hud.AdvanceTurnFromGd()
 	await get_tree().process_frame
 
-	var got_week_advanced := await _wait_for_event_count("core.game_turn.week_advanced", 1)
-	var got_phase_changed := await _wait_for_event_count("core.game_turn.phase_changed", 1)
+	var got_week_advanced := await _wait_for_event_count(EVENT_WEEK_ADVANCED, 1)
+	var got_phase_changed := await _wait_for_event_count(EVENT_PHASE_CHANGED, 1)
 	assert_bool(got_week_advanced).is_true()
 	assert_bool(got_phase_changed).is_true()
 
 	var after_text := week_label.text
 	assert_bool(after_text.begins_with("Week:")).is_true()
 	assert_bool(after_text != before_text).is_true()
-	assert_bool(_received_event_types.has("core.game_turn.week_advanced")).is_true()
-	assert_bool(_received_event_types.has("core.game_turn.phase_changed")).is_true()
+	assert_bool(_received_event_types.has(EVENT_WEEK_ADVANCED)).is_true()
+	assert_bool(_received_event_types.has(EVENT_PHASE_CHANGED)).is_true()
 
 	var date_utc := Time.get_date_string_from_system(true)
 	var audit_path := "user://logs/ci/%s/security-audit.jsonl" % date_utc
-	assert_bool(await _wait_for_audit_contains(audit_path, "core.game_turn.week_advanced")).is_true()
-	assert_bool(await _wait_for_audit_contains(audit_path, "core.game_turn.phase_changed")).is_true()
+	var week_entry := await _wait_for_audit_entry(audit_path, EVENT_WEEK_ADVANCED)
+	assert_bool(not week_entry.has("__parse_errors__")).is_true()
+	assert_int(week_entry.size()).is_greater(0)
+	assert_bool(_has_required_audit_fields(week_entry)).is_true()
+
+	var phase_entry := await _wait_for_audit_entry(audit_path, EVENT_PHASE_CHANGED)
+	assert_bool(not phase_entry.has("__parse_errors__")).is_true()
+	assert_int(phase_entry.size()).is_greater(0)
+	assert_bool(_has_required_audit_fields(phase_entry)).is_true()
 
 	if bus.is_connected("DomainEventEmitted", callback):
 		bus.disconnect("DomainEventEmitted", callback)
