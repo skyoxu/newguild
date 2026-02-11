@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set CI_DATE (stable per run)
         shell: pwsh
@@ -74,6 +76,72 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+
+      - name: Test naming gate (strict changed-only)
+        shell: pwsh
+        run: |
+          $date = $env:CI_DATE
+          $ciDir = "logs/ci/$date"
+          New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
+
+          $baseRef = ""
+          if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
+            $baseBranch = "${{ github.base_ref }}"
+            if (-not [string]::IsNullOrWhiteSpace($baseBranch)) {
+              git fetch --no-tags --prune --depth=1 origin $baseBranch
+              $baseRef = "origin/$baseBranch"
+            }
+          }
+          elseif ($env:GITHUB_EVENT_NAME -eq 'push') {
+            $before = "${{ github.event.before }}"
+            if (-not [string]::IsNullOrWhiteSpace($before) -and $before -ne "0000000000000000000000000000000000000000") {
+              $baseRef = $before
+            }
+            else {
+              $baseRef = "HEAD~1"
+            }
+          }
+
+          if ([string]::IsNullOrWhiteSpace($baseRef)) {
+            py -3 scripts/python/check_test_naming.py --style gwt_should --changed-only *>&1 | Tee-Object -FilePath "$ciDir/test-naming-stdout.txt"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          else {
+            py -3 scripts/python/check_test_naming.py --style gwt_should --changed-only --base-ref $baseRef *>&1 | Tee-Object -FilePath "$ciDir/test-naming-stdout.txt"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Allowlist growth gate (shrink-only)
+        shell: pwsh
+        run: |
+          $date = $env:CI_DATE
+          $ciDir = "logs/ci/$date"
+          New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
+
+          $baseRef = ""
+          if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
+            $baseBranch = "${{ github.base_ref }}"
+            if (-not [string]::IsNullOrWhiteSpace($baseBranch)) {
+              $baseRef = "origin/$baseBranch"
+            }
+          }
+          elseif ($env:GITHUB_EVENT_NAME -eq 'push') {
+            $before = "${{ github.event.before }}"
+            if (-not [string]::IsNullOrWhiteSpace($before) -and $before -ne "0000000000000000000000000000000000000000") {
+              $baseRef = $before
+            }
+            else {
+              $baseRef = "HEAD~1"
+            }
+          }
+
+          if ([string]::IsNullOrWhiteSpace($baseRef)) {
+            Write-Host "ALLOWLIST_GROWTH gate skipped (no base ref in this event)."
+          }
+          else {
+            py -3 scripts/python/check_allowlist_growth.py --base-ref $baseRef --allow-bootstrap *>&1 | Tee-Object -FilePath "$ciDir/allowlist-growth-stdout.txt"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
 
       - name: "Preflight: audit .git ACL drift (Windows)"
         id: acl_audit

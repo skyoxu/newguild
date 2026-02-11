@@ -6,19 +6,12 @@ using Game.Core.Services;
 
 namespace Game.Core.Engine;
 
-public interface IGameTurnSystem
-{
-    GameTurnState StartNewWeek(SaveIdValue saveId);
-    Task<GameTurnState> Advance(GameTurnState state);
-}
-
 public sealed class GameTurnSystem : IGameTurnSystem
 {
     private readonly IEventEngine _eventEngine;
     private readonly IEventBus _eventBus;
     private readonly ITime _time;
     private readonly IIdGenerator _idGenerator;
-    private bool _firstTurnStarted;
 
     public GameTurnSystem(
         IEventEngine eventEngine,
@@ -30,7 +23,6 @@ public sealed class GameTurnSystem : IGameTurnSystem
         _eventBus = eventBus;
         _time = time;
         _idGenerator = idGenerator ?? new GuidIdGenerator();
-        _firstTurnStarted = false;
     }
 
     public GameTurnState StartNewWeek(SaveIdValue saveId)
@@ -48,9 +40,8 @@ public sealed class GameTurnSystem : IGameTurnSystem
     public async Task<GameTurnState> Advance(GameTurnState state)
     {
         // Publish GameTurnStarted event only on first turn
-        if (!_firstTurnStarted)
+        if (state.Week == 1 && state.Phase == GameTurnPhase.Resolution)
         {
-            _firstTurnStarted = true;
             var startedEvent = WrapEvent(new GameTurnStarted(
                 SaveId: state.SaveId,
                 Week: state.Week,
@@ -113,7 +104,7 @@ public sealed class GameTurnSystem : IGameTurnSystem
             Type: eventType,
             Source: "GameTurnSystem",
             Data: data,
-            Timestamp: now.UtcDateTime,
+            Timestamp: now,
             Id: _idGenerator.NewId()
         );
     }

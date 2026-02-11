@@ -10,11 +10,6 @@ using Game.Core.Services;
 
 namespace Game.Core.Engine;
 
-public interface IAICoordinator
-{
-    IReadOnlyList<DomainEvent> GenerateAiEvents(GameTurnState state);
-}
-
 public sealed class AICoordinator : IAICoordinator
 {
     private const string JoinIntentType = "core.guild.member.join";
