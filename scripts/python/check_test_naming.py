@@ -8,8 +8,13 @@ Rules:
 - C# xUnit methods:
   - PascalCase
   - PascalCase_With_Underscores (for readable scenario-style names)
+  - Optional strict behavior style (Given_When_Then or Should_)
 - GdUnit methods:
   - test_snake_case (method name starts with ``test_``)
+
+Additional capabilities:
+- Legacy allowlist support (file/method granularity)
+- Changed-only mode for CI/PR incremental enforcement
 
 The script supports legacy CI invocations like:
     py -3 scripts/python/check_test_naming.py --task-id 44 --style strict
@@ -18,12 +23,19 @@ Unknown CLI arguments are ignored for backward compatibility.
 """
 
 import argparse
+import fnmatch
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, List, Sequence, Tuple
 
 Violation = Tuple[int, str, str]
+AllowlistEntry = Tuple[str, str]
+
+
+class GitCommandError(RuntimeError):
+    """Raised when a git command required by changed-only mode fails."""
 
 
 def is_pascal_case(name: str) -> bool:
@@ -72,6 +84,110 @@ def is_allowed_test_method_name(name: str) -> bool:
     return is_pascal_case(name) or is_pascal_case_with_underscores(name)
 
 
+def is_given_when_then_name(name: str) -> bool:
+    """Return True if method name follows Given_When_Then style."""
+    pattern = r'^Given[A-Za-z0-9]+_When[A-Za-z0-9]+_Then[A-Za-z0-9]+$'
+    return bool(re.match(pattern, name))
+
+
+def is_should_style_name(name: str) -> bool:
+    """Return True if method name follows Should_ style."""
+    return name.startswith('Should_') or '_Should_' in name or name.endswith('_Should')
+
+
+def normalize_style_mode(style: str | None) -> str:
+    """Normalize style argument while preserving backward compatibility.
+
+    - legacy: existing permissive mode (PascalCase or PascalCase_With_Underscores)
+    - gwt_should: strict behavior mode (Given_When_Then or Should_)
+    """
+    raw = (style or 'strict').strip().lower().replace('-', '_')
+    if raw in {'strict', 'legacy', 'pascal', 'compat'}:
+        return 'legacy'
+    if raw in {'gwt_should', 'behavior', 'scenario', 'strict_behavior'}:
+        return 'gwt_should'
+    return 'legacy'
+
+
+def is_allowed_test_method_name_by_style(name: str, style_mode: str) -> bool:
+    """Validate test method name according to selected style mode."""
+    if style_mode == 'gwt_should':
+        return is_given_when_then_name(name) or is_should_style_name(name)
+    return is_allowed_test_method_name(name)
+
+
+def run_git(project_root: Path, args: Sequence[str]) -> List[str]:
+    """Run git command and return normalized path list.
+
+    Raises GitCommandError when git is unavailable or command fails.
+    """
+    command = ['git', *args]
+    try:
+        output = subprocess.check_output(
+            command,
+            cwd=project_root,
+            text=True,
+            encoding='utf-8',
+            stderr=subprocess.STDOUT,
+        )
+    except subprocess.CalledProcessError as exception:  # pragma: no cover - defensive
+        stderr = (exception.output or '').strip()
+        if len(stderr) > 400:
+            stderr = stderr[:400] + '...'
+        raise GitCommandError(
+            f"git command failed: {' '.join(command)} (exit={exception.returncode})"
+            + (f" output={stderr}" if stderr else '')
+        ) from exception
+    except FileNotFoundError as exception:  # pragma: no cover - defensive
+        raise GitCommandError('git executable not found in PATH') from exception
+    except Exception as exception:  # pragma: no cover - defensive
+        raise GitCommandError(f'git command failed unexpectedly: {exception}') from exception
+
+    return [line.strip().replace('\\', '/') for line in output.splitlines() if line.strip()]
+
+
+def collect_changed_repo_paths(project_root: Path, base_ref: str | None) -> List[str]:
+    """Collect changed paths for changed-only mode."""
+    paths: set[str] = set()
+
+    if base_ref:
+        paths.update(run_git(project_root, ['diff', '--name-only', '--diff-filter=ACMRTUXB', f'{base_ref}...HEAD']))
+    else:
+        paths.update(run_git(project_root, ['diff', '--name-only', '--diff-filter=ACMRTUXB', '--cached']))
+        paths.update(run_git(project_root, ['diff', '--name-only', '--diff-filter=ACMRTUXB']))
+        paths.update(run_git(project_root, ['ls-files', '--others', '--exclude-standard']))
+
+    return sorted(paths)
+
+
+def collect_changed_test_paths(
+    project_root: Path,
+    csharp_test_dir: Path,
+    gdunit_test_dir: Path,
+    base_ref: str | None,
+) -> set[str]:
+    """Return changed test file paths (repo-relative POSIX style)."""
+    changed_paths = collect_changed_repo_paths(project_root, base_ref)
+    selected: set[str] = set()
+
+    csharp_root = csharp_test_dir.resolve()
+    gdunit_root = gdunit_test_dir.resolve()
+
+    for rel in changed_paths:
+        absolute = (project_root / rel).resolve()
+        if not absolute.exists() or not absolute.is_file():
+            continue
+
+        if absolute.suffix.lower() == '.cs' and absolute.name.endswith('Tests.cs') and absolute.is_relative_to(csharp_root):
+            selected.add(rel)
+            continue
+
+        if absolute.suffix.lower() == '.gd' and absolute.is_relative_to(gdunit_root):
+            selected.add(rel)
+
+    return selected
+
+
 def extract_test_methods(file_path: Path) -> List[Tuple[int, str]]:
     """
     Extract test method names and their line numbers from a C# test file.
@@ -114,7 +230,12 @@ def extract_test_methods(file_path: Path) -> List[Tuple[int, str]]:
     return test_methods
 
 
-def scan_csharp_test_files(test_dir: Path) -> Dict[Path, List[Violation]]:
+def scan_csharp_test_files(
+    test_dir: Path,
+    project_root: Path,
+    style_mode: str,
+    target_rel_paths: set[str] | None = None,
+) -> Dict[Path, List[Violation]]:
     """
     Scan all test files and find naming violations.
 
@@ -130,16 +251,24 @@ def scan_csharp_test_files(test_dir: Path) -> Dict[Path, List[Violation]]:
     test_files = list(test_dir.rglob('*Tests.cs'))
 
     for test_file in sorted(test_files):
+        rel_path = test_file.relative_to(project_root).as_posix()
+        if target_rel_paths is not None and rel_path not in target_rel_paths:
+            continue
+
         test_methods = extract_test_methods(test_file)
         file_violations: List[Violation] = []
 
         for line_num, method_name in test_methods:
-            if not is_allowed_test_method_name(method_name):
+            if not is_allowed_test_method_name_by_style(method_name, style_mode):
                 file_violations.append(
                     (
                         line_num,
                         method_name,
-                        "not approved; expected PascalCase or PascalCase_With_Underscores",
+                        (
+                            "not approved; expected Given_When_Then or Should_ style"
+                            if style_mode == 'gwt_should'
+                            else "not approved; expected PascalCase or PascalCase_With_Underscores"
+                        ),
                     )
                 )
 
@@ -173,12 +302,20 @@ def is_allowed_gdunit_test_name(name: str) -> bool:
     return bool(re.match(r'^test_[a-z0-9_]+$', name))
 
 
-def scan_gdunit_test_files(test_dir: Path) -> Dict[Path, List[Violation]]:
+def scan_gdunit_test_files(
+    test_dir: Path,
+    project_root: Path,
+    target_rel_paths: set[str] | None = None,
+) -> Dict[Path, List[Violation]]:
     """Scan GdUnit files and validate test function naming."""
     violations: Dict[Path, List[Violation]] = {}
 
     gd_files = sorted(test_dir.rglob('*.gd'))
     for gd_file in gd_files:
+        rel_path = gd_file.relative_to(project_root).as_posix()
+        if target_rel_paths is not None and rel_path not in target_rel_paths:
+            continue
+
         functions = extract_gdscript_functions(gd_file)
         file_violations: List[Violation] = []
 
@@ -211,24 +348,122 @@ def merge_violations(*groups: Dict[Path, List[Violation]]) -> Dict[Path, List[Vi
     return merged
 
 
+def load_allowlist(file_path: Path) -> List[AllowlistEntry]:
+    """Load allowlist entries from UTF-8 text file.
+
+    Format:
+      - "relative/path/to/file.cs::MethodName"
+      - "relative/path/**/*.cs::Method*"
+      - "relative/path/to/file.cs" (equivalent to "::*")
+    """
+    if not file_path.exists():
+        return []
+
+    entries: List[AllowlistEntry] = []
+    try:
+        for raw_line in file_path.read_text(encoding='utf-8').splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith('#'):
+                continue
+
+            if '::' in line:
+                path_pattern, method_pattern = line.split('::', 1)
+            else:
+                path_pattern, method_pattern = line, '*'
+
+            path_pattern = path_pattern.strip().replace('\\', '/')
+            method_pattern = method_pattern.strip() or '*'
+            if path_pattern:
+                entries.append((path_pattern, method_pattern))
+    except Exception as exception:  # pragma: no cover - defensive
+        print(f"Error loading allowlist {file_path}: {exception}", file=sys.stderr)
+        return []
+
+    return entries
+
+
+def is_allowlisted(relative_path: str, method_name: str, entries: Sequence[AllowlistEntry]) -> bool:
+    """Return True if file/method pair matches any allowlist entry."""
+    for path_pattern, method_pattern in entries:
+        if fnmatch.fnmatch(relative_path, path_pattern) and fnmatch.fnmatch(method_name, method_pattern):
+            return True
+    return False
+
+
+def apply_allowlist(
+    violations: Dict[Path, List[Violation]],
+    project_root: Path,
+    entries: Sequence[AllowlistEntry],
+) -> Tuple[Dict[Path, List[Violation]], int]:
+    """Filter violations by allowlist entries and return remaining violations with skipped count."""
+    if not entries:
+        return violations, 0
+
+    filtered: Dict[Path, List[Violation]] = {}
+    skipped = 0
+
+    for file_path, items in violations.items():
+        rel_path = file_path.relative_to(project_root).as_posix()
+        keep: List[Violation] = []
+        for line_num, method_name, reason in items:
+            if is_allowlisted(rel_path, method_name, entries):
+                skipped += 1
+                continue
+            keep.append((line_num, method_name, reason))
+
+        if keep:
+            filtered[file_path] = keep
+
+    return filtered, skipped
+
+
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     """Parse CLI arguments while keeping backward compatibility."""
     parser = argparse.ArgumentParser(description='Validate test naming conventions.')
     parser.add_argument('--task-id', default=None, help='Optional task id for CI compatibility.')
     parser.add_argument('--style', default='strict', help='Naming style mode (kept for compatibility).')
+    parser.add_argument('--allowlist', default=None, help='Optional allowlist path for legacy tests.')
+    parser.add_argument('--changed-only', action='store_true', help='Validate only changed test files.')
+    parser.add_argument('--base-ref', default=None, help='Base git ref for changed-only mode (e.g. origin/main).')
     args, _unknown = parser.parse_known_args(argv)
     return args
 
 
 def main():
     """Main entry point for the script."""
-    _args = parse_args(sys.argv[1:])
+    args = parse_args(sys.argv[1:])
 
     # Determine project root (script is in scripts/python/)
     script_dir = Path(__file__).parent
     project_root = script_dir.parent.parent
     csharp_test_dir = project_root / 'Game.Core.Tests'
     gdunit_test_dir = project_root / 'Tests.Godot' / 'tests'
+    style_mode = normalize_style_mode(args.style)
+
+    if args.allowlist:
+        allowlist_path = Path(args.allowlist)
+    else:
+        allowlist_path = (
+            script_dir / 'check_test_naming.strict.allowlist.txt'
+            if style_mode == 'gwt_should'
+            else script_dir / 'check_test_naming.allowlist.txt'
+        )
+
+    allowlist_entries = load_allowlist(allowlist_path)
+
+    target_rel_paths: set[str] | None = None
+    if args.changed_only:
+        try:
+            target_rel_paths = collect_changed_test_paths(
+                project_root=project_root,
+                csharp_test_dir=csharp_test_dir,
+                gdunit_test_dir=gdunit_test_dir,
+                base_ref=args.base_ref,
+            )
+        except GitCommandError as exception:
+            print(f"[FAIL] changed-only git source failed: {exception}", file=sys.stderr)
+            print('[FAIL] changed-only gate is fail-closed to avoid false green.', file=sys.stderr)
+            return 2
 
     if not csharp_test_dir.exists():
         print(f"Error: C# test directory not found: {csharp_test_dir}", file=sys.stderr)
@@ -237,19 +472,44 @@ def main():
     print('Scanning test naming conventions...')
     print(f'C# test directory: {csharp_test_dir}')
     print(f'GdUnit test directory: {gdunit_test_dir}')
+    print(f'[INFO] Style mode: {style_mode}')
+    if args.changed_only:
+        base_text = args.base_ref if args.base_ref else 'worktree(index+unstaged+untracked)'
+        print(f'[INFO] Changed-only mode enabled (base: {base_text})')
+        print(f'[INFO] Selected changed test files: {len(target_rel_paths)}')
+        if len(target_rel_paths) == 0:
+            print('[INFO] No changed test files selected by changed-only filter.')
     print()
 
-    csharp_violations = scan_csharp_test_files(csharp_test_dir)
+    csharp_violations = scan_csharp_test_files(
+        csharp_test_dir,
+        project_root=project_root,
+        style_mode=style_mode,
+        target_rel_paths=target_rel_paths,
+    )
     gdunit_violations: Dict[Path, List[Violation]] = {}
 
     if gdunit_test_dir.exists():
-        gdunit_violations = scan_gdunit_test_files(gdunit_test_dir)
+        gdunit_violations = scan_gdunit_test_files(
+            gdunit_test_dir,
+            project_root=project_root,
+            target_rel_paths=target_rel_paths,
+        )
 
     violations = merge_violations(csharp_violations, gdunit_violations)
+    violations, skipped_count = apply_allowlist(violations, project_root, allowlist_entries)
+
+    if allowlist_entries:
+        print(f'[INFO] Loaded naming allowlist entries: {len(allowlist_entries)} ({allowlist_path})')
+        print(f'[INFO] Skipped violations by allowlist: {skipped_count}')
+        print()
 
     if not violations:
         print('[OK] All test methods follow approved naming conventions')
-        print('[OK] C# tests: PascalCase or PascalCase_With_Underscores')
+        if style_mode == 'gwt_should':
+            print('[OK] C# tests: Given_When_Then or Should_ style')
+        else:
+            print('[OK] C# tests: PascalCase or PascalCase_With_Underscores')
         print('[OK] GdUnit tests: test_snake_case (test_*)')
         print("[OK] No violations found")
         return 0
@@ -270,9 +530,15 @@ def main():
     print(f"Total violations: {total_violations}")
     print()
     print('Fix these violations by renaming methods to an approved pattern:')
-    print('  - C# PascalCase: GivenNoState_WhenSaveGame_ThenThrowsInvalidOperationException')
-    print('  - C# PascalCase_With_Underscores: SaveGame_WhenStateMissing_ShouldThrowInvalidOperationException')
+    if style_mode == 'gwt_should':
+        print('  - C# Given_When_Then: GivenNoState_WhenSaveGame_ThenThrowsInvalidOperationException')
+        print('  - C# Should_: SaveGame_WhenStateMissing_ShouldThrowInvalidOperationException')
+    else:
+        print('  - C# PascalCase: GivenNoState_WhenSaveGame_ThenThrowsInvalidOperationException')
+        print('  - C# PascalCase_With_Underscores: SaveGame_WhenStateMissing_ShouldThrowInvalidOperationException')
     print('  - GdUnit test_snake_case: test_save_load_roundtrip_persists_state')
+    if allowlist_entries:
+        print(f'  - Legacy skip via allowlist: {allowlist_path}')
 
     return 1
 

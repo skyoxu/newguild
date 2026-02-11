@@ -1,0 +1,6 @@
+# Legacy test naming allowlist
+# Auto-generated for gradual migration to stricter naming style.
+# Format: relative/path/to/file::MethodName or glob::Method*
+# Keep this file UTF-8 and version-controlled.
+
+Game.Core.Tests/Domain/SaveIdValueTests.cs::Constructor_rejects_invalid_ids

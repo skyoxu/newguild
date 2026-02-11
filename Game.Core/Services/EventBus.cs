@@ -3,12 +3,6 @@ using Game.Core.Ports;
 
 namespace Game.Core.Services;
 
-public interface IEventBus
-{
-    Task PublishAsync(DomainEvent evt);
-    IDisposable Subscribe(Func<DomainEvent, Task> handler);
-}
-
 public class InMemoryEventBus : IEventBus
 {
     private readonly List<Func<DomainEvent, Task>> _handlers = new();

@@ -9,13 +9,6 @@ using Game.Core.Services;
 
 namespace Game.Core.Engine;
 
-public interface IEventEngine
-{
-    Task<GameTurnState> ExecuteResolutionPhaseAsync(GameTurnState state);
-    Task<GameTurnState> ExecutePlayerPhaseAsync(GameTurnState state);
-    Task<GameTurnState> ExecuteAiPhaseAsync(GameTurnState state);
-}
-
 public sealed class EventEngine : IEventEngine
 {
     private readonly IEventCatalog _eventCatalog;

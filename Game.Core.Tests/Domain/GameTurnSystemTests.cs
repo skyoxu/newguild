@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Game.Contracts.GameLoop;
 using Game.Core.Contracts;
 using Game.Core.Domain.Turn;
 using Game.Core.Engine;
@@ -84,7 +85,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public void StartNewWeek_Initializes_Week_And_Phase()
+    public void Should_StartNewWeek_Initialize_Week_And_Phase()
     {
         // Arrange
         var system = CreateSystem();
@@ -101,7 +102,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public void StartNewWeek_Should_Require_SaveIdValue_As_Input_Type()
+    public void Should_StartNewWeek_Require_SaveIdValue_As_Input_Type()
     {
         var method = typeof(GameTurnSystem).GetMethod(nameof(GameTurnSystem.StartNewWeek));
         method.Should().NotBeNull();
@@ -112,7 +113,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_Moves_From_Resolution_To_Player_Phase()
+    public async Task Should_Advance_From_Resolution_To_Player_Phase()
     {
         // Arrange
         var system = CreateSystem();
@@ -132,7 +133,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_Moves_From_Player_To_Ai_Phase()
+    public async Task Should_Advance_From_Player_To_Ai_Phase()
     {
         // Arrange
         var system = CreateSystem();
@@ -152,7 +153,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_Moves_From_Ai_Phase_To_Next_Week_Resolution()
+    public async Task Should_Advance_From_Ai_Phase_To_Next_Week_Resolution()
     {
         // Arrange
         var system = CreateSystem();
@@ -172,7 +173,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Full_Week_Cycle_From_Start_New_Week_Advances_To_Week_Two_Resolution()
+    public async Task Should_Advance_Week_Cycle_From_NewWeek_To_WeekTwo_Resolution()
     {
         // Arrange
         var system = CreateSystem();
@@ -200,7 +201,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_PropagatesException_FromResolutionPhase()
+    public async Task Should_PropagateException_When_Advance_FromResolutionPhase()
     {
         // Arrange
         var expectedException = new InvalidOperationException("Resolution phase failed");
@@ -223,7 +224,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_PropagatesException_FromPlayerPhase()
+    public async Task Should_PropagateException_When_Advance_FromPlayerPhase()
     {
         // Arrange
         var expectedException = new InvalidOperationException("Player phase failed");
@@ -246,7 +247,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_PropagatesException_FromAiPhase()
+    public async Task Should_PropagateException_When_Advance_FromAiPhase()
     {
         // Arrange
         var expectedException = new InvalidOperationException("AI phase failed");
@@ -268,8 +269,9 @@ public class GameTurnSystemTests
         exception.Message.Should().Be("AI phase failed");
     }
 
+    // ACC:T45.7
     [Fact]
-    public async Task Advance_Publishes_GameTurnStarted_Event_At_Start_Of_First_Turn()
+    public async Task Should_Publish_GameTurnStarted_When_Advance_FirstTurn()
     {
         // Arrange
         var eventBus = new CapturingEventBus();
@@ -291,7 +293,74 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_Publishes_GameTurnPhaseChanged_When_Transitioning_Resolution_To_Player()
+    public async Task Should_NotPublish_GameTurnStarted_When_WeekOne_NotResolutionPhase()
+    {
+        // Arrange
+        var eventBus = new CapturingEventBus();
+        var engine = new DummyEventEngine();
+        var time = new FakeTime();
+        var system = new GameTurnSystem(engine, eventBus, time);
+        var state = new GameTurnState(
+            Week: 1,
+            Phase: GameTurnPhase.Player,
+            SaveId: new SaveIdValue("save-1"),
+            CurrentTime: DateTimeOffset.UtcNow
+        );
+
+        // Act
+        _ = await system.Advance(state);
+
+        // Assert
+        eventBus.Published.Should().NotContain(e => GetEventType(e) == "core.game_turn.started");
+    }
+
+    [Fact]
+    public async Task Should_NotPublish_GameTurnStarted_When_Week_GreaterThanOne()
+    {
+        // Arrange
+        var eventBus = new CapturingEventBus();
+        var engine = new DummyEventEngine();
+        var time = new FakeTime();
+        var system = new GameTurnSystem(engine, eventBus, time);
+        var state = new GameTurnState(
+            Week: 2,
+            Phase: GameTurnPhase.Resolution,
+            SaveId: new SaveIdValue("save-2"),
+            CurrentTime: DateTimeOffset.UtcNow
+        );
+
+        // Act
+        _ = await system.Advance(state);
+
+        // Assert
+        eventBus.Published.Should().NotContain(e => GetEventType(e) == "core.game_turn.started");
+    }
+
+    [Fact]
+    public async Task Should_Keep_State_Unchanged_When_Advance_Phase_Unknown()
+    {
+        // Arrange
+        var eventBus = new CapturingEventBus();
+        var engine = new DummyEventEngine();
+        var time = new FakeTime();
+        var system = new GameTurnSystem(engine, eventBus, time);
+        var state = new GameTurnState(
+            Week: 3,
+            Phase: (GameTurnPhase)999,
+            SaveId: new SaveIdValue("save-unknown"),
+            CurrentTime: DateTimeOffset.UtcNow
+        );
+
+        // Act
+        var next = await system.Advance(state);
+
+        // Assert
+        next.Should().Be(state);
+        eventBus.Published.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Publish_GameTurnPhaseChanged_When_Resolution_To_Player()
     {
         // Arrange
         var eventBus = new CapturingEventBus();
@@ -318,7 +387,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Advance_Publishes_GameWeekAdvanced_When_Completing_Full_Turn_Cycle()
+    public async Task Should_Publish_GameWeekAdvanced_When_Completing_FullTurnCycle()
     {
         // Arrange
         var eventBus = new CapturingEventBus();
@@ -344,8 +413,9 @@ public class GameTurnSystemTests
         weekAdvanced.CurrentWeek.Should().Be(2);
     }
 
+    // ACC:T45.6
     [Fact]
-    public async Task Full_Turn_Cycle_Publishes_Correct_Event_Sequence()
+    public async Task Should_Publish_Correct_Event_Sequence_When_FullTurnCycle()
     {
         // Arrange
         var eventBus = new CapturingEventBus();
@@ -393,7 +463,7 @@ public class GameTurnSystemTests
     [InlineData("")]  // Empty string
     [InlineData("   ")]  // Whitespace only
     [InlineData(null)]  // Null
-    public void StartNewWeek_RejectsNullOrEmptySaveId(string? invalidSaveId)
+    public void Should_Reject_NullOrEmpty_SaveId_When_StartNewWeek(string? invalidSaveId)
     {
         // Arrange & Act
         var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(invalidSaveId!));
@@ -407,7 +477,7 @@ public class GameTurnSystemTests
     [InlineData("valid-save-123")]  // Valid with hyphens
     [InlineData("ABC_def-789")]  // Valid with underscores and hyphens
     [InlineData("0123456789012345678901234567890123456789012345678901234567890123")]  // Maximum valid length (64 chars)
-    public void StartNewWeek_AcceptsValidSaveId(string validSaveId)
+    public void Should_Accept_Valid_SaveId_When_StartNewWeek(string validSaveId)
     {
         // Arrange
         var system = CreateSystem();
@@ -423,7 +493,7 @@ public class GameTurnSystemTests
     [Theory]
     [InlineData("01234567890123456789012345678901234567890123456789012345678901234")]  // 65 chars - too long
     [InlineData("this-is-a-very-long-save-id-that-exceeds-the-maximum-allowed-length-of-64-characters")]  // Way too long
-    public void StartNewWeek_RejectsOverlongSaveId(string overlongSaveId)
+    public void Should_Reject_Overlong_SaveId_When_StartNewWeek(string overlongSaveId)
     {
         // Act
         var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(overlongSaveId));
@@ -436,7 +506,7 @@ public class GameTurnSystemTests
     [InlineData("'; DROP TABLE saves--")]  // SQL injection attempt
     [InlineData("1' UNION SELECT * FROM users--")]  // SQL union injection
     [InlineData("admin'--")]  // SQL comment injection
-    public void StartNewWeek_RejectsSqlInjectionPatterns(string sqlInjectionPattern)
+    public void Should_Reject_SqlInjection_Patterns_When_StartNewWeek(string sqlInjectionPattern)
     {
         // Act
         var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(sqlInjectionPattern));
@@ -449,7 +519,7 @@ public class GameTurnSystemTests
     [InlineData("../../etc/passwd")]  // Unix path traversal
     [InlineData("..\\..\\Windows\\System32")]  // Windows path traversal
     [InlineData("../../../secrets")]  // Relative path traversal
-    public void StartNewWeek_RejectsPathTraversalPatterns(string pathTraversalPattern)
+    public void Should_Reject_PathTraversal_Patterns_When_StartNewWeek(string pathTraversalPattern)
     {
         // Act
         var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(pathTraversalPattern));
@@ -464,7 +534,7 @@ public class GameTurnSystemTests
     [InlineData("save\nid\r\nwith\nnewlines")]  // Newlines
     [InlineData("save<script>alert('xss')</script>")]  // XSS attempt
     [InlineData("save|id&cmd")]  // Shell metacharacters
-    public void StartNewWeek_RejectsInvalidCharacters(string invalidCharsPattern)
+    public void Should_Reject_InvalidCharacters_When_StartNewWeek(string invalidCharsPattern)
     {
         // Act
         var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(invalidCharsPattern));
@@ -474,7 +544,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public void GameTurnState_SaveId_ShouldUseSaveIdValueType()
+    public void Should_Use_SaveIdValueType_For_GameTurnState_SaveId()
     {
         // Arrange & Act - RED: This will fail because GameTurnState.SaveId is currently string
         // We want to verify that SaveId is of type SaveIdValue, not string
@@ -485,5 +555,108 @@ public class GameTurnSystemTests
         saveIdProperty.Should().NotBeNull();
         saveIdProperty!.PropertyType.Should().Be(typeof(SaveIdValue),
             "SaveId should use SaveIdValue type for type-safe validation (ADR-0019)");
+    }
+
+    // ACC:T45.2
+    [Fact]
+    public void Should_NotRequire_IAICoordinator_Dependency_In_GameTurnSystem()
+    {
+        // Arrange
+        var constructor = typeof(GameTurnSystem)
+            .GetConstructors()
+            .Single();
+
+        // Act
+        var parameterTypes = constructor
+            .GetParameters()
+            .Select(parameter => parameter.ParameterType)
+            .ToList();
+
+        // Assert
+        parameterTypes.Should().Contain(typeof(IEventEngine));
+        parameterTypes.Should().Contain(typeof(IEventBus));
+        parameterTypes.Should().Contain(typeof(ITime));
+        parameterTypes.Should().NotContain(typeof(IAICoordinator),
+            "GameTurnSystem constructor should not require IAICoordinator dependency");
+    }
+
+    // ACC:T45.3
+    [Fact]
+    public async Task Should_Publish_GameTurnStarted_Per_NewState_Without_HiddenFlag()
+    {
+        // Arrange
+        var eventBus = new CapturingEventBus();
+        var engine = new DummyEventEngine();
+        var time = new FakeTime();
+        var system = new GameTurnSystem(engine, eventBus, time);
+
+        var firstState = new GameTurnState(
+            Week: 1,
+            Phase: GameTurnPhase.Resolution,
+            SaveId: new SaveIdValue("save-first"),
+            CurrentTime: DateTimeOffset.UtcNow
+        );
+
+        var secondState = new GameTurnState(
+            Week: 1,
+            Phase: GameTurnPhase.Resolution,
+            SaveId: new SaveIdValue("save-second"),
+            CurrentTime: DateTimeOffset.UtcNow
+        );
+
+        // Act
+        _ = await system.Advance(firstState);
+        _ = await system.Advance(secondState);
+
+        // Assert
+        eventBus.Published
+            .Count(eventItem => GetEventType(eventItem) == GameTurnStarted.EventType)
+            .Should().Be(2,
+                "start event emission should be derived from input state, not hidden mutable instance flags");
+    }
+
+    // ACC:T45.4
+    [Fact]
+    public void Should_Use_DateTimeOffset_For_DomainEvent_Timestamp()
+    {
+        // Arrange
+        var timestampProperty = typeof(DomainEvent).GetProperty(nameof(DomainEvent.Timestamp));
+
+        // Assert
+        timestampProperty.Should().NotBeNull();
+        timestampProperty!.PropertyType.Should().Be(typeof(DateTimeOffset));
+    }
+
+    // ACC:T45.1
+    // ACC:T45.5
+    // ACC:T45.8
+    [Fact]
+    public void Should_Converge_GameLoop_Interfaces_To_Ports_Namespace()
+    {
+        // Arrange
+        var coreAssembly = typeof(GameTurnSystem).Assembly;
+
+        // Act
+        var engineNamespace = typeof(GameTurnSystem).Namespace;
+        var eventEngineNamespace = typeof(EventEngine).Namespace;
+        var aiCoordinatorNamespace = typeof(AICoordinator).Namespace;
+
+        var interfaceTypes = coreAssembly.GetTypes()
+            .Where(type => type.IsInterface)
+            .Where(type => type.Name is nameof(IGameTurnSystem) or nameof(IEventEngine) or nameof(IAICoordinator) or nameof(IEventBus))
+            .ToList();
+
+        // Assert
+        engineNamespace.Should().Be("Game.Core.Engine");
+        eventEngineNamespace.Should().Be("Game.Core.Engine");
+        aiCoordinatorNamespace.Should().Be("Game.Core.Engine");
+
+        interfaceTypes.Should().HaveCount(4);
+        interfaceTypes.Should().OnlyContain(type => type.Namespace == "Game.Core.Ports");
+
+        object.ReferenceEquals(typeof(IGameTurnSystem).Assembly, coreAssembly).Should().BeTrue();
+        object.ReferenceEquals(typeof(IEventEngine).Assembly, coreAssembly).Should().BeTrue();
+        object.ReferenceEquals(typeof(IAICoordinator).Assembly, coreAssembly).Should().BeTrue();
+        object.ReferenceEquals(typeof(IEventBus).Assembly, coreAssembly).Should().BeTrue();
     }
 }

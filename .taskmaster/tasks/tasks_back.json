@@ -1766,7 +1766,7 @@
     "story_id": "PH07-GAMELOOP-ARCH-REFINE",
     "title": "GameLoop 架构骨架收敛：Ports/时间/状态整理",
     "description": "根据 cifix.txt 的建议，围绕 GameLoop 相关代码完成一轮轻量级架构收敛：将 IAICoordinator/IEventEngine/IGameTurnSystem/IEventBus 等接口统一归档到 Ports 命名空间；移除当前未使用的 ITime/IAICoordinator 依赖或明确使用场景；将 _firstTurnStarted 等可变实例状态迁移到 GameTurnState 等不可变记录类型中；并统一使用 DateTimeOffset 表达时间语义。\n\nEvidence Artifacts (not test_refs):\n- Game.Core/Engine/GameTurnSystem.cs\n- Game.Core/Domain/Turn/GameTurnState.cs\n- Game.Core/Contracts/DomainEvent.cs",
-    "status": "pending",
+    "status": "done",
     "priority": "P2",
     "layer": "core",
     "depends_on": [
@@ -1815,7 +1815,9 @@
     ],
     "taskmaster_exported": true,
     "contractRefs": [
-      "core.game_turn.started"
+      "core.game_turn.started",
+      "core.game_turn.phase_changed",
+      "core.game_turn.week_advanced"
     ],
     "artifactRefs": [],
     "taskmaster_id": 45

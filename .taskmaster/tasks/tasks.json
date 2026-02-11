@@ -1647,7 +1647,7 @@
       {
         "id": "45",
         "title": "GameLoop 架构骨架收敛：Ports/时间/状态整理",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "description": "根据 cifix.txt 的建议，围绕 GameLoop 相关代码完成一轮轻量级架构收敛：将 IAICoordinator/IEventEngine/IGameTurnSystem/IEventBus 等接口统一归档到 Ports 命名空间；移除当前未使用的 ITime/IAICoordinator 依赖或明确使用场景；将 _firstTurnStarted 等可变实例状态迁移到 GameTurnState 等不可变记录类型中；并统一使用 DateTimeOffset 表达时间语义。",
         "details": "Story: PH07-GAMELOOP-ARCH-REFINE\nADR Refs: ADR-0007; ADR-0005; ADR-0018\nChapters: CH01; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core/Engine/GameTurnSystem.cs; Game.Core/Domain/Turn/GameTurnState.cs; Game.Core/Contracts/DomainEvent.cs; Game.Core.Tests/Domain/GameTurnSystemTests.cs",
