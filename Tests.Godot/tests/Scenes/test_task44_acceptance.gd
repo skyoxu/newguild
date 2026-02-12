@@ -83,6 +83,16 @@ func _wait_for_audit_entry(path: String, action: String, frames: int = 240) -> D
 	return {}
 
 
+func _count_audit_entries(path: String, action: String) -> int:
+	var read_result := _read_audit_entries(path)
+	var entries = read_result.get("entries", []) as Array
+	var count := 0
+	for entry in entries:
+		if str(entry.get("action", "")) == action and _has_required_audit_fields(entry):
+			count += 1
+	return count
+
+
 func before() -> void:
 	_previous_secure_mode = OS.get_environment("GD_SECURE_MODE")
 	_previous_security_test_mode = OS.get_environment("SECURITY_TEST_MODE")
@@ -193,6 +203,50 @@ func test_ui_state_changes_are_event_driven_by_real_event_bus() -> void:
 	assert_bool(not phase_entry.has("__parse_errors__")).is_true()
 	assert_int(phase_entry.size()).is_greater(0)
 	assert_bool(_has_required_audit_fields(phase_entry)).is_true()
+
+	if bus.is_connected("DomainEventEmitted", callback):
+		bus.disconnect("DomainEventEmitted", callback)
+
+
+# ACC:T44.10
+func test_eventbus_publishsimple_writes_week_advanced_audit_jsonl_with_required_fields() -> void:
+	_received_event_types.clear()
+
+	var bus := get_node_or_null("/root/EventBus")
+	if bus == null:
+		bus = preload("res://Game.Godot/Adapters/EventBusAdapter.cs").new()
+		bus.name = "EventBus"
+		get_tree().get_root().add_child(auto_free(bus))
+
+	var callback := Callable(self, "_on_event")
+	if not bus.is_connected("DomainEventEmitted", callback):
+		bus.connect("DomainEventEmitted", callback)
+
+	await get_tree().process_frame
+
+	var date_utc := Time.get_date_string_from_system(true)
+	var audit_path := "user://logs/ci/%s/security-audit.jsonl" % date_utc
+	var before_count := _count_audit_entries(audit_path, EVENT_WEEK_ADVANCED)
+
+	var payload := {
+		"reason": "week_advanced_event_published",
+		"target": "save:task44_direct;week:2",
+		"caller": "Task44DirectPublish",
+	}
+	var payload_json := JSON.stringify(payload)
+	bus.PublishSimple(EVENT_WEEK_ADVANCED, "Task44DirectPublish", payload_json)
+
+	var got_week_advanced := await _wait_for_event_count(EVENT_WEEK_ADVANCED, 1)
+	assert_bool(got_week_advanced).is_true()
+
+	var week_entry := await _wait_for_audit_entry(audit_path, EVENT_WEEK_ADVANCED)
+	assert_bool(not week_entry.has("__parse_errors__")).is_true()
+	assert_int(week_entry.size()).is_greater(0)
+	assert_bool(_has_required_audit_fields(week_entry)).is_true()
+	assert_str(str(week_entry.get("action", ""))).is_equal(EVENT_WEEK_ADVANCED)
+
+	var after_count := _count_audit_entries(audit_path, EVENT_WEEK_ADVANCED)
+	assert_bool(after_count > before_count).is_true()
 
 	if bus.is_connected("DomainEventEmitted", callback):
 		bus.disconnect("DomainEventEmitted", callback)
