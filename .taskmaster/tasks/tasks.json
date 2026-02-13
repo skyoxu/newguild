@@ -1714,7 +1714,7 @@
       {
         "id": "46",
         "title": "Implement Core UI Components",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "description": "Build the shared UI foundation (navigation, side panel, content area, modal system) used by Playability Routes 2/14/15/7 so route entry and status display stay consistent.",
         "details": "Story: PRD-GUILD-MANAGER\nADR Refs: ADR-0018; ADR-0005\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",

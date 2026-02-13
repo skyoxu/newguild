@@ -8,6 +8,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using Game.Contracts.GameLoop;
+using Game.Core.Contracts.Security;
 using Game.Core.Contracts;
 using Godot;
 
@@ -111,7 +112,13 @@ internal sealed class SecurityAuditWriter : IAsyncDisposable
         if (string.Equals(eventType, GameTurnPhaseChanged.EventType, StringComparison.Ordinal))
             return true;
 
-        return string.Equals(eventType, GameWeekAdvanced.EventType, StringComparison.Ordinal);
+        if (string.Equals(eventType, GameWeekAdvanced.EventType, StringComparison.Ordinal))
+            return true;
+
+        if (string.Equals(eventType, SecurityAiLogPopupGateDecision.EventType, StringComparison.Ordinal))
+            return true;
+
+        return string.Equals(eventType, SecurityDemoGateDecision.EventType, StringComparison.Ordinal);
     }
 
     private static bool IsEnabled()

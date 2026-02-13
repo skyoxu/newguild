@@ -4,6 +4,7 @@ using Game.Core.Contracts.Persistence;
 using Game.Core.Contracts.UI;
 using Game.Core.Ports;
 using Game.Core.Services;
+using Game.Core.Contracts.Security;
 using Game.Godot.Adapters;
 using System.Collections.Generic;
 
@@ -14,6 +15,9 @@ public partial class StartScreen : Control
     private const string DemoGuildId = "npc-guild-01";
     private const int MaxLogLines = 200;
     private const string CoreAiPrefix = "core.ai.";
+    private const string DemosDisabledHint = "Demos disabled. GD_ENABLE_PLAYABLE=0 always disables. Use GD_ENABLE_PLAYABLE=1 or unset it and set SECURITY_TEST_MODE=1 for test mode.";
+    private const string DemoGateTarget = "ai-log-popup";
+    private const string DemoGateCaller = "StartScreen";
 
     private Button _btnOpenGuild = default!;
     private Button _btnSaveLoad = default!;
@@ -33,11 +37,13 @@ public partial class StartScreen : Control
     private readonly IIdGenerator _ids = new GuidIdGenerator();
     private ReputationSystem? _reputation;
     private MediaBeatSystem? _mediaBeats;
+    private SecurityGateDecisionPublisher? _gateDecisionPublisher;
 
     private Node? _hud;
     private Callable _raidCompletedCallable;
     private Callable _domainEventCallable;
     private readonly List<string> _aiLogLines = new();
+    private bool _areDemosEnabled;
 
     public override void _Ready()
     {
@@ -68,6 +74,7 @@ public partial class StartScreen : Control
         _btnCloseLog.Pressed += OnCloseAiLogPressed;
 
         _bus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
+        _gateDecisionPublisher = _bus != null ? new SecurityGateDecisionPublisher(_bus) : null;
         _time = GetNodeOrNull<TimeAdapter>("/root/Time");
 
         if (_bus != null)
@@ -86,15 +93,22 @@ public partial class StartScreen : Control
             _hud.Connect("RaidEncounterDemoCompleted", _raidCompletedCallable);
         }
 
-        var demosEnabled = AreDemosEnabled();
-        _btnDemoRaid.Visible = demosEnabled;
-        _btnDemoMedia.Visible = demosEnabled;
-        _btnDemoReputation.Visible = demosEnabled;
-        _btnAiLog.Visible = demosEnabled;
+        var demosAllowedByPolicy = AreDemosEnabled();
+        _areDemosEnabled = demosAllowedByPolicy && _gateDecisionPublisher != null;
 
-        _output.Text = demosEnabled
-            ? "Demos enabled."
-            : "Demos disabled. Set GD_ENABLE_PLAYABLE=1 to enable.";
+        _btnDemoRaid.Visible = _areDemosEnabled;
+        _btnDemoMedia.Visible = _areDemosEnabled;
+        _btnDemoReputation.Visible = _areDemosEnabled;
+        _btnAiLog.Visible = _areDemosEnabled;
+        if (!_areDemosEnabled)
+            HideAiLogPopup();
+
+        if (demosAllowedByPolicy && _gateDecisionPublisher == null)
+            _output.Text = "Demos disabled. EventBus unavailable.";
+        else
+            _output.Text = _areDemosEnabled
+                ? "Demos enabled."
+                : DemosDisabledHint;
     }
 
     public override void _ExitTree()
@@ -131,11 +145,22 @@ public partial class StartScreen : Control
 
     private static bool AreDemosEnabled()
     {
-        if (OS.IsDebugBuild())
-            return true;
+        var playableRaw = OS.GetEnvironment("GD_ENABLE_PLAYABLE");
+        if (string.IsNullOrWhiteSpace(playableRaw))
+            playableRaw = System.Environment.GetEnvironmentVariable("GD_ENABLE_PLAYABLE") ?? string.Empty;
 
-        return string.Equals(OS.GetEnvironment("GD_ENABLE_PLAYABLE"), "1", StringComparison.Ordinal) ||
-               string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal);
+        bool? playableOverride = playableRaw == "1" ? true : playableRaw == "0" ? false : null;
+
+        var securityTestModeRaw = OS.GetEnvironment("SECURITY_TEST_MODE");
+        if (string.IsNullOrWhiteSpace(securityTestModeRaw))
+            securityTestModeRaw = System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE") ?? string.Empty;
+
+        var securityTestModeEnabled = string.Equals(securityTestModeRaw, "1", StringComparison.Ordinal);
+
+        return DemoGatePolicy.AreDemosEnabled(
+            playableOverride: playableOverride,
+            securityTestModeEnabled: securityTestModeEnabled,
+            isDebugBuild: OS.IsDebugBuild());
     }
 
     private void SetOutput(string message)
@@ -256,13 +281,119 @@ public partial class StartScreen : Control
 
     private void OnShowAiLogPressed()
     {
+        if (!_areDemosEnabled)
+        {
+            PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionDeny, SecurityAiLogPopupGateDecision.ReasonDemosDisabled);
+            SetOutput(DemosDisabledHint);
+            return;
+        }
+
+        if (_eventLogPopup == null)
+        {
+            PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionError, SecurityAiLogPopupGateDecision.ReasonPopupNotAvailable);
+            SetOutput("AI log popup is not available.");
+            return;
+        }
+
+        ShowAiLogPopup();
+        PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionAllow, SecurityAiLogPopupGateDecision.ReasonPopupOpened);
+    }
+
+    private void OnCloseAiLogPressed()
+    {
+        HideAiLogPopup();
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventKey keyEvent &&
+            keyEvent.Pressed &&
+            keyEvent.Keycode == Key.Escape)
+        {
+            if (_eventLogPopup != null && _eventLogPopup.Visible)
+            {
+                HideAiLogPopup();
+                GetViewport().SetInputAsHandled();
+            }
+
+            return;
+        }
+
+        if (@event is InputEventMouseButton mouseEvent &&
+            mouseEvent.Pressed &&
+            mouseEvent.ButtonIndex == MouseButton.Right)
+        {
+            if (!_areDemosEnabled)
+            {
+                PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionDeny, SecurityAiLogPopupGateDecision.ReasonDemosDisabled);
+                return;
+            }
+
+            if (ToggleAiLogPopup())
+            {
+                PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionAllow, SecurityAiLogPopupGateDecision.ReasonPopupToggled);
+                GetViewport().SetInputAsHandled();
+            }
+            else
+            {
+                PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionError, SecurityAiLogPopupGateDecision.ReasonPopupNotAvailable);
+            }
+        }
+    }
+
+    private void PublishDemoGateDecision(string decision, string reason)
+    {
+        if (_gateDecisionPublisher == null)
+        {
+            GD.PushWarning($"[StartScreen] SecurityGateDecisionPublisher unavailable decision={decision} reason={reason}");
+            return;
+        }
+
+        var published = _gateDecisionPublisher.TryPublishAiLogPopupDecision(
+            decision: decision,
+            reason: reason,
+            source: DemoGateCaller,
+            target: DemoGateTarget,
+            caller: DemoGateCaller);
+
+        if (!published)
+            SetOutput("Security gate decision publish failed.");
+    }
+
+    private bool ToggleAiLogPopup()
+    {
+        if (!_areDemosEnabled)
+            return false;
+
+        if (_eventLogPopup == null)
+            return false;
+
+        if (_eventLogPopup.Visible)
+        {
+            HideAiLogPopup();
+            return true;
+        }
+
+        ShowAiLogPopup();
+        return true;
+    }
+
+    private void ShowAiLogPopup()
+    {
+        if (!_areDemosEnabled)
+        {
+            HideAiLogPopup();
+            return;
+        }
+
         if (_eventLogPopup == null)
             return;
+
         RefreshAiLogUi();
         _eventLogPopup.PopupCentered();
     }
 
-    private void OnCloseAiLogPressed()
+    private void HideAiLogPopup()
     {
         _eventLogPopup?.Hide();
     }
@@ -280,9 +411,9 @@ public partial class StartScreen : Control
 
     private void OnDemoRaidPressed()
     {
-        if (!AreDemosEnabled())
+        if (!_areDemosEnabled)
         {
-            SetOutput("Demos disabled (GD_ENABLE_PLAYABLE=1).");
+            SetOutput(DemosDisabledHint);
             return;
         }
 
@@ -304,9 +435,9 @@ public partial class StartScreen : Control
 
     private async void OnDemoMediaPressed()
     {
-        if (!AreDemosEnabled())
+        if (!_areDemosEnabled)
         {
-            SetOutput("Demos disabled (GD_ENABLE_PLAYABLE=1).");
+            SetOutput(DemosDisabledHint);
             return;
         }
         if (_mediaBeats == null)
@@ -334,9 +465,9 @@ public partial class StartScreen : Control
 
     private async void OnDemoReputationPressed()
     {
-        if (!AreDemosEnabled())
+        if (!_areDemosEnabled)
         {
-            SetOutput("Demos disabled (GD_ENABLE_PLAYABLE=1).");
+            SetOutput(DemosDisabledHint);
             return;
         }
         if (_reputation == null)

@@ -18,6 +18,9 @@ ADR-Refs:
   - ADR-0020  # Contracts SSoT 位置标准化
   - ADR-0023  # Settings SSoT = ConfigFile（user://）
 Test-Refs:
+  - Tests.Godot/tests/Scenes/test_task46_acceptance.gd
+  - Tests.Godot/tests/Scenes/test_task46_button_audit_acceptance.gd
+  - Game.Core.Tests/Services/DemoGatePolicyTests.cs
   # 当前仓库真实存在的测试文件（用于存在性校验）
   - Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs
   - Game.Core.Tests/Domain/GuildCoreTests.cs
@@ -56,6 +59,9 @@ Artifact-Refs:
 - `Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd`
 - `Tests.Godot/tests/Integration/test_guild_vertical_slice.gd`
 
+- `Tests.Godot/tests/Scenes/test_task46_acceptance.gd`
+- `Tests.Godot/tests/Scenes/test_task46_button_audit_acceptance.gd`
+- `Game.Core.Tests/Services/DemoGatePolicyTests.cs`
 ## Artifact-Refs（允许占位，不参与存在性校验）
 
 > 说明：产物/门禁锚点允许占位（例如 `<YYYY-MM-DD>`），用于帮助定位 CI 输出与取证归档；不参与“测试文件必须存在”的硬规则。
@@ -236,3 +242,6 @@ Artifact-Refs:
 - T31: `Tests.Godot/tests/UI/test_ui_components_smoke.gd`
 - T31: `Tests.Godot/tests/UI/test_guild_panel_scene.gd`
 - T31: `Game.Core.Tests/CI/Task31UiComponentsAcceptanceTests.cs`
+- T46: `Tests.Godot/tests/Scenes/test_task46_acceptance.gd`
+- T46: `Tests.Godot/tests/Scenes/test_task46_button_audit_acceptance.gd`
+- T46: `Game.Core.Tests/Services/DemoGatePolicyTests.cs`
