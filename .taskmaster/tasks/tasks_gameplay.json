@@ -1787,9 +1787,9 @@
       "UI interaction is deterministic in headless GdUnit4: modal open/close and context menu open/close are observable via nodes or labels. Refs: Tests.Godot/tests/Scenes/test_task46_acceptance.gd",
       "No stuck focus/input: ESC closes modal; right-click menu does not block navigation; actions are idempotent. Refs: Tests.Godot/tests/Scenes/test_task46_acceptance.gd",
       "应完成：Implement Core UI Components Refs: Tests.Godot/tests/Scenes/test_task46_acceptance.gd",
-      "应有测试：至少新增/更新 1 个确定性测试并在 test_refs 中引用。 Refs: Game.Core.Tests/Tasks/Task46AcceptanceTests.cs",
-      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/Scenes/test_task46_acceptance.gd",
-      "应留证：在 logs/** 下产出最小审计/门禁证据（可复现、可追溯）。 Refs: Game.Core.Tests/Tasks/Task46AcceptanceTests.cs"
+      "应有测试：至少新增/更新 1 个确定性测试并在 test_refs 中引用。 Refs: Tests.Godot/tests/Scenes/test_task46_acceptance.gd",
+      "Route entries must remain reachable from UI entry points and state visibility must be observable after interaction changes. Refs: Tests.Godot/tests/Scenes/test_task46_acceptance.gd",
+      "Evidence required: produce reproducible artifacts under user://logs/** and validate security-audit.jsonl contains ts/action/reason/target/caller fields. Refs: Tests.Godot/tests/Scenes/test_task46_acceptance.gd"
     ],
     "test_strategy": [
       "GdUnit4 playability (headless) + targeted xUnit for pure logic where applicable.",
@@ -1797,10 +1797,17 @@
     ],
     "test_refs": [
       "Tests.Godot/tests/Scenes/test_task46_acceptance.gd",
-      "Game.Core.Tests/Tasks/Task46AcceptanceTests.cs"
+      "Game.Core.Tests/Services/DemoGatePolicyTests.cs",
+      "Tests.Godot/tests/Scenes/test_task46_button_audit_acceptance.gd"
     ],
-    "contractRefs": [],
-    "artifactRefs": []
+    "contractRefs": [
+      "Game.Core/Contracts/Security/SecurityAiLogPopupGateDecision.cs"
+    ],
+    "artifactRefs": [
+      "logs/ci/<YYYY-MM-DD>/sc-acceptance-check/summary.json",
+      "logs/ci/<YYYY-MM-DD>/sc-acceptance-check/report.md",
+      "logs/ci/<YYYY-MM-DD>/sc-llm-review/summary.json"
+    ]
   },
   {
     "id": "GM-0317",
