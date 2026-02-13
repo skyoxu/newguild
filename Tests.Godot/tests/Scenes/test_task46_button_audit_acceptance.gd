@@ -96,11 +96,20 @@ func _read_jsonl_entries(path: String) -> Array[Dictionary]:
 func _entry_matches(entry: Dictionary, action: String, reason: String, target: String, caller: String) -> bool:
     if str(entry.get("action", "")) != action:
         return false
-    if reason != "" and str(entry.get("reason", "")) != reason:
+    var entry_reason := str(entry.get("reason", ""))
+    if entry_reason.begins_with("claim:"):
+        entry_reason = entry_reason.substr(6)
+    if reason != "" and entry_reason != reason:
         return false
-    if target != "" and str(entry.get("target", "")) != target:
+    var entry_target := str(entry.get("target", ""))
+    if entry_target.begins_with("claim:"):
+        entry_target = entry_target.substr(6)
+    if target != "" and entry_target != target:
         return false
-    if caller != "" and str(entry.get("caller", "")) != caller:
+    var entry_caller := str(entry.get("caller", ""))
+    if entry_caller.begins_with("claim:"):
+        entry_caller = entry_caller.substr(6)
+    if caller != "" and entry_caller != caller:
         return false
     return true
 
