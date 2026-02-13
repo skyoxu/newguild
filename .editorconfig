@@ -6,7 +6,11 @@ end_of_line = crlf
 insert_final_newline = true
 
 [*.cs]
+end_of_line = lf
 dotnet_diagnostic.NG0001.severity = error
+
+[*.gd]
+end_of_line = lf
 
 [**/*.g.cs]
 dotnet_diagnostic.NG0001.severity = silent
