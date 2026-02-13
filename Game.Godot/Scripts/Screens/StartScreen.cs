@@ -18,6 +18,18 @@ public partial class StartScreen : Control
     private const string DemosDisabledHint = "Demos disabled. GD_ENABLE_PLAYABLE=0 always disables. Use GD_ENABLE_PLAYABLE=1 or unset it and set SECURITY_TEST_MODE=1 for test mode.";
     private const string DemoGateTarget = "ai-log-popup";
     private const string DemoGateCaller = "StartScreen";
+    private const string FallbackScreenNavigatorPath = "/root/Main/ScreenNavigator";
+    private const string FallbackMainMenuPath = "/root/Main/MainMenu";
+    private const string FallbackHudPath = "/root/Main/HUD";
+
+    [Export]
+    public NodePath ScreenNavigatorPath { get; set; } = new NodePath("../../ScreenNavigator");
+
+    [Export]
+    public NodePath MainMenuPath { get; set; } = new NodePath("../../MainMenu");
+
+    [Export]
+    public NodePath HudPath { get; set; } = new NodePath("../../HUD");
 
     private Button _btnOpenGuild = default!;
     private Button _btnSaveLoad = default!;
@@ -86,7 +98,7 @@ public partial class StartScreen : Control
             _bus.Connect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
         }
 
-        _hud = GetNodeOrNull<Node>("/root/Main/HUD");
+        _hud = ResolveHud();
         if (_hud != null && _hud.HasSignal("RaidEncounterDemoCompleted"))
         {
             _raidCompletedCallable = new Callable(this, nameof(OnRaidEncounterDemoCompleted));
@@ -163,6 +175,30 @@ public partial class StartScreen : Control
             isDebugBuild: OS.IsDebugBuild());
     }
 
+    private Node? ResolveNode(NodePath preferredPath, string fallbackAbsolutePath)
+    {
+        var byPreferredPath = GetNodeOrNull<Node>(preferredPath);
+        if (byPreferredPath != null)
+            return byPreferredPath;
+
+        return GetNodeOrNull<Node>(fallbackAbsolutePath);
+    }
+
+    private Node? ResolveScreenNavigator()
+    {
+        return ResolveNode(ScreenNavigatorPath, FallbackScreenNavigatorPath);
+    }
+
+    private Node? ResolveMainMenu()
+    {
+        return ResolveNode(MainMenuPath, FallbackMainMenuPath);
+    }
+
+    private Node? ResolveHud()
+    {
+        return ResolveNode(HudPath, FallbackHudPath);
+    }
+
     private void SetOutput(string message)
     {
         _output.Text = message;
@@ -205,7 +241,7 @@ public partial class StartScreen : Control
 
     private void OnOpenGuildPressed()
     {
-        var nav = GetNodeOrNull<Node>("/root/Main/ScreenNavigator");
+        var nav = ResolveScreenNavigator();
         if (nav == null || !nav.HasMethod("SwitchTo"))
         {
             SetOutput("ScreenNavigator not found.");
@@ -400,11 +436,11 @@ public partial class StartScreen : Control
 
     private void OnBackPressed()
     {
-        var nav = GetNodeOrNull<Node>("/root/Main/ScreenNavigator");
+        var nav = ResolveScreenNavigator();
         if (nav != null && nav.HasMethod("Clear"))
             nav.Call("Clear");
 
-        var menu = GetNodeOrNull<Node>("/root/Main/MainMenu");
+        var menu = ResolveMainMenu();
         if (menu != null && menu.HasMethod("ShowMenu"))
             menu.Call("ShowMenu");
     }
@@ -417,7 +453,7 @@ public partial class StartScreen : Control
             return;
         }
 
-        var hud = GetNodeOrNull<Node>("/root/Main/HUD");
+        var hud = ResolveHud();
         if (hud == null || !hud.HasMethod("TriggerRaidEncounterDemo"))
         {
             SetOutput("HUD raid demo is not available.");

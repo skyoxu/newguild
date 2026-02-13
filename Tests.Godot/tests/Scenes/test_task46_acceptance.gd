@@ -78,8 +78,7 @@ func _load_main_scene() -> Node:
         await get_tree().process_frame
 
     var main := preload(MAIN_SCENE_PATH).instantiate()
-    root.add_child(main)
-    auto_free(main)
+    add_child(auto_free(main))
     await get_tree().process_frame
     return main
 
