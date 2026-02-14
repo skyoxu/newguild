@@ -35,14 +35,17 @@ text = "Open Guild Screen"
 [node name="BtnSaveLoad" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "Save + Load (UI Entry)"
+tooltip_text = "Runs save and load through DataStore and EventBus."
 
 [node name="BtnActivityFeed" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "Open Activity Feed"
+tooltip_text = "Opens activity feed and emits UI menu event."
 
 [node name="BtnAiLog" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "Show AI Event Log"
+tooltip_text = "Right click or press F1 to toggle AI event log."
 
 [node name="BtnDemoRaid" type="Button" parent="Center/VBox"]
 layout_mode = 2
