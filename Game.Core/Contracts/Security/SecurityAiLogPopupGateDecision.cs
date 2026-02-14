@@ -30,6 +30,7 @@ public sealed record SecurityAiLogPopupGateDecision(
     public const string DecisionError = "error";
 
     public const string ReasonDemosDisabled = "demos_disabled";
+    public const string ReasonInvalidPayload = "invalid_payload";
     public const string ReasonPopupNotAvailable = "popup_not_available";
     public const string ReasonPopupOpened = "popup_opened";
     public const string ReasonPopupToggled = "popup_toggled";

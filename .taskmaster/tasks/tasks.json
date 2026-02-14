@@ -1770,7 +1770,7 @@
       {
         "id": "47",
         "title": "Develop Interaction Patterns",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "description": "Implement core interaction patterns (drag-drop, context menu, keyboard shortcuts, tooltips) as reusable behavior for Playability Routes 2/14/15/7.",
         "details": "Story: PRD-GUILD-MANAGER\nADR Refs: ADR-0018; ADR-0005\nChapters: CH01; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",

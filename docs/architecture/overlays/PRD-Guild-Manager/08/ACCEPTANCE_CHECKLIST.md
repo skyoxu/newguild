@@ -20,7 +20,9 @@ ADR-Refs:
 Test-Refs:
   - Tests.Godot/tests/Scenes/test_task46_acceptance.gd
   - Tests.Godot/tests/Scenes/test_task46_button_audit_acceptance.gd
+  - Tests.Godot/tests/Scenes/test_task47_acceptance.gd
   - Game.Core.Tests/Services/DemoGatePolicyTests.cs
+  - Game.Core.Tests/Tasks/Task47AcceptanceTests.cs
   # 当前仓库真实存在的测试文件（用于存在性校验）
   - Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs
   - Game.Core.Tests/Domain/GuildCoreTests.cs
@@ -245,3 +247,5 @@ Artifact-Refs:
 - T46: `Tests.Godot/tests/Scenes/test_task46_acceptance.gd`
 - T46: `Tests.Godot/tests/Scenes/test_task46_button_audit_acceptance.gd`
 - T46: `Game.Core.Tests/Services/DemoGatePolicyTests.cs`
+- T47: `Tests.Godot/tests/Scenes/test_task47_acceptance.gd`
+- T47: `Game.Core.Tests/Tasks/Task47AcceptanceTests.cs`

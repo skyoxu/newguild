@@ -21,6 +21,12 @@ public partial class StartScreen : Control
     private const string FallbackScreenNavigatorPath = "/root/Main/ScreenNavigator";
     private const string FallbackMainMenuPath = "/root/Main/MainMenu";
     private const string FallbackHudPath = "/root/Main/HUD";
+    private const string DragPayloadSourceKey = "source";
+    private const string DragPayloadTargetKey = "target";
+    private const string DragPayloadInteractionKey = "interaction";
+    private const string DragPayloadExpectedSource = DemoGateCaller;
+    private const string DragPayloadExpectedTarget = DemoGateTarget;
+    private const string DragPayloadExpectedInteraction = "dragdrop";
 
     [Export]
     public NodePath ScreenNavigatorPath { get; set; } = new NodePath("../../ScreenNavigator");
@@ -340,6 +346,85 @@ public partial class StartScreen : Control
         HideAiLogPopup();
     }
 
+    private void OnRightClickInteraction()
+    {
+        if (!_areDemosEnabled)
+        {
+            PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionDeny, SecurityAiLogPopupGateDecision.ReasonDemosDisabled);
+            SetOutput(DemosDisabledHint);
+            return;
+        }
+
+        if (ToggleAiLogPopup())
+        {
+            PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionAllow, SecurityAiLogPopupGateDecision.ReasonPopupToggled);
+            SetOutput(_eventLogPopup != null && _eventLogPopup.Visible
+                ? "AI log popup opened from interaction."
+                : "AI log popup closed from interaction.");
+            GetViewport()?.SetInputAsHandled();
+        }
+        else
+        {
+            PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionError, SecurityAiLogPopupGateDecision.ReasonPopupNotAvailable);
+            SetOutput("AI log popup is not available.");
+        }
+    }
+
+    public override Variant _GetDragData(Vector2 atPosition)
+    {
+        if (!_areDemosEnabled)
+        {
+            PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionDeny, SecurityAiLogPopupGateDecision.ReasonDemosDisabled);
+            return default;
+        }
+
+        _ = atPosition;
+        SetOutput("Drag-drop payload prepared.");
+        return new global::Godot.Collections.Dictionary
+        {
+            { DragPayloadSourceKey, DragPayloadExpectedSource },
+            { DragPayloadTargetKey, DragPayloadExpectedTarget },
+            { DragPayloadInteractionKey, DragPayloadExpectedInteraction },
+        };
+    }
+
+    public override bool _CanDropData(Vector2 atPosition, Variant data)
+    {
+        _ = atPosition;
+        if (!_areDemosEnabled)
+        {
+            PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionDeny, SecurityAiLogPopupGateDecision.ReasonDemosDisabled);
+            return false;
+        }
+
+        if (data.VariantType != Variant.Type.Dictionary)
+        {
+            PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionDeny, SecurityAiLogPopupGateDecision.ReasonInvalidPayload);
+            return false;
+        }
+
+        var payload = data.AsGodotDictionary();
+        var isExpectedPayload = HasExpectedPayloadValue(payload, DragPayloadSourceKey, DragPayloadExpectedSource)
+            && HasExpectedPayloadValue(payload, DragPayloadTargetKey, DragPayloadExpectedTarget)
+            && HasExpectedPayloadValue(payload, DragPayloadInteractionKey, DragPayloadExpectedInteraction);
+
+        if (!isExpectedPayload)
+            PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionDeny, SecurityAiLogPopupGateDecision.ReasonInvalidPayload);
+
+        return isExpectedPayload;
+    }
+
+    public override void _DropData(Vector2 atPosition, Variant data)
+    {
+        if (!_CanDropData(atPosition, data))
+        {
+            SetOutput(_areDemosEnabled ? "Drag-drop rejected." : DemosDisabledHint);
+            return;
+        }
+
+        OnRightClickInteraction();
+    }
+
     public override void _UnhandledInput(InputEvent @event)
     {
         if (@event is InputEventKey keyEvent &&
@@ -355,26 +440,34 @@ public partial class StartScreen : Control
             return;
         }
 
+        if (@event is InputEventKey shortcutEvent &&
+            shortcutEvent.Pressed &&
+            !shortcutEvent.Echo &&
+            (shortcutEvent.Keycode == Key.F1 || shortcutEvent.PhysicalKeycode == Key.F1))
+        {
+            OnRightClickInteraction();
+            return;
+        }
+
         if (@event is InputEventMouseButton mouseEvent &&
             mouseEvent.Pressed &&
             mouseEvent.ButtonIndex == MouseButton.Right)
         {
-            if (!_areDemosEnabled)
-            {
-                PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionDeny, SecurityAiLogPopupGateDecision.ReasonDemosDisabled);
-                return;
-            }
-
-            if (ToggleAiLogPopup())
-            {
-                PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionAllow, SecurityAiLogPopupGateDecision.ReasonPopupToggled);
-                GetViewport().SetInputAsHandled();
-            }
-            else
-            {
-                PublishDemoGateDecision(SecurityAiLogPopupGateDecision.DecisionError, SecurityAiLogPopupGateDecision.ReasonPopupNotAvailable);
-            }
+            OnRightClickInteraction();
         }
+    }
+
+    private static bool HasExpectedPayloadValue(global::Godot.Collections.Dictionary payload, string key, string expectedValue)
+    {
+        if (!payload.ContainsKey(key))
+            return false;
+
+        var value = payload[key];
+        if (value.VariantType != Variant.Type.String)
+            return false;
+
+        var actual = value.AsString();
+        return string.Equals(actual, expectedValue, StringComparison.Ordinal);
     }
 
     private void PublishDemoGateDecision(string decision, string reason)
