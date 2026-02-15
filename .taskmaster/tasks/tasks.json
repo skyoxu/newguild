@@ -1828,7 +1828,7 @@
       {
         "id": "48",
         "title": "Playability 路线2：两周推进稳定性（Week 1→3）",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "description": "验证主流程连续两周推进（Week 1→3）后，跨界面切换仍保持状态一致与可见。",
         "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-2\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs; Game.Core.Tests/Domain/GameLoopTests.cs; Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
@@ -1853,7 +1853,7 @@
           "主流程支持连续两次推进回合（Week 1→2→3），并在 UI 可见当前 Week/Phase。 Refs: Game.Core.Tests/Domain/GameLoopTests.cs Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
           "跨界面切换（Guild/Activity/Settings）后返回主界面，不丢失当前周次与关键状态显示。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
           "回合推进事件链与 contractRefs 对齐，至少覆盖 started/phase_changed/week_advanced 的发布与消费。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs",
-          "产出可审计工件到 logs/**，用于 CI 回归追踪。 Refs: logs/e2e/<date>/playability-route2-summary.json"
+          "产出可审计工件到 logs/**（artifactRefs: logs/e2e/<date>/playability-route2-summary.json），用于 CI 回归追踪。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
         ],
         "testRefs": [
           "Game.Core.Tests/Domain/GameTurnSystemTests.cs",
@@ -1869,10 +1869,10 @@
             "description": "Ensure turn transitions and week increment semantics are deterministic and state-safe.",
             "dependencies": [],
             "details": "Cover started/phase_changed/week_advanced pipeline with consistent domain state.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use ACC:T48.1 anchor in referenced tests or deterministic evidence output.",
             "parentId": "48",
-            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "updatedAt": "2026-02-15T13:09:55+00:00",
             "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
           },
           {
@@ -1883,10 +1883,10 @@
               1
             ],
             "details": "Verify UI consume path and avoid state loss after screen switches.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use ACC:T48.2 anchor in referenced tests or deterministic evidence output.",
             "parentId": "48",
-            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "updatedAt": "2026-02-15T13:09:55+00:00",
             "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
           },
           {
@@ -1898,14 +1898,14 @@
               2
             ],
             "details": "Bind to ACC:T48.1/T48.2 and persist summary under logs/e2e/<date>/playability-route2-summary.json.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use ACC:T48.3 anchor in referenced tests or deterministic evidence output.",
             "parentId": "48",
-            "updatedAt": "2026-02-08T09:55:19+00:00",
+            "updatedAt": "2026-02-15T13:09:55+00:00",
             "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
           }
         ],
-        "updatedAt": "2026-02-08T09:55:19+00:00",
+        "updatedAt": "2026-02-15T13:09:55+00:00",
         "complexity": 4
       },
       {

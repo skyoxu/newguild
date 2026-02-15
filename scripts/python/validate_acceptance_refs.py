@@ -133,7 +133,12 @@ def _is_allowed_test_path(p: str) -> bool:
         "Tests/",
         "scripts/python/tests/",
     )
-    return p.startswith(allowed_prefixes)
+    if p.startswith(allowed_prefixes):
+        return True
+    if p.startswith("scripts/python/"):
+        filename = p.rsplit("/", 1)[-1]
+        return bool(re.match(r"^test_.*\.py$", filename))
+    return False
 
 
 def parse_acceptance_item(text: str) -> tuple[str, list[str]]:

@@ -12,6 +12,7 @@ Usage:
 import argparse
 import datetime as dt
 import os
+import re
 import shutil
 import subprocess
 import json
@@ -21,6 +22,15 @@ import sys
 import xml.etree.ElementTree as ET
 
 from godot_cli import build_userdir_args, default_user_dir
+from playability_artifacts import (
+    DEFAULT_ROUTE2_ARTIFACT_NAME,
+    DEFAULT_ROUTE2_TEST_MARKER,
+    collect_playability_artifacts,
+    decide_route2_requirement,
+    detect_route2_execution,
+    is_route2_suite_requested,
+    resolve_route2_artifact_requirement,
+)
 
 
 def run_cmd(args, cwd=None, timeout=600_000, env=None):
@@ -262,7 +272,65 @@ def main():
     ap.add_argument('--userlog-max-file-mb', type=int, default=int(os.environ.get('GODOT_USERLOG_MAX_FILE_MB', '256')))
     ap.add_argument('--userlog-tail-mb', type=int, default=int(os.environ.get('GODOT_USERLOG_TAIL_MB', '4')))
     ap.add_argument('--userlog-max-full-copy-mb', type=int, default=int(os.environ.get('GODOT_USERLOG_MAX_FULL_COPY_MB', '16')))
+    ap.add_argument(
+        '--require-route2-artifact',
+        default=os.environ.get('SC_REQUIRE_ROUTE2_ARTIFACT', 'auto'),
+        help='Route2 artifact requirement mode: auto|always|never (also supports true/false, 1/0). env: SC_REQUIRE_ROUTE2_ARTIFACT',
+    )
     args = ap.parse_args()
+
+    artifact_names_raw = os.environ.get(
+        'SC_PLAYABILITY_ARTIFACTS',
+        '',
+    )
+    artifact_name_pattern = re.compile(r'^[A-Za-z0-9._-]+\.json$')
+    artifact_name_errors: list[str] = []
+    artifact_names: list[str] = []
+    for raw_value in artifact_names_raw.split(','):
+        artifact_name = raw_value.strip()
+        if not artifact_name:
+            continue
+        if (not artifact_name_pattern.fullmatch(artifact_name)) or ('..' in artifact_name) or ('/' in artifact_name) or ('\\' in artifact_name):
+            artifact_name_errors.append(artifact_name)
+            continue
+        artifact_names.append(artifact_name)
+
+    try:
+        route2_requirement_mode, route2_requirement_base_reason = resolve_route2_artifact_requirement(args.require_route2_artifact)
+    except ValueError as ex:
+        print(f'GDUNIT_CONFIG_ERROR {ex}')
+        return 2
+
+    route2_artifact_name = os.environ.get('SC_ROUTE2_ARTIFACT_NAME', DEFAULT_ROUTE2_ARTIFACT_NAME).strip()
+    if not route2_artifact_name:
+        route2_artifact_name = DEFAULT_ROUTE2_ARTIFACT_NAME
+    if (not artifact_name_pattern.fullmatch(route2_artifact_name)) or ('..' in route2_artifact_name) or ('/' in route2_artifact_name) or ('\\' in route2_artifact_name):
+        print('GDUNIT_CONFIG_ERROR invalid SC_ROUTE2_ARTIFACT_NAME')
+        return 2
+
+    route2_test_marker = os.environ.get('SC_ROUTE2_TEST_MARKER', DEFAULT_ROUTE2_TEST_MARKER).strip().lower()
+    if not route2_test_marker:
+        route2_test_marker = DEFAULT_ROUTE2_TEST_MARKER
+
+    try:
+        artifact_max_mb = int(os.environ.get('SC_PLAYABILITY_ARTIFACT_MAX_MB', '2'))
+    except ValueError:
+        print('GDUNIT_CONFIG_ERROR invalid SC_PLAYABILITY_ARTIFACT_MAX_MB, expected integer')
+        return 2
+    artifact_max_mb = max(0, artifact_max_mb)
+    artifact_max_bytes = artifact_max_mb * 1024 * 1024
+
+    try:
+        route2_detect_max_xml_files = int(os.environ.get('SC_ROUTE2_DETECT_MAX_XML_FILES', '200'))
+        route2_detect_max_xml_mb = int(os.environ.get('SC_ROUTE2_DETECT_MAX_XML_MB', '2'))
+        route2_detect_max_console_kb = int(os.environ.get('SC_ROUTE2_DETECT_MAX_CONSOLE_KB', '512'))
+    except ValueError:
+        print('GDUNIT_CONFIG_ERROR invalid route2 detection limits, expected integers')
+        return 2
+
+    route2_detect_max_xml_files = max(1, route2_detect_max_xml_files)
+    route2_detect_max_xml_bytes = max(1, route2_detect_max_xml_mb) * 1024 * 1024
+    route2_detect_max_console_bytes = max(1, route2_detect_max_console_kb) * 1024
 
     if not args.no_prepare_runtime:
         prc, pout = ensure_test_runtime_mount(args.project, runtime_dir="Game.Godot")
@@ -306,6 +374,7 @@ def main():
     # In sandboxed environments, writes to %APPDATA% can be blocked. As a fallback,
     # override APPDATA for the child process to keep user:// writes under the repo.
     env = os.environ.copy()
+    env['SC_ARTIFACT_DATE'] = date
     appdata_override = None
     project_name = read_project_name(Path(proj)) or Path(proj).name
     if user_dir and userdir_flag_used is None:
@@ -317,6 +386,21 @@ def main():
             (Path(appdata_override) / "Godot" / "app_userdata" / project_name / "logs").mkdir(parents=True, exist_ok=True)
         except Exception:
             appdata_override = None
+
+    artifact_source_roots: list[Path] = []
+    artifact_source_root_labels: list[str] = []
+    if userdir_flag_used and user_dir:
+        artifact_source_roots.append(Path(user_dir).resolve())
+        artifact_source_root_labels.append('userdir')
+    if appdata_override:
+        artifact_source_roots.append((Path(appdata_override) / 'Godot' / 'app_userdata' / project_name).resolve())
+        artifact_source_root_labels.append('appdata_override')
+
+    if not artifact_source_roots:
+        appdata_default = env.get('APPDATA') or os.environ.get('APPDATA')
+        if appdata_default:
+            artifact_source_roots.append((Path(appdata_default) / 'Godot' / 'app_userdata' / project_name).resolve())
+            artifact_source_root_labels.append('appdata_default')
 
     # Optional prewarm with fallback
     prewarm_rc = None
@@ -431,6 +515,8 @@ def main():
         return 0 if rc == 0 else rc
 
     # Run tests (Debugger Break fail-fast)
+    run_started_at_utc = dt.datetime.now(dt.timezone.utc)
+
     # Build command with optional -a filters
     cmd = [
         args.godot_bin,
@@ -557,6 +643,71 @@ def main():
                 pass
         except Exception as e:
             write_text(os.path.join(dest, 'godot-userlogs-error.txt'), str(e))
+
+    route2_test_executed, route2_detection_error = detect_route2_execution(
+        dest,
+        console_path,
+        route2_test_marker,
+        run_started_at_utc=run_started_at_utc,
+        max_xml_files=route2_detect_max_xml_files,
+        max_xml_bytes=route2_detect_max_xml_bytes,
+        max_console_bytes=route2_detect_max_console_bytes,
+    )
+    route2_suite_requested = is_route2_suite_requested(args.add, route2_test_marker)
+    require_route2_artifact, route2_requirement_reason, artifact_warning_messages, artifact_error_messages = decide_route2_requirement(
+        route2_requirement_mode=route2_requirement_mode,
+        route2_requirement_base_reason=route2_requirement_base_reason,
+        route2_test_executed=route2_test_executed,
+        route2_detection_error=route2_detection_error,
+        route2_suite_requested=route2_suite_requested,
+    )
+
+    artifact_error_path = os.path.join(dest, 'playability-artifacts-error.txt')
+    if artifact_error_messages:
+        rc = 1
+
+    try:
+        artifact_payload, artifact_collection_errors, artifact_failed = collect_playability_artifacts(
+            artifact_names=artifact_names,
+            artifact_source_roots=artifact_source_roots,
+            artifact_source_root_labels=artifact_source_root_labels,
+            date=date,
+            run_started_at_utc=run_started_at_utc,
+            out_dir=Path(out_dir),
+            repo_root=Path(root),
+            artifact_name_errors=artifact_name_errors,
+            require_route2_artifact=require_route2_artifact,
+            route2_artifact_name=route2_artifact_name,
+            route2_requirement_mode=route2_requirement_mode,
+            route2_requirement_reason=route2_requirement_reason,
+            route2_test_executed=route2_test_executed,
+            artifact_max_mb=artifact_max_mb,
+            artifact_max_bytes=artifact_max_bytes,
+        )
+        if artifact_failed:
+            rc = 1
+        artifact_error_messages.extend(artifact_collection_errors)
+        if artifact_warning_messages:
+            artifact_payload['warnings'] = artifact_warning_messages
+        artifact_payload['route2_suite_requested'] = route2_suite_requested
+        artifact_payload['route2_detection_limits'] = {
+            'max_xml_files': route2_detect_max_xml_files,
+            'max_xml_bytes': route2_detect_max_xml_bytes,
+            'max_console_bytes': route2_detect_max_console_bytes,
+        }
+        write_text(os.path.join(dest, 'playability-artifacts.json'), json.dumps(artifact_payload, ensure_ascii=False, indent=2))
+    except Exception as e:
+        rc = 1
+        artifact_error_messages.append(f'artifact collection failed: {e}')
+
+    if artifact_error_messages:
+        write_text(artifact_error_path, '\n\n'.join(msg.rstrip() for msg in artifact_error_messages if msg).rstrip() + '\n')
+    else:
+        try:
+            Path(artifact_error_path).unlink(missing_ok=True)
+        except Exception:
+            pass
+
     print(f'GDUNIT_DONE rc={rc} out={out_dir}')
     if rc != 0:
         try:
