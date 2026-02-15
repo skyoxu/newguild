@@ -79,9 +79,9 @@ public class GameTurnSystemTests
         return new GameTurnSystem(engine, eventBus, time);
     }
 
-    private static string? GetEventType(DomainEvent e)
+    private static string? GetEventType(DomainEvent domainEvent)
     {
-        return e.Type;
+        return domainEvent.Type;
     }
 
     [Fact]
@@ -172,6 +172,7 @@ public class GameTurnSystemTests
         next.Phase.Should().Be(GameTurnPhase.Resolution);
     }
 
+    // ACC:T48.5
     [Fact]
     public async Task Should_Advance_Week_Cycle_From_NewWeek_To_WeekTwo_Resolution()
     {
@@ -386,6 +387,7 @@ public class GameTurnSystemTests
         phaseChanged.CurrentPhase.Should().Be("Player");
     }
 
+    // ACC:T48.10
     [Fact]
     public async Task Should_Publish_GameWeekAdvanced_When_Completing_FullTurnCycle()
     {
@@ -414,6 +416,9 @@ public class GameTurnSystemTests
     }
 
     // ACC:T45.6
+    // ACC:T48.3
+    // ACC:T48.6
+    // ACC:T48.7
     [Fact]
     public async Task Should_Publish_Correct_Event_Sequence_When_FullTurnCycle()
     {

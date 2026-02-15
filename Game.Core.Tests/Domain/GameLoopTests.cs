@@ -17,7 +17,7 @@ namespace Game.Core.Tests.Domain;
 public class GameLoopTests
 {
     [Fact]
-    public void GameTurnState_Can_Be_Constructed_For_Week_And_Phase()
+    public void Should_Construct_GameTurnState_With_Week_And_Phase()
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
@@ -38,7 +38,7 @@ public class GameLoopTests
     }
 
     [Fact]
-    public void GameTurnSystem_Can_Be_Constructed_With_Mock_Dependencies()
+    public void Should_Construct_GameTurnSystem_With_Mock_Dependencies()
     {
         // Arrange & Act
         var system = CreateMinimalSystem();
@@ -48,7 +48,7 @@ public class GameLoopTests
     }
 
     [Fact]
-    public void StartNewWeek_Returns_Valid_Initial_State()
+    public void Should_Return_Valid_Initial_State_When_StartNewWeek()
     {
         // Arrange
         var system = CreateMinimalSystem();
@@ -64,7 +64,7 @@ public class GameLoopTests
     }
 
     [Fact]
-    public async Task Single_Advance_From_Resolution_Completes_Successfully()
+    public async Task Should_Complete_Single_Advance_From_Resolution()
     {
         // Arrange
         var system = CreateMinimalSystem();
@@ -78,8 +78,9 @@ public class GameLoopTests
         resultState.Week.Should().BeGreaterOrEqualTo(1);
     }
 
+    // ACC:T48.1
     [Fact]
-    public async Task Full_Turn_Cycle_Advances_Through_All_Phases()
+    public async Task Should_Advance_Through_All_Phases_In_Full_Turn_Cycle()
     {
         // Arrange
         var eventBus = new CapturingEventBus();
