@@ -223,10 +223,17 @@ def step_security_soft(out_dir: Path) -> StepResult:
     return StepResult(name="security-soft", status="ok", details=details)
 
 
-def step_tests_all(out_dir: Path, godot_bin: str | None) -> StepResult:
-    cmd = ["py", "-3", "scripts/sc/test.py", "--type", "all"]
+def step_tests_all(
+    out_dir: Path,
+    godot_bin: str | None,
+    artifact_gate_mode: str | None = None,
+    tests_scope: str = "all",
+) -> StepResult:
+    cmd = ["py", "-3", "scripts/sc/test.py", "--type", str(tests_scope)]
     if godot_bin:
         cmd += ["--godot-bin", godot_bin]
+    if artifact_gate_mode:
+        cmd += ["--artifact-gate", artifact_gate_mode]
     return run_and_capture(out_dir, name="tests-all", cmd=cmd, timeout_sec=2_400)
 
 

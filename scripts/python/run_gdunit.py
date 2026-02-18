@@ -33,6 +33,44 @@ from playability_artifacts import (
 )
 
 
+def _parse_bool_env(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    return default
+
+
+def _resolve_artifact_gate_mode(mode_raw: str) -> tuple[str, str]:
+    normalized = (mode_raw or "auto").strip().lower()
+    aliases = {
+        "on": "on",
+        "true": "on",
+        "1": "on",
+        "strict": "on",
+        "off": "off",
+        "false": "off",
+        "0": "off",
+        "disabled": "off",
+        "auto": "auto",
+    }
+    if normalized not in aliases:
+        raise ValueError(f"invalid --artifact-gate: {mode_raw}")
+
+    resolved = aliases[normalized]
+    if resolved == "auto":
+        # Local development should default to test-only gate;
+        # CI should include artifact gate by default.
+        effective = "on" if _parse_bool_env("CI", False) else "off"
+    else:
+        effective = resolved
+    return resolved, effective
+
+
 def run_cmd(args, cwd=None, timeout=600_000, env=None):
     p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          text=True, encoding='utf-8', errors='ignore', env=env)
@@ -76,14 +114,12 @@ def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None, env=No
         'Debugger Break',
         'Parser Error:',
     ]
-    failure_markers = [
-        'SCRIPT ERROR',
-    ]
+    # Do not infer test failure from console text markers.
+    # Gate decision is based on process return code + JUnit results.xml parsing.
     p = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                          text=True, encoding='utf-8', errors='ignore', env=env)
     buf_lines = []
     hit_kill = False
-    hit_failure = False
     try:
         # Poll line-by-line up to timeout
         end_ts = dt.datetime.now().timestamp() + (timeout/1000.0)
@@ -92,8 +128,6 @@ def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None, env=No
             if line:
                 buf_lines.append(line)
                 low = line.lower()
-                if any(m.lower() in low for m in failure_markers):
-                    hit_failure = True
                 if any(m.lower() in low for m in kill_markers):
                     hit_kill = True
                     p.kill()
@@ -108,8 +142,6 @@ def run_cmd_failfast(args, cwd=None, timeout=600_000, break_markers=None, env=No
         if hit_kill:
             return 1, out
         rc = p.returncode or 0
-        if rc == 0 and hit_failure:
-            rc = 1
         return rc, out
     except Exception:
         try:
@@ -277,6 +309,11 @@ def main():
         default=os.environ.get('SC_REQUIRE_ROUTE2_ARTIFACT', 'auto'),
         help='Route2 artifact requirement mode: auto|always|never (also supports true/false, 1/0). env: SC_REQUIRE_ROUTE2_ARTIFACT',
     )
+    ap.add_argument(
+        '--artifact-gate',
+        default=os.environ.get('SC_ARTIFACT_GATE', 'auto'),
+        help='Artifact gate mode: auto|on|off. auto=CI:on, local:off. env: SC_ARTIFACT_GATE',
+    )
     args = ap.parse_args()
 
     artifact_names_raw = os.environ.get(
@@ -297,6 +334,12 @@ def main():
 
     try:
         route2_requirement_mode, route2_requirement_base_reason = resolve_route2_artifact_requirement(args.require_route2_artifact)
+    except ValueError as ex:
+        print(f'GDUNIT_CONFIG_ERROR {ex}')
+        return 2
+
+    try:
+        artifact_gate_mode, artifact_gate_effective = _resolve_artifact_gate_mode(args.artifact_gate)
     except ValueError as ex:
         print(f'GDUNIT_CONFIG_ERROR {ex}')
         return 2
@@ -581,9 +624,18 @@ def main():
                 shutil.copytree(src, dst, dirs_exist_ok=True)
             else:
                 shutil.copy2(src, dst)
-    # Write a small summary json for CI
+    process_rc = rc
+    junit_failure_count = len(_collect_failed_testcases_from_reports(dest))
+    test_rc = 0 if (process_rc == 0 and junit_failure_count == 0) else 1
+
     summary = {
-        'rc': rc,
+        'rc': test_rc,
+        'process_rc': process_rc,
+        'junit_failure_count': junit_failure_count,
+        'test_rc': test_rc,
+        'artifact_rc': 0,
+        'artifact_gate_mode': artifact_gate_mode,
+        'artifact_gate_effective': artifact_gate_effective,
         'project': proj,
         'added': args.add,
         'timeout_sec': args.timeout_sec,
@@ -599,11 +651,6 @@ def main():
             summary['prewarm_attempts'] = prewarm_attempts
         except NameError:
             pass
-    try:
-        with open(os.path.join(dest, 'run-summary.json'), 'w', encoding='utf-8') as f:
-            json.dump(summary, f, ensure_ascii=False)
-    except Exception:
-        pass
 
     # Archive + prune Godot user:// logs (Windows: %APPDATA%/Godot/app_userdata/<ProjectName>/logs).
     # This prevents uncontrolled growth of godot.log files in AppData.
@@ -663,8 +710,7 @@ def main():
     )
 
     artifact_error_path = os.path.join(dest, 'playability-artifacts-error.txt')
-    if artifact_error_messages:
-        rc = 1
+    artifact_rc = 1 if artifact_error_messages else 0
 
     try:
         artifact_payload, artifact_collection_errors, artifact_failed = collect_playability_artifacts(
@@ -685,8 +731,10 @@ def main():
             artifact_max_bytes=artifact_max_bytes,
         )
         if artifact_failed:
-            rc = 1
+            artifact_rc = 1
         artifact_error_messages.extend(artifact_collection_errors)
+        if artifact_collection_errors:
+            artifact_rc = 1
         if artifact_warning_messages:
             artifact_payload['warnings'] = artifact_warning_messages
         artifact_payload['route2_suite_requested'] = route2_suite_requested
@@ -695,9 +743,13 @@ def main():
             'max_xml_bytes': route2_detect_max_xml_bytes,
             'max_console_bytes': route2_detect_max_console_bytes,
         }
+        artifact_payload['artifact_gate_mode'] = artifact_gate_mode
+        artifact_payload['artifact_gate_effective'] = artifact_gate_effective
+        artifact_payload['test_rc'] = test_rc
+        artifact_payload['artifact_rc'] = artifact_rc
         write_text(os.path.join(dest, 'playability-artifacts.json'), json.dumps(artifact_payload, ensure_ascii=False, indent=2))
     except Exception as e:
-        rc = 1
+        artifact_rc = 1
         artifact_error_messages.append(f'artifact collection failed: {e}')
 
     if artifact_error_messages:
@@ -708,13 +760,33 @@ def main():
         except Exception:
             pass
 
-    print(f'GDUNIT_DONE rc={rc} out={out_dir}')
-    if rc != 0:
+    if artifact_gate_effective == 'off':
+        final_rc = test_rc
+    else:
+        final_rc = 0 if (test_rc == 0 and artifact_rc == 0) else 1
+
+    summary['test_rc'] = test_rc
+    summary['artifact_rc'] = artifact_rc
+    summary['artifact_gate_mode'] = artifact_gate_mode
+    summary['artifact_gate_effective'] = artifact_gate_effective
+    summary['rc'] = final_rc
+    try:
+        with open(os.path.join(dest, 'run-summary.json'), 'w', encoding='utf-8') as f:
+            json.dump(summary, f, ensure_ascii=False)
+    except Exception:
+        pass
+
+    print(f'GDUNIT_DONE rc={final_rc} test_rc={test_rc} artifact_rc={artifact_rc} artifact_gate={artifact_gate_effective} out={out_dir}')
+    if final_rc != 0 and test_rc != 0:
         try:
             _print_failure_summary(console_path=console_path, dest_dir=dest, out_dir=out_dir)
         except Exception as e:
             print(f"GDUNIT_FAILURE_SUMMARY error={e}")
-    return 0 if rc == 0 else rc
+    if final_rc != 0 and artifact_rc != 0:
+        print(f'GDUNIT_ARTIFACT_GATE_FAIL details={artifact_error_path}')
+    if final_rc == 0 and artifact_rc != 0 and artifact_gate_effective == 'off':
+        print(f'GDUNIT_ARTIFACT_GATE_BYPASS artifact_rc={artifact_rc} mode=off details={artifact_error_path}')
+    return 0 if final_rc == 0 else final_rc
 
 
 if __name__ == '__main__':

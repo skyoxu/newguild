@@ -9,6 +9,7 @@ This script maps SuperClaude `/sc:test` into repository-native test entrypoints:
 Usage (Windows):
   py -3 scripts/sc/test.py --type unit
   py -3 scripts/sc/test.py --type e2e --godot-bin \"C:\\Godot\\Godot_v4.5.1-stable_mono_win64_console.exe\"
+  py -3 scripts/sc/test.py --type e2e-light --godot-bin \"C:\\Godot\\Godot_v4.5.1-stable_mono_win64_console.exe\"
   py -3 scripts/sc/test.py --type all --godot-bin \"%GODOT_BIN%\"
 """
 
@@ -23,10 +24,13 @@ from typing import Any
 
 from _util import ci_dir, repo_root, run_cmd, today_str, write_json, write_text
 
+DEFAULT_TIMEOUT_SEC = 600
+DEFAULT_E2E_LIGHT_TIMEOUT_SEC = 300
+
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="sc-test (test shim)")
-    ap.add_argument("--type", choices=["unit", "integration", "e2e", "all"], default="all")
+    ap.add_argument("--type", choices=["unit", "integration", "e2e", "e2e-light", "all"], default="all")
     ap.add_argument("--solution", default="Game.sln")
     ap.add_argument("--configuration", default="Debug")
     ap.add_argument("--godot-bin", default=None, help="Godot mono console binary (required for e2e/all)")
@@ -34,12 +38,39 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--smoke-require-marker", default=None, help="Require this marker for --smoke-scene (strict mode).")
     ap.add_argument("--wiring-smoke-scene", default="res://Game.Godot/Scenes/CI/WiringSmoke.tscn", help="Wiring smoke scene for deterministic runtime wiring gate")
     ap.add_argument("--wiring-smoke-require-marker", default="[WIRING_SMOKE_READY]", help="Require this marker for wiring smoke (strict mode).")
-    ap.add_argument("--timeout-sec", type=int, default=600)
+    ap.add_argument(
+        "--timeout-sec",
+        type=int,
+        default=DEFAULT_TIMEOUT_SEC,
+        help=(
+            "Timeout for gdunit run. Default is 600s; when --type e2e-light and this value is not overridden, "
+            "effective timeout is 300s."
+        ),
+    )
+    ap.add_argument(
+        "--artifact-gate",
+        choices=["auto", "on", "off"],
+        default=os.environ.get("SC_ARTIFACT_GATE", "auto"),
+        help="Artifact gate for run_gdunit.py. auto=CI:on, local:off.",
+    )
     ap.add_argument("--skip-smoke", action="store_true")
     ap.add_argument("--skip-wiring-smoke", action="store_true")
+    ap.add_argument("--skip-prewarm", action="store_true", help="Skip run_gdunit.py --prewarm to reduce startup overhead in local fast loops")
     ap.add_argument("--no-coverage-gate", action="store_true", help="do not enforce default coverage thresholds")
     ap.add_argument("--no-coverage-report", action="store_true", help="skip HTML coverage report generation")
     return ap
+
+
+def _is_ci() -> bool:
+    value = os.environ.get("CI", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def resolve_artifact_gate_mode(mode: str) -> str:
+    normalized = (mode or "auto").strip().lower()
+    if normalized == "auto":
+        return "on" if _is_ci() else "off"
+    return normalized
 
 
 def run_unit(out_dir: Path, solution: str, configuration: str) -> dict[str, Any]:
@@ -157,7 +188,13 @@ def run_coverage_report(out_dir: Path, unit_artifacts_dir: Path) -> dict[str, An
     }
 
 
-def run_gdunit_hard(out_dir: Path, godot_bin: str, timeout_sec: int) -> dict[str, Any]:
+def run_gdunit_hard(
+    out_dir: Path,
+    godot_bin: str,
+    timeout_sec: int,
+    artifact_gate_mode: str,
+    prewarm: bool,
+) -> dict[str, Any]:
     date = today_str()
     report_dir = Path("logs") / "e2e" / date / "sc-test" / "gdunit-hard"
 
@@ -170,7 +207,10 @@ def run_gdunit_hard(out_dir: Path, godot_bin: str, timeout_sec: int) -> dict[str
         "py",
         "-3",
         "scripts/python/run_gdunit.py",
-        "--prewarm",
+    ]
+    if prewarm:
+        cmd += ["--prewarm"]
+    cmd += [
         "--godot-bin",
         godot_bin,
         "--project",
@@ -178,11 +218,19 @@ def run_gdunit_hard(out_dir: Path, godot_bin: str, timeout_sec: int) -> dict[str
     ]
     for d in add_dirs:
         cmd += ["--add", d]
-    cmd += ["--timeout-sec", str(timeout_sec), "--rd", str(report_dir)]
+    cmd += ["--timeout-sec", str(timeout_sec), "--artifact-gate", artifact_gate_mode, "--rd", str(report_dir)]
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=timeout_sec + 300)
     log_path = out_dir / "gdunit-hard.log"
     write_text(log_path, out)
-    return {"name": "gdunit-hard", "cmd": cmd, "rc": rc, "log": str(log_path), "report_dir": str(report_dir)}
+    return {
+        "name": "gdunit-hard",
+        "cmd": cmd,
+        "rc": rc,
+        "log": str(log_path),
+        "report_dir": str(report_dir),
+        "artifact_gate_mode": artifact_gate_mode,
+        "prewarm": prewarm,
+    }
 
 
 def run_smoke(out_dir: Path, godot_bin: str, scene: str, require_marker: str | None) -> dict[str, Any]:
@@ -280,12 +328,20 @@ def main() -> int:
     out_dir = ci_dir("sc-test")
 
     godot_bin = args.godot_bin or os.environ.get("GODOT_BIN")
+    artifact_gate_mode = resolve_artifact_gate_mode(args.artifact_gate)
+    e2e_timeout_sec = args.timeout_sec
+    if args.type == "e2e-light" and args.timeout_sec == DEFAULT_TIMEOUT_SEC:
+        e2e_timeout_sec = DEFAULT_E2E_LIGHT_TIMEOUT_SEC
+    prewarm_enabled = not args.skip_prewarm
 
     summary: dict[str, Any] = {
         "cmd": "sc-test",
         "type": args.type,
         "solution": args.solution,
         "configuration": args.configuration,
+        "artifact_gate_mode": artifact_gate_mode,
+        "e2e_timeout_sec": e2e_timeout_sec,
+        "prewarm_enabled": prewarm_enabled,
         "status": "fail",
         "steps": [],
     }
@@ -308,23 +364,32 @@ def main() -> int:
                 if cov.get("status") == "fail":
                     hard_fail = True
 
-    if args.type in ("integration", "e2e", "all"):
+    run_e2e = args.type in ("integration", "e2e", "e2e-light", "all")
+    run_full_e2e = args.type in ("integration", "e2e", "all")
+
+    if run_e2e:
         if not godot_bin:
             print("[sc-test] ERROR: --godot-bin (or env GODOT_BIN) is required for e2e/integration tests.")
             return 2
 
-        step = run_gdunit_hard(out_dir, godot_bin, args.timeout_sec)
+        step = run_gdunit_hard(
+            out_dir,
+            godot_bin,
+            e2e_timeout_sec,
+            artifact_gate_mode,
+            prewarm_enabled,
+        )
         summary["steps"].append(step)
         if step["rc"] != 0:
             hard_fail = True
 
-        if not args.skip_smoke:
+        if run_full_e2e and not args.skip_smoke:
             sm = run_smoke(out_dir, godot_bin, args.smoke_scene, args.smoke_require_marker)
             summary["steps"].append(sm)
             if sm["rc"] != 0:
                 hard_fail = True
 
-        if not args.skip_wiring_smoke:
+        if run_full_e2e and not args.skip_wiring_smoke:
             ws = run_wiring_smoke(out_dir, godot_bin, args.wiring_smoke_scene, args.wiring_smoke_require_marker)
             summary["steps"].append(ws)
             if ws["rc"] != 0:
