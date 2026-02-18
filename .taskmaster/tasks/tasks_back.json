@@ -2306,8 +2306,8 @@
     ],
     "test_refs": [
       "Game.Core.Tests/Progression/ExperienceSystemTests.cs",
-      "Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs",
-      "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs"
     ],
     "contractRefs": [
       "core.experience.changed",
