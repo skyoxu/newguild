@@ -53,6 +53,18 @@ def parse_task_id(value: str | None) -> str | None:
     return s.split(".", 1)[0]
 
 
+def _is_ci() -> bool:
+    value = os.environ.get("CI", "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def resolve_artifact_gate_mode(mode: str) -> str:
+    normalized = (mode or "auto").strip().lower()
+    if normalized == "auto":
+        return "on" if _is_ci() else "off"
+    return normalized
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="sc-acceptance-check (reproducible acceptance gate)")
     ap.add_argument(
@@ -66,6 +78,18 @@ def main() -> int:
     ap.add_argument("--strict-adr-status", action="store_true", help="fail if any referenced ADR is not Accepted")
     ap.add_argument("--strict-test-quality", action="store_true", help="fail if deterministic test-quality heuristics report verdict=Needs Fix")
     ap.add_argument("--strict-quality-rules", action="store_true", help="fail if deterministic quality rules report verdict=Needs Fix")
+    ap.add_argument(
+        "--tests-scope",
+        choices=["unit", "e2e", "e2e-light", "all"],
+        default="all",
+        help="Scope for tests step. unit/e2e/e2e-light/all (default: all).",
+    )
+    ap.add_argument(
+        "--artifact-gate",
+        choices=["auto", "on", "off"],
+        default=os.environ.get("SC_ARTIFACT_GATE", "auto"),
+        help="Artifact gate for tests-all. auto=CI:on, local:off.",
+    )
     ap.add_argument(
         "--only",
         default=None,
@@ -110,8 +134,9 @@ def main() -> int:
         steps.append(step_security_soft(out_dir))
 
     godot_bin = args.godot_bin or os.environ.get("GODOT_BIN")
+    artifact_gate_mode = resolve_artifact_gate_mode(args.artifact_gate)
     if enabled("tests"):
-        steps.append(step_tests_all(out_dir, godot_bin))
+        steps.append(step_tests_all(out_dir, godot_bin, artifact_gate_mode, str(args.tests_scope)))
 
     env_v = os.environ.get("PERF_P95_THRESHOLD_MS")
     env_p95 = int(env_v) if (env_v and env_v.isdigit()) else None
@@ -132,6 +157,8 @@ def main() -> int:
         "task_id": triplet.task_id,
         "title": triplet.master.get("title"),
         "only": args.only,
+        "tests_scope": args.tests_scope,
+        "artifact_gate_mode": artifact_gate_mode,
         "status": "fail" if hard_failed else "ok",
         "steps": [s.__dict__ for s in steps],
         "out_dir": str(out_dir),

@@ -235,6 +235,33 @@ def validate_task_context_required_fields(*, task_id: str, stage: str, out_dir: 
     return {"name": "validate_task_context_required_fields", "cmd": cmd, "rc": rc, "log": str(log_path), "status": "ok" if rc == 0 else "fail"}
 
 
+def run_tests_godot_build_prestep(*, configuration: str, out_dir: Path) -> dict[str, Any]:
+    target = repo_root() / "Tests.Godot" / "Tests.Godot.csproj"
+    cmd = ["dotnet", "build", str(target), "-c", configuration, "-v", "minimal"]
+    log_path = out_dir / "dotnet-build-tests-godot.log"
+
+    if not target.is_file():
+        write_text(log_path, f"SKIP: missing {target}\n")
+        return {
+            "name": "dotnet_build_tests_godot",
+            "cmd": cmd,
+            "rc": 0,
+            "log": str(log_path),
+            "status": "skipped",
+            "reason": "missing:Tests.Godot.csproj",
+        }
+
+    rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=1_200)
+    write_text(log_path, out)
+    return {
+        "name": "dotnet_build_tests_godot",
+        "cmd": cmd,
+        "rc": rc,
+        "log": str(log_path),
+        "status": "ok" if rc == 0 else "fail",
+    }
+
+
 def run_green_gate(*, solution: str, configuration: str, out_dir: Path, no_coverage_gate: bool) -> dict[str, Any]:
     if not no_coverage_gate:
         os.environ.setdefault("COVERAGE_LINES_MIN", "90")
@@ -461,6 +488,17 @@ def main() -> int:
         ctx_step = validate_task_context_required_fields(task_id=triplet.task_id, stage="green", out_dir=out_dir)
         summary["steps"].append(ctx_step)
         if ctx_step["rc"] != 0:
+            write_json(out_dir / "summary.json", summary)
+            print(f"SC_BUILD_TDD status=fail out={out_dir}")
+            assert_no_new_contract_files(before_contracts)
+            return 1
+
+        tests_godot_build_step = run_tests_godot_build_prestep(
+            configuration=args.configuration,
+            out_dir=out_dir,
+        )
+        summary["steps"].append(tests_godot_build_step)
+        if tests_godot_build_step["rc"] != 0:
             write_json(out_dir / "summary.json", summary)
             print(f"SC_BUILD_TDD status=fail out={out_dir}")
             assert_no_new_contract_files(before_contracts)
