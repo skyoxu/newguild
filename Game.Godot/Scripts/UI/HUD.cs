@@ -43,6 +43,10 @@ public partial class HUD : Control
     private const string DemoAuditSource = "game.godot/hud";
     private const string DemoAuditTarget = "raid-encounter-demo";
 
+    private static bool _hasExperienceSnapshot;
+    private static int _lastExperienceTotal;
+    private static int _lastExperienceLevel = 1;
+
     private Label _score = default!;
     private Label _health = default!;
     private Label _week = default!;
@@ -57,6 +61,7 @@ public partial class HUD : Control
     private AchievementTracker? _achievementTracker;
 
     private EventBusAdapter? _eventBus;
+    private Node? _eventBusNode;
     private Callable _domainEventCallable;
 
     private IGameTurnSystem? _turnSystem;
@@ -95,8 +100,13 @@ public partial class HUD : Control
             _achievements.Text = FormatAchievementsText(0);
         if (_reputation != null && string.IsNullOrWhiteSpace(_reputation.Text))
             _reputation.Text = FormatReputationText(0);
-        if (_experience != null && string.IsNullOrWhiteSpace(_experience.Text))
-            _experience.Text = FormatExperienceText(0, 1);
+        if (_experience != null)
+        {
+            if (_hasExperienceSnapshot)
+                _experience.Text = FormatExperienceText(_lastExperienceTotal, _lastExperienceLevel);
+            else if (string.IsNullOrWhiteSpace(_experience.Text))
+                _experience.Text = FormatExperienceText(0, 1);
+        }
 
         var allowMediaBeatDemo = IsMediaBeatDemoAllowed();
         if (_mediaBeatLabel != null)
@@ -113,11 +123,12 @@ public partial class HUD : Control
         if (_nextTurnButton != null)
             _nextTurnButton.Pressed += OnNextTurnPressed;
 
-        _eventBus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
-        if (_eventBus != null)
+        _eventBusNode = GetNodeOrNull<Node>("/root/EventBus");
+        _eventBus = _eventBusNode as EventBusAdapter;
+        if (_eventBusNode != null)
         {
             _domainEventCallable = new Callable(this, nameof(OnDomainEventEmitted));
-            _eventBus.Connect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
+            _eventBusNode.Connect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
         }
 
         // Resolve GameTurnSystem from CompositionRoot if available; fall back to in-memory wiring for T2 demo.
@@ -160,14 +171,15 @@ public partial class HUD : Control
         _turnSystem = new GameTurnSystem(new EventEngine(catalog, eventBus, timePort, aiCoordinator: aiCoordinator), eventBus, timePort);
         _currentTurn = _turnSystem.StartNewWeek(saveId);
         UpdateTurnLabels();
+
+        if (_eventBus != null)
+            BackfillExperienceFromRecentEvents(_eventBus);
     }
 
     public override void _ExitTree()
     {
-        if (_eventBus == null)
-            return;
-        if (_eventBus.IsConnected(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable))
-            _eventBus.Disconnect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
+        if (_eventBusNode != null && _eventBusNode.IsConnected(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable))
+            _eventBusNode.Disconnect(EventBusAdapter.SignalName.DomainEventEmitted, _domainEventCallable);
 
         if (_achievementTracker != null)
         {
@@ -249,34 +261,16 @@ public partial class HUD : Control
             if (_experience == null)
                 return;
 
-            try
+            if (!TryParseExperiencePayload(dataJson, out var total, out var level))
             {
-                using var doc = JsonDocument.Parse(dataJson, JsonOptions);
-                int total;
-                int level;
-
-                if (doc.RootElement.TryGetProperty("totalExperience", out var totalExperience) && totalExperience.TryGetInt32(out total)) { }
-                else if (doc.RootElement.TryGetProperty("total", out var totalValue) && totalValue.TryGetInt32(out total)) { }
-                else
-                {
-                    GD.PushWarning($"[HUD] invalid payload for {type} (expected int totalExperience/total).");
-                    return;
-                }
-
-                if (doc.RootElement.TryGetProperty("level", out var levelValue) && levelValue.TryGetInt32(out level)) { }
-                else if (doc.RootElement.TryGetProperty("newLevel", out var newLevel) && newLevel.TryGetInt32(out level)) { }
-                else
-                {
-                    GD.PushWarning($"[HUD] invalid payload for {type} (expected int level/newLevel).");
-                    return;
-                }
-
-                _experience.Text = FormatExperienceText(total, level);
+                GD.PushWarning($"[HUD] invalid payload for {type} (expected int totalExperience/total and level/newLevel).");
+                return;
             }
-            catch (Exception ex)
-            {
-                GD.PushWarning($"[HUD] failed to parse event payload type={type} exType={ex.GetType().Name}");
-            }
+
+            _experience.Text = FormatExperienceText(total, level);
+            _hasExperienceSnapshot = true;
+            _lastExperienceTotal = total;
+            _lastExperienceLevel = level;
         }
         else if (type == MediaBeatTriggered.EventType)
         {
@@ -310,6 +304,62 @@ public partial class HUD : Control
     private static string FormatAchievementsText(int count) => $"{AchievementsLabelPrefix}: {count}";
     private static string FormatExperienceText(int totalExperience, int level) =>
         $"{ExperienceLabelPrefix}: {totalExperience} Lv: {level}";
+
+    private static bool TryParseExperiencePayload(string dataJson, out int total, out int level)
+    {
+        total = 0;
+        level = 1;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(dataJson, JsonOptions);
+
+            if (doc.RootElement.TryGetProperty("totalExperience", out var totalExperience) && totalExperience.TryGetInt32(out total)) { }
+            else if (doc.RootElement.TryGetProperty("total", out var totalValue) && totalValue.TryGetInt32(out total)) { }
+            else
+            {
+                return false;
+            }
+
+            if (doc.RootElement.TryGetProperty("level", out var levelValue) && levelValue.TryGetInt32(out level)) { }
+            else if (doc.RootElement.TryGetProperty("newLevel", out var newLevel) && newLevel.TryGetInt32(out level)) { }
+            else
+            {
+                return false;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void BackfillExperienceFromRecentEvents(EventBusAdapter bus)
+    {
+        if (_experience == null)
+            return;
+
+        var recentEvents = bus.GetRecentEvents();
+        for (var i = recentEvents.Count - 1; i >= 0; i--)
+        {
+            var recentEvent = recentEvents[i];
+            var eventType = recentEvent.type;
+            if (eventType != ExperienceChanged.EventType && eventType != LevelChanged.EventType)
+                continue;
+
+            var dataJson = recentEvent.dataJson;
+            if (!TryParseExperiencePayload(dataJson, out var total, out var level))
+                continue;
+
+            _experience.Text = FormatExperienceText(total, level);
+            _hasExperienceSnapshot = true;
+            _lastExperienceTotal = total;
+            _lastExperienceLevel = level;
+            return;
+        }
+    }
 
     private static string FormatMediaBeatText(string beatId, string headline) =>
         $"{MediaBeatLabelPrefix}: {beatId} {headline}".Trim();

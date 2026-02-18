@@ -77,6 +77,7 @@ func test_phase2_demos_emit_events_and_show_in_activity_feed() -> void:
 	assert_str(final_text).contains("core.reputation.changed")
 	assert_bool(final_text.find("core.raid.") >= 0).is_true()
 
+# ACC:T49.2
 func test_phase2_hud_updates_on_experience_and_achievement_events() -> void:
 	var hud := preload("res://Game.Godot/Scenes/UI/HUD.tscn").instantiate()
 	add_child(auto_free(hud))
@@ -97,3 +98,29 @@ func test_phase2_hud_updates_on_experience_and_achievement_events() -> void:
 
 	assert_str(xp_label.text).is_not_equal(before_xp)
 	assert_str(achievements_label.text).is_not_equal(before_ach)
+
+# ACC:T49.3
+func test_phase2_hud_should_keep_xp_after_reopen_without_event_replay_red() -> void:
+	var bus := get_node_or_null("/root/EventBus")
+	assert_object(bus).is_not_null()
+
+	var first_hud := preload("res://Game.Godot/Scenes/UI/HUD.tscn").instantiate()
+	add_child(auto_free(first_hud))
+	await get_tree().process_frame
+
+	var first_xp_label: Label = first_hud.get_node("TopBar/HBox/ExperienceLabel")
+	bus.PublishSimple("core.experience.changed", "core", '{"guildId":"guild-1","totalExperience":150,"delta":150,"level":2,"sourceEventType":"core.raid.resolved","changedAt":"2025-01-01T00:00:00Z"}')
+	await get_tree().process_frame
+	assert_str(first_xp_label.text).contains("150")
+
+	first_hud.queue_free()
+	await get_tree().process_frame
+
+	var second_hud := preload("res://Game.Godot/Scenes/UI/HUD.tscn").instantiate()
+	add_child(auto_free(second_hud))
+	await get_tree().process_frame
+
+	var second_xp_label: Label = second_hud.get_node("TopBar/HBox/ExperienceLabel")
+	# T49 continuity expectation at UI entry.
+	assert_str(second_xp_label.text).contains("150")
+
