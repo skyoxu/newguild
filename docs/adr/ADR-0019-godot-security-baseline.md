@@ -9,9 +9,11 @@
   - OS.execute 与权限：默认禁用 OS.execute（或仅开发态开启并严审计）；CI/headless 下摄像头/麦克风/文件选择默认拒绝。
   - 遥测与隐私：最早 Autoload 初始化 Sentry Godot SDK；开启 Releases + Sessions 计算 Crash‑Free；敏感字段 SDK 端脱敏；结构化日志采样。
   - 配置开关：`GD_SECURE_MODE=1`、`ALLOWED_EXTERNAL_HOSTS=<csv>`、`GD_OFFLINE_MODE=0/1`、`SECURITY_TEST_MODE=1`。
+  - 安全档位：`SECURITY_PROFILE=host-safe|strict`。默认 `host-safe` 适用于单机项目快速迭代，仅要求保护宿主系统边界（路径越权、外链白名单、动态执行限制）；允许本地存档、进程快照与内存状态被玩家修改。`strict` 仅用于 `SECURITY_TEST_MODE=1` 与 CI 安全门禁。
   - 安全烟测（CI 最小集）：外链 allow/deny/invalid 三态 + 审计文件存在；网络白名单验证；user:// 写入成功、绝对/越权写入拒绝；权限在 headless 下默认拒绝。
 - Consequences:
   - 安全相关改动必须附带就地验收（xUnit/GdUnit4）与审计产物（logs/ 路径见 6.3）。
+  - 单机发行默认不把“防本地改档/改快照”作为阻断发布条件；相关能力仅在 strict 门禁场景验证。
   - Overlay 的 08 章仅引用本基线，不复制阈值；契约与事件统一落盘 Game.Core/Contracts/**
   - CI 中新增/保留安全作业 `godot-e2e --suite security`；release‑health 门禁保持不变（ADR‑0003）。
 - Supersedes: ADR-0002-旧桌面壳-security

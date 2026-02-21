@@ -21,4 +21,19 @@ public sealed record ExperienceChanged(
     /// CloudEvents 1.0 type field for this event.
     /// </summary>
     public const string EventType = "core.experience.changed";
+
+    /// <summary>
+    /// Canonical event source from core domain publish path.
+    /// </summary>
+    public const string SourceCore = "core";
+
+    /// <summary>
+    /// Canonical event source from UI publish path.
+    /// </summary>
+    public const string SourceUi = "ui";
+
+    /// <summary>
+    /// Canonical event source from reward ledger publish path.
+    /// </summary>
+    public const string SourceRewardLedger = "RewardLedgerService";
 }

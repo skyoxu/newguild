@@ -87,6 +87,7 @@
 软门禁（不阻断，只记录证据）：
 
 - Sentry secrets/编码扫描/核心契约检查（输出写入 `security-soft.json`）
+- SECURITY_PROFILE 注释口径软检查（输出写入 `security-profile-soft.json`，仅提示不阻断）
 
 性能门禁（可选硬门禁）：
 

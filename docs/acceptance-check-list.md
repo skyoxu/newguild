@@ -47,6 +47,7 @@ py -3 scripts/sc/acceptance_check.py --task-id 10 --only perf --perf-p95-ms 20
 - `architecture-boundary.json`：架构边界校验结果
 - `dotnet-build-warnaserror.log`：`dotnet build -warnaserror` 日志
 - `security-soft.json`：安全软扫描结果（不阻断）
+- `security-profile-soft.json`：Task 安全档位注释检查（不阻断）
 - `check-encoding-since-today.log`：编码检查日志（不阻断）
 - `tests-all.log`：测试执行日志（当 `tests` 步骤启用）
 - `perf-budget.json`：性能预算（当 `perf` 步骤启用）
@@ -94,6 +95,7 @@ py -3 scripts/sc/acceptance_check.py --task-id 10 --only perf --perf-p95-ms 20
 - [ ] GameLoop/Sanguo contracts 检查（`check_sanguo_gameloop_contracts.py`）
 - [ ] 安全模式关键 API 软扫描（`security_soft_scan.py`）
 - [ ] 编码检查（`check_encoding.py --since-today`）
+- [ ] SECURITY_PROFILE 注释检查（Playability 路线任务需在 details/acceptance 中出现 `SECURITY_PROFILE`）
 
 ### 3.8 `tests`（Hard）
 

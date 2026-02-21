@@ -22,6 +22,7 @@ namespace Game.Godot.Adapters;
 public partial class EventBusAdapter : Node, IEventBus
 {
     private const int DefaultRecentEventsMax = 200;
+    private const int MaxTrackedPublisherTrustIds = 2048;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -44,6 +45,7 @@ public partial class EventBusAdapter : Node, IEventBus
         string SpecVersion,
         string DataContentType,
         string TimestampIso,
+        bool IsTrustedPublisher,
         TaskCompletionSource<bool> Completion);
 
     private sealed record RecentDomainEvent(
@@ -62,6 +64,9 @@ public partial class EventBusAdapter : Node, IEventBus
     private readonly object _gate = new();
     private readonly List<RecentDomainEvent> _recent = new();
     private readonly object _recentGate = new();
+    private readonly object _publisherTrustGate = new();
+    private readonly HashSet<string> _trustedPublisherEventIds = new(StringComparer.Ordinal);
+    private readonly Queue<string> _publisherTrustEventOrder = new();
 
     public override void _Ready()
     {
@@ -84,11 +89,16 @@ public partial class EventBusAdapter : Node, IEventBus
 
     public Task PublishAsync(DomainEvent evt)
     {
+        return PublishAsyncInternal(evt, isTrustedPublisher: true);
+    }
+
+    private Task PublishAsyncInternal(DomainEvent evt, bool isTrustedPublisher)
+    {
         var dataJson = evt.Data is string dataText ? (string.IsNullOrWhiteSpace(dataText) ? "{}" : dataText)
                                             : JsonSerializer.Serialize(evt.Data, JsonOptions);
 
         if (System.Environment.CurrentManagedThreadId == _mainThreadId)
-            return PublishOnMainThread(evt, dataJson);
+            return PublishOnMainThread(evt, dataJson, isTrustedPublisher);
 
         var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         _pending.Enqueue(new PendingPublish(
@@ -99,6 +109,7 @@ public partial class EventBusAdapter : Node, IEventBus
             SpecVersion: evt.SpecVersion,
             DataContentType: evt.DataContentType,
             TimestampIso: evt.Timestamp.ToString("o"),
+            IsTrustedPublisher: isTrustedPublisher,
             Completion: tcs));
 
         if (Interlocked.Exchange(ref _flushScheduled, 1) == 0 && IsInsideTree())
@@ -125,7 +136,7 @@ public partial class EventBusAdapter : Node, IEventBus
                     SpecVersion: pending.SpecVersion,
                     DataContentType: pending.DataContentType);
 
-                var task = PublishOnMainThread(evt, pending.DataJson);
+                var task = PublishOnMainThread(evt, pending.DataJson, pending.IsTrustedPublisher);
                 _ = task.ContinueWith(
                     t =>
                     {
@@ -148,8 +159,9 @@ public partial class EventBusAdapter : Node, IEventBus
             CallDeferred(nameof(FlushPending));
     }
 
-    private Task PublishOnMainThread(DomainEvent evt, string dataJson)
+    private Task PublishOnMainThread(DomainEvent evt, string dataJson, bool isTrustedPublisher)
     {
+        TrackPublisherTrust(evt.Id, isTrustedPublisher);
         var timestampIso = evt.Timestamp.ToString("o");
         EmitSignal(SignalName.DomainEventEmitted, evt.Type, evt.Source, dataJson, evt.Id, evt.SpecVersion, evt.DataContentType, timestampIso);
         _securityAudit?.TryEnqueue(evt, dataJson);
@@ -236,17 +248,39 @@ public partial class EventBusAdapter : Node, IEventBus
     }
 
     // Simple publish for GDScript tests without needing DomainEvent construction
-    public void PublishSimple(string type, string source, string data_json)
+    public bool PublishSimple(string type, string source, string data_json)
+    {
+        return PublishSimpleInternal(type, source, data_json, isTrustedPublisher: false);
+    }
+
+    // Trusted publish for tests that validate trusted-path behavior.
+#if DEBUG
+    public bool PublishSimpleTrusted(string type, string source, string data_json)
+#else
+    internal bool PublishSimpleTrusted(string type, string source, string data_json)
+#endif
+    {
+        if (!IsTrustedSimplePublishAllowed())
+        {
+            if (OS.IsDebugBuild())
+                GD.PushWarning("[EventBusAdapter][DEBUG] PublishSimpleTrusted denied (requires SECURITY_TEST_MODE=1).");
+            return false;
+        }
+
+        return PublishSimpleInternal(type, source, data_json, isTrustedPublisher: true);
+    }
+
+    private bool PublishSimpleInternal(string type, string source, string data_json, bool isTrustedPublisher)
     {
         if (!IsPublishSimpleAllowed())
         {
             if (OS.IsDebugBuild())
                 GD.PushWarning("[EventBusAdapter][DEBUG] PublishSimple denied (not in debug/test mode).");
-            return;
+            return false;
         }
 
         if (string.IsNullOrWhiteSpace(type))
-            return;
+            return false;
 
         if (string.IsNullOrWhiteSpace(source))
             source = "gdscript";
@@ -254,8 +288,41 @@ public partial class EventBusAdapter : Node, IEventBus
         if (string.IsNullOrWhiteSpace(data_json))
             data_json = "{}";
 
-        var evt = new DomainEvent(type.Trim(), source.Trim(), data_json, DateTimeOffset.UtcNow, Guid.NewGuid().ToString("N"));
-        _ = PublishAsync(evt);
+        var eventId = Guid.NewGuid().ToString("N");
+        var evt = new DomainEvent(type.Trim(), source.Trim(), data_json, DateTimeOffset.UtcNow, eventId);
+        _ = PublishAsyncInternal(evt, isTrustedPublisher);
+        return true;
+    }
+
+    public bool IsTrustedPublisherEvent(string eventId)
+    {
+        if (string.IsNullOrWhiteSpace(eventId))
+            return false;
+
+        lock (_publisherTrustGate)
+            return _trustedPublisherEventIds.Contains(eventId);
+    }
+
+    private void TrackPublisherTrust(string eventId, bool isTrustedPublisher)
+    {
+        if (string.IsNullOrWhiteSpace(eventId))
+            return;
+
+        lock (_publisherTrustGate)
+        {
+            _publisherTrustEventOrder.Enqueue(eventId);
+
+            if (isTrustedPublisher)
+                _trustedPublisherEventIds.Add(eventId);
+            else
+                _trustedPublisherEventIds.Remove(eventId);
+
+            while (_publisherTrustEventOrder.Count > MaxTrackedPublisherTrustIds)
+            {
+                var staleId = _publisherTrustEventOrder.Dequeue();
+                _trustedPublisherEventIds.Remove(staleId);
+            }
+        }
     }
 
     private static bool IsPublishSimpleAllowed()
@@ -265,6 +332,15 @@ public partial class EventBusAdapter : Node, IEventBus
 
         return string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal) ||
                string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal);
+    }
+
+    private static bool IsTrustedSimplePublishAllowed()
+    {
+        if (!OS.IsDebugBuild())
+            return false;
+
+        return string.Equals(OS.GetEnvironment("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal)
+               || string.Equals(System.Environment.GetEnvironmentVariable("SECURITY_TEST_MODE"), "1", StringComparison.Ordinal);
     }
 
     private static int GetAuditFlushTimeoutMs()
