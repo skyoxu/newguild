@@ -223,6 +223,92 @@ def step_security_soft(out_dir: Path) -> StepResult:
     return StepResult(name="security-soft", status="ok", details=details)
 
 
+def step_security_profile_soft(out_dir: Path, triplet: TaskmasterTriplet) -> StepResult:
+    title = str(triplet.master.get("title") or "")
+    details_blob = "\n".join(
+        [
+            str(triplet.master.get("details") or ""),
+            str((triplet.back or {}).get("details") or ""),
+            str((triplet.gameplay or {}).get("details") or ""),
+        ]
+    )
+
+    is_playability_route = ("playability" in title.lower()) or ("PLAYABILITY-ROUTE-" in details_blob.upper())
+
+    def _join_acceptance(value: Any) -> str:
+        if isinstance(value, list):
+            return "\n".join(str(x) for x in value if str(x).strip())
+        if value is None:
+            return ""
+        return str(value)
+
+    checks: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    views: list[tuple[str, dict[str, Any] | None]] = [
+        ("master", triplet.master),
+        ("back", triplet.back),
+        ("gameplay", triplet.gameplay),
+    ]
+
+    for name, view in views:
+        if not isinstance(view, dict):
+            checks.append(
+                {
+                    "view": name,
+                    "present": False,
+                    "has_security_profile": False,
+                    "details_has_profile": False,
+                    "acceptance_has_profile": False,
+                }
+            )
+            continue
+
+        details_text = str(view.get("details") or "")
+        acceptance_text = _join_acceptance(view.get("acceptance"))
+        details_has_profile = "SECURITY_PROFILE" in details_text
+        acceptance_has_profile = "SECURITY_PROFILE" in acceptance_text
+        has_security_profile = details_has_profile or acceptance_has_profile
+
+        checks.append(
+            {
+                "view": name,
+                "present": True,
+                "has_security_profile": has_security_profile,
+                "details_has_profile": details_has_profile,
+                "acceptance_has_profile": acceptance_has_profile,
+            }
+        )
+
+        if is_playability_route and not has_security_profile:
+            warnings.append(
+                f"missing SECURITY_PROFILE annotation in task {triplet.task_id} {name} view (details/acceptance)"
+            )
+
+    verdict = "OK"
+    if is_playability_route and warnings:
+        verdict = "Needs Fix"
+
+    details = {
+        "task_id": triplet.task_id,
+        "title": title,
+        "is_playability_route": is_playability_route,
+        "verdict": verdict,
+        "ci_mode": bool(os.environ.get("CI")),
+        "checks": checks,
+        "warnings": warnings,
+        "note": "Soft rule only: does not fail acceptance gate.",
+    }
+
+    lines: list[str] = []
+    lines.append(f"SECURITY_PROFILE_SOFT verdict={verdict} playability_route={is_playability_route}")
+    for warning in warnings:
+        lines.append(f"WARN {warning}")
+    log_path = out_dir / "security-profile-soft.log"
+    write_text(log_path, "\n".join(lines) + "\n")
+    write_json(out_dir / "security-profile-soft.json", details)
+    return StepResult(name="security-profile-soft", status="ok", rc=0, log=str(log_path), details=details)
+
+
 def step_tests_all(
     out_dir: Path,
     godot_bin: str | None,

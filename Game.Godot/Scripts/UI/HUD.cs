@@ -384,6 +384,7 @@ public partial class HUD : Control
             return;
         _achievements.Text = FormatAchievementsText(_achievementsUnlockedCount);
     }
+
     private void OnAchievementCountChanged(object? sender, AchievementCountChanged args)
     {
         SetAchievementsUnlockedCount(args.UnlockedCount);

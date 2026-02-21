@@ -11,7 +11,7 @@ namespace Game.Core.Tests.Services
 {
     public class RewardLedgerAlignmentTests
     {
-        // ACC:T37.1 ACC:T49.4
+        // ACC:T37.1
         [Fact]
         public void Should_Expose_Stable_EventType_Contracts_For_Rewards()
         {

@@ -33,6 +33,7 @@ from _acceptance_steps import (
     step_overlay_validate,
     step_perf_budget,
     step_quality_rules,
+    step_security_profile_soft,
     step_security_soft,
     step_task_links_validate,
     step_test_quality_soft,
@@ -132,6 +133,7 @@ def main() -> int:
         steps.append(step_quality_rules(out_dir, strict=bool(args.strict_quality_rules)))
     if enabled("security"):
         steps.append(step_security_soft(out_dir))
+        steps.append(step_security_profile_soft(out_dir, triplet))
 
     godot_bin = args.godot_bin or os.environ.get("GODOT_BIN")
     artifact_gate_mode = resolve_artifact_gate_mode(args.artifact_gate)

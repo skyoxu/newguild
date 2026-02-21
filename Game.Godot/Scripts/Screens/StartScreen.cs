@@ -1,6 +1,8 @@
 using Godot;
 using System;
+using Game.Core.Contracts;
 using Game.Core.Contracts.Persistence;
+using Game.Core.Contracts.Progression;
 using Game.Core.Contracts.UI;
 using Game.Core.Ports;
 using Game.Core.Services;
@@ -27,6 +29,8 @@ public partial class StartScreen : Control
     private const string DragPayloadExpectedSource = DemoGateCaller;
     private const string DragPayloadExpectedTarget = DemoGateTarget;
     private const string DragPayloadExpectedInteraction = "dragdrop";
+    private const string UiSaveEntryKey = "ui_save_entry";
+    private const string UiExperienceSnapshotKey = "ui_save_entry_xp_state";
 
     [Export]
     public NodePath ScreenNavigatorPath { get; set; } = new NodePath("../../ScreenNavigator");
@@ -56,6 +60,7 @@ public partial class StartScreen : Control
     private ReputationSystem? _reputation;
     private MediaBeatSystem? _mediaBeats;
     private SecurityGateDecisionPublisher? _gateDecisionPublisher;
+    private ExperienceSnapshotWorkflowAdapter _snapshotWorkflow = default!;
 
     private Node? _hud;
     private Callable _raidCompletedCallable;
@@ -93,6 +98,9 @@ public partial class StartScreen : Control
 
         _bus = GetNodeOrNull<EventBusAdapter>("/root/EventBus");
         _gateDecisionPublisher = _bus != null ? new SecurityGateDecisionPublisher(_bus) : null;
+        _snapshotWorkflow = new ExperienceSnapshotWorkflowAdapter(
+            _bus,
+            guildManagerResolver: () => GetNodeOrNull<Node>("/root/GuildManager"));
         _time = GetNodeOrNull<TimeAdapter>("/root/Time");
 
         if (_bus != null)
@@ -238,6 +246,11 @@ public partial class StartScreen : Control
 
     private void OnDomainEventEmitted(string type, string source, string dataJson, string id, string specVersion, string dataContentType, string timestampIso)
     {
+        if (string.Equals(type, ExperienceChanged.EventType, StringComparison.Ordinal))
+        {
+            _snapshotWorkflow.HandleExperienceDomainEvent(dataJson, source, id, UiExperienceSnapshotKey, nameof(StartScreen));
+        }
+
         if (!IsAiEventType(type))
             return;
 
@@ -267,7 +280,7 @@ public partial class StartScreen : Control
             return;
         }
 
-        var key = "ui_save_entry";
+        var key = UiSaveEntryKey;
         var json = "{\"ts\":" + Time.GetUnixTimeFromSystem() + "}";
         var payload = "{\"saveId\":\"" + key.Replace("\"", "\\\"") + "\"}";
 
@@ -276,14 +289,8 @@ public partial class StartScreen : Control
             if (_bus != null && _bus.HasMethod("PublishSimple"))
                 _bus.Call("PublishSimple", SaveRequested.EventType, "ui", payload);
 
-            var savedOk = false;
-            if (ds.HasMethod("TrySaveSync"))
-                savedOk = (bool)ds.Call("TrySaveSync", key, json);
-            else if (ds.HasMethod("SaveSync"))
-            {
-                ds.Call("SaveSync", key, json);
-                savedOk = true;
-            }
+            var snapshotSavedOk = _snapshotWorkflow.TryPersistSnapshot(ds, UiExperienceSnapshotKey);
+            var savedOk = snapshotSavedOk && DataStoreSyncAccessor.TrySaveString(ds, key, json);
 
             if (_bus != null && _bus.HasMethod("PublishSimple"))
                 _bus.Call("PublishSimple", savedOk ? SaveCompleted.EventType : SaveFailed.EventType, "ui", payload);
@@ -291,13 +298,40 @@ public partial class StartScreen : Control
             if (_bus != null && _bus.HasMethod("PublishSimple"))
                 _bus.Call("PublishSimple", LoadRequested.EventType, "ui", payload);
 
-            Variant loaded = default;
-            if (ds.HasMethod("TryLoadSync"))
-                loaded = (Variant)ds.Call("TryLoadSync", key);
-            else if (ds.HasMethod("LoadSync"))
-                loaded = (Variant)ds.Call("LoadSync", key);
+            var loaded = DataStoreSyncAccessor.TryLoadString(ds, key);
+            var hasValidXpPayload = _snapshotWorkflow.TryLoadSnapshot(
+                ds,
+                UiExperienceSnapshotKey,
+                out var normalizedXpPayload,
+                out var hasPersistedXpSnapshot,
+                out var clearedInvalidXpSnapshot);
 
-            var loadedOk = loaded.VariantType != Variant.Type.Nil;
+            var snapshotRejectReason = SecuritySnapshotGateDecision.ReasonNormalizeFailed;
+            var snapshotLoadAccepted = !hasPersistedXpSnapshot
+                                      || (hasValidXpPayload && !clearedInvalidXpSnapshot &&
+                                          _snapshotWorkflow.TryAcceptSnapshotForLoad(normalizedXpPayload, out snapshotRejectReason));
+
+            if (hasPersistedXpSnapshot && !snapshotLoadAccepted)
+            {
+                _snapshotWorkflow.PublishAuditEvent(
+                    SecuritySnapshotGateDecision.ActionInvalid,
+                    snapshotRejectReason,
+                    UiExperienceSnapshotKey,
+                    nameof(StartScreen));
+
+                _ = _snapshotWorkflow.TryClearSnapshotForSecurityReject(
+                    ds,
+                    UiExperienceSnapshotKey,
+                    snapshotRejectReason);
+            }
+
+            if (hasPersistedXpSnapshot && snapshotLoadAccepted)
+                PublishExperienceSnapshot(normalizedXpPayload);
+
+            var loadedOk = !string.IsNullOrWhiteSpace(loaded)
+                           && snapshotLoadAccepted
+                           && !clearedInvalidXpSnapshot;
+
             if (_bus != null && _bus.HasMethod("PublishSimple"))
                 _bus.Call("PublishSimple", loadedOk ? LoadCompleted.EventType : LoadFailed.EventType, "ui", payload);
 
@@ -307,6 +341,20 @@ public partial class StartScreen : Control
         {
             SetOutput($"Save+Load failed exType={ex.GetType().Name}");
         }
+    }
+
+    private void PublishExperienceSnapshot(string normalizedPayload)
+    {
+        if (_bus == null || string.IsNullOrWhiteSpace(normalizedPayload))
+            return;
+
+        var evt = new DomainEvent(
+            Type: ExperienceChanged.EventType,
+            Source: ExperienceChanged.SourceUi,
+            Data: normalizedPayload,
+            Timestamp: DateTimeOffset.UtcNow,
+            Id: _ids.NewId());
+        _ = _bus.PublishAsync(evt);
     }
 
     private void OnActivityFeedPressed()

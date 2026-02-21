@@ -1914,7 +1914,7 @@
         "status": "pending",
         "priority": "medium",
         "description": "验证 XP/Level 从玩法事件驱动增长、在 HUD 可见，并在 Save/Load 后保持一致。",
-        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-14\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs; Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs; Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-14\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs; Game.Core.Tests/Tasks/Task49GovernanceTests.cs; Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd\nSecurity Profile: SECURITY_PROFILE=host-safe (default for single-player delivery; local save/snapshot/process tampering is allowed). Use SECURITY_PROFILE=strict for SECURITY_TEST_MODE=1 and CI security checks.",
         "dependencies": [
           "35",
           "37",
@@ -1937,13 +1937,30 @@
         "acceptance": [
           "触发玩法事件后 XP 增长可见，并在达阈值时正确升至下一等级。 Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs",
           "HUD 中 XP/Level 显示与事件驱动同步，不依赖手工刷新。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
-          "Save/Load 后 XP/Level 与加载前一致，且不回退。 Refs: Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs",
-          "对齐 contractRefs（experience/level/raid）的最小覆盖，避免只做显示不接线。 Refs: Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs"
+          "Save/Load 后 XP/Level 与加载前一致，且不回退。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+          "对齐 contractRefs 字段与事件常量集合（experience/level/raid + guild/media/recruitment/reputation/score/save/load/security），避免口径漂移。 Refs: Game.Core.Tests/Tasks/Task49GovernanceTests.cs",
+          "单机安全口径：默认 SECURITY_PROFILE=host-safe（允许本地改档/快照），仅保护宿主系统边界；SECURITY_PROFILE=strict 仅用于安全门禁与测试。 Refs: docs/adr/ADR-0019-godot-security-baseline.md"
         ],
         "testRefs": [
           "Game.Core.Tests/Progression/ExperienceSystemTests.cs",
-          "Game.Core.Tests/Services/RewardLedgerAlignmentTests.cs",
+          "Game.Core.Tests/Tasks/Task49GovernanceTests.cs",
           "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+        ],
+        "contractRefs": [
+          "core.experience.changed",
+          "core.level.changed",
+          "core.raid.resolved",
+          "core.guild.created",
+          "core.media.beat.triggered",
+          "core.recruitment.offer.resolved",
+          "core.reputation.changed",
+          "core.score.changed",
+          "core.save.requested",
+          "core.load.requested",
+          "core.security.snapshot.decision"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route14-summary.json"
         ],
         "testStrategy": "TDD (red->green->refactor). Prefer deterministic xUnit + GdUnit4 playability route checks.",
         "recommendedSubtasks": 3,
@@ -1953,7 +1970,7 @@
             "title": "Wire XP/Level event pipeline",
             "description": "Ensure experience and level events are published/consumed along gameplay flow.",
             "dependencies": [],
-            "details": "Use contractRefs as minimal coverage set: core.experience.changed/core.level.changed/core.raid.resolved.",
+            "details": "Use contractRefs coverage set from Task49 governance: experience/level/raid + guild/media/recruitment/reputation/score/save/load/security.",
             "status": "pending",
             "testStrategy": "Use ACC:T49.1 anchor in referenced tests or deterministic evidence output.",
             "parentId": "49",

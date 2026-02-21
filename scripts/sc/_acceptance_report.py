@@ -69,6 +69,26 @@ def write_markdown_report(out_dir: Path, task: TaskmasterTriplet, steps: list[St
         if s.log:
             rel_log = str(Path(s.log).relative_to(repo_root())).replace("\\", "/")
             lines.append(f"  - log: `{rel_log}`")
+
+    security_profile_step = next((s for s in steps if s.name == "security-profile-soft"), None)
+    if security_profile_step and isinstance(security_profile_step.details, dict):
+        details = security_profile_step.details
+        lines.append("")
+        lines.append("## Security Profile (Soft)")
+        lines.append(f"- playability_route: {bool(details.get('is_playability_route'))}")
+        lines.append(f"- verdict: {details.get('verdict')}")
+        warnings = details.get("warnings") if isinstance(details.get("warnings"), list) else []
+        lines.append(f"- warnings: {len(warnings)}")
+        for warning in warnings:
+            lines.append(f"  - {warning}")
+        checks = details.get("checks") if isinstance(details.get("checks"), list) else []
+        for item in checks:
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- view `{item.get('view')}`: has_profile={bool(item.get('has_security_profile'))} "
+                f"(details={bool(item.get('details_has_profile'))}, acceptance={bool(item.get('acceptance_has_profile'))})"
+            )
     lines.append("")
     write_text(out_dir / "report.md", "\n".join(lines) + "\n")
 

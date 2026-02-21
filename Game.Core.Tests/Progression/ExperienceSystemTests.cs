@@ -7,7 +7,7 @@ namespace Game.Core.Tests.Progression;
 
 public class ExperienceSystemTests
 {
-    // ACC:T37.1 ACC:T49.1
+    // ACC:T37.1 ACC:T49.1 ACC:T49.5
     [Fact]
     public void Should_Calculate_Level_From_TotalXp_Using_Deterministic_Curve()
     {
@@ -95,4 +95,5 @@ public class ExperienceSystemTests
 
         snapshot.Should().Be(saved);
     }
+
 }
