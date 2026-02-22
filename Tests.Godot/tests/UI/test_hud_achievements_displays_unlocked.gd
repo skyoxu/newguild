@@ -20,7 +20,7 @@ func _ensure_event_bus(root: Node) -> Node:
 	await get_tree().process_frame
 	return bus
 
-# ACC:T36.1
+# ACC:T36.1 ACC:T50.1 ACC:T50.4
 func test_hud_achievements_label_updates_on_set() -> void:
 	var root := get_tree().get_root()
 	var bus := await _ensure_event_bus(root)
@@ -39,7 +39,7 @@ func test_hud_achievements_label_updates_on_set() -> void:
 		assert_str(label.text).contains("Achievements")
 		assert_str(label.text).contains("1")
 
-# ACC:T36.3
+# ACC:T36.3 ACC:T50.7
 func test_hud_achievements_label_default_is_zero() -> void:
 	var scene := preload(HUD_SCENE).instantiate()
 	add_child(auto_free(scene))

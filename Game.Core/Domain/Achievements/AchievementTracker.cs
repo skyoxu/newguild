@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Game.Core.Contracts;
 using Game.Core.Contracts.Achievements;
@@ -23,9 +23,10 @@ public sealed class AchievementTracker : IDisposable
         ReputationChanged.EventType,
     };
 
+    private static readonly ConditionalWeakTable<IEventBus, TrackerState> SharedStates = new();
+
     private readonly IDisposable _subscription;
-    private readonly object _gate = new();
-    private readonly HashSet<string> _unlockedTriggers = new(StringComparer.Ordinal);
+    private readonly TrackerState _state;
     private int _unlockedCount;
 
     public int UnlockedCount => _unlockedCount;
@@ -36,6 +37,13 @@ public sealed class AchievementTracker : IDisposable
     {
         if (eventBus == null)
             throw new ArgumentNullException(nameof(eventBus));
+
+        _state = SharedStates.GetOrCreateValue(eventBus);
+        lock (_state.Gate)
+        {
+            _unlockedCount = _state.UnlockedCount;
+        }
+
         _subscription = eventBus.Subscribe(OnEventAsync);
     }
 
@@ -45,11 +53,13 @@ public sealed class AchievementTracker : IDisposable
             return Task.CompletedTask;
 
         int newCount;
-        lock (_gate)
+        lock (_state.Gate)
         {
-            if (!_unlockedTriggers.Add(evt.Type))
+            if (!_state.UnlockedTriggers.Add(evt.Type))
                 return Task.CompletedTask;
-            newCount = Interlocked.Increment(ref _unlockedCount);
+
+            newCount = ++_state.UnlockedCount;
+            _unlockedCount = newCount;
         }
 
         UnlockedCountChanged?.Invoke(this, new AchievementCountChanged(newCount, evt.Type));
@@ -59,5 +69,12 @@ public sealed class AchievementTracker : IDisposable
     public void Dispose()
     {
         _subscription.Dispose();
+    }
+
+    private sealed class TrackerState
+    {
+        public object Gate { get; } = new();
+        public HashSet<string> UnlockedTriggers { get; } = new(StringComparer.Ordinal);
+        public int UnlockedCount { get; set; }
     }
 }
