@@ -16,9 +16,9 @@ namespace Game.Core.Tests.Domain.Achievements;
 
 public class AchievementTrackerTests
 {
-    // ACC:T36.3
+    // ACC:T36.3 ACC:T50.1
     [Fact]
-    public void ShouldStartAtZero()
+    public void ShouldBeZero_WhenTrackerCreated()
     {
         var bus = new InMemoryEventBus();
         using var tracker = new AchievementTracker(bus);
@@ -26,9 +26,9 @@ public class AchievementTrackerTests
         tracker.UnlockedCount.Should().Be(0);
     }
 
-    // ACC:T36.3
+    // ACC:T36.3 ACC:T50.1 ACC:T50.5 ACC:T50.6 ACC:T50.10
     [Fact]
-    public async Task ShouldIncrementOncePerTriggerEventType()
+    public async Task ShouldIncrementOnce_WhenSameTriggerTypePublishedRepeatedly()
     {
         var bus = new InMemoryEventBus();
         using var tracker = new AchievementTracker(bus);
@@ -48,9 +48,9 @@ public class AchievementTrackerTests
         updates[1].TriggerEventType.Should().Be(MediaBeatTriggered.EventType);
     }
 
-    // ACC:T36.3
+    // ACC:T36.3 ACC:T50.3
     [Fact]
-    public async Task ShouldIgnoreNonTriggerEvent()
+    public async Task ShouldRemainZero_WhenNonTriggerEventPublished()
     {
         var bus = new InMemoryEventBus();
         using var tracker = new AchievementTracker(bus);
@@ -58,6 +58,23 @@ public class AchievementTrackerTests
         await bus.PublishAsync(BuildEvent("core.test.non.trigger.event"));
 
         tracker.UnlockedCount.Should().Be(0);
+    }
+
+
+    // ACC:T50.4 RED-FIRST
+    [Fact]
+    public async Task ShouldRestoreUnlockedCount_WhenTrackerRecreatedOnSameEventBus()
+    {
+        var bus = new InMemoryEventBus();
+
+        using (var tracker = new AchievementTracker(bus))
+        {
+            await bus.PublishAsync(BuildEvent(GuildCreated.EventType));
+            tracker.UnlockedCount.Should().Be(1);
+        }
+
+        using var reloaded = new AchievementTracker(bus);
+        reloaded.UnlockedCount.Should().Be(1);
     }
 
     private static DomainEvent BuildEvent(string eventType) =>

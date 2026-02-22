@@ -2063,13 +2063,14 @@
     ],
     "test_refs": [
       "Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs",
-      "Tests.Godot/tests/UI/test_achievements_smoke.gd",
-      "Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd"
+      "Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+      "Tests.Godot/tests/UI/test_achievements_smoke.gd"
     ],
     "contractRefs": [
       "core.guild.created",
       "core.raid.resolved",
-      "core.reputation.changed"
+      "core.reputation.changed",
+      "core.media.beat.triggered"
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route15-summary.json"

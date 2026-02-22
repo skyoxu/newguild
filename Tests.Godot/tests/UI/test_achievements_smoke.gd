@@ -6,7 +6,7 @@ const ACHIEVEMENT_REPOSITORY := "res://Game.Core/Repositories/IAchievementReposi
 const ACHIEVEMENT_ADAPTER := "res://Game.Godot/Adapters/Db/AchievementRepository.cs"
 const ACHIEVEMENT_TRACKER := "res://Game.Core/Domain/Achievements/AchievementTracker.cs"
 
-# ACC:T36.3
+# ACC:T36.3 ACC:T50.2 ACC:T50.7 ACC:T50.8 ACC:T50.9
 func test_achievements_smoke_hud_has_label() -> void:
 	assert_bool(FileAccess.file_exists(ACHIEVEMENT_ENTITY)).is_true()
 	assert_bool(FileAccess.file_exists(ACHIEVEMENT_REPOSITORY)).is_true()
