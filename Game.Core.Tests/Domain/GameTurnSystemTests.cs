@@ -85,7 +85,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public void Should_StartNewWeek_Initialize_Week_And_Phase()
+    public void ShouldInitializeWeekAndPhase_WhenStartNewWeekCalled()
     {
         // Arrange
         var system = CreateSystem();
@@ -113,7 +113,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Should_Advance_From_Resolution_To_Player_Phase()
+    public async Task ShouldMoveToPlayerPhase_WhenAdvanceFromResolution()
     {
         // Arrange
         var system = CreateSystem();
@@ -133,7 +133,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Should_Advance_From_Player_To_Ai_Phase()
+    public async Task ShouldMoveToAiPhase_WhenAdvanceFromPlayerPhase()
     {
         // Arrange
         var system = CreateSystem();
@@ -153,7 +153,7 @@ public class GameTurnSystemTests
     }
 
     [Fact]
-    public async Task Should_Advance_From_Ai_Phase_To_Next_Week_Resolution()
+    public async Task ShouldMoveToNextWeekResolution_WhenAdvanceFromAiPhase()
     {
         // Arrange
         var system = CreateSystem();
@@ -174,7 +174,7 @@ public class GameTurnSystemTests
 
     // ACC:T48.5
     [Fact]
-    public async Task Should_Advance_Week_Cycle_From_NewWeek_To_WeekTwo_Resolution()
+    public async Task ShouldAdvanceToWeekTwoResolution_WhenFullWeekCycleRuns()
     {
         // Arrange
         var system = CreateSystem();
@@ -468,7 +468,7 @@ public class GameTurnSystemTests
     [InlineData("")]  // Empty string
     [InlineData("   ")]  // Whitespace only
     [InlineData(null)]  // Null
-    public void Should_Reject_NullOrEmpty_SaveId_When_StartNewWeek(string? invalidSaveId)
+    public void ShouldRejectNullOrEmptySaveId_WhenStartNewWeek(string? invalidSaveId)
     {
         // Arrange & Act
         var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(invalidSaveId!));
@@ -498,7 +498,7 @@ public class GameTurnSystemTests
     [Theory]
     [InlineData("01234567890123456789012345678901234567890123456789012345678901234")]  // 65 chars - too long
     [InlineData("this-is-a-very-long-save-id-that-exceeds-the-maximum-allowed-length-of-64-characters")]  // Way too long
-    public void Should_Reject_Overlong_SaveId_When_StartNewWeek(string overlongSaveId)
+    public void ShouldRejectOverlongSaveId_WhenStartNewWeek(string overlongSaveId)
     {
         // Act
         var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(overlongSaveId));
@@ -511,7 +511,7 @@ public class GameTurnSystemTests
     [InlineData("'; DROP TABLE saves--")]  // SQL injection attempt
     [InlineData("1' UNION SELECT * FROM users--")]  // SQL union injection
     [InlineData("admin'--")]  // SQL comment injection
-    public void Should_Reject_SqlInjection_Patterns_When_StartNewWeek(string sqlInjectionPattern)
+    public void ShouldRejectSqlInjectionPatterns_WhenStartNewWeek(string sqlInjectionPattern)
     {
         // Act
         var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(sqlInjectionPattern));
@@ -524,7 +524,7 @@ public class GameTurnSystemTests
     [InlineData("../../etc/passwd")]  // Unix path traversal
     [InlineData("..\\..\\Windows\\System32")]  // Windows path traversal
     [InlineData("../../../secrets")]  // Relative path traversal
-    public void Should_Reject_PathTraversal_Patterns_When_StartNewWeek(string pathTraversalPattern)
+    public void ShouldRejectPathTraversalPatterns_WhenStartNewWeek(string pathTraversalPattern)
     {
         // Act
         var exception = Assert.Throws<ArgumentException>(() => _ = new SaveIdValue(pathTraversalPattern));

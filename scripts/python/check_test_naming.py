@@ -91,8 +91,9 @@ def is_given_when_then_name(name: str) -> bool:
 
 
 def is_should_style_name(name: str) -> bool:
-    """Return True if method name follows Should_ style."""
-    return name.startswith('Should_') or '_Should_' in name or name.endswith('_Should')
+    """Return True if method name follows ShouldX_WhenY style."""
+    pattern = r'^Should[A-Za-z0-9]+_When[A-Za-z0-9]+(?:_(?:Then|And)[A-Za-z0-9]+)*$'
+    return bool(re.match(pattern, name))
 
 
 def normalize_style_mode(style: str | None) -> str:
@@ -102,8 +103,12 @@ def normalize_style_mode(style: str | None) -> str:
     - gwt_should: strict behavior mode (Given_When_Then or Should_)
     """
     raw = (style or 'strict').strip().lower().replace('-', '_')
-    if raw in {'strict', 'legacy', 'pascal', 'compat'}:
+    if raw in {'strict'}:
+        return 'strict_auto'
+    if raw in {'legacy', 'pascal', 'compat'}:
         return 'legacy'
+    if raw in {'should_when', 'shouldx_wheny', 'strict_should'}:
+        return 'should_when'
     if raw in {'gwt_should', 'behavior', 'scenario', 'strict_behavior'}:
         return 'gwt_should'
     return 'legacy'
@@ -111,9 +116,51 @@ def normalize_style_mode(style: str | None) -> str:
 
 def is_allowed_test_method_name_by_style(name: str, style_mode: str) -> bool:
     """Validate test method name according to selected style mode."""
+    if style_mode == 'should_when':
+        return is_should_style_name(name)
     if style_mode == 'gwt_should':
         return is_given_when_then_name(name) or is_should_style_name(name)
     return is_allowed_test_method_name(name)
+
+
+def parse_test_refs_from_details(details: str) -> List[str]:
+    """Extract test refs from details text fallback when testRefs is absent."""
+    refs: List[str] = []
+    for line in details.splitlines():
+        if not line.lower().startswith('test refs:'):
+            continue
+        payload = line.split(':', 1)[1]
+        refs.extend([item.strip().replace('\\', '/') for item in payload.split(';') if item.strip()])
+    return refs
+
+
+def collect_task_test_ref_paths(project_root: Path, task_id: str) -> set[str]:
+    """Collect task-scoped test refs from .taskmaster/tasks/tasks.json."""
+    tasks_file = project_root / '.taskmaster' / 'tasks' / 'tasks.json'
+    if not tasks_file.exists():
+        return set()
+
+    try:
+        import json
+
+        payload = json.loads(tasks_file.read_text(encoding='utf-8'))
+        tasks = payload.get('master', {}).get('tasks', [])
+        task = next((item for item in tasks if str(item.get('id')) == str(task_id)), None)
+        if not isinstance(task, dict):
+            return set()
+
+        refs: List[str] = []
+        test_refs = task.get('testRefs')
+        if isinstance(test_refs, list):
+            refs.extend([str(item).strip().replace('\\', '/') for item in test_refs if str(item).strip()])
+
+        if not refs and isinstance(task.get('details'), str):
+            refs.extend(parse_test_refs_from_details(task['details']))
+
+        return {ref for ref in refs if ref}
+    except Exception as exception:  # pragma: no cover - defensive
+        print(f"[FAIL] failed to load task test refs: {exception}", file=sys.stderr)
+        return set()
 
 
 def run_git(project_root: Path, args: Sequence[str]) -> List[str]:
@@ -265,9 +312,13 @@ def scan_csharp_test_files(
                         line_num,
                         method_name,
                         (
-                            "not approved; expected Given_When_Then or Should_ style"
-                            if style_mode == 'gwt_should'
-                            else "not approved; expected PascalCase or PascalCase_With_Underscores"
+                            "not approved; expected ShouldX_WhenY style"
+                            if style_mode == 'should_when'
+                            else (
+                                "not approved; expected Given_When_Then or ShouldX_WhenY style"
+                                if style_mode == 'gwt_should'
+                                else "not approved; expected PascalCase or PascalCase_With_Underscores"
+                            )
                         ),
                     )
                 )
@@ -421,7 +472,14 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     """Parse CLI arguments while keeping backward compatibility."""
     parser = argparse.ArgumentParser(description='Validate test naming conventions.')
     parser.add_argument('--task-id', default=None, help='Optional task id for CI compatibility.')
-    parser.add_argument('--style', default='strict', help='Naming style mode (kept for compatibility).')
+    parser.add_argument(
+        '--style',
+        default='strict',
+        help=(
+            'Naming style mode: strict(auto task/changed ShouldX_WhenY), '
+            'legacy(PascalCase), gwt_should(Given_When_Then or ShouldX_WhenY).'
+        ),
+    )
     parser.add_argument('--allowlist', default=None, help='Optional allowlist path for legacy tests.')
     parser.add_argument('--changed-only', action='store_true', help='Validate only changed test files.')
     parser.add_argument('--base-ref', default=None, help='Base git ref for changed-only mode (e.g. origin/main).')
@@ -440,12 +498,18 @@ def main():
     gdunit_test_dir = project_root / 'Tests.Godot' / 'tests'
     style_mode = normalize_style_mode(args.style)
 
+    if style_mode == 'strict_auto':
+        if args.task_id or args.changed_only:
+            style_mode = 'should_when'
+        else:
+            style_mode = 'legacy'
+
     if args.allowlist:
         allowlist_path = Path(args.allowlist)
     else:
         allowlist_path = (
             script_dir / 'check_test_naming.strict.allowlist.txt'
-            if style_mode == 'gwt_should'
+            if style_mode in {'gwt_should', 'should_when'}
             else script_dir / 'check_test_naming.allowlist.txt'
         )
 
@@ -465,6 +529,20 @@ def main():
             print('[FAIL] changed-only gate is fail-closed to avoid false green.', file=sys.stderr)
             return 2
 
+    if style_mode == 'should_when' and args.task_id:
+        task_ref_paths = collect_task_test_ref_paths(project_root, str(args.task_id))
+        if not task_ref_paths:
+            print(
+                f"[FAIL] strict task naming requires non-empty testRefs for task-id={args.task_id}",
+                file=sys.stderr,
+            )
+            print('[FAIL] add task.testRefs or pass --changed-only for incremental enforcement.', file=sys.stderr)
+            return 2
+        if target_rel_paths is None:
+            target_rel_paths = task_ref_paths
+        else:
+            target_rel_paths = target_rel_paths.intersection(task_ref_paths)
+
     if not csharp_test_dir.exists():
         print(f"Error: C# test directory not found: {csharp_test_dir}", file=sys.stderr)
         return 1
@@ -479,6 +557,9 @@ def main():
         print(f'[INFO] Selected changed test files: {len(target_rel_paths)}')
         if len(target_rel_paths) == 0:
             print('[INFO] No changed test files selected by changed-only filter.')
+    if style_mode == 'should_when' and args.task_id:
+        print(f'[INFO] Task-scoped strict naming enabled (task-id: {args.task_id})')
+        print(f'[INFO] Selected task test refs: {len(target_rel_paths) if target_rel_paths is not None else 0}')
     print()
 
     csharp_violations = scan_csharp_test_files(
@@ -506,8 +587,10 @@ def main():
 
     if not violations:
         print('[OK] All test methods follow approved naming conventions')
-        if style_mode == 'gwt_should':
-            print('[OK] C# tests: Given_When_Then or Should_ style')
+        if style_mode == 'should_when':
+            print('[OK] C# tests: ShouldX_WhenY style')
+        elif style_mode == 'gwt_should':
+            print('[OK] C# tests: Given_When_Then or ShouldX_WhenY style')
         else:
             print('[OK] C# tests: PascalCase or PascalCase_With_Underscores')
         print('[OK] GdUnit tests: test_snake_case (test_*)')
@@ -530,9 +613,12 @@ def main():
     print(f"Total violations: {total_violations}")
     print()
     print('Fix these violations by renaming methods to an approved pattern:')
-    if style_mode == 'gwt_should':
+    if style_mode == 'should_when':
+        print('  - C# ShouldX_WhenY: ShouldSaveGame_WhenStateMissing')
+        print('  - C# Optional extension: ShouldSaveGame_WhenStateMissing_ThenThrowInvalidOperationException')
+    elif style_mode == 'gwt_should':
         print('  - C# Given_When_Then: GivenNoState_WhenSaveGame_ThenThrowsInvalidOperationException')
-        print('  - C# Should_: SaveGame_WhenStateMissing_ShouldThrowInvalidOperationException')
+        print('  - C# ShouldX_WhenY: ShouldSaveGame_WhenStateMissing')
     else:
         print('  - C# PascalCase: GivenNoState_WhenSaveGame_ThenThrowsInvalidOperationException')
         print('  - C# PascalCase_With_Underscores: SaveGame_WhenStateMissing_ShouldThrowInvalidOperationException')
