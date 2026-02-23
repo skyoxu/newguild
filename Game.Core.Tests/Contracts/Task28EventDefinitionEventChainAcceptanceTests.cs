@@ -129,7 +129,7 @@ public sealed class Task28EventDefinitionEventChainAcceptanceTests
     }
 
     [Fact]
-    public void Should_Throw_When_EventChainDefinition_EventTypes_Is_Null()
+    public void ShouldThrowArgumentNullException_WhenEventChainDefinitionEventTypesIsNull()
     {
         Action act = () => new EventChainDefinition(chainId: "x", eventTypes: null!);
 
@@ -137,7 +137,7 @@ public sealed class Task28EventDefinitionEventChainAcceptanceTests
     }
 
     [Fact]
-    public void Should_Throw_When_EventChainDefinition_EventTypes_Is_Empty()
+    public void ShouldThrowArgumentException_WhenEventChainDefinitionEventTypesIsEmpty()
     {
         Action act = () => new EventChainDefinition(chainId: "x", eventTypes: Array.Empty<string>());
 
@@ -145,7 +145,7 @@ public sealed class Task28EventDefinitionEventChainAcceptanceTests
     }
 
     [Fact]
-    public void Should_Throw_When_EventChainDefinition_Has_Invalid_EventType()
+    public void ShouldThrowArgumentException_WhenEventChainDefinitionContainsInvalidEventType()
     {
         Action act = () => new EventChainDefinition(chainId: "x", eventTypes: new[] { "core.guild created" });
 
@@ -153,7 +153,7 @@ public sealed class Task28EventDefinitionEventChainAcceptanceTests
     }
 
     [Fact]
-    public void Should_Resolve_EventCatalog_Gating_From_Definition()
+    public void ShouldResolveEventCatalogGating_WhenBuiltFromDefinition()
     {
         var enabled = new EventDefinition(EventCatalogLoaded.EventType, "Event Catalog Loaded", null, enabledByDefault: true);
         var disabled = new EventDefinition("core.sample.disabled", "Disabled Sample", null, enabledByDefault: false);
