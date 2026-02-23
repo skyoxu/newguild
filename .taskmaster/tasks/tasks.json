@@ -2016,7 +2016,7 @@
         "status": "pending",
         "priority": "medium",
         "description": "验证成就由领域事件触发解锁、UI 可见、并在 Save/Load 后保持一致。",
-        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-15\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs; Tests.Godot/tests/UI/test_achievements_smoke.gd; Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+        "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-15\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs; Tests.Godot/tests/UI/test_achievements_smoke.gd; Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd\nSecurity Profile: SECURITY_PROFILE=host-safe (single-player default; local save/process tampering allowed; for CI security checks use SECURITY_PROFILE=strict + SECURITY_TEST_MODE=1).",
         "dependencies": [
           "36",
           "49"
