@@ -13,6 +13,12 @@ func before() -> void:
     _bus = preload("res://Game.Godot/Adapters/EventBusAdapter.cs").new()
     _bus.name = "EventBus"
 
+    var data_store := get_node_or_null("/root/DataStore")
+    if data_store == null:
+        data_store = preload("res://Game.Godot/Adapters/DataStoreAdapter.cs").new()
+        data_store.name = "DataStore"
+        get_tree().get_root().add_child(auto_free(data_store))
+
     _previous_bus = get_node_or_null("/root/EventBus")
     if _previous_bus != null:
         _previous_bus_original_name = _previous_bus.name

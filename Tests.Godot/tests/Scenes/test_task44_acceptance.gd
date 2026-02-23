@@ -98,6 +98,12 @@ func before() -> void:
 	_previous_security_test_mode = OS.get_environment("SECURITY_TEST_MODE")
 	_previous_enable_playable = OS.get_environment("GD_ENABLE_PLAYABLE")
 
+	var data_store := get_node_or_null("/root/DataStore")
+	if data_store == null:
+		data_store = preload("res://Game.Godot/Adapters/DataStoreAdapter.cs").new()
+		data_store.name = "DataStore"
+		get_tree().get_root().add_child(auto_free(data_store))
+
 	OS.set_environment("GD_SECURE_MODE", "1")
 	OS.set_environment("SECURITY_TEST_MODE", "1")
 	OS.set_environment("GD_ENABLE_PLAYABLE", "1")
