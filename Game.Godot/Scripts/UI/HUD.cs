@@ -158,10 +158,11 @@ public partial class HUD : Control
         _demoScore = 0;
         _mediaBeatSystem = new MediaBeatSystem(eventBus, timePort, _coreIdGenerator);
         _achievementsUnlockedCount = 0;
-        if (root == null || root.DataStore == null)
-            throw new InvalidOperationException("Achievement persistence requires CompositionRoot.DataStore.");
+        var dataStorePort = root?.DataStore ?? GetNodeOrNull<DataStoreAdapter>("/root/DataStore");
+        if (dataStorePort == null)
+            throw new InvalidOperationException("Achievement persistence requires DataStore (CompositionRoot.DataStore or /root/DataStore).");
 
-        IAchievementStateStore stateStore = new AchievementStateStoreAdapter(root.DataStore);
+        IAchievementStateStore stateStore = new AchievementStateStoreAdapter(dataStorePort);
         _achievementTracker = new AchievementTracker(eventBus, stateStore, AchievementSaveId);
         _achievementTracker.UnlockedCountChanged += OnAchievementCountChanged;
         SetAchievementsUnlockedCount(_achievementTracker.UnlockedCount);

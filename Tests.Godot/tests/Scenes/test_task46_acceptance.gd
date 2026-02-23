@@ -12,6 +12,8 @@ const REASON_DEMOS_DISABLED := "demos_disabled"
 
 var _bus = null
 var _owns_bus := false
+var _data_store = null
+var _owns_data_store := false
 var _received_event_types: Array[String] = []
 var _original_playable_env := ""
 var _original_security_env := ""
@@ -23,6 +25,7 @@ func before() -> void:
     _set_env("GD_ENABLE_PLAYABLE", "1")
     _set_env("SECURITY_TEST_MODE", "1")
     _ensure_event_bus()
+    _ensure_data_store()
 
 func after() -> void:
     _set_env("GD_ENABLE_PLAYABLE", _original_playable_env)
@@ -36,8 +39,13 @@ func after() -> void:
     if _owns_bus and _bus != null and is_instance_valid(_bus):
         _bus.queue_free()
 
+    if _owns_data_store and _data_store != null and is_instance_valid(_data_store):
+        _data_store.queue_free()
+
     _bus = null
     _owns_bus = false
+    _data_store = null
+    _owns_data_store = false
 
     await get_tree().process_frame
     await get_tree().process_frame
@@ -65,6 +73,19 @@ func _ensure_event_bus() -> void:
     var callback := Callable(self, "_on_domain_event_emitted")
     if _bus.has_signal("DomainEventEmitted") and not _bus.is_connected("DomainEventEmitted", callback):
         _bus.connect("DomainEventEmitted", callback)
+
+func _ensure_data_store() -> void:
+    var existing = get_node_or_null("/root/DataStore")
+    if existing != null:
+        _data_store = existing
+        return
+
+    var store = preload("res://Game.Godot/Adapters/DataStoreAdapter.cs").new()
+    store.name = "DataStore"
+    get_tree().get_root().add_child(store)
+    auto_free(store)
+    _data_store = store
+    _owns_data_store = true
 
 func _on_domain_event_emitted(type, _source, _data_json, _id, _spec_version, _content_type, _timestamp_iso) -> void:
     _received_event_types.append(str(type))
