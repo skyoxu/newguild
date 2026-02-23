@@ -2391,7 +2391,8 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route15-summary.json"
-    ]
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe (single-player default; local save/process tampering allowed; for CI security checks use SECURITY_PROFILE=strict + SECURITY_TEST_MODE=1)."
   },
   {
     "id": "NG-0051",

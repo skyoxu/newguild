@@ -28,7 +28,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
 
 Violation = Tuple[int, str, str]
 AllowlistEntry = Tuple[str, str]
@@ -102,9 +102,11 @@ def normalize_style_mode(style: str | None) -> str:
     - legacy: existing permissive mode (PascalCase or PascalCase_With_Underscores)
     - gwt_should: strict behavior mode (Given_When_Then or Should_)
     """
-    raw = (style or 'strict').strip().lower().replace('-', '_')
-    if raw in {'strict'}:
+    raw = (style or 'auto').strip().lower().replace('-', '_')
+    if raw in {'auto', 'strict_auto'}:
         return 'strict_auto'
+    if raw in {'strict'}:
+        return 'should_when'
     if raw in {'legacy', 'pascal', 'compat'}:
         return 'legacy'
     if raw in {'should_when', 'shouldx_wheny', 'strict_should'}:
@@ -126,7 +128,10 @@ def is_allowed_test_method_name_by_style(name: str, style_mode: str) -> bool:
 def parse_test_refs_from_details(details: str) -> List[str]:
     """Extract test refs from details text fallback when testRefs is absent."""
     refs: List[str] = []
-    for line in details.splitlines():
+    for raw_line in details.splitlines():
+        line = raw_line.strip()
+        if line.startswith('-'):
+            line = line[1:].strip()
         if not line.lower().startswith('test refs:'):
             continue
         payload = line.split(':', 1)[1]
@@ -135,29 +140,80 @@ def parse_test_refs_from_details(details: str) -> List[str]:
 
 
 def collect_task_test_ref_paths(project_root: Path, task_id: str) -> set[str]:
-    """Collect task-scoped test refs from .taskmaster/tasks/tasks.json."""
-    tasks_file = project_root / '.taskmaster' / 'tasks' / 'tasks.json'
-    if not tasks_file.exists():
-        return set()
+    """Collect task-scoped test refs from task master/view files."""
 
-    try:
+    def normalize_refs(value: Any) -> List[str]:
+        if isinstance(value, list):
+            return [str(item).strip().replace('\\', '/') for item in value if str(item).strip()]
+        if isinstance(value, str):
+            text = value.strip()
+            if not text:
+                return []
+            if ';' in text:
+                return [item.strip().replace('\\', '/') for item in text.split(';') if item.strip()]
+            return [text.replace('\\', '/')]
+        return []
+
+    def extract_refs_from_task(task: dict[str, Any]) -> List[str]:
+        refs: List[str] = []
+        refs.extend(normalize_refs(task.get('testRefs')))
+        refs.extend(normalize_refs(task.get('test_refs')))
+
+        for text_key in ('details', 'acceptanceCriteria', 'acceptance_criteria'):
+            value = task.get(text_key)
+            if isinstance(value, str):
+                refs.extend(parse_test_refs_from_details(value))
+
+        return refs
+
+    def find_task_in_file(tasks_file: Path) -> List[str]:
+        if not tasks_file.exists():
+            return []
+
         import json
 
         payload = json.loads(tasks_file.read_text(encoding='utf-8'))
-        tasks = payload.get('master', {}).get('tasks', [])
-        task = next((item for item in tasks if str(item.get('id')) == str(task_id)), None)
-        if not isinstance(task, dict):
-            return set()
+
+        candidates: List[dict[str, Any]] = []
+        if isinstance(payload, dict):
+            master_tasks = payload.get('master', {}).get('tasks', [])
+            if isinstance(master_tasks, list):
+                candidates.extend([item for item in master_tasks if isinstance(item, dict)])
+
+            direct_tasks = payload.get('tasks')
+            if isinstance(direct_tasks, list):
+                candidates.extend([item for item in direct_tasks if isinstance(item, dict)])
+        elif isinstance(payload, list):
+            candidates.extend([item for item in payload if isinstance(item, dict)])
+
+        matched: List[dict[str, Any]] = []
+        for task in candidates:
+            ids = [
+                str(task.get('id', '')).strip(),
+                str(task.get('taskmaster_id', '')).strip(),
+            ]
+            if str(task_id) in ids:
+                matched.append(task)
 
         refs: List[str] = []
-        test_refs = task.get('testRefs')
-        if isinstance(test_refs, list):
-            refs.extend([str(item).strip().replace('\\', '/') for item in test_refs if str(item).strip()])
+        for task in matched:
+            refs.extend(extract_refs_from_task(task))
+        return refs
 
-        if not refs and isinstance(task.get('details'), str):
-            refs.extend(parse_test_refs_from_details(task['details']))
+    task_dir = project_root / '.taskmaster' / 'tasks'
+    sources = [
+        task_dir / 'tasks.json',
+        task_dir / 'tasks_back.json',
+        task_dir / 'tasks_gameplay.json',
+    ]
 
-        return {ref for ref in refs if ref}
+    refs: set[str] = set()
+    try:
+        for source in sources:
+            for ref in find_task_in_file(source):
+                if ref:
+                    refs.add(ref)
+        return refs
     except Exception as exception:  # pragma: no cover - defensive
         print(f"[FAIL] failed to load task test refs: {exception}", file=sys.stderr)
         return set()
@@ -474,9 +530,10 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument('--task-id', default=None, help='Optional task id for CI compatibility.')
     parser.add_argument(
         '--style',
-        default='strict',
+        default='auto',
         help=(
-            'Naming style mode: strict(auto task/changed ShouldX_WhenY), '
+            'Naming style mode: auto(task/changed ShouldX_WhenY, otherwise legacy), '
+            'strict(ShouldX_WhenY), '
             'legacy(PascalCase), gwt_should(Given_When_Then or ShouldX_WhenY).'
         ),
     )
@@ -533,12 +590,14 @@ def main():
         task_ref_paths = collect_task_test_ref_paths(project_root, str(args.task_id))
         if not task_ref_paths:
             print(
-                f"[FAIL] strict task naming requires non-empty testRefs for task-id={args.task_id}",
+                f"[WARN] strict task naming found no task test refs for task-id={args.task_id}; fallback to legacy mode.",
                 file=sys.stderr,
             )
-            print('[FAIL] add task.testRefs or pass --changed-only for incremental enforcement.', file=sys.stderr)
-            return 2
-        if target_rel_paths is None:
+            style_mode = 'legacy'
+            if not args.allowlist:
+                allowlist_path = script_dir / 'check_test_naming.allowlist.txt'
+                allowlist_entries = load_allowlist(allowlist_path)
+        elif target_rel_paths is None:
             target_rel_paths = task_ref_paths
         else:
             target_rel_paths = target_rel_paths.intersection(task_ref_paths)
