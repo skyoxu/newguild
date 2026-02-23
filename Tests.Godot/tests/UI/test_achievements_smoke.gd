@@ -5,6 +5,8 @@ const ACHIEVEMENT_ENTITY := "res://Game.Core/Domain/Entities/Achievement.cs"
 const ACHIEVEMENT_REPOSITORY := "res://Game.Core/Repositories/IAchievementRepository.cs"
 const ACHIEVEMENT_ADAPTER := "res://Game.Godot/Adapters/Db/AchievementRepository.cs"
 const ACHIEVEMENT_TRACKER := "res://Game.Core/Domain/Achievements/AchievementTracker.cs"
+const ACHIEVEMENT_STATE_STORE := "res://Game.Core/Contracts/Achievements/IAchievementStateStore.cs"
+const ACHIEVEMENT_STATE_ADAPTER := "res://Game.Godot/Adapters/AchievementStateStoreAdapter.cs"
 
 # ACC:T36.3 ACC:T50.2 ACC:T50.7 ACC:T50.8 ACC:T50.9
 func test_achievements_smoke_hud_has_label() -> void:
@@ -12,6 +14,8 @@ func test_achievements_smoke_hud_has_label() -> void:
 	assert_bool(FileAccess.file_exists(ACHIEVEMENT_REPOSITORY)).is_true()
 	assert_bool(FileAccess.file_exists(ACHIEVEMENT_ADAPTER)).is_true()
 	assert_bool(FileAccess.file_exists(ACHIEVEMENT_TRACKER)).is_true()
+	assert_bool(FileAccess.file_exists(ACHIEVEMENT_STATE_STORE)).is_true()
+	assert_bool(FileAccess.file_exists(ACHIEVEMENT_STATE_ADAPTER)).is_true()
 	var scene := preload(HUD_SCENE).instantiate()
 	add_child(auto_free(scene))
 	await get_tree().process_frame

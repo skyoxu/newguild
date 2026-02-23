@@ -46,6 +46,7 @@ public partial class HUD : Control
     private static bool _hasExperienceSnapshot;
     private static int _lastExperienceTotal;
     private static int _lastExperienceLevel = 1;
+    private const string AchievementSaveId = "t2-demo";
 
     private Label _score = default!;
     private Label _health = default!;
@@ -157,12 +158,16 @@ public partial class HUD : Control
         _demoScore = 0;
         _mediaBeatSystem = new MediaBeatSystem(eventBus, timePort, _coreIdGenerator);
         _achievementsUnlockedCount = 0;
-        _achievementTracker = new AchievementTracker(eventBus);
+        if (root == null || root.DataStore == null)
+            throw new InvalidOperationException("Achievement persistence requires CompositionRoot.DataStore.");
+
+        IAchievementStateStore stateStore = new AchievementStateStoreAdapter(root.DataStore);
+        _achievementTracker = new AchievementTracker(eventBus, stateStore, AchievementSaveId);
         _achievementTracker.UnlockedCountChanged += OnAchievementCountChanged;
         SetAchievementsUnlockedCount(_achievementTracker.UnlockedCount);
 
         var catalog = LoadEventCatalogOrThrow(eventBus, timePort);
-        var saveId = new SaveIdValue("t2-demo");
+        var saveId = new SaveIdValue(AchievementSaveId);
 
         var world = new InMemoryAiWorldStatePort();
         world.Seed(saveId, week: 1, CreateDemoWorldSnapshot());
