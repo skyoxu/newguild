@@ -1,27 +1,11 @@
 from __future__ import annotations
 
 import json
-import os
-import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from _util import repo_root
-
-
-CH_RE = re.compile(r"\bCH\d{2}\b")
-
-
-def _unique_preserve(values: list[str]) -> list[str]:
-    out: list[str] = []
-    seen: set[str] = set()
-    for v in values:
-        if v in seen:
-            continue
-        seen.add(v)
-        out.append(v)
-    return out
 
 
 @dataclass(frozen=True)
@@ -41,16 +25,7 @@ class TaskmasterTriplet:
 
     def arch_refs(self) -> list[str]:
         v = self.master.get("archRefs") or []
-        if isinstance(v, str):
-            v = [v]
-        refs = [str(x) for x in v if str(x).strip()]
-        if refs:
-            return refs
-
-        # Backward compatible: parse "Chapters: CH02; CH05; ..." from master.details.
-        details = str(self.master.get("details") or "")
-        ch = [m.group(0) for m in CH_RE.finditer(details)]
-        return _unique_preserve(ch)
+        return [str(x) for x in v if str(x).strip()]
 
     def overlay(self) -> str | None:
         v = self.master.get("overlay")
@@ -79,21 +54,10 @@ def iter_master_tasks(tasks_json: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def resolve_current_task_id(tasks_json: dict[str, Any]) -> str:
-    # CI-friendly: allow explicit task id injection without mutating tasks.json statuses.
-    # Preferred env var: SC_TASK_ID (numeric string matching master.tasks[].id).
-    env_task_id = (os.environ.get("SC_TASK_ID") or "").strip()
-    if env_task_id:
-        # Validate existence early with a clear error.
-        find_master_task(tasks_json, env_task_id)
-        return env_task_id
-
     for t in iter_master_tasks(tasks_json):
         if str(t.get("status")) == "in-progress":
             return str(t.get("id"))
-    raise ValueError(
-        "No task-id provided and no task with status=in-progress found in tasks.json. "
-        "Pass --task-id <id> (or set env SC_TASK_ID=<id> in CI) to select which task to validate."
-    )
+    raise ValueError("No task with status=in-progress found in tasks.json")
 
 
 def find_master_task(tasks_json: dict[str, Any], task_id: str) -> dict[str, Any]:
