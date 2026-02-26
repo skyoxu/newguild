@@ -19,6 +19,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set CI_DATE (stable per run)
+        shell: pwsh
+        run: |
+          $date = Get-Date -Format 'yyyy-MM-dd'
+          Add-Content -Path $env:GITHUB_ENV -Value "CI_DATE=$date" -Encoding utf8
+          Write-Host "CI_DATE=$date"
+
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
@@ -43,6 +50,15 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: EOL policy gate (hard)
+        shell: pwsh
+        run: |
+          $date = $env:CI_DATE
+          if ([string]::IsNullOrWhiteSpace($date)) {
+            throw 'CI_DATE is missing.'
+          }
+          py -3 scripts/python/check_eol_policy.py --date "$date" --strict
+
       - name: "Preflight: audit .git ACL drift (Windows)"
         id: acl_audit
         shell: pwsh
@@ -66,7 +82,10 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
-          $date = Get-Date -Format 'yyyy-MM-dd'
+          $date = $env:CI_DATE
+          if ([string]::IsNullOrWhiteSpace($date)) {
+            throw 'CI_DATE is missing.'
+          }
           $ciDir = "logs/ci/$date"
           New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
           $diag = Join-Path $ciDir 'ensure-gdunit4-diag.txt'
@@ -229,7 +248,6 @@ jobs:
         shell: pwsh
         continue-on-error: true
         run: |
-          $date = Get-Date -Format 'yyyy-MM-dd'
           $out = "logs/ci/${{ github.run_id }}/schema-dump.json"
           py -3 scripts/python/db_schema_dump.py --glob "$env:APPDATA\Godot\app_userdata\GodotGame\*.db" --out "$out"
           Write-Host "SCHEMA_DUMP_OUT=$out"
