@@ -1,23 +1,31 @@
-* text=auto eol=crlf
+* text=auto eol=lf
 
 *.cs text eol=lf diff=csharp
 *.gd text eol=lf
-*.tscn text eol=crlf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
 *.json text eol=lf
 *.md text eol=lf
-*.yml text eol=crlf
-*.yaml text eol=crlf
-*.xml text eol=crlf
-*.txt text eol=crlf
-*.editorconfig text eol=crlf
-*.gitignore text eol=crlf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.xml text eol=lf
+*.txt text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
 
-*.sln text eol=crlf
-*.csproj text eol=crlf
-*.props text eol=crlf
-*.targets text eol=crlf
+*.sln text eol=lf
+*.csproj text eol=lf
+*.props text eol=lf
+*.targets text eol=lf
 
 *.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+.editorconfig text eol=lf
+.gitignore text eol=lf
 .gitattributes text eol=lf
 
 *.png binary
