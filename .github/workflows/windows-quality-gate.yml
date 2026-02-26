@@ -77,6 +77,15 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: EOL policy gate (hard)
+        shell: pwsh
+        run: |
+          $date = $env:CI_DATE
+          if ([string]::IsNullOrWhiteSpace($date)) {
+            throw 'CI_DATE is missing.'
+          }
+          py -3 scripts/python/check_eol_policy.py --date "$date" --strict
+
       - name: Test naming gate (strict changed-only)
         shell: pwsh
         run: |

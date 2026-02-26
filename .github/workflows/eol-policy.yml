@@ -1,0 +1,50 @@
+name: EOL Policy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  eol-policy:
+    runs-on: windows-latest
+    env:
+      PYTHONIOENCODING: 'utf-8'
+      PYTHONUTF8: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set CI_DATE (stable per run)
+        shell: pwsh
+        run: |
+          $date = Get-Date -Format 'yyyy-MM-dd'
+          Add-Content -Path $env:GITHUB_ENV -Value "CI_DATE=$date" -Encoding utf8
+          Write-Host "CI_DATE=$date"
+
+      - name: Setup Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: EOL policy gate (hard)
+        shell: pwsh
+        run: |
+          $date = $env:CI_DATE
+          if ([string]::IsNullOrWhiteSpace($date)) {
+            throw 'CI_DATE is missing.'
+          }
+          py -3 scripts/python/check_eol_policy.py --date "$date" --strict
+
+      - name: Upload EOL policy logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eol-policy-logs
+          path: logs/ci/**/eol-policy/**
+          if-no-files-found: ignore
+
