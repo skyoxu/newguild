@@ -7,9 +7,7 @@
     "status": "done",
     "priority": "P1",
     "layer": "core",
-    "depends_on": [
-      "NG-0020"
-    ],
+    "depends_on": [],
     "adr_refs": [
       "ADR-0018",
       "ADR-0004",
@@ -82,7 +80,6 @@
     "priority": "P1",
     "layer": "core",
     "depends_on": [
-      "NG-0020",
       "GM-0101"
     ],
     "adr_refs": [
@@ -157,7 +154,6 @@
     "priority": "P2",
     "layer": "adapter",
     "depends_on": [
-      "NG-0020",
       "GM-0101",
       "GM-0103"
     ],
@@ -657,9 +653,7 @@
     "status": "done",
     "priority": "P1",
     "layer": "adapter",
-    "depends_on": [
-      "NG-0046"
-    ],
+    "depends_on": [],
     "adr_refs": [
       "ADR-0004",
       "ADR-0005",
@@ -726,10 +720,7 @@
     "status": "done",
     "priority": "P1",
     "layer": "adapter",
-    "depends_on": [
-      "NG-0014",
-      "NG-0042"
-    ],
+    "depends_on": [],
     "adr_refs": [
       "ADR-0005",
       "ADR-0011",
@@ -1270,7 +1261,7 @@
     "depends_on": [
       "GM-0204",
       "GM-0206",
-      "NG-0046"
+      "GM-0207"
     ],
     "adr_refs": [
       "ADR-0004",
@@ -1484,7 +1475,7 @@
     "layer": "core",
     "depends_on": [
       "GM-0202",
-      "NG-0046"
+      "GM-0207"
     ],
     "adr_refs": [
       "ADR-0005",
@@ -1624,7 +1615,7 @@
     "layer": "core",
     "depends_on": [
       "GM-0201",
-      "NG-0046",
+      "GM-0207",
       "GM-0301"
     ],
     "adr_refs": [
