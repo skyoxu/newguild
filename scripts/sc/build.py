@@ -4,7 +4,7 @@ sc-build: Repo-specific build shim (Godot+C# template).
 
 Usage (Windows):
   py -3 scripts/sc/build.py
-  py -3 scripts/sc/build.py GodotGame.sln --type prod --clean --verbose
+  py -3 scripts/sc/build.py NewRouge.sln --type prod --clean --verbose
 
 TDD helper (gated, non-generative):
   py -3 scripts/sc/build.py tdd --stage green
@@ -13,8 +13,8 @@ TDD helper (gated, non-generative):
 from __future__ import annotations
 
 import argparse
+import os
 import sys
-import time
 from pathlib import Path
 
 from _util import ci_dir, repo_root, run_cmd, write_json, write_text
@@ -22,7 +22,7 @@ from _util import ci_dir, repo_root, run_cmd, write_json, write_text
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="sc-build (build shim)")
-    ap.add_argument("target", nargs="?", default="GodotGame.csproj", help="build target (.csproj/.sln)")
+    ap.add_argument("target", nargs="?", default="NewRouge.csproj", help="build target (.csproj/.sln)")
     ap.add_argument("--type", choices=["dev", "prod", "test"], default="dev")
     ap.add_argument("--clean", action="store_true")
     ap.add_argument("--optimize", action="store_true")
@@ -30,40 +30,10 @@ def build_parser() -> argparse.ArgumentParser:
     return ap
 
 
-def dotnet_restore_with_retries(
-    target: Path,
-    out_dir: Path,
-    *,
-    attempts: int = 4,
-    sleep_base_sec: int = 3,
-    verbose: bool = False,
-) -> tuple[int, list[dict]]:
-    logs: list[dict] = []
-
-    cmd = ["dotnet", "restore", str(target), "--disable-parallel"]
-    if verbose:
-        cmd += ["-v", "minimal"]
-
-    last_rc = 1
-    for attempt_index in range(1, attempts + 1):
-        rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=900)
-        log_path = out_dir / f"dotnet-restore.attempt{attempt_index}.log"
-        write_text(log_path, out)
-        logs.append({"name": "dotnet-restore", "cmd": cmd, "rc": rc, "log": str(log_path), "attempt": attempt_index})
-
-        if rc == 0:
-            return 0, logs
-
-        last_rc = rc
-        if attempt_index < attempts:
-            # NuGet restore can fail transiently on CI (network). Retry with backoff.
-            sleep_sec = sleep_base_sec * attempt_index
-            time.sleep(sleep_sec)
-
-    return last_rc, logs
-
-
 def main() -> int:
+    # Keep local runs aligned with CI default security posture.
+    os.environ.setdefault("SECURITY_PROFILE", "host-safe")
+
     # Lightweight subcommand routing (keeps backward compatibility):
     #   py -3 scripts/sc/build.py tdd ...
     if len(sys.argv) > 1 and sys.argv[1] == "tdd":
@@ -71,6 +41,9 @@ def main() -> int:
         rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=3_600)
         out_dir = ci_dir("sc-build")
         write_text(out_dir / "tdd.log", out)
+        if out:
+            end = "" if out.endswith("\n") else "\n"
+            print(out, end=end)
         print(f"SC_BUILD_TDD rc={rc} out={out_dir}")
         return 0 if rc == 0 else rc
 
@@ -108,17 +81,7 @@ def main() -> int:
             print(f"SC_BUILD status=fail out={out_dir}")
             return rc
 
-    rc, restore_logs = dotnet_restore_with_retries(target, out_dir, attempts=4, sleep_base_sec=3, verbose=args.verbose)
-    logs.extend(restore_logs)
-    if rc != 0:
-        summary["logs"] = logs
-        write_json(out_dir / "summary.json", summary)
-        print(f"SC_BUILD status=fail out={out_dir}")
-        return rc
-
-    # MSB3101 ("failed to write state file ...AssemblyReference.cache") can be triggered by filesystem
-    # restrictions/locks on Windows. It is not a code correctness issue and should not fail -warnaserror gates.
-    cmd = ["dotnet", "build", str(target), "-c", config, "--no-restore", "-warnaserror", "-p:WarningsNotAsErrors=MSB3101"]
+    cmd = ["dotnet", "build", str(target), "-c", config, "-warnaserror"]
     if args.verbose:
         cmd += ["-v", "normal"]
 
