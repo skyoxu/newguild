@@ -9,137 +9,46 @@ This script maps SuperClaude `/sc:test` into repository-native test entrypoints:
 Usage (Windows):
   py -3 scripts/sc/test.py --type unit
   py -3 scripts/sc/test.py --type e2e --godot-bin \"C:\\Godot\\Godot_v4.5.1-stable_mono_win64_console.exe\"
-  py -3 scripts/sc/test.py --type e2e-light --godot-bin \"C:\\Godot\\Godot_v4.5.1-stable_mono_win64_console.exe\"
   py -3 scripts/sc/test.py --type all --godot-bin \"%GODOT_BIN%\"
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
-import xml.etree.ElementTree as ET
+import uuid
 from pathlib import Path
 from typing import Any
 
 from _util import ci_dir, repo_root, run_cmd, today_str, write_json, write_text
 
-DEFAULT_TIMEOUT_SEC = 600
-DEFAULT_E2E_LIGHT_TIMEOUT_SEC = 300
-
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="sc-test (test shim)")
-    ap.add_argument("--type", choices=["unit", "integration", "e2e", "e2e-light", "all"], default="all")
+    ap.add_argument("--type", choices=["unit", "integration", "e2e", "all"], default="all")
+    ap.add_argument("--task-id", default=None, help="Optional task id for smoke evidence file logs/ci/<date>/task-<id>.json")
     ap.add_argument("--solution", default="Game.sln")
     ap.add_argument("--configuration", default="Debug")
     ap.add_argument("--godot-bin", default=None, help="Godot mono console binary (required for e2e/all)")
+    ap.add_argument("--run-id", default=None, help="Optional run identifier for evidence binding (default: auto-generate).")
     ap.add_argument("--smoke-scene", default="res://Game.Godot/Scenes/Main.tscn", help="Main scene for smoke test")
-    ap.add_argument("--smoke-require-marker", default=None, help="Require this marker for --smoke-scene (strict mode).")
-    ap.add_argument("--wiring-smoke-scene", default="res://Game.Godot/Scenes/CI/WiringSmoke.tscn", help="Wiring smoke scene for deterministic runtime wiring gate")
-    ap.add_argument("--wiring-smoke-require-marker", default="[WIRING_SMOKE_READY]", help="Require this marker for wiring smoke (strict mode).")
-    ap.add_argument(
-        "--timeout-sec",
-        type=int,
-        default=DEFAULT_TIMEOUT_SEC,
-        help=(
-            "Timeout for gdunit run. Default is 600s; when --type e2e-light and this value is not overridden, "
-            "effective timeout is 300s."
-        ),
-    )
-    ap.add_argument(
-        "--artifact-gate",
-        choices=["auto", "on", "off"],
-        default=os.environ.get("SC_ARTIFACT_GATE", "auto"),
-        help="Artifact gate for run_gdunit.py. auto=CI:on, local:off.",
-    )
+    ap.add_argument("--timeout-sec", type=int, default=600)
     ap.add_argument("--skip-smoke", action="store_true")
-    ap.add_argument("--skip-wiring-smoke", action="store_true")
-    ap.add_argument("--skip-prewarm", action="store_true", help="Skip run_gdunit.py --prewarm to reduce startup overhead in local fast loops")
     ap.add_argument("--no-coverage-gate", action="store_true", help="do not enforce default coverage thresholds")
     ap.add_argument("--no-coverage-report", action="store_true", help="skip HTML coverage report generation")
     return ap
 
 
-def _is_ci() -> bool:
-    value = os.environ.get("CI", "").strip().lower()
-    return value in {"1", "true", "yes", "on"}
-
-
-def resolve_artifact_gate_mode(mode: str) -> str:
-    normalized = (mode or "auto").strip().lower()
-    if normalized == "auto":
-        return "on" if _is_ci() else "off"
-    return normalized
-
-
-def run_unit(out_dir: Path, solution: str, configuration: str) -> dict[str, Any]:
+def run_unit(out_dir: Path, solution: str, configuration: str, *, run_id: str) -> dict[str, Any]:
     cmd = ["py", "-3", "scripts/python/run_dotnet.py", "--solution", solution, "--configuration", configuration]
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=1_800)
     log_path = out_dir / "unit.log"
     write_text(log_path, out)
     unit_artifacts_dir = repo_root() / "logs" / "unit" / today_str()
+    write_text(unit_artifacts_dir / "run_id.txt", run_id + "\n")
     return {"name": "unit", "cmd": cmd, "rc": rc, "log": str(log_path), "artifacts_dir": str(unit_artifacts_dir)}
-
-
-def normalize_cobertura_paths(cobertura: Path, normalized: Path) -> dict[str, Any]:
-    """
-    Cobertura files sometimes contain "logical" source paths that no longer exist after repo refactors,
-    e.g. 'Scripts/Core/Contracts/**' while sources live under 'Game.Core/Contracts/**'.
-
-    reportgenerator will try to resolve these paths literally and emit noisy warnings.
-    This function rewrites only those filenames that do not exist on disk.
-    """
-
-    root = repo_root()
-    tree = ET.parse(cobertura)
-    doc = tree.getroot()
-
-    replacements = [
-        ("Scripts\\Core\\Contracts\\", "Game.Core\\Contracts\\"),
-        ("Scripts/Core/Contracts/", "Game.Core/Contracts/"),
-    ]
-
-    changed: list[dict[str, str]] = []
-    missing: list[str] = []
-
-    for elem in doc.iter():
-        filename = elem.attrib.get("filename")
-        if not filename:
-            continue
-
-        src = root / filename
-        if src.exists():
-            continue
-
-        new_name = filename
-        for old, new in replacements:
-            if old in new_name:
-                new_name = new_name.replace(old, new)
-
-        # If the simple prefix map didn't help, try a best-effort resolve by basename (deterministic when unique).
-        if new_name == filename or not (root / new_name).exists():
-            matches = [p for p in root.rglob(Path(filename).name) if "logs" not in p.parts]
-            if len(matches) == 1:
-                new_name = str(matches[0].relative_to(root))
-
-        if (root / new_name).exists():
-            elem.set("filename", new_name)
-            changed.append({"from": filename, "to": new_name})
-        else:
-            missing.append(filename)
-
-    normalized.parent.mkdir(parents=True, exist_ok=True)
-    tree.write(normalized, encoding="utf-8", xml_declaration=True)
-
-    return {
-        "input": str(cobertura),
-        "output": str(normalized),
-        "changed_count": len(changed),
-        "missing_count": len(missing),
-        "changed": changed,
-        "missing": missing,
-    }
 
 
 def run_coverage_report(out_dir: Path, unit_artifacts_dir: Path) -> dict[str, Any]:
@@ -160,19 +69,10 @@ def run_coverage_report(out_dir: Path, unit_artifacts_dir: Path) -> dict[str, An
         }
 
     target_dir = unit_artifacts_dir / "coverage-report"
-    # Some coverage generators embed stale/previous source paths (e.g. after file moves).
-    # Provide repo root as a source directory so reportgenerator can resolve sources reliably.
-    src_dirs = str(repo_root())
-
-    normalized = unit_artifacts_dir / "coverage.cobertura.normalized.xml"
-    norm = normalize_cobertura_paths(cobertura, normalized)
-    write_json(out_dir / "coverage-pathmap.json", norm)
-
     cmd = [
         "reportgenerator",
-        f"-reports:{normalized}",
+        f"-reports:{cobertura}",
         f"-targetdir:{target_dir}",
-        f"-sourcedirs:{src_dirs}",
         "-reporttypes:Html",
     ]
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=300)
@@ -188,29 +88,118 @@ def run_coverage_report(out_dir: Path, unit_artifacts_dir: Path) -> dict[str, An
     }
 
 
+def _normalize_task_root_id(task_id: str | None) -> str | None:
+    raw = str(task_id or "").strip()
+    if not raw:
+        return None
+    return raw.split(".", 1)[0].strip()
+
+
+def _task_scoped_gdunit_refs(*, task_id: str | None, tests_project: Path) -> list[str]:
+    """
+    Resolve task-scoped GdUnit refs from task views to keep refs and execution evidence aligned.
+
+    Accepted ref shapes:
+    - Tests.Godot/tests/.../*.gd
+    - tests/.../*.gd
+    """
+    task_root_id = _normalize_task_root_id(task_id)
+    if not task_root_id:
+        return []
+
+    refs: list[str] = []
+    seen: set[str] = set()
+    view_files = [
+        repo_root() / ".taskmaster" / "tasks" / "tasks_back.json",
+        repo_root() / ".taskmaster" / "tasks" / "tasks_gameplay.json",
+    ]
+
+    for view_path in view_files:
+        if not view_path.is_file():
+            continue
+        try:
+            data = json.loads(view_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(data, list):
+            continue
+
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+            if str(item.get("taskmaster_id")).strip() != task_root_id:
+                continue
+
+            test_refs = item.get("test_refs")
+            if not isinstance(test_refs, list):
+                continue
+
+            for raw_ref in test_refs:
+                if not isinstance(raw_ref, str):
+                    continue
+                ref = raw_ref.replace("\\", "/").strip()
+                if not ref.lower().endswith(".gd"):
+                    continue
+
+                rel: str | None = None
+                if ref.startswith("Tests.Godot/"):
+                    rel = ref[len("Tests.Godot/") :]
+                elif ref.startswith("tests/"):
+                    rel = ref
+
+                if not rel:
+                    continue
+                if not (tests_project / rel).is_file():
+                    continue
+                if rel in seen:
+                    continue
+
+                seen.add(rel)
+                refs.append(rel)
+
+    return refs
+
+
 def run_gdunit_hard(
     out_dir: Path,
     godot_bin: str,
     timeout_sec: int,
-    artifact_gate_mode: str,
-    prewarm: bool,
+    *,
+    run_id: str,
+    task_id: str | None = None,
 ) -> dict[str, Any]:
     date = today_str()
     report_dir = Path("logs") / "e2e" / date / "sc-test" / "gdunit-hard"
+    os.environ["AUDIT_LOG_ROOT"] = str(repo_root() / "logs" / "ci" / date)
 
     add_dirs: list[str] = []
-    for rel in ["tests/Scenes", "tests/Adapters/Config", "tests/Security/Hard"]:
-        if (repo_root() / rel).exists():
+    tests_project = repo_root() / "Tests.Godot"
+    for rel in ["tests/Scenes", "tests/UI", "tests/Adapters/Config", "tests/Security/Hard"]:
+        if (tests_project / rel).exists():
             add_dirs.append(rel)
+        elif (repo_root() / rel).exists():
+            # Backward-compatible fallback for repos that keep GdUnit suites at repo root.
+            add_dirs.append(rel)
+    # Task-specific acceptance suites (e.g., tests/Tasks/test_taskXXXX_acceptance.gd)
+    # should be included only when a concrete task id is being validated.
+    if str(task_id or "").strip():
+        rel = "tests/Tasks"
+        if (tests_project / rel).exists():
+            add_dirs.append(rel)
+        elif (repo_root() / rel).exists():
+            add_dirs.append(rel)
+
+        # Add task-scoped GdUnit refs from task views so acceptance-executed-refs
+        # can bind to real executed tests.
+        for rel_ref in _task_scoped_gdunit_refs(task_id=task_id, tests_project=tests_project):
+            if rel_ref not in add_dirs:
+                add_dirs.append(rel_ref)
 
     cmd = [
         "py",
         "-3",
         "scripts/python/run_gdunit.py",
-    ]
-    if prewarm:
-        cmd += ["--prewarm"]
-    cmd += [
+        "--prewarm",
         "--godot-bin",
         godot_bin,
         "--project",
@@ -218,22 +207,15 @@ def run_gdunit_hard(
     ]
     for d in add_dirs:
         cmd += ["--add", d]
-    cmd += ["--timeout-sec", str(timeout_sec), "--artifact-gate", artifact_gate_mode, "--rd", str(report_dir)]
+    cmd += ["--timeout-sec", str(timeout_sec), "--rd", str(report_dir)]
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=timeout_sec + 300)
     log_path = out_dir / "gdunit-hard.log"
     write_text(log_path, out)
-    return {
-        "name": "gdunit-hard",
-        "cmd": cmd,
-        "rc": rc,
-        "log": str(log_path),
-        "report_dir": str(report_dir),
-        "artifact_gate_mode": artifact_gate_mode,
-        "prewarm": prewarm,
-    }
+    write_text(repo_root() / report_dir / "run_id.txt", run_id + "\n")
+    return {"name": "gdunit-hard", "cmd": cmd, "rc": rc, "log": str(log_path), "report_dir": str(report_dir)}
 
 
-def run_smoke(out_dir: Path, godot_bin: str, scene: str, require_marker: str | None) -> dict[str, Any]:
+def run_smoke(out_dir: Path, godot_bin: str, scene: str, task_id: str | None = None) -> dict[str, Any]:
     if scene.startswith("res://"):
         disk_path = repo_root() / scene[len("res://") :]
         if not disk_path.exists():
@@ -247,101 +229,36 @@ def run_smoke(out_dir: Path, godot_bin: str, scene: str, require_marker: str | N
         "scripts/python/smoke_headless.py",
         "--godot-bin",
         godot_bin,
-        "--project",
+        "--project-path",
         ".",
         "--scene",
         scene,
         "--timeout-sec",
-        "10",
-        "--mode",
-        "strict",
+        "5",
+        "--strict",
     ]
-    if require_marker:
-        cmd += ["--require-marker", str(require_marker)]
+    if str(task_id or "").strip():
+        cmd += ["--task-id", str(task_id).strip()]
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=120)
     log_path = out_dir / "smoke.log"
     write_text(log_path, out)
     return {"name": "smoke", "cmd": cmd, "rc": rc, "log": str(log_path)}
 
 
-def run_wiring_smoke(out_dir: Path, godot_bin: str, scene: str, require_marker: str) -> dict[str, Any]:
-    if scene.startswith("res://"):
-        disk_path = repo_root() / scene[len("res://") :]
-        if not disk_path.exists():
-            msg = f"[sc-test] ERROR: wiring smoke scene not found on disk: {disk_path}\n"
-            log_path = out_dir / "wiring-smoke.log"
-            write_text(log_path, msg)
-            return {"name": "wiring-smoke", "cmd": [], "rc": 2, "log": str(log_path), "error": "wiring_smoke_scene_missing"}
-
-    # Deterministic environment to avoid state drift across runs.
-    suffix = f"{today_str()}-{os.getpid()}"
-    os.environ.setdefault("GD_ENABLE_PLAYABLE", "1")
-    os.environ.setdefault("SECURITY_TEST_MODE", "1")
-    os.environ.setdefault("GD_GUILD_DB_PATH", f"user://wiring/wiring-smoke-{suffix}.db")
-
-    # Godot headless runs do not always rebuild C# scripts. Ensure the project assembly is up-to-date.
-    build_cmd = ["dotnet", "build", "GodotGame.csproj", "-c", "Debug", "-v", "minimal"]
-    build_rc, build_out = run_cmd(build_cmd, cwd=repo_root(), timeout_sec=300)
-    build_log = out_dir / "wiring-smoke-build.log"
-    write_text(build_log, build_out)
-    if build_rc != 0:
-        return {
-            "name": "wiring-smoke-build",
-            "cmd": build_cmd,
-            "rc": build_rc,
-            "log": str(build_log),
-        }
-
-    cmd = [
-        "py",
-        "-3",
-        "scripts/python/smoke_headless.py",
-        "--godot-bin",
-        godot_bin,
-        "--project",
-        ".",
-        "--scene",
-        scene,
-        "--timeout-sec",
-        "10",
-        "--mode",
-        "strict",
-        "--require-marker",
-        require_marker,
-    ]
-    rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=120)
-    log_path = out_dir / "wiring-smoke.log"
-    write_text(log_path, out)
-    return {
-        "name": "wiring-smoke",
-        "cmd": cmd,
-        "rc": rc,
-        "log": str(log_path),
-        "build_cmd": build_cmd,
-        "build_rc": build_rc,
-        "build_log": str(build_log),
-    }
-
-
 def main() -> int:
     args = build_parser().parse_args()
     out_dir = ci_dir("sc-test")
+    run_id = str(args.run_id or "").strip() or uuid.uuid4().hex
+    write_text(out_dir / "run_id.txt", run_id + "\n")
 
     godot_bin = args.godot_bin or os.environ.get("GODOT_BIN")
-    artifact_gate_mode = resolve_artifact_gate_mode(args.artifact_gate)
-    e2e_timeout_sec = args.timeout_sec
-    if args.type == "e2e-light" and args.timeout_sec == DEFAULT_TIMEOUT_SEC:
-        e2e_timeout_sec = DEFAULT_E2E_LIGHT_TIMEOUT_SEC
-    prewarm_enabled = not args.skip_prewarm
 
     summary: dict[str, Any] = {
         "cmd": "sc-test",
+        "run_id": run_id,
         "type": args.type,
         "solution": args.solution,
         "configuration": args.configuration,
-        "artifact_gate_mode": artifact_gate_mode,
-        "e2e_timeout_sec": e2e_timeout_sec,
-        "prewarm_enabled": prewarm_enabled,
         "status": "fail",
         "steps": [],
     }
@@ -353,7 +270,7 @@ def main() -> int:
             os.environ.setdefault("COVERAGE_LINES_MIN", "90")
             os.environ.setdefault("COVERAGE_BRANCHES_MIN", "85")
 
-        step = run_unit(out_dir, args.solution, args.configuration)
+        step = run_unit(out_dir, args.solution, args.configuration, run_id=run_id)
         summary["steps"].append(step)
         if step["rc"] != 0:
             hard_fail = True
@@ -364,35 +281,20 @@ def main() -> int:
                 if cov.get("status") == "fail":
                     hard_fail = True
 
-    run_e2e = args.type in ("integration", "e2e", "e2e-light", "all")
-    run_full_e2e = args.type in ("integration", "e2e", "all")
-
-    if run_e2e:
+    if args.type in ("integration", "e2e", "all"):
         if not godot_bin:
             print("[sc-test] ERROR: --godot-bin (or env GODOT_BIN) is required for e2e/integration tests.")
             return 2
 
-        step = run_gdunit_hard(
-            out_dir,
-            godot_bin,
-            e2e_timeout_sec,
-            artifact_gate_mode,
-            prewarm_enabled,
-        )
+        step = run_gdunit_hard(out_dir, godot_bin, args.timeout_sec, run_id=run_id, task_id=args.task_id)
         summary["steps"].append(step)
         if step["rc"] != 0:
             hard_fail = True
 
-        if run_full_e2e and not args.skip_smoke:
-            sm = run_smoke(out_dir, godot_bin, args.smoke_scene, args.smoke_require_marker)
+        if not args.skip_smoke:
+            sm = run_smoke(out_dir, godot_bin, args.smoke_scene, task_id=args.task_id)
             summary["steps"].append(sm)
             if sm["rc"] != 0:
-                hard_fail = True
-
-        if run_full_e2e and not args.skip_wiring_smoke:
-            ws = run_wiring_smoke(out_dir, godot_bin, args.wiring_smoke_scene, args.wiring_smoke_require_marker)
-            summary["steps"].append(ws)
-            if ws["rc"] != 0:
                 hard_fail = True
 
     summary["status"] = "ok" if not hard_fail else "fail"
