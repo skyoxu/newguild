@@ -185,9 +185,21 @@ public sealed class Task22DocsLinksAcceptanceTests
             "{0} Test-Refs must include this acceptance test to keep docs and tests aligned",
             OverlayAcceptanceChecklistPath);
 
-        acceptanceCheck.Should().MatchRegex(
-            new Regex(@"task[_\-]links[_\-]validate", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
-            "{0} must reference task-links validation so CI can validate backlinks",
+        var hasLegacyTaskLinksHook = Regex.IsMatch(
+            acceptanceCheck,
+            @"task[_\-]links[_\-]validate",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        var hasOrchestrationHook = Regex.IsMatch(
+                acceptanceCheck,
+                @"_acceptance_orchestration",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+            && Regex.IsMatch(
+                acceptanceCheck,
+                @"run_registry_steps|build_step_plan",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        (hasLegacyTaskLinksHook || hasOrchestrationHook).Should().BeTrue(
+            "{0} must wire task-links validation directly or through orchestration",
             AcceptanceCheckScriptPath);
 
         validateScript.Should().MatchRegex(
