@@ -1,40 +1,33 @@
 #!/usr/bin/env python3
 """
 Acceptance check step implementations.
-
-Why:
-  Keep scripts under the repo's single-file size guideline (<= 400 lines) by
-  moving step implementations out of the CLI entrypoint.
 """
 
 from __future__ import annotations
 
 import os
 import re
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from _quality_rules import scan_quality_rules
+from _acceptance_steps_quality import (
+    step_perf_budget,
+    step_quality_rules,
+    step_test_quality_soft,
+)
+from _acceptance_steps_runner import run_and_capture
+from _acceptance_steps_security import (
+    step_security_hard,
+    step_security_soft,
+    step_ui_event_security,
+)
+from _step_result import StepResult
+from _subtasks_coverage_step import step_subtasks_coverage_llm
 from _taskmaster import TaskmasterTriplet
-from _test_quality import assess_test_quality
-from _util import repo_root, run_cmd, write_json, write_text
+from _util import repo_root, write_json
 
 
 ADR_STATUS_RE = re.compile(r"^\s*-?\s*(?:Status|status)\s*:\s*([A-Za-z]+)\s*$", re.MULTILINE)
-PERF_METRICS_RE = re.compile(
-    r"\[PERF\]\s*frames=(\d+)\s+avg_ms=([0-9]+(?:\.[0-9]+)?)\s+p50_ms=([0-9]+(?:\.[0-9]+)?)\s+p95_ms=([0-9]+(?:\.[0-9]+)?)\s+p99_ms=([0-9]+(?:\.[0-9]+)?)"
-)
-
-
-@dataclass(frozen=True)
-class StepResult:
-    name: str
-    status: str  # ok|fail|skipped
-    rc: int | None = None
-    cmd: list[str] | None = None
-    log: str | None = None
-    details: dict[str, Any] | None = None
 
 
 def find_adr_file(root: Path, adr_id: str) -> Path | None:
@@ -56,19 +49,6 @@ def read_adr_status(path: Path) -> str | None:
     if not m:
         return None
     return m.group(1).strip()
-
-
-def run_and_capture(out_dir: Path, name: str, cmd: list[str], timeout_sec: int) -> StepResult:
-    rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=timeout_sec)
-    log_path = out_dir / f"{name}.log"
-    write_text(log_path, out)
-    return StepResult(
-        name=name,
-        status="ok" if rc == 0 else "fail",
-        rc=rc,
-        cmd=cmd,
-        log=str(log_path),
-    )
 
 
 def step_adr_compliance(out_dir: Path, triplet: TaskmasterTriplet, *, strict_status: bool) -> StepResult:
@@ -128,12 +108,72 @@ def step_adr_compliance(out_dir: Path, triplet: TaskmasterTriplet, *, strict_sta
 
 def step_task_links_validate(out_dir: Path) -> StepResult:
     # Validates tasks_back/tasks_gameplay refs (ADR/CH/overlay/depends_on).
+    raw_budget = (os.getenv("TASK_LINKS_MAX_WARNINGS", "") or "").strip()
+    max_warnings = -1
+    if raw_budget:
+        try:
+            max_warnings = int(raw_budget)
+        except ValueError:
+            max_warnings = -1
+
+    cmd = ["py", "-3", "scripts/python/task_links_validate.py", "--mode", "all"]
+    if max_warnings >= 0:
+        cmd.extend(["--max-warnings", str(max_warnings)])
+    cmd.extend(["--summary-out", str(out_dir / "task-links-validate-summary.json")])
+
     return run_and_capture(
         out_dir,
         name="task-links-validate",
-        cmd=["py", "-3", "scripts/python/task_links_validate.py"],
+        cmd=cmd,
         timeout_sec=300,
     )
+
+
+def step_task_test_refs_validate(out_dir: Path, triplet: TaskmasterTriplet, *, require_non_empty: bool) -> StepResult:
+    cmd = [
+        "py",
+        "-3",
+        "scripts/python/validate_task_test_refs.py",
+        "--task-id",
+        str(triplet.task_id),
+        "--out",
+        str(out_dir / "task-test-refs.json"),
+    ]
+    if require_non_empty:
+        cmd.append("--require-non-empty")
+    return run_and_capture(out_dir, name="task-test-refs", cmd=cmd, timeout_sec=60)
+
+
+def step_acceptance_refs_validate(out_dir: Path, triplet: TaskmasterTriplet) -> StepResult:
+    # Hard gate (deterministic): acceptance items must declare "Refs:" and be consistent with test_refs at refactor stage.
+    cmd = [
+        "py",
+        "-3",
+        "scripts/python/validate_acceptance_refs.py",
+        "--task-id",
+        str(triplet.task_id),
+        "--stage",
+        "refactor",
+        "--out",
+        str(out_dir / "acceptance-refs.json"),
+    ]
+    return run_and_capture(out_dir, name="acceptance-refs", cmd=cmd, timeout_sec=60)
+
+
+def step_acceptance_anchors_validate(out_dir: Path, triplet: TaskmasterTriplet) -> StepResult:
+    # Hard gate (deterministic): referenced tests must contain ACC:T<id>.<n> anchors.
+    cmd = [
+        "py",
+        "-3",
+        "scripts/python/validate_acceptance_anchors.py",
+        "--task-id",
+        str(triplet.task_id),
+        "--stage",
+        "refactor",
+        "--out",
+        str(out_dir / "acceptance-anchors.json"),
+    ]
+    return run_and_capture(out_dir, name="acceptance-anchors", cmd=cmd, timeout_sec=60)
 
 
 def step_overlay_validate(out_dir: Path, triplet: TaskmasterTriplet) -> StepResult:
@@ -196,256 +236,46 @@ def step_build_warnaserror(out_dir: Path) -> StepResult:
     return run_and_capture(
         out_dir,
         name="dotnet-build-warnaserror",
-        cmd=["py", "-3", "scripts/sc/build.py", "GodotGame.csproj", "--type", "dev"],
+        cmd=["py", "-3", "scripts/sc/build.py", "NewRouge.csproj", "--type", "dev"],
         timeout_sec=1_800,
     )
-
-
-def step_security_soft(out_dir: Path) -> StepResult:
-    # Soft checks: do not block, but record output.
-    steps = []
-    steps.append(run_and_capture(out_dir, "check-sentry-secrets", ["py", "-3", "scripts/python/check_sentry_secrets.py"], 60))
-    steps.append(run_and_capture(out_dir, "check-sanguo-gameloop-contracts", ["py", "-3", "scripts/python/check_sanguo_gameloop_contracts.py"], 60))
-    steps.append(
-        run_and_capture(
-            out_dir,
-            "security-soft-scan",
-            ["py", "-3", "scripts/python/security_soft_scan.py", "--out", str(out_dir / "security-soft-scan.json")],
-            120,
-        )
-    )
-    # Optional: encoding scan (soft)
-    steps.append(run_and_capture(out_dir, "check-encoding-since-today", ["py", "-3", "scripts/python/check_encoding.py", "--since-today"], 300))
-
-    # Soft gate: always ok, but include failures in details.
-    details = {"steps": [s.__dict__ for s in steps]}
-    write_json(out_dir / "security-soft.json", details)
-    return StepResult(name="security-soft", status="ok", details=details)
-
-
-def step_security_profile_soft(out_dir: Path, triplet: TaskmasterTriplet) -> StepResult:
-    title = str(triplet.master.get("title") or "")
-    details_blob = "\n".join(
-        [
-            str(triplet.master.get("details") or ""),
-            str((triplet.back or {}).get("details") or ""),
-            str((triplet.gameplay or {}).get("details") or ""),
-        ]
-    )
-
-    is_playability_route = ("playability" in title.lower()) or ("PLAYABILITY-ROUTE-" in details_blob.upper())
-
-    def _join_acceptance(value: Any) -> str:
-        if isinstance(value, list):
-            return "\n".join(str(x) for x in value if str(x).strip())
-        if value is None:
-            return ""
-        return str(value)
-
-    checks: list[dict[str, Any]] = []
-    warnings: list[str] = []
-    views: list[tuple[str, dict[str, Any] | None]] = [
-        ("master", triplet.master),
-        ("back", triplet.back),
-        ("gameplay", triplet.gameplay),
-    ]
-
-    for name, view in views:
-        if not isinstance(view, dict):
-            checks.append(
-                {
-                    "view": name,
-                    "present": False,
-                    "has_security_profile": False,
-                    "details_has_profile": False,
-                    "acceptance_has_profile": False,
-                }
-            )
-            continue
-
-        details_text = str(view.get("details") or "")
-        acceptance_text = _join_acceptance(view.get("acceptance"))
-        details_has_profile = "SECURITY_PROFILE" in details_text
-        acceptance_has_profile = "SECURITY_PROFILE" in acceptance_text
-        has_security_profile = details_has_profile or acceptance_has_profile
-
-        checks.append(
-            {
-                "view": name,
-                "present": True,
-                "has_security_profile": has_security_profile,
-                "details_has_profile": details_has_profile,
-                "acceptance_has_profile": acceptance_has_profile,
-            }
-        )
-
-        if is_playability_route and not has_security_profile:
-            warnings.append(
-                f"missing SECURITY_PROFILE annotation in task {triplet.task_id} {name} view (details/acceptance)"
-            )
-
-    verdict = "OK"
-    if is_playability_route and warnings:
-        verdict = "Needs Fix"
-
-    details = {
-        "task_id": triplet.task_id,
-        "title": title,
-        "is_playability_route": is_playability_route,
-        "verdict": verdict,
-        "ci_mode": bool(os.environ.get("CI")),
-        "checks": checks,
-        "warnings": warnings,
-        "note": "Soft rule only: does not fail acceptance gate.",
-    }
-
-    lines: list[str] = []
-    lines.append(f"SECURITY_PROFILE_SOFT verdict={verdict} playability_route={is_playability_route}")
-    for warning in warnings:
-        lines.append(f"WARN {warning}")
-    log_path = out_dir / "security-profile-soft.log"
-    write_text(log_path, "\n".join(lines) + "\n")
-    write_json(out_dir / "security-profile-soft.json", details)
-    return StepResult(name="security-profile-soft", status="ok", rc=0, log=str(log_path), details=details)
 
 
 def step_tests_all(
     out_dir: Path,
     godot_bin: str | None,
-    artifact_gate_mode: str | None = None,
-    tests_scope: str = "all",
+    *,
+    run_id: str | None = None,
+    test_type: str = "all",
+    task_id: str | None = None,
 ) -> StepResult:
-    cmd = ["py", "-3", "scripts/sc/test.py", "--type", str(tests_scope)]
-    if godot_bin:
+    cmd = ["py", "-3", "scripts/sc/test.py", "--type", test_type]
+    if str(task_id or "").strip():
+        cmd += ["--task-id", str(task_id).strip()]
+    if run_id:
+        cmd += ["--run-id", run_id]
+    if godot_bin and test_type != "unit":
         cmd += ["--godot-bin", godot_bin]
-    if artifact_gate_mode:
-        cmd += ["--artifact-gate", artifact_gate_mode]
-    return run_and_capture(out_dir, name="tests-all", cmd=cmd, timeout_sec=2_400)
+    return run_and_capture(out_dir, name="tests-all", cmd=cmd, timeout_sec=1_200)
 
 
-def step_test_quality_soft(out_dir: Path, triplet: TaskmasterTriplet, *, strict: bool) -> StepResult:
-    title = str(triplet.master.get("title") or "")
-    details_blob = "\n".join(
-        [
-            str(triplet.master.get("details") or ""),
-            str((triplet.back or {}).get("details") or ""),
-            str((triplet.gameplay or {}).get("details") or ""),
-        ]
-    )
-    taskdoc_path = Path(triplet.taskdoc_path) if triplet.taskdoc_path else None
-    layer = str(((triplet.gameplay or {}).get("layer") or (triplet.back or {}).get("layer") or triplet.master.get("layer") or "")).strip() or None
-
-
-    report = assess_test_quality(
-        repo_root=repo_root(),
-        task_id=triplet.task_id,
-        title=title,
-        details_blob=details_blob,
-        taskdoc_path=taskdoc_path,
-        layer=layer,
-    )
-    write_json(out_dir / "test-quality.json", report)
-
-    verdict = str(report.get("verdict") or "OK")
-    findings = report.get("findings") if isinstance(report.get("findings"), dict) else {}
-    p1 = findings.get("p1") if isinstance(findings.get("p1"), list) else []
-    p2 = findings.get("p2") if isinstance(findings.get("p2"), list) else []
-
-    lines: list[str] = []
-    lines.append(f"TEST_QUALITY verdict={verdict} ui_task={bool(report.get('ui_task'))} scanned={report.get('gdunit', {}).get('tests_scanned')}")
-    for x in p1[:20]:
-        lines.append(f"P1 {x}")
-    for x in p2[:20]:
-        lines.append(f"P2 {x}")
-    log_path = out_dir / "test-quality.log"
-    write_text(log_path, "\n".join(lines) + "\n")
-
-    status = "ok"
-    if strict and verdict == "Needs Fix":
-        status = "fail"
-    return StepResult(name="test-quality", status=status, rc=0 if status == "ok" else 1, log=str(log_path), details=report)
-
-
-def step_quality_rules(out_dir: Path, *, strict: bool) -> StepResult:
-    report = scan_quality_rules(repo_root=repo_root())
-    write_json(out_dir / "quality-rules.json", report)
-
-    verdict = str(report.get("verdict") or "OK")
-    counts = report.get("counts") if isinstance(report.get("counts"), dict) else {}
-    p0_count = int(counts.get("p0") or 0)
-
-    lines: list[str] = []
-    lines.append(f"QUALITY_RULES verdict={verdict} total={counts.get('total')} p0={counts.get('p0')} p1={counts.get('p1')}")
-    findings = report.get("findings") if isinstance(report.get("findings"), dict) else {}
-    for sev in ["p0", "p1"]:
-        items = findings.get(sev) if isinstance(findings.get(sev), list) else []
-        for it in items[:50]:
-            if not isinstance(it, dict):
-                continue
-            f = it.get("file")
-            ln = it.get("line")
-            msg = it.get("message")
-            lines.append(f"{sev.upper()} {f}:{ln} {msg}")
-
-    log_path = out_dir / "quality-rules.log"
-    write_text(log_path, "\n".join(lines) + "\n")
-
-    status = "ok"
-    # Stop-loss hard gate: any P0 must fail regardless of --strict-quality-rules.
-    if p0_count > 0:
-        status = "fail"
-    elif strict and verdict == "Needs Fix":
-        status = "fail"
-    return StepResult(name="quality-rules", status=status, rc=0 if status == "ok" else 1, log=str(log_path), details=report)
-
-
-def find_latest_headless_log() -> Path | None:
-    ci_root = repo_root() / "logs" / "ci"
-    if not ci_root.exists():
-        return None
-    candidates = list(ci_root.rglob("headless.log"))
-    if not candidates:
-        return None
-    return max(candidates, key=lambda p: p.stat().st_mtime)
-
-
-def step_perf_budget(out_dir: Path, *, max_p95_ms: int) -> StepResult:
-    root = repo_root()
-    headless_log = find_latest_headless_log()
-    if not headless_log:
-        details = {
-            "status": "disabled" if max_p95_ms <= 0 else "enabled",
-            "error": "no recent headless.log found under logs/ci (run smoke first)",
-            "max_p95_ms": max_p95_ms,
-        }
-        write_json(out_dir / "perf-budget.json", details)
-        return StepResult(name="perf-budget", status="skipped" if max_p95_ms <= 0 else "fail", details=details)
-
-    content = headless_log.read_text(encoding="utf-8", errors="ignore")
-    matches = list(PERF_METRICS_RE.finditer(content))
-    if not matches:
-        details = {
-            "status": "disabled" if max_p95_ms <= 0 else "enabled",
-            "error": "no [PERF] metrics found in headless.log",
-            "headless_log": str(headless_log.relative_to(root)).replace("\\", "/"),
-            "max_p95_ms": max_p95_ms,
-        }
-        write_json(out_dir / "perf-budget.json", details)
-        return StepResult(name="perf-budget", status="skipped" if max_p95_ms <= 0 else "fail", details=details)
-
-    last = matches[-1]
-    frames = int(last.group(1))
-    p95_ms = float(last.group(4))
-    details = {
-        "headless_log": str(headless_log.relative_to(root)).replace("\\", "/"),
-        "frames": frames,
-        "p95_ms": p95_ms,
-        "max_p95_ms": max_p95_ms,
-        "budget_status": ("disabled" if max_p95_ms <= 0 else ("pass" if p95_ms <= max_p95_ms else "fail")),
-        "note": "Always extracts latest [PERF] metrics from headless.log; becomes a hard gate only when max_p95_ms > 0 (ADR-0015).",
-    }
-    write_json(out_dir / "perf-budget.json", details)
-    if max_p95_ms <= 0:
-        return StepResult(name="perf-budget", status="skipped", details=details)
-    return StepResult(name="perf-budget", status="ok" if p95_ms <= max_p95_ms else "fail", details=details)
-
+__all__ = [
+    "StepResult",
+    "step_acceptance_anchors_validate",
+    "step_acceptance_refs_validate",
+    "step_adr_compliance",
+    "step_architecture_boundary",
+    "step_build_warnaserror",
+    "step_contracts_validate",
+    "step_overlay_validate",
+    "step_perf_budget",
+    "step_quality_rules",
+    "step_security_hard",
+    "step_security_soft",
+    "step_subtasks_coverage_llm",
+    "step_task_links_validate",
+    "step_task_test_refs_validate",
+    "step_test_quality_soft",
+    "step_tests_all",
+    "step_ui_event_security",
+]

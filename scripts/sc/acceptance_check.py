@@ -1,173 +1,45 @@
 #!/usr/bin/env python3
 """
-sc-acceptance-check: Local, reproducible acceptance gate (Claude Code /acceptance-check equivalent).
-
-This script does NOT call LLM subagents. Instead, it maps the 6 conceptual
-"subagents" to deterministic checks already present in this repo, and writes
-an auditable report to logs/ci/<YYYY-MM-DD>/sc-acceptance-check/.
-
-Usage (Windows):
-  py -3 scripts/sc/acceptance_check.py --task-id 10
-  py -3 scripts/sc/acceptance_check.py --task-id 10.3 --godot-bin "%GODOT_BIN%"
-
-Exit codes:
-  0  all hard checks passed
-  1  at least one hard check failed
-  2  invalid usage / missing requirements
+sc-acceptance-check: local, reproducible acceptance gate.
 """
 
 from __future__ import annotations
 
-import argparse
 import os
+import uuid
 from pathlib import Path
 from typing import Any
-
-from _acceptance_report import write_markdown_report
-from _acceptance_steps import (
-    StepResult,
-    step_adr_compliance,
-    step_architecture_boundary,
-    step_build_warnaserror,
-    step_contracts_validate,
-    step_overlay_validate,
-    step_perf_budget,
-    step_quality_rules,
-    step_security_profile_soft,
-    step_security_soft,
-    step_task_links_validate,
-    step_test_quality_soft,
-    step_tests_all,
+from _acceptance_orchestration import (
+    build_step_plan,
+    is_enabled,
+    run_registry_steps,
+    run_tests_bundle,
 )
+from _acceptance_report import write_markdown_report
+from _acceptance_runtime import (
+    build_parser,
+    compute_perf_p95_ms,
+    normalize_subtasks_mode,
+    parse_only_steps,
+    resolve_security_modes,
+    should_mark_hard_failure,
+    validate_arg_conflicts,
+)
+from _acceptance_task_requirements import (
+    parse_task_id,
+    task_requires_env_evidence_preflight,
+    task_requires_headless_e2e,
+)
+from _acceptance_steps import StepResult, step_perf_budget
+from _risk_summary import write_risk_summary
+from _security_profile import security_profile_payload
 from _taskmaster import resolve_triplet
 from _unit_metrics import collect_unit_metrics
 from _util import ci_dir, repo_root, today_str, write_json
 
 
-def parse_task_id(value: str | None) -> str | None:
-    if not value:
-        return None
-    s = str(value).strip()
-    if not s:
-        return None
-    # Accept "10" or "10.3" and normalize to master task id ("10").
-    return s.split(".", 1)[0]
-
-
-def _is_ci() -> bool:
-    value = os.environ.get("CI", "").strip().lower()
-    return value in {"1", "true", "yes", "on"}
-
-
-def resolve_artifact_gate_mode(mode: str) -> str:
-    normalized = (mode or "auto").strip().lower()
-    if normalized == "auto":
-        return "on" if _is_ci() else "off"
-    return normalized
-
-
-def main() -> int:
-    ap = argparse.ArgumentParser(description="sc-acceptance-check (reproducible acceptance gate)")
-    ap.add_argument(
-        "--task-id",
-        default=None,
-        help="Taskmaster id (e.g. 10 or 10.3). If omitted: uses env SC_TASK_ID if set; otherwise first status=in-progress task.",
-    )
-    ap.add_argument("--godot-bin", default=None, help="Godot mono console path (or set env GODOT_BIN)")
-    ap.add_argument("--perf-p95-ms", type=int, default=None, help="Enable perf hard gate by parsing [PERF] p95_ms from latest logs/ci/**/headless.log. 0 disables.")
-    ap.add_argument("--require-perf", action="store_true", help="(legacy) enable perf hard gate using env PERF_P95_THRESHOLD_MS (or default 20ms)")
-    ap.add_argument("--strict-adr-status", action="store_true", help="fail if any referenced ADR is not Accepted")
-    ap.add_argument("--strict-test-quality", action="store_true", help="fail if deterministic test-quality heuristics report verdict=Needs Fix")
-    ap.add_argument("--strict-quality-rules", action="store_true", help="fail if deterministic quality rules report verdict=Needs Fix")
-    ap.add_argument(
-        "--tests-scope",
-        choices=["unit", "e2e", "e2e-light", "all"],
-        default="all",
-        help="Scope for tests step. unit/e2e/e2e-light/all (default: all).",
-    )
-    ap.add_argument(
-        "--artifact-gate",
-        choices=["auto", "on", "off"],
-        default=os.environ.get("SC_ARTIFACT_GATE", "auto"),
-        help="Artifact gate for tests-all. auto=CI:on, local:off.",
-    )
-    ap.add_argument(
-        "--only",
-        default=None,
-        help="Comma-separated step filter (adr,links,overlay,contracts,arch,build,security,quality,rules,tests,perf). Default: all.",
-    )
-    args = ap.parse_args()
-
-    task_id = parse_task_id(args.task_id)
-    try:
-        triplet = resolve_triplet(task_id=task_id)
-    except Exception as exc:  # noqa: BLE001
-        print(f"[sc-acceptance-check] ERROR: failed to resolve task: {exc}")
-        return 2
-
-    out_dir = ci_dir("sc-acceptance-check")
-    only = None
-    if args.only:
-        only = {x.strip() for x in str(args.only).split(",") if x.strip()}
-
-    def enabled(key: str) -> bool:
-        return True if only is None else (key in only)
-
-    steps: list[StepResult] = []
-
-    if enabled("adr"):
-        steps.append(step_adr_compliance(out_dir, triplet, strict_status=bool(args.strict_adr_status)))
-    if enabled("links"):
-        steps.append(step_task_links_validate(out_dir))
-    if enabled("overlay"):
-        steps.append(step_overlay_validate(out_dir, triplet))
-    if enabled("contracts"):
-        steps.append(step_contracts_validate(out_dir))
-    if enabled("arch"):
-        steps.append(step_architecture_boundary(out_dir))
-    if enabled("build"):
-        steps.append(step_build_warnaserror(out_dir))
-    if enabled("quality"):
-        steps.append(step_test_quality_soft(out_dir, triplet, strict=bool(args.strict_test_quality)))
-    if enabled("rules"):
-        steps.append(step_quality_rules(out_dir, strict=bool(args.strict_quality_rules)))
-    if enabled("security"):
-        steps.append(step_security_soft(out_dir))
-        steps.append(step_security_profile_soft(out_dir, triplet))
-
-    godot_bin = args.godot_bin or os.environ.get("GODOT_BIN")
-    artifact_gate_mode = resolve_artifact_gate_mode(args.artifact_gate)
-    if enabled("tests"):
-        steps.append(step_tests_all(out_dir, godot_bin, artifact_gate_mode, str(args.tests_scope)))
-
-    env_v = os.environ.get("PERF_P95_THRESHOLD_MS")
-    env_p95 = int(env_v) if (env_v and env_v.isdigit()) else None
-    perf_p95_ms = max(0, int(args.perf_p95_ms)) if args.perf_p95_ms is not None else (env_p95 if env_p95 is not None else (20 if args.require_perf else 0))
-    if enabled("perf"):
-        steps.append(step_perf_budget(out_dir, max_p95_ms=perf_p95_ms))
-
-    hard_failed = False
-    for s in steps:
-        if s.name == "security-soft":
-            continue
-        if s.status == "fail":
-            hard_failed = True
-
-    summary: dict[str, Any] = {
-        "cmd": "sc-acceptance-check",
-        "date": today_str(),
-        "task_id": triplet.task_id,
-        "title": triplet.master.get("title"),
-        "only": args.only,
-        "tests_scope": args.tests_scope,
-        "artifact_gate_mode": artifact_gate_mode,
-        "status": "fail" if hard_failed else "ok",
-        "steps": [s.__dict__ for s in steps],
-        "out_dir": str(out_dir),
-    }
-
+def _collect_metrics(steps: list[StepResult]) -> dict[str, Any]:
     metrics: dict[str, Any] = {}
-
     tests_step = next((s for s in steps if s.name == "tests-all" and s.log), None)
     tests_log = Path(tests_step.log) if (tests_step and tests_step.log) else None
     unit = collect_unit_metrics(
@@ -180,17 +52,275 @@ def main() -> int:
     perf_step = next((s for s in steps if s.name == "perf-budget" and isinstance(s.details, dict)), None)
     if perf_step and isinstance(perf_step.details, dict):
         metrics["perf"] = perf_step.details
+    return metrics
 
+
+def _append_risk_summary(
+    *,
+    out_dir: Path,
+    triplet: Any,
+    run_id: str,
+    hard_failed: bool,
+    steps: list[StepResult],
+    metrics: dict[str, Any],
+) -> tuple[bool, str | None]:
+    try:
+        risk_path, risk_payload = write_risk_summary(
+            out_dir=out_dir,
+            task_id=str(triplet.task_id),
+            run_id=run_id,
+            acceptance_status="fail" if hard_failed else "ok",
+            steps=steps,
+            metrics=metrics or None,
+        )
+        risk_summary_rel = str(risk_path.relative_to(repo_root())).replace("\\", "/")
+        steps.append(
+            StepResult(
+                name="risk-summary",
+                status="ok",
+                rc=0,
+                details={
+                    "risk_summary": risk_summary_rel,
+                    "levels": (risk_payload or {}).get("levels"),
+                    "scores": (risk_payload or {}).get("scores"),
+                    "verdict": (risk_payload or {}).get("verdict"),
+                },
+            )
+        )
+        return hard_failed, risk_summary_rel
+    except Exception as exc:  # noqa: BLE001
+        steps.append(StepResult(name="risk-summary", status="fail", rc=1, details={"error": str(exc)}))
+        return True, None
+
+
+def _build_summary(
+    *,
+    mode: str,
+    status: str,
+    out_dir: Path,
+    args: Any,
+    subtasks_mode: str,
+    security_profile: str,
+    security_modes: dict[str, str],
+    arg_errors: list[str],
+    run_id: str | None = None,
+    task_id: str | None = None,
+    title: str | None = None,
+    steps: list[StepResult] | None = None,
+    task_requirements: dict[str, Any] | None = None,
+    metrics: dict[str, Any] | None = None,
+    risk_summary_rel: str | None = None,
+    step_plan: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    summary: dict[str, Any] = {
+        "schema_version": "1.1.0",
+        "cmd": "sc-acceptance-check",
+        "mode": mode,
+        "date": today_str(),
+        "only": args.only,
+        "status": status,
+        "out_dir": str(out_dir),
+        "subtasks_coverage_mode": subtasks_mode,
+        "security_profile": security_profile_payload(security_profile),
+        "security_modes": security_modes,
+        "arg_validation": {
+            "errors": arg_errors,
+            "valid": len(arg_errors) == 0,
+        },
+    }
+    if run_id is not None:
+        summary["run_id"] = run_id
+    if task_id is not None:
+        summary["task_id"] = task_id
+    if title is not None:
+        summary["title"] = title
+    if steps is not None:
+        summary["steps"] = [s.__dict__ for s in steps]
+    if task_requirements:
+        summary["task_requirements"] = task_requirements
     if metrics:
         summary["metrics"] = metrics
+    if risk_summary_rel:
+        summary["risk_summary"] = risk_summary_rel
+    if step_plan is not None:
+        summary["step_plan"] = step_plan
+    return summary
+
+
+def _run_self_check(args: Any) -> int:
+    only_steps = parse_only_steps(args.only)
+    subtasks_mode = normalize_subtasks_mode(args.subtasks_coverage)
+    security_profile, security_modes = resolve_security_modes(args)
+    arg_errors = validate_arg_conflicts(
+        only_steps=only_steps,
+        subtasks_mode=subtasks_mode,
+        require_headless_e2e=bool(args.require_headless_e2e),
+        require_executed_refs=bool(args.require_executed_refs),
+        audit_evidence_mode=security_modes["audit_evidence"],
+    )
+    out_dir = ci_dir("sc-acceptance-self-check")
+    summary = _build_summary(
+        mode="self-check",
+        status="fail" if arg_errors else "ok",
+        out_dir=out_dir,
+        args=args,
+        subtasks_mode=subtasks_mode,
+        security_profile=security_profile,
+        security_modes=security_modes,
+        arg_errors=arg_errors,
+    )
+    write_json(out_dir / "summary.json", summary)
+    for err in arg_errors:
+        print(f"[sc-acceptance-check] ERROR: {err}")
+    print(f"SC_ACCEPTANCE_SELF_CHECK status={summary['status']} out={out_dir}")
+    return 0 if not arg_errors else 2
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    if bool(getattr(args, "self_check", False)):
+        return _run_self_check(args)
+    task_id = parse_task_id(args.task_id)
+
+    try:
+        triplet = resolve_triplet(task_id=task_id)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[sc-acceptance-check] ERROR: failed to resolve task: {exc}")
+        return 2
+
+    out_dir = ci_dir(f"sc-acceptance-check-task-{triplet.task_id}") if bool(args.out_per_task) else ci_dir("sc-acceptance-check")
+    only_steps = parse_only_steps(args.only)
+    subtasks_mode = normalize_subtasks_mode(args.subtasks_coverage)
+
+    has_gd_refs = task_requires_headless_e2e(triplet)
+    needs_env_preflight = task_requires_env_evidence_preflight(triplet)
+    require_headless_e2e = bool(args.require_headless_e2e) and has_gd_refs
+    require_executed_refs = bool(args.require_executed_refs)
+
+    security_profile, security_modes = resolve_security_modes(args)
+    audit_evidence_mode = security_modes["audit_evidence"]
+    perf_p95_ms = compute_perf_p95_ms(perf_p95_ms=args.perf_p95_ms, require_perf=bool(args.require_perf))
+
+    arg_errors = validate_arg_conflicts(
+        only_steps=only_steps,
+        subtasks_mode=subtasks_mode,
+        require_headless_e2e=bool(args.require_headless_e2e),
+        require_executed_refs=require_executed_refs,
+        audit_evidence_mode=audit_evidence_mode,
+    )
+    if arg_errors:
+        for e in arg_errors:
+            print(f"[sc-acceptance-check] ERROR: {e}")
+        return 2
+
+    run_id = uuid.uuid4().hex
+    godot_bin = args.godot_bin or os.environ.get("GODOT_BIN")
+
+    if bool(getattr(args, "dry_run_plan", False)):
+        out_dir = ci_dir(f"sc-acceptance-dry-plan-task-{triplet.task_id}") if bool(args.out_per_task) else ci_dir("sc-acceptance-dry-plan")
+        step_plan = build_step_plan(
+            only_steps=only_steps,
+            subtasks_mode=subtasks_mode,
+            security_modes=security_modes,
+            has_gd_refs=has_gd_refs,
+            needs_env_preflight=needs_env_preflight,
+            require_headless_e2e=require_headless_e2e,
+            require_executed_refs=require_executed_refs,
+            audit_evidence_mode=audit_evidence_mode,
+            perf_p95_ms=perf_p95_ms,
+        )
+        summary = _build_summary(
+            mode="dry-run-plan",
+            status="ok",
+            out_dir=out_dir,
+            args=args,
+            subtasks_mode=subtasks_mode,
+            security_profile=security_profile,
+            security_modes=security_modes,
+            arg_errors=arg_errors,
+            run_id=run_id,
+            task_id=str(triplet.task_id),
+            title=str(triplet.master.get("title") or ""),
+            task_requirements={
+                "has_gd_refs": has_gd_refs,
+                "requires_env_evidence_preflight": needs_env_preflight,
+            },
+            step_plan=step_plan,
+        )
+        write_json(out_dir / "summary.json", summary)
+        print(f"SC_ACCEPTANCE_DRY_RUN_PLAN status={summary['status']} out={out_dir}")
+        return 0
+
+    steps = run_registry_steps(
+        out_dir=out_dir,
+        triplet=triplet,
+        args=args,
+        only_steps=only_steps,
+        subtasks_mode=subtasks_mode,
+        security_modes=security_modes,
+        needs_env_preflight=needs_env_preflight,
+        godot_bin=godot_bin,
+    )
+    steps.extend(
+        run_tests_bundle(
+            out_dir=out_dir,
+            triplet=triplet,
+            only_steps=only_steps,
+            has_gd_refs=has_gd_refs,
+            require_headless_e2e=require_headless_e2e,
+            require_executed_refs=require_executed_refs,
+            audit_evidence_mode=audit_evidence_mode,
+            godot_bin=godot_bin,
+            run_id=run_id,
+        )
+    )
+
+    if is_enabled(only_steps, "perf"):
+        steps.append(step_perf_budget(out_dir, max_p95_ms=perf_p95_ms))
+
+    hard_failed = any(
+        should_mark_hard_failure(step_name=s.name, status=s.status, subtasks_mode=subtasks_mode)
+        for s in steps
+    )
+    metrics = _collect_metrics(steps)
+
+    risk_summary_rel: str | None = None
+    if is_enabled(only_steps, "risk"):
+        hard_failed, risk_summary_rel = _append_risk_summary(
+            out_dir=out_dir,
+            triplet=triplet,
+            run_id=run_id,
+            hard_failed=hard_failed,
+            steps=steps,
+            metrics=metrics,
+        )
+
+    summary = _build_summary(
+        mode="run",
+        status="fail" if hard_failed else "ok",
+        out_dir=out_dir,
+        args=args,
+        subtasks_mode=subtasks_mode,
+        security_profile=security_profile,
+        security_modes=security_modes,
+        arg_errors=arg_errors,
+        run_id=run_id,
+        task_id=str(triplet.task_id),
+        title=str(triplet.master.get("title") or ""),
+        steps=steps,
+        task_requirements={
+            "has_gd_refs": has_gd_refs,
+            "requires_env_evidence_preflight": needs_env_preflight,
+        },
+        metrics=metrics,
+        risk_summary_rel=risk_summary_rel,
+    )
 
     write_json(out_dir / "summary.json", summary)
     write_markdown_report(out_dir, triplet, steps, metrics=metrics or None)
-
     print(f"SC_ACCEPTANCE status={summary['status']} out={out_dir}")
     return 0 if not hard_failed else 1
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Any
 
 
-EVENT_RE = re.compile(r"(?<!\.)\b(?:core|ui|security)\.[a-z0-9_]+(?:\.[a-z0-9_]+){1,}\b", re.IGNORECASE)
-PUBLISH_RE = re.compile(r"\bPublishSimple\s*\(\s*\"(core|ui|security)\.", re.IGNORECASE)
+EVENT_RE = re.compile(r"\b(?:core|ui)\.[a-z0-9_]+(?:\.[a-z0-9_]+){1,}\b", re.IGNORECASE)
+PUBLISH_RE = re.compile(r"\bPublishSimple\s*\(\s*\"(core|ui)\.", re.IGNORECASE)
 ASSERT_RE = re.compile(r"\bassert_\w+\b", re.IGNORECASE)
 
 
@@ -44,19 +44,6 @@ def _is_ui_task(*, title: str, details_blob: str) -> bool:
     if "界面" in s or "按钮" in s or "面板" in s:
         return True
     return False
-
-
-_UI_LAYERS = {"ui", "screen", "gameplay"}
-_NON_UI_LAYERS = {"core", "back", "infra", "contracts", "data"}
-
-
-def _infer_ui_task(*, layer: str | None, title: str, details_blob: str) -> tuple[bool, str]:
-    normalized = (layer or "").strip().lower()
-    if normalized in _UI_LAYERS:
-        return True, f"layer:{normalized}"
-    if normalized in _NON_UI_LAYERS:
-        return False, f"layer:{normalized}"
-    return _is_ui_task(title=title, details_blob=details_blob), "heuristic:text"
 
 
 def _extract_events_from_taskdoc(taskdoc_path: Path | None) -> dict[str, list[str]]:
@@ -90,9 +77,8 @@ def assess_test_quality(
     title: str,
     details_blob: str,
     taskdoc_path: Path | None,
-    layer: str | None = None,
 ) -> dict[str, Any]:
-    ui_task, ui_task_reason = _infer_ui_task(layer=layer, title=title, details_blob=details_blob)
+    ui_task = _is_ui_task(title=title, details_blob=details_blob)
     taskdoc_events = _extract_events_from_taskdoc(taskdoc_path)
 
     tests_root = repo_root / "Tests.Godot" / "tests"
@@ -164,9 +150,7 @@ def assess_test_quality(
     return {
         "task_id": str(task_id),
         "title": title,
-        "layer": (layer or "").strip() or None,
         "ui_task": ui_task,
-        "ui_task_reason": ui_task_reason,
         "taskdoc_path": _to_posix(taskdoc_path) if taskdoc_path else None,
         "taskdoc_events": taskdoc_events,
         "gdunit": {
