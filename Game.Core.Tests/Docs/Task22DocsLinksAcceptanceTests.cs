@@ -55,7 +55,7 @@ public sealed class Task22DocsLinksAcceptanceTests
 
     // ACC:T22.1
     [Fact]
-    public void Should_Require_PRD_Has_GuildManager_Section_And_Overlay_References_The_PRD()
+    public void ShouldRequirePrdAndOverlayPrdRefs_WhenValidatingGuildManagerBaseline()
     {
         var repo = RepoRootLocator.FindRepoRoot();
 
@@ -98,7 +98,7 @@ public sealed class Task22DocsLinksAcceptanceTests
 
     // ACC:T22.2
     [Fact]
-    public void Should_Require_OverlayAdrRefs_Are_Consistent_Between_FeatureSlice_And_AcceptanceChecklist()
+    public void ShouldRequireConsistentAdrRefs_WhenComparingFeatureSliceAndAcceptanceChecklist()
     {
         var repo = RepoRootLocator.FindRepoRoot();
         var featureSlice = RepoFiles.ReadAllTextUtf8(repo, OverlayFeatureSlicePath);
@@ -124,7 +124,7 @@ public sealed class Task22DocsLinksAcceptanceTests
 
     // ACC:T22.3
     [Fact]
-    public void Should_Require_Task22_Has_BackLinks_To_Overlay_Adr_And_Architecture_Chapters()
+    public void ShouldRequireTask22Backlinks_WhenCheckingOverlayAdrAndChapterRefs()
     {
         var repo = RepoRootLocator.FindRepoRoot();
 
@@ -168,7 +168,7 @@ public sealed class Task22DocsLinksAcceptanceTests
 
     // ACC:T22.4
     [Fact]
-    public void Should_Require_TaskLinksValidate_Is_Wired_And_AcceptanceChecklist_Has_TestRefs()
+    public void ShouldRequireTaskLinksValidationWiring_WhenCheckingAcceptanceChecklistTestRefs()
     {
         var repo = RepoRootLocator.FindRepoRoot();
 
@@ -209,7 +209,7 @@ public sealed class Task22DocsLinksAcceptanceTests
     }
 
     [Fact]
-    public void Should_Not_Allow_PRD_Specific_Ids_In_Base_Architecture_Docs()
+    public void ShouldRejectPrdSpecificIds_WhenScanningBaseArchitectureDocs()
     {
         var repo = RepoRootLocator.FindRepoRoot();
         var baseDir = Path.Combine(repo, "docs", "architecture", "base");
