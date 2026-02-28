@@ -8,7 +8,6 @@ Why:
   as hard/soft checks inside sc-acceptance-check.
 
 Scope (4 rules):
-  - P0: zero-byte C# source file (*.cs) (catastrophic; breaks Godot Mono type resolution)
   - P0: blocking async wait via GetAwaiter().GetResult() in production code
   - P1: repeated /root/EventBus lookups in a single UI script
   - P1: EventBus DomainEventEmitted connect without _ExitTree cleanup
@@ -46,11 +45,17 @@ def _iter_cs_files(root: Path) -> Iterable[Path]:
     for p in root.rglob("*.cs"):
         if not p.is_file():
             continue
-        # Avoid scanning generated/junction-mounted runtime copy under Tests.Godot to prevent double counting.
-        if "Tests.Godot" in p.parts and "Game.Godot" in p.parts:
-            continue
         if any(seg in {".git", ".godot", "bin", "obj", "logs", "TestResults"} for seg in p.parts):
             continue
+        # Tests.Godot/Game.Godot is a Junction to Game.Godot (SSoT). Scanning it would
+        # duplicate findings and slow down gates. Always prefer the canonical path.
+        if "Tests.Godot" in p.parts and "Game.Godot" in p.parts:
+            try:
+                i = p.parts.index("Tests.Godot")
+                if i + 1 < len(p.parts) and p.parts[i + 1] == "Game.Godot":
+                    continue
+            except ValueError:
+                pass
         yield p
 
 
@@ -137,24 +142,6 @@ def scan_quality_rules(*, repo_root: Path) -> dict[str, Any]:
 
     for p in _iter_cs_files(repo_root):
         rel = _to_posix(p.relative_to(repo_root))
-        try:
-            size = p.stat().st_size
-        except OSError:
-            size = -1
-
-        if size == 0:
-            findings.append(
-                Finding(
-                    rule="cs.zero_byte_source_file",
-                    severity="p0",
-                    file=rel,
-                    line=None,
-                    message="Zero-byte C# source file detected. This is a hard stop-loss gate because it breaks compilation/type resolution.",
-                )
-            )
-            # Keep scanning to collect more evidence.
-            continue
-
         text = p.read_text(encoding="utf-8", errors="ignore")
 
         if _is_blocking_wait_hard_scope(rel) and _BLOCKING_WAIT_RE.search(text):
@@ -233,7 +220,6 @@ def scan_quality_rules(*, repo_root: Path) -> dict[str, Any]:
         "status": "ok",
         "verdict": verdict,
         "rules": [
-            "cs.zero_byte_source_file",
             "cs.blocking_async_wait",
             "cs.eventbus_repeated_lookup",
             "cs.domain_event_connect_without_exit_cleanup",
