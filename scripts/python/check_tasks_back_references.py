@@ -1,24 +1,12 @@
 import json
-import argparse
-from pathlib import Path
 import re
+from pathlib import Path
+
+import check_tasks_all_refs
 
 
-ADR_FOR_CH = {
-    "ADR-0002": ["CH02"],
-    "ADR-0019": ["CH02"],
-    "ADR-0003": ["CH03"],
-    "ADR-0004": ["CH04"],
-    "ADR-0006": ["CH05"],
-    "ADR-0007": ["CH05", "CH06"],
-    "ADR-0005": ["CH07"],
-    "ADR-0011": ["CH07", "CH10"],
-    "ADR-0008": ["CH10"],
-    "ADR-0015": ["CH09"],
-    "ADR-0018": ["CH01", "CH06", "CH07"],
-    "ADR-0024": ["CH06", "CH07"],
-    "ADR-0023": ["CH05"],
-}
+# Keep ADR->CH mapping consistent with the main checker.
+ADR_FOR_CH = check_tasks_all_refs.ADR_FOR_CH
 
 
 def load_tasks_back(root: Path) -> list[dict]:
@@ -39,53 +27,48 @@ def collect_adr_ids(root: Path) -> set[str]:
 
 
 def collect_overlay_paths(root: Path) -> set[str]:
-    overlay_root = root / "docs" / "architecture" / "overlays" / "PRD-Guild-Manager" / "08"
-    if not overlay_root.exists():
-        return set()
-    paths: set[str] = set()
-    for p in overlay_root.glob("*"):
-        rel = p.relative_to(root)
-        paths.add(str(rel).replace("\\", "/"))
-    return paths
+    overlay_paths: set[str] = set()
+
+    overlays_root = root / "docs" / "architecture" / "overlays"
+    if not overlays_root.exists():
+        return overlay_paths
+
+    for prd_dir in overlays_root.iterdir():
+        if not prd_dir.is_dir():
+            continue
+        chapter_dir = prd_dir / "08"
+        if not chapter_dir.exists():
+            continue
+        for p in chapter_dir.glob("*"):
+            rel = p.relative_to(root)
+            overlay_paths.add(str(rel).replace("\\", "/"))
+
+    return overlay_paths
 
 
-def _parse_ng_number(task_id: str | None) -> int | None:
-    if not isinstance(task_id, str):
-        return None
-    match = re.fullmatch(r"NG-(\d{4})", task_id)
-    if not match:
-        return None
-    return int(match.group(1))
+def run_check(root: Path) -> bool:
+    """Validate backlog (non-exported) tasks in tasks_back.json.
 
+    This is an incremental check that focuses on tasks that are NOT exported to
+    tasks.json (i.e., taskmaster_exported != true). The full check still lives in
+    check_tasks_all_refs.py.
 
-def run_check(root: Path, id_start: int | None = None, id_end: int | None = None) -> bool:
-    """Validate new NG tasks in tasks_back.json against ADR/Overlay maps.
-
-    Returns True if everything is consistent, False if any problem is found.
+    Returns True if everything is consistent, False otherwise.
     """
 
     tasks = load_tasks_back(root)
     adr_ids = collect_adr_ids(root)
     overlay_paths = collect_overlay_paths(root)
 
-    target_tasks: list[dict] = []
-    for task in tasks:
-        ng_no = _parse_ng_number(task.get("id"))
-        if ng_no is None:
-            continue
-        if id_start is not None and ng_no < id_start:
-            continue
-        if id_end is not None and ng_no > id_end:
-            continue
-        target_tasks.append(task)
+    backlog_tasks = [t for t in tasks if not t.get("taskmaster_exported")]
 
-    print(f"target_tasks_count: {len(target_tasks)}")
+    print(f"backlog_tasks_count: {len(backlog_tasks)}")
     print(f"known ADR ids (sample): {sorted(adr_ids)[:10]} ...")
     print(f"overlay files: {sorted(overlay_paths)}")
 
     has_error = False
 
-    for t in sorted(target_tasks, key=lambda x: x["id"]):
+    for t in sorted(backlog_tasks, key=lambda x: str(x.get("id", ""))):
         tid = t["id"]
         story_id = t.get("story_id")
         print(f"\n== {tid} ==")
@@ -110,12 +93,12 @@ def run_check(root: Path, id_start: int | None = None, id_end: int | None = None
             print(f"  missing chapter_refs (from ADR): {sorted(missing_ch)}")
             has_error = True
         if extra_ch:
-            print(f"  extra chapter_refs (not implied by ADR map): {sorted(extra_ch)}")
-            has_error = True
+            # Optional improvement (A+B): allow extra chapters as warnings.
+            print(f"  WARN extra chapter_refs (not implied by ADR map): {sorted(extra_ch)}")
         if not missing_ch and not extra_ch:
             print("  chapter_refs consistent with ADR map")
 
-        # overlay refs
+        # overlay refs (if present)
         refs = [p.replace("\\", "/") for p in t.get("overlay_refs", [])]
         if refs:
             missing_overlays = [p for p in refs if p not in overlay_paths]
@@ -127,29 +110,20 @@ def run_check(root: Path, id_start: int | None = None, id_end: int | None = None
         else:
             print("  overlay_refs: (none)")
 
+        # depends_on refs must exist within tasks_back.json (local sanity)
+        known_ids = {str(x.get("id")) for x in tasks if x.get("id")}
+        deps = [str(d) for d in t.get("depends_on") or []]
+        missing_deps = [d for d in deps if d not in known_ids]
+        if missing_deps:
+            print(f"  missing depends_on ids: {missing_deps}")
+            has_error = True
+
     return not has_error
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Validate tasks_back ADR/chapter/overlay refs for NG tasks.",
-    )
-    parser.add_argument(
-        "--id-start",
-        type=int,
-        default=None,
-        help="Optional lower bound for NG task number (e.g. 44 for NG-0044).",
-    )
-    parser.add_argument(
-        "--id-end",
-        type=int,
-        default=None,
-        help="Optional upper bound for NG task number (e.g. 51 for NG-0051).",
-    )
-    args = parser.parse_args()
-
     root = Path(__file__).resolve().parents[2]
-    ok = run_check(root, id_start=args.id_start, id_end=args.id_end)
+    ok = run_check(root)
     if not ok:
         raise SystemExit(1)
 
