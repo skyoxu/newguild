@@ -4,16 +4,18 @@ PRD-Refs:
   - docs/prd.txt
 Story-ID: PRD-GUILD-MANAGER-T3-PVE-RAID
 Title: Feature Slice - T3 PVE Raid（副本/遭遇）
-Status: Delivered
+Status: In Progress
 ADR-Refs:
   - ADR-0004
   - ADR-0005
-  - ADR-0007
+  - ADR-0006
   - ADR-0018
 Arch-Refs:
   - CH01
   - CH04
+  - CH05
   - CH06
+  - CH07
 ---
 
 本页作为 T3“PVE 副本/遭遇”纵切的审计锚点。
@@ -41,14 +43,20 @@ Arch-Refs:
   - 字段：`RaidId`, `GuildId`, `Week`, `Result`, `RewardPoints`, `ResolvedAt`
   - 契约位置：`Game.Core/Contracts/Raid/RaidResolved.cs`
 
-## 验收与测试（规则）
+## 验收与测试（T51 对齐）
 
-- 副本调度与结算必须通过事件驱动对外发布，支持 UI/媒体/声望等模块消费。
-- 本次纵切已在仓库落地 `Game.Core/Contracts/Raid/**` 与对应测试用例，并通过确定性门禁。
+- `ACC:T51.1`：Raid 流程必须形成 `scheduled -> resolved` 单次闭环，`success/failed` 可区分；进入终态后不可继续推进或重复结算。  
+  Refs: `Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs`、`Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs`
+- `ACC:T51.2`：UI 入口触发一次真实遭遇后必须展示结果摘要；当 demo 关闭（如 `GD_ENABLE_PLAYABLE=0`）时不得出现 resolved 摘要。  
+  Refs: `Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd`
+- `ACC:T51.3`：Activity/Feed 必须观察到 `core.raid.resolved`，并校验该次 resolved 载荷含 `result` 字段且与同次 UI 反馈一致；单次触发不得产生重复 resolved。  
+  Refs: `Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd`
+- `ACC:T51.4`：必须产出可回放的 `logs/**` 证据，并校验 `action/reason/target/caller` 等审计字段完整。  
+  Refs: `Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd`
 
 ## Test-Refs
 
 - `Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs`
 - `Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs`
-- `Game.Core.Tests/Domain/RaidEncounterEventContractsTests.cs`
 - `Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd`
+- `Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd`

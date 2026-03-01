@@ -44,7 +44,8 @@ EVENT_TYPES_MEMBER_RE = re.compile(
     r"\bpublic\s+const\s+string\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*\"([^\"]+)\"\s*;",
     re.MULTILINE,
 )
-DOC_DOMAIN_EVENT_RE = re.compile(r"\bDomain\s+event:\s*([a-z0-9.]+)\b", re.IGNORECASE)
+# Allow underscores in documented event type (e.g. core.game_turn.week_advanced).
+DOC_DOMAIN_EVENT_RE = re.compile(r"\bDomain\s+event:\s*([a-z0-9._]+)\b", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -108,7 +109,7 @@ def _validate_event_type(value: str, *, domain_prefix: str) -> list[str]:
 
     for part in parts:
         if not token_re.fullmatch(part):
-            issues.append(f"invalid segment: {part!r} (require [a-z][a-z0-9]*)")
+            issues.append(f"invalid segment: {part!r} (require [a-z][a-z0-9_]*)")
 
     if parts and parts[0] != domain_prefix:
         issues.append(f"domain prefix mismatch: expected '{domain_prefix}.'")
@@ -151,8 +152,8 @@ def main() -> int:
         text = cs.read_text(encoding="utf-8", errors="ignore")
         literal_values = EVENT_TYPE_LITERAL_RE.findall(text)
         symbol_values = EVENT_TYPE_SYMBOL_RE.findall(text)
-        doc_values = DOC_DOMAIN_EVENT_RE.findall(text)
-        doc_value = doc_values[0].strip() if doc_values else None
+        doc_values = [v.strip() for v in DOC_DOMAIN_EVENT_RE.findall(text)]
+        doc_values_lc = {v.lower() for v in doc_values if v.strip()}
 
         resolved_values: list[tuple[str, str]] = []
         for value in literal_values:
@@ -176,8 +177,8 @@ def main() -> int:
         for source_expr, event_type in resolved_values:
             issues = _validate_event_type(event_type, domain_prefix=args.domain_prefix)
             warnings: list[str] = []
-            if doc_value and doc_value.lower() != event_type.strip().lower():
-                warnings.append(f"doc 'Domain event' mismatch: doc={doc_value!r} const={event_type!r}")
+            if doc_values and event_type.strip().lower() not in doc_values_lc:
+                warnings.append(f"doc 'Domain event' missing exact match: const={event_type!r} docs={doc_values!r}")
 
             rel = _to_posix(cs.relative_to(root))
             ok = not issues
@@ -222,4 +223,3 @@ if __name__ == "__main__":
     except Exception as exc:  # noqa: BLE001
         print(f"DOMAIN_CONTRACTS_CHECK status=fail error={exc}")
         raise SystemExit(2)
-
