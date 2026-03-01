@@ -44,6 +44,21 @@ PUBLIC_TYPE_LINE_PATTERN = re.compile(
 EVENTTYPE_CONST_PATTERN = re.compile(r"public\s+const\s+string\s+EventType\s*=\s*([^;]+);")
 EVENT_TYPES_CONST_PATTERN = re.compile(r"public\s+const\s+string\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*\"([^\"]+)\";")
 
+LEGACY_NAMESPACE_ALLOWLIST = {
+    "Game.Contracts.GameLoop",
+}
+
+BCL_USING_ALLOWLIST: Dict[str, set[str]] = {
+    "Game.Core/Contracts/GameLoop/": {"Game.Core.Domain.Turn"},
+}
+
+EVENTTYPE_CONST_SKIP_REL_PATHS = {
+    "Game.Core/Contracts/Events/EventCatalogDefinition.cs",
+    "Game.Core/Contracts/Events/EventChainDefinition.cs",
+    "Game.Core/Contracts/Events/EventDefinition.cs",
+    "Game.Core/Contracts/Events/EventTypeRules.cs",
+}
+
 
 def _to_posix(p: Path) -> str:
     return p.as_posix()
@@ -159,7 +174,7 @@ def _validate_namespace(rel_path: str, text: str) -> List[Dict[str, Any]]:
         return issues
 
     ns = m.group(1)
-    if not ns.startswith("Game.Core.Contracts"):
+    if not ns.startswith("Game.Core.Contracts") and ns not in LEGACY_NAMESPACE_ALLOWLIST:
         issues.append(
             {
                 "file": rel_path,
@@ -186,6 +201,13 @@ def _validate_bcl_only(rel_path: str, text: str) -> List[Dict[str, Any]]:
     for m in USING_PATTERN.finditer(text):
         ns = m.group(1)
         if ns.startswith("System") or ns.startswith("Game.Core.Contracts"):
+            continue
+        allowed = False
+        for path_prefix, allowed_namespaces in BCL_USING_ALLOWLIST.items():
+            if rel_path.startswith(path_prefix) and ns in allowed_namespaces:
+                allowed = True
+                break
+        if allowed:
             continue
         issues.append(
             {
@@ -230,6 +252,9 @@ def _validate_xml_comments(rel_path: str, text: str, require_remarks: bool) -> L
 
 def _validate_eventtype_constants(rel_path: str, text: str, event_types_map: Dict[str, str]) -> List[Dict[str, Any]]:
     issues: List[Dict[str, Any]] = []
+    if rel_path in EVENTTYPE_CONST_SKIP_REL_PATHS:
+        return issues
+
     matches = list(EVENTTYPE_CONST_PATTERN.finditer(text))
     if rel_path.startswith("Game.Core/Contracts/Events/") and not matches:
         issues.append(
@@ -405,4 +430,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())
-

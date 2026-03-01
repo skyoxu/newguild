@@ -4,6 +4,9 @@ namespace Game.Core.Contracts.Engine;
 /// Domain event: core.player.health.changed
 /// Published when player health changes due to damage or healing
 /// </summary>
+/// <remarks>
+/// Follows ADR-0004 event contracts for engine-level events.
+/// </remarks>
 public sealed record PlayerHealthChanged(
     int Health,
     int Delta

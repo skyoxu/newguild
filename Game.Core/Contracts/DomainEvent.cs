@@ -1,5 +1,11 @@
 namespace Game.Core.Contracts
 {
+    /// <summary>
+    /// Canonical CloudEvents-like envelope used by the domain event bus.
+    /// </summary>
+    /// <remarks>
+    /// This contract defines shared event metadata fields consumed by core and adapters.
+    /// </remarks>
     public record DomainEvent(
         string Type,
         string Source,

@@ -6,6 +6,8 @@ Engine for sc-llm-review.
 from __future__ import annotations
 
 import argparse
+import os
+import re
 import time
 from typing import Any
 
@@ -33,7 +35,111 @@ from _llm_review_prompting import (
 )
 from _security_profile import build_security_profile_context, resolve_security_profile, security_profile_payload
 from _taskmaster import resolve_triplet
-from _util import ci_dir, repo_root, write_json, write_text
+from _util import ci_dir, repo_root, split_csv, write_json, write_text
+
+
+_VERDICT_RE = re.compile(r"(?mi)^\s*(?:#+\s*)?Verdict\s*:\s*(OK|Needs Fix)\s*$")
+_DEFAULT_ADVISORY_NORMALIZATION_AGENTS = {
+    "architect-reviewer",
+    "semantic-equivalence-auditor",
+}
+_DEFAULT_HARD_NEEDS_FIX_TERMS = (
+    "deterministic gate failed",
+    "acceptance_status\": \"fail\"",
+    "status: fail",
+    "tests-all",
+    "untracked",
+    "missing file",
+    "build failed",
+    "compile failed",
+    "crash",
+    "exception",
+    "timeout",
+    "cannot be considered complete",
+)
+
+
+def _override_verdict(text: str, verdict: str) -> str:
+    replaced, count = _VERDICT_RE.subn(f"Verdict: {verdict}", str(text or ""))
+    if count > 0:
+        return replaced
+    base = str(text or "").rstrip()
+    return f"{base}\nVerdict: {verdict}\n" if base else f"Verdict: {verdict}\n"
+
+
+def _resolve_advisory_normalization_agents(args: argparse.Namespace) -> tuple[set[str], str]:
+    raw = str(args.advisory_normalization_agents or "").strip()
+    if raw:
+        return set(split_csv(raw)), "args"
+    env = str(os.environ.get("SC_LLM_REVIEW_ADVISORY_NORMALIZATION_AGENTS") or "").strip()
+    if env:
+        return set(split_csv(env)), "env"
+    return set(_DEFAULT_ADVISORY_NORMALIZATION_AGENTS), "default"
+
+
+def _resolve_hard_needs_fix_terms(args: argparse.Namespace) -> tuple[tuple[str, ...], str]:
+    raw = str(args.hard_needs_fix_terms or "").strip()
+    if raw:
+        return tuple(v.lower() for v in split_csv(raw)), "args"
+    env = str(os.environ.get("SC_LLM_REVIEW_HARD_NEEDS_FIX_TERMS") or "").strip()
+    if env:
+        return tuple(v.lower() for v in split_csv(env)), "env"
+    return tuple(_DEFAULT_HARD_NEEDS_FIX_TERMS), "default"
+
+
+def _contains_hard_needs_fix_signals(text: str, *, hard_terms: tuple[str, ...]) -> bool:
+    lower = str(text or "").lower()
+    for term in hard_terms:
+        if term in lower:
+            return True
+    return False
+
+
+def _is_advisory_only_needs_fix(*, agent: str, text: str, advisory_agents: set[str], hard_terms: tuple[str, ...]) -> bool:
+    if agent not in advisory_agents:
+        return False
+    if _contains_hard_needs_fix_signals(text, hard_terms=hard_terms):
+        return False
+    return True
+
+
+def _recompute_result_flags(
+    *,
+    results: list[ReviewResult],
+    semantic_gate: str,
+    prompt_budget_gate: str,
+    prompt_truncated_agents: list[str],
+) -> tuple[bool, bool]:
+    hard_fail = False
+    had_warnings = False
+
+    if prompt_truncated_agents and prompt_budget_gate in {"warn", "require"}:
+        had_warnings = True
+    if prompt_truncated_agents and prompt_budget_gate == "require":
+        hard_fail = True
+
+    semantic_agent = "semantic-equivalence-auditor"
+    for r in results:
+        if r.status == "fail":
+            hard_fail = True
+            had_warnings = True
+        elif r.status != "ok":
+            had_warnings = True
+
+        if r.agent in DETERMINISTIC_AGENTS:
+            verdict = str((r.details or {}).get("verdict") or "").strip()
+            if verdict and verdict != "OK":
+                had_warnings = True
+
+        if r.agent == semantic_agent:
+            verdict = str((r.details or {}).get("verdict") or "").strip()
+            if semantic_gate == "warn" and verdict != "OK":
+                had_warnings = True
+            if semantic_gate == "require" and verdict != "OK":
+                had_warnings = True
+                hard_fail = True
+
+    return hard_fail, had_warnings
 
 
 def _run_self_check(args: argparse.Namespace) -> int:
@@ -126,6 +232,8 @@ def main() -> int:
     claude_agents_root = resolve_claude_agents_root(args.claude_agents_root)
     security_profile = resolve_security_profile(args.security_profile)
     agents = resolve_agents(args.agents, str(args.semantic_gate or "skip").strip().lower())
+    advisory_agents, advisory_agents_source = _resolve_advisory_normalization_agents(args)
+    hard_needs_fix_terms, hard_terms_source = _resolve_hard_needs_fix_terms(args)
     per_agent_overrides = parse_agent_timeout_overrides(args.agent_timeouts)
     total_timeout_sec = int(args.timeout_sec)
     per_agent_timeout_sec = int(args.agent_timeout_sec)
@@ -311,6 +419,69 @@ def main() -> int:
             )
         )
 
+    # Stop-loss normalization:
+    # In warn mode, when deterministic acceptance is green, demote advisory-only
+    # Needs Fix for selected LLM reviewers to avoid repetitive per-task soft-review churn.
+    semantic_gate = str(args.semantic_gate or "skip").strip().lower()
+    acc_status = str((acceptance_meta or {}).get("acceptance_status") or "").strip().lower()
+    if semantic_gate == "warn" and acc_status == "ok":
+        for idx, item in enumerate(results):
+            if item.agent in DETERMINISTIC_AGENTS:
+                continue
+            verdict = str((item.details or {}).get("verdict") or "").strip()
+            if item.status != "ok" or verdict != "Needs Fix":
+                continue
+            if item.agent not in advisory_agents:
+                continue
+
+            output_text = ""
+            output_path = str(item.output_path or "").strip()
+            if output_path:
+                p = repo_root() / output_path
+                if p.is_file():
+                    output_text = p.read_text(encoding="utf-8", errors="ignore")
+            if not _is_advisory_only_needs_fix(
+                agent=item.agent,
+                text=output_text,
+                advisory_agents=advisory_agents,
+                hard_terms=hard_needs_fix_terms,
+            ):
+                continue
+
+            normalized = _override_verdict(
+                output_text
+                + "\n\nWarn-mode normalization:\n"
+                + "- acceptance_check is green; this Needs Fix is treated as advisory wording-strength guidance.\n",
+                "OK",
+            )
+            if output_path:
+                write_text(repo_root() / output_path, normalized)
+
+            new_details = dict(item.details or {})
+            new_details["verdict"] = "OK"
+            new_details["verdict_normalization"] = {
+                "demoted": True,
+                "reason": "advisory_only_under_warn_with_acceptance_ok",
+                "agent": item.agent,
+            }
+            results[idx] = ReviewResult(
+                agent=item.agent,
+                status=item.status,
+                rc=item.rc,
+                cmd=item.cmd,
+                output=item.output,
+                prompt_path=item.prompt_path,
+                output_path=item.output_path,
+                details=new_details,
+            )
+
+    hard_fail, had_warnings = _recompute_result_flags(
+        results=results,
+        semantic_gate=str(args.semantic_gate or "skip").strip().lower(),
+        prompt_budget_gate=str(args.prompt_budget_gate),
+        prompt_truncated_agents=prompt_truncated_agents,
+    )
+
     summary = summary_base(
         mode="uncommitted" if args.uncommitted else ("commit" if args.commit else "base"),
         out_dir=out_dir,
@@ -327,6 +498,12 @@ def main() -> int:
             "template_meta": template_meta,
             "acceptance_meta": acceptance_meta,
             "acceptance_semantic_meta": acceptance_semantic_meta,
+            "normalization_policy": {
+                "advisory_normalization_agents": sorted(advisory_agents),
+                "advisory_agents_source": advisory_agents_source,
+                "hard_needs_fix_terms": list(hard_needs_fix_terms),
+                "hard_needs_fix_terms_source": hard_terms_source,
+            },
             "results": [r.__dict__ for r in results],
             "prompt_budget": {
                 "max_chars": int(args.prompt_max_chars),

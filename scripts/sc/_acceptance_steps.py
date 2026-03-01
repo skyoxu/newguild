@@ -233,10 +233,36 @@ def step_architecture_boundary(out_dir: Path) -> StepResult:
 
 
 def step_build_warnaserror(out_dir: Path) -> StepResult:
+    root = repo_root()
+    target = (
+        (os.getenv("SC_BUILD_TARGET", "") or "").strip()
+        or next(
+            (
+                candidate
+                for candidate in [
+                    "Game.sln",
+                    "NewRouge.sln",
+                    "NewRouge.csproj",
+                ]
+                if (root / candidate).exists()
+            ),
+            "",
+        )
+    )
+    if not target:
+        return StepResult(
+            name="dotnet-build-warnaserror",
+            status="fail",
+            rc=2,
+            details={
+                "error": "no_build_target_found",
+                "hint": "Set SC_BUILD_TARGET or ensure one of Game.sln/NewRouge.sln/NewRouge.csproj exists.",
+            },
+        )
     return run_and_capture(
         out_dir,
         name="dotnet-build-warnaserror",
-        cmd=["py", "-3", "scripts/sc/build.py", "NewRouge.csproj", "--type", "dev"],
+        cmd=["py", "-3", "scripts/sc/build.py", target, "--type", "dev"],
         timeout_sec=1_800,
     )
 

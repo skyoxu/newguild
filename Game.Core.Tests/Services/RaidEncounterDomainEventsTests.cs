@@ -11,8 +11,9 @@ namespace Game.Core.Tests.Services;
 public sealed class RaidEncounterDomainEventsTests
 {
     // ACC:T17.2
+    // ACC:T51.1
     [Fact]
-    public void Start_Should_Enqueue_RaidScheduled_DomainEvent_With_Expected_Type_And_Data()
+    public void ShouldEnqueueRaidScheduledDomainEvent_WhenStart()
     {
         var now = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var time = new FixedTime(now);
@@ -38,10 +39,11 @@ public sealed class RaidEncounterDomainEventsTests
     }
 
     // ACC:T17.2
+    // ACC:T51.1
     [Theory]
     [InlineData(true, RaidResolved.ResultSuccess)]
     [InlineData(false, RaidResolved.ResultFailed)]
-    public void Completion_Or_Fail_Should_Enqueue_RaidResolved_DomainEvent_With_Result(bool successPath, string expectedResult)
+    public void ShouldEnqueueRaidResolvedDomainEvent_WhenCompleteOrFail(bool successPath, string expectedResult)
     {
         var now = new DateTimeOffset(2026, 1, 1, 0, 5, 0, TimeSpan.Zero);
         var time = new FixedTime(now);

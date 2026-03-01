@@ -2108,16 +2108,10 @@
     ],
     "description": "验证 Raid 从触发到结算反馈的闭环，包括结果可见、事件可观测与状态一致性。",
     "acceptance": [
-      "Raid 流程包含 scheduled→resolved 的完整事件链，成功/失败结果可区分。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
-      "UI 入口可触发一次遭遇并展示结果摘要，不依赖手工注入才能看到反馈。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
-      "Activity/Feed 中可观测到 raid 结果相关事件，避免接线缺失。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
-      "产出 logs/** 证据用于 CI 回归比对。 Refs: logs/e2e/<date>/playability-route7-summary.json",
-      "应完成：Playability 路线7：Raid 结算反馈闭环 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
-      "应有测试：至少包含并通过 test_refs 引用的测试（4 个）。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
-      "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.raid.scheduled, core.raid.resolved, core.game_turn.week_advanced）。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
-      "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
-      "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
-      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+      "Raid 流程必须形成 scheduled→resolved 单次闭环，success/failed 可区分；进入 resolved/failed 终态后不可继续推进或重复结算。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "UI 入口触发一次真实遭遇后必须展示结果摘要；当 demo 关闭（如 GD_ENABLE_PLAYABLE=0）时不得出现 resolved 摘要。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
+      "Activity/Feed 必须观察到 core.raid.resolved，并校验该次 resolved 载荷含 result 字段且与同次 UI 反馈一致；单次触发不得产生重复 resolved。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+      "必须产出可回放的 logs/** 证据，并校验 action/reason/target/caller 等审计字段完整。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd"
     ],
     "test_strategy": [
       "xUnit: verify raid state machine transitions and domain event emission deterministically.",
@@ -2128,7 +2122,7 @@
       "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
       "Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
       "Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
-      "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+      "Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd"
     ],
     "contractRefs": [
       "core.raid.scheduled",

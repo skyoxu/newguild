@@ -39,6 +39,7 @@ func _wait_for_screen(main: Node, expected_name: String, max_frames: int = 240) 
 	return null
 
 # ACC:T49.8
+# ACC:T51.3
 func test_phase2_demos_emit_events_and_show_in_activity_feed() -> void:
 	var main := await _spawn_main_on_root()
 	var nav := main.get_node_or_null("ScreenNavigator")
@@ -180,4 +181,3 @@ func test_phase2_hud_should_keep_xp_after_save_load_round_trip() -> void:
 	assert_int(second_observed_feed_text.length()).is_greater(before_second_save_load_feed.length())
 	assert_str(second_observed_feed_text).contains(EVENT_SAVE_REQUESTED)
 	assert_str(second_observed_feed_text).contains(EVENT_LOAD_REQUESTED)
-
