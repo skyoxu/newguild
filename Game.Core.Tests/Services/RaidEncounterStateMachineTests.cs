@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using FluentAssertions;
 using Game.Core.Contracts;
 using Game.Core.Contracts.Raid;
@@ -11,8 +12,10 @@ namespace Game.Core.Tests.Services;
 public sealed class RaidEncounterStateMachineTests
 {
     // ACC:T17.1
+    // ACC:T51.5
+    // ACC:T51.6
     [Fact]
-    public void RaidEncounterStateMachine_Should_Exist_And_Expose_Public_Api()
+    public void ShouldExposePublicApi_WhenTypeLoaded()
     {
         typeof(RaidEncounterStateMachine).IsPublic.Should().BeTrue();
         typeof(RaidEncounterStateMachine).GetMethod(nameof(RaidEncounterStateMachine.Start)).Should().NotBeNull();
@@ -23,7 +26,7 @@ public sealed class RaidEncounterStateMachineTests
 
     // ACC:T17.4
     [Fact]
-    public void RaidEncounterPhase_Should_Contain_Entering_Combat_And_Resolution_Semantics()
+    public void ShouldContainEncounterLifecyclePhases_WhenEnumeratingPhaseNames()
     {
         var names = Enum.GetNames(typeof(RaidEncounterPhase));
         names.Should().Contain(nameof(RaidEncounterPhase.Entering));
@@ -33,15 +36,16 @@ public sealed class RaidEncounterStateMachineTests
         names.Should().Contain(nameof(RaidEncounterPhase.Failed));
     }
 
+    // ACC:T51.7
     [Fact]
-    public void Raid_EventTypes_Should_Match_Expected()
+    public void ShouldMatchExpectedRaidEventTypes_WhenReadingConstants()
     {
         RaidScheduled.EventType.Should().Be("core.raid.scheduled");
         RaidResolved.EventType.Should().Be("core.raid.resolved");
     }
 
     [Fact]
-    public void DomainEvent_Defaults_Should_Be_Stable()
+    public void ShouldUseStableDomainEventDefaults_WhenConstructed()
     {
         var evt = new DomainEvent(
             Type: "core.test.event",
@@ -56,8 +60,9 @@ public sealed class RaidEncounterStateMachineTests
     }
 
     // ACC:T17.1
+    // ACC:T51.1
     [Fact]
-    public void RaidEncounterStateMachine_Should_Advance_Through_Phases_And_Reach_Completed()
+    public void ShouldReachCompletedAndEmitResolvedEvent_WhenAdvancingThroughAllPhases()
     {
         var sm = new RaidEncounterStateMachine(new FixedTime(DateTimeOffset.UnixEpoch), new SequenceIdGenerator("evt-1", "evt-2"));
         sm.Start(raidId: "raid-1", guildId: "guild-1", week: 1, encounterId: "enc-1");
@@ -84,8 +89,9 @@ public sealed class RaidEncounterStateMachineTests
     }
 
     // ACC:T17.4
+    // ACC:T51.1
     [Fact]
-    public void RaidEncounterStateMachine_Should_Allow_Fail_And_Stop_Advancing()
+    public void ShouldStopAdvancingAndEmitFailedResult_WhenFailCalled()
     {
         var sm = new RaidEncounterStateMachine(new FixedTime(DateTimeOffset.UnixEpoch), new SequenceIdGenerator("evt-1", "evt-2"));
         sm.Start(raidId: "raid-1", guildId: "guild-1", week: 1, encounterId: "enc-1");
@@ -105,8 +111,30 @@ public sealed class RaidEncounterStateMachineTests
         resolved.Data.Should().BeOfType<RaidResolved>().Which.RewardPoints.Should().Be(0);
     }
 
+    // ACC:T51.1
     [Fact]
-    public void Advance_Before_Start_Should_Throw()
+    public void ShouldNotEmitSecondResolvedEvent_WhenFailCalledAfterCompleted()
+    {
+        var sm = new RaidEncounterStateMachine(new FixedTime(DateTimeOffset.UnixEpoch), new SequenceIdGenerator("evt-1", "evt-2"));
+        sm.Start(raidId: "raid-1", guildId: "guild-1", week: 1, encounterId: "enc-1");
+        sm.DequeueEvents().Should().ContainSingle(e => e.Type == RaidScheduled.EventType);
+
+        sm.Advance().Should().BeTrue();
+        sm.Advance().Should().BeTrue();
+        sm.Advance().Should().BeTrue();
+        sm.Phase.Should().Be(RaidEncounterPhase.Completed);
+
+        var firstResolved = sm.DequeueEvents().Where(e => e.Type == RaidResolved.EventType).ToList();
+        firstResolved.Should().HaveCount(1);
+
+        sm.Fail().Should().BeFalse();
+        sm.Advance().Should().BeFalse();
+
+        sm.DequeueEvents().Should().NotContain(e => e.Type == RaidResolved.EventType);
+    }
+
+    [Fact]
+    public void ShouldThrowInvalidOperationException_WhenAdvanceBeforeStart()
     {
         var sm = new RaidEncounterStateMachine(new FixedTime(DateTimeOffset.UnixEpoch), new SequenceIdGenerator("evt-1"));
         var act = () => sm.Advance();
@@ -114,7 +142,7 @@ public sealed class RaidEncounterStateMachineTests
     }
 
     [Fact]
-    public void Fail_Before_Start_Should_Throw()
+    public void ShouldThrowInvalidOperationException_WhenFailBeforeStart()
     {
         var sm = new RaidEncounterStateMachine(new FixedTime(DateTimeOffset.UnixEpoch), new SequenceIdGenerator("evt-1"));
         var act = () => sm.Fail();
@@ -122,7 +150,7 @@ public sealed class RaidEncounterStateMachineTests
     }
 
     [Fact]
-    public void Start_With_Week_LessThanOne_Should_Throw()
+    public void ShouldThrowArgumentOutOfRangeException_WhenWeekLessThanOneOnStart()
     {
         var sm = new RaidEncounterStateMachine(new FixedTime(DateTimeOffset.UnixEpoch), new SequenceIdGenerator("evt-1"));
         var act = () => sm.Start(raidId: "raid-1", guildId: "guild-1", week: 0, encounterId: "enc-1");
@@ -132,7 +160,7 @@ public sealed class RaidEncounterStateMachineTests
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
-    public void Start_With_Invalid_RaidId_Should_Throw(string raidId)
+    public void ShouldThrowArgumentException_WhenRaidIdInvalidOnStart(string raidId)
     {
         var sm = new RaidEncounterStateMachine(new FixedTime(DateTimeOffset.UnixEpoch), new SequenceIdGenerator("evt-1"));
         var act = () => sm.Start(raidId: raidId, guildId: "guild-1", week: 1, encounterId: "enc-1");
@@ -142,17 +170,18 @@ public sealed class RaidEncounterStateMachineTests
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
-    public void Start_With_Invalid_GuildId_Should_Throw(string guildId)
+    public void ShouldThrowArgumentException_WhenGuildIdInvalidOnStart(string guildId)
     {
         var sm = new RaidEncounterStateMachine(new FixedTime(DateTimeOffset.UnixEpoch), new SequenceIdGenerator("evt-1"));
         var act = () => sm.Start(raidId: "raid-1", guildId: guildId, week: 1, encounterId: "enc-1");
         act.Should().Throw<ArgumentException>();
     }
 
+    // ACC:T51.10
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
-    public void Start_With_Invalid_EncounterId_Should_Throw(string encounterId)
+    public void ShouldThrowArgumentException_WhenEncounterIdInvalidOnStart(string encounterId)
     {
         var sm = new RaidEncounterStateMachine(new FixedTime(DateTimeOffset.UnixEpoch), new SequenceIdGenerator("evt-1"));
         var act = () => sm.Start(raidId: "raid-1", guildId: "guild-1", week: 1, encounterId: encounterId);

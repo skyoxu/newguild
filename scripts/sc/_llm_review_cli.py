@@ -40,6 +40,16 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--security-profile", default=None, choices=["strict", "host-safe"], help="Security review profile hint.")
     ap.add_argument("--claude-agents-root", default=None, help="Claude agents root path.")
     ap.add_argument("--skip-agent-prompts", action="store_true", help="Skip loading external agent prompt files.")
+    ap.add_argument(
+        "--advisory-normalization-agents",
+        default="",
+        help="Comma-separated agents eligible for advisory Needs Fix demotion in warn mode. Empty=engine defaults.",
+    )
+    ap.add_argument(
+        "--hard-needs-fix-terms",
+        default="",
+        help="Comma-separated hard-fail keywords that block advisory demotion. Empty=engine defaults.",
+    )
     ap.add_argument("--prompt-max-chars", type=int, default=32000, help="Max prompt chars per agent before truncation.")
     ap.add_argument(
         "--prompt-budget-gate",

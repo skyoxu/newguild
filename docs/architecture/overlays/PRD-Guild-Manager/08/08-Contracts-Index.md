@@ -89,6 +89,24 @@ ADR-Refs:
 - `core.media.beat.triggered` → `Game.Core/Contracts/Media/MediaBeatTriggered.cs`
 - `core.reputation.changed` → `Game.Core/Contracts/Media/ReputationChanged.cs`
 
+### Supplemental Contracts (DTO / Store / Utility)
+
+- `Game.Core/Contracts/Achievements/AchievementStateSnapshot.cs`
+- `Game.Core/Contracts/Achievements/AchievementStateSnapshotMigration.cs`
+- `Game.Core/Contracts/Achievements/IAchievementStateStore.cs`
+- `Game.Core/Contracts/Content/NpcGuildArchetypesLoaded.cs`
+- `Game.Core/Contracts/EventTypes.cs`
+- `Game.Core/Contracts/Events/EventTypeRules.cs`
+- `Game.Core/Contracts/Persistence/AutoSaveCompleted.cs`
+- `Game.Core/Contracts/Persistence/AutoSaveDisabled.cs`
+- `Game.Core/Contracts/Persistence/AutoSaveEnabled.cs`
+- `Game.Core/Contracts/Persistence/SaveDeleted.cs`
+- `Game.Core/Contracts/Progression/ExperienceSnapshotPayload.cs`
+- `Game.Core/Contracts/Security/SecurityAiLogPopupGateDecision.cs`
+- `Game.Core/Contracts/Security/SecuritySnapshotGateDecision.cs`
+- `Game.Core/Contracts/State/GameStateUpdated.cs`
+- `Game.Core/Contracts/UI/UiMenuEventTypes.cs`
+
 <!-- GENERATED_CONTRACTS_START -->
 
 ## 领域事件明细（自动生成，避免漂移）

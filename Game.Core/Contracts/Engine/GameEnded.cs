@@ -4,6 +4,9 @@ namespace Game.Core.Contracts.Engine;
 /// Domain event: core.game.ended
 /// Published when the game session ends
 /// </summary>
+/// <remarks>
+/// Follows ADR-0004 event contracts for engine-level events.
+/// </remarks>
 public sealed record GameEnded(
     int Score
 )

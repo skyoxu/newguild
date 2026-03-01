@@ -174,26 +174,41 @@ def run_gdunit_hard(
 
     add_dirs: list[str] = []
     tests_project = repo_root() / "Tests.Godot"
-    for rel in ["tests/Scenes", "tests/UI", "tests/Adapters/Config", "tests/Security/Hard"]:
-        if (tests_project / rel).exists():
-            add_dirs.append(rel)
-        elif (repo_root() / rel).exists():
-            # Backward-compatible fallback for repos that keep GdUnit suites at repo root.
-            add_dirs.append(rel)
-    # Task-specific acceptance suites (e.g., tests/Tasks/test_taskXXXX_acceptance.gd)
-    # should be included only when a concrete task id is being validated.
-    if str(task_id or "").strip():
+    task_scope = bool(str(task_id or "").strip())
+    if task_scope:
+        # Task mode: only execute task-scoped refs to avoid unrelated historical suite noise.
         rel = "tests/Tasks"
         if (tests_project / rel).exists():
             add_dirs.append(rel)
         elif (repo_root() / rel).exists():
             add_dirs.append(rel)
 
-        # Add task-scoped GdUnit refs from task views so acceptance-executed-refs
-        # can bind to real executed tests.
-        for rel_ref in _task_scoped_gdunit_refs(task_id=task_id, tests_project=tests_project):
+        scoped_refs = _task_scoped_gdunit_refs(task_id=task_id, tests_project=tests_project)
+        for rel_ref in scoped_refs:
             if rel_ref not in add_dirs:
                 add_dirs.append(rel_ref)
+        if not scoped_refs:
+            log_path = out_dir / "gdunit-hard.log"
+            write_text(
+                log_path,
+                "[sc-test] ERROR: no task-scoped gdunit refs resolved from tasks_back/tasks_gameplay test_refs.\n"
+                "Fix: ensure task test_refs contains existing .gd paths under Tests.Godot/tests/**.\n",
+            )
+            return {
+                "name": "gdunit-hard",
+                "cmd": [],
+                "rc": 2,
+                "log": str(log_path),
+                "report_dir": str(report_dir),
+                "error": "missing_task_scoped_gd_refs",
+            }
+    else:
+        for rel in ["tests/Scenes", "tests/UI", "tests/Adapters/Config", "tests/Security/Hard"]:
+            if (tests_project / rel).exists():
+                add_dirs.append(rel)
+            elif (repo_root() / rel).exists():
+                # Backward-compatible fallback for repos that keep GdUnit suites at repo root.
+                add_dirs.append(rel)
 
     cmd = [
         "py",
