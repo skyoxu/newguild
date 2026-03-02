@@ -72,3 +72,26 @@ Status: Proposed
   - 规则：仅允许 `[a-zA-Z0-9_-]`，长度 1–64，违反规则时抛出异常。
   - 契约位置：`Game.Core/Domain/Turn/SaveIdValue.cs`
   - 关联事件：`core.game_turn.started` / `core.game_turn.phase_changed` / `core.game_turn.week_advanced` 中的 `SaveId` 字段应基于该值对象生成，避免未经验证的输入进入事件与持久化层。
+
+## V1.1 Gameplay Depth Extended Event Contracts
+
+- **ActivityFeedAppended** (`core.activity.feed.appended`)
+  - Trigger: appended to activity feed after major gameplay event is committed.
+  - Fields: `FeedEntryId`, `GuildId`, `SourceEventType`, `Message`, `AppendedAt`.
+  - Contract: `Game.Core/Contracts/Activity/ActivityFeedAppended.cs`
+- **WorldBossEntered** (`core.worldboss.entered`)
+  - Trigger: guild enters world-boss encounter for a specific week.
+  - Fields: `EncounterId`, `GuildId`, `Week`, `EnteredAt`.
+  - Contract: `Game.Core/Contracts/WorldBoss/WorldBossEntered.cs`
+- **WorldBossResolved** (`core.worldboss.resolved`)
+  - Trigger: world-boss encounter is resolved with result and rewards.
+  - Fields: `EncounterId`, `GuildId`, `Week`, `Result`, `RewardPoints`, `ResolvedAt`.
+  - Contract: `Game.Core/Contracts/WorldBoss/WorldBossResolved.cs`
+- **PvpMatchStarted** (`core.pvp.match.started`)
+  - Trigger: PVP match starts after matchmaking is accepted.
+  - Fields: `MatchId`, `GuildId`, `OpponentGuildId`, `Week`, `StartedAt`.
+  - Contract: `Game.Core/Contracts/Pvp/PvpMatchStarted.cs`
+- **PvpMatchResolved** (`core.pvp.match.resolved`)
+  - Trigger: PVP match reaches a terminal state and rating update is produced.
+  - Fields: `MatchId`, `GuildId`, `OpponentGuildId`, `Result`, `RatingDelta`, `ResolvedAt`.
+  - Contract: `Game.Core/Contracts/Pvp/PvpMatchResolved.cs`

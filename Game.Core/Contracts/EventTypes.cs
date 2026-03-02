@@ -66,6 +66,11 @@ public static class EventTypes
     public const string StatusStacked = "core.status.stacked";
     public const string TraceabilityChecked = "core.traceability.checked";
     public const string GuildMemberJoined = "core.guild.member.joined";
+    public const string ActivityFeedAppended = "core.activity.feed.appended";
+    public const string WorldBossEntered = "core.worldboss.entered";
+    public const string WorldBossResolved = "core.worldboss.resolved";
+    public const string PvpMatchStarted = "core.pvp.match.started";
+    public const string PvpMatchResolved = "core.pvp.match.resolved";
     public const string ScoreUpdated = "core.score.updated";
     public const string HealthUpdated = "core.health.updated";
 }

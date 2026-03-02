@@ -1,0 +1,95 @@
+nextplan.txt（假设态：S1-S6 已全部完成，更新于 2026-03-02）
+
+说明
+- 本文是“目标态模拟”，用于判断项目阶段与下一阶段任务，不代表当前仓库自动完成了 S1-S6。
+- 判定前提：S1-S6 全部通过 red-first -> green -> refactor -> acceptance_check -> llm_review，且 logs/ci 与 logs/e2e 证据齐全。
+
+一、阶段判定（你关心的核心结论）
+- 假设 S1-S6 全部完成后，项目阶段将从“补洞治理阶段”进入：
+  - PRD-GUILD-MANAGER V1 功能闭环完成（Feature Complete）阶段
+  - 随后进入 V1.1 稳定性与发布就绪（Stabilization & Release Readiness）阶段
+
+二、对照原 nextplan 1-21 条目的目标完成态
+状态统一为 Done（按 A-G 分组）：
+
+A. 核心循环与阶段（1-3） -> Done
+- 1) 最小可玩循环验收（MainMenu -> NewGame -> Week1->2 -> BackToMenu）完成
+- 2) 两周推进稳定性（Week1->3）完成
+- 3) critical deadline 自动处理闭环完成
+
+B. 邮件与日常管理（4-5） -> Done
+- 4) mailbox triage/filter/quick action 完成
+- 5) mailbox 与决策链路回写完成
+
+C. 六大模块（6-11） -> Done
+- 6) Guild WorkPanel 刷新闭环完成
+- 7) Raid Hall 运行与结算反馈闭环完成
+- 8) TacticalCenter 组合与持久化完成
+- 9) Members roster 状态变化与持久化完成
+- 10) Forum/Streaming 事件后反馈闭环完成
+- 11) Logistics 交易与预算联动完成
+
+D. UI 规格与可用性（12-13） -> Done
+- 12) 导航一致性与 backstack 完成
+- 13) modal/context menu/ESC 输入不卡死完成
+
+E. Meta 系统（14-17） -> Done
+- 14) XP/Level 可视化增长与持久化完成
+- 15) Achievement 解锁展示与持久化完成
+- 16) Ranking 周更/活动后更新完成
+- 17) 数据管理 export/import/reset 护栏完成
+
+F. Endgame（18-19） -> Done（入口可用 + 结果可观测）
+- 18) WorldBoss 入口与结算 stub 闭环完成
+- 19) PVP 入口与匹配结算 stub 闭环完成
+
+G. 安全/离线/可观测（20-21） -> Done
+- 20) GD_OFFLINE_MODE=1 下可玩且有审计证据完成
+- 21) ActivityFeed 对关键事件可观测性完成
+
+结论：
+- 原 nextplan 的“补洞清单”在该假设态下归零。
+
+三、下一阶段任务集（V1.1）大致描述（对应已完成 nextplan 内容）
+目标：从“功能能跑”转向“稳定、可发布、可持续迭代”。
+
+N1. 回归稳定性与去脆弱化（Flaky Reduction）
+- 对应原 nextplan：A-G 全域（横切）
+- 重点：清理 GdUnit 定时等待脆弱点、提升 headless 可重复性、收敛 nondeterministic case。
+- 交付：flaky 基线清单 + 逐周压降目标 + 稳定性回归报告。
+
+N2. 性能与容量硬门升级
+- 对应原 nextplan：A/C/F（主循环、模块交互、终局入口）
+- 重点：把当前软门指标收敛成可发布硬门（帧耗时、加载时延、关键路径性能）。
+- 交付：性能预算文件、场景基准、回归曲线。
+
+N3. 内容与数值平衡（Balance Pass）
+- 对应原 nextplan：C/E/F
+- 重点：Raid/招募/经济/声望/成长曲线调参与日志可解释性。
+- 交付：平衡参数表、对局样本统计、调参变更说明。
+
+N4. 发布与运维就绪（Release Readiness）
+- 对应原 nextplan：G + 全域门禁
+- 重点：发布流水线固化、崩溃率门禁、版本回溯、工件归档策略。
+- 交付：RC 清单、发布 Checklist、回滚演练记录。
+
+N5. 数据与存档演进策略（Schema Evolution）
+- 对应原 nextplan：E/F/G
+- 重点：存档 schemaVersion 演进、兼容迁移、损坏恢复和降级策略。
+- 交付：迁移矩阵、跨版本回放测试集、异常恢复用例。
+
+N6. 可维护性与任务治理自动化
+- 对应原 nextplan：A-G 全域
+- 重点：task/acceptance/test refs 的自动体检、差异审计与 PR 机器人提示。
+- 交付：治理脚本、规则白名单、CI 诊断摘要模板。
+
+四、里程碑（假设态下推荐）
+1) M-Feature-Complete：原 nextplan 1-21 全部 Done，门禁全绿。
+2) M-RC：稳定性/性能/数据迁移门禁达标，进入候选发布。
+3) M-GA：完成发布与回滚演练，具备正式发布条件。
+
+五、进入 V1.1 阶段的硬门（建议）
+- 必须：acceptance_check 全绿（含 subtasks coverage require）
+- 必须：llm_review 至少 warn 且无硬阻断项
+- 必须：unit/godot headless 回归持续绿灯
+- 必须：关键证据工件可回放（logs/ci 与 logs/e2e）

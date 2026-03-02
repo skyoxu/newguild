@@ -72,6 +72,79 @@
     "artifactRefs": []
   },
   {
+    "id": "GM-0102",
+    "story_id": "PRD-GUILD-MANAGER-CORE-AI-COORDINATOR",
+    "title": "实现 AI 协调器（AICoordinator）管理 NPC 公会与成员行为",
+    "description": "在 Game.Core 中实现 AICoordinator（或等价组件），负责管理 NPC 公会和成员 AI：处理 AI 周期、关系网络更新、冲突解决与 AI 事件生成，并通过接口向 EventEngine 与 Godot 适配层暴露能力，支撑 PRD-Guild-Manager 中“生态模拟与多主体 AI”要求。",
+    "status": "done",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "GM-0201"
+    ],
+    "adr_refs": [
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0007",
+      "ADR-0005",
+      "ADR-0015"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-AI-Coordinator.md"
+    ],
+    "labels": [
+      "core",
+      "ai",
+      "simulation",
+      "guild"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core.Tests/Domain/AICoordinatorTests.cs",
+      "Game.Core.Tests/Domain/EventEngineTests.cs",
+      "Game.Core.Tests/Domain/AICoordinatorPerformanceTests.cs",
+      "Game.Core.Tests/Services/AICoordinatorConcurrencyTests.cs"
+    ],
+    "acceptance": [
+      "Game.Core 中存在 AICoordinator 类（或等价服务），负责在每个 AI 周期内驱动 NPC 公会与成员行为（决策、关系更新、事件生成）。 Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs",
+      "AICoordinator 对外暴露用于集成的接口（如 GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs",
+      "xUnit 测试涵盖基本 AI 行为（例如简单策略下的成员状态变化）、冲突场景（多个 NPC 目标冲突）以及性能边界（在模拟大量 NPC 时仍保持可接受性能）。 Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs Game.Core.Tests/Domain/AICoordinatorPerformanceTests.cs",
+      "如采用多线程/ThreadPool 优化 AI 计算，AICoordinator 提供线程安全保证，并在测试中验证无竞态条件。 Refs: Game.Core.Tests/Services/AICoordinatorConcurrencyTests.cs Game.Core.Tests/Domain/AICoordinatorTests.cs"
+    ],
+    "test_strategy": [
+      "为小规模 NPC 集合设计 AI 周期测试，用 xUnit 验证行为决策与状态更新是否符合 PRD 中定义的规则。",
+      "构造典型冲突场景（例如资源争抢、公会关系冲突），验证 AICoordinator 能生成合理事件并与 EventEngine 协同处理。",
+      "在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。"
+    ],
+    "taskmaster_exported": true,
+    "taskmaster_id": 16,
+    "contractRefs": [
+      "core.ai.cycle.completed",
+      "core.ai.cycle.started",
+      "core.ai.intent.issued",
+      "core.game_turn.phase_changed"
+    ],
+    "artifactRefs": []
+  },
+  {
     "id": "GM-0103",
     "story_id": "PRD-GUILD-MANAGER-CORE-GAME-LOOP",
     "title": "实现公会管理器核心回合循环与时间推进（Game Loop）",
@@ -142,6 +215,76 @@
       "core.game_turn.phase_changed",
       "core.game_turn.started",
       "core.game_turn.week_advanced"
+    ],
+    "artifactRefs": []
+  },
+  {
+    "id": "GM-0201",
+    "story_id": "PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM",
+    "title": "T3 NPC Guild Ecosystem (AI Ecosystem)",
+    "description": "Minimal NPC guild ecosystem loop: AIEcosystem generates deterministic behavior under turn progression and emits domain events.",
+    "status": "done",
+    "priority": "P2",
+    "layer": "core",
+    "depends_on": [
+      "GM-0203"
+    ],
+    "adr_refs": [
+      "ADR-0018",
+      "ADR-0004",
+      "ADR-0007",
+      "ADR-0005",
+      "ADR-0015"
+    ],
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-AI-Ecosystem.md"
+    ],
+    "labels": [
+      "core",
+      "ai",
+      "simulation",
+      "npc",
+      "guild"
+    ],
+    "owner": "architecture",
+    "test_refs": [
+      "Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
+      "Game.Core.Tests/Contracts/DomainEventTests.cs"
+    ],
+    "acceptance": [
+      "Game.Core provides AIEcosystem driven by turn progression and is reproducible (fixed seed or deterministic input). Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
+      "Emits at least 3 observable behaviors as domain events (core.guild.member.joined / core.guild.member.left / core.ai.ecosystem.step.completed) and complies with ADR-0004. Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs Game.Core.Tests/Contracts/DomainEventTests.cs",
+      "Clear boundaries: core logic does not depend on Godot APIs; time/id sources are injectable. Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
+      "xUnit coverage: determinism, event types/counts, and boundaries (empty/full/no-candidates). Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit: fixed time + fixed id generator + fixed seed; assert deterministic event sequences and positive join/leave cases.",
+      "If a playable demo is needed later: render an event summary in a Godot scene (demo-only, not the sole acceptance)."
+    ],
+    "taskmaster_id": 15,
+    "taskmaster_exported": true,
+    "contractRefs": [
+      "core.ai.ecosystem.step.completed",
+      "core.guild.member.joined",
+      "core.guild.member.left"
     ],
     "artifactRefs": []
   },
@@ -281,149 +424,6 @@
       "core.guild.member.joined",
       "core.recruitment.offer.presented",
       "core.recruitment.offer.resolved"
-    ],
-    "artifactRefs": []
-  },
-  {
-    "id": "GM-0201",
-    "story_id": "PRD-GUILD-MANAGER-T3-AI-ECOSYSTEM",
-    "title": "T3 NPC Guild Ecosystem (AI Ecosystem)",
-    "description": "Minimal NPC guild ecosystem loop: AIEcosystem generates deterministic behavior under turn progression and emits domain events.",
-    "status": "done",
-    "priority": "P2",
-    "layer": "core",
-    "depends_on": [
-      "GM-0203"
-    ],
-    "adr_refs": [
-      "ADR-0018",
-      "ADR-0004",
-      "ADR-0007",
-      "ADR-0005",
-      "ADR-0015"
-    ],
-    "chapter_refs": [
-      "CH01",
-      "CH04",
-      "CH05",
-      "CH06",
-      "CH07",
-      "CH09"
-    ],
-    "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-AI-Ecosystem.md"
-    ],
-    "labels": [
-      "core",
-      "ai",
-      "simulation",
-      "npc",
-      "guild"
-    ],
-    "owner": "architecture",
-    "test_refs": [
-      "Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
-      "Game.Core.Tests/Contracts/DomainEventTests.cs"
-    ],
-    "acceptance": [
-      "Game.Core provides AIEcosystem driven by turn progression and is reproducible (fixed seed or deterministic input). Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
-      "Emits at least 3 observable behaviors as domain events (core.guild.member.joined / core.guild.member.left / core.ai.ecosystem.step.completed) and complies with ADR-0004. Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs Game.Core.Tests/Contracts/DomainEventTests.cs",
-      "Clear boundaries: core logic does not depend on Godot APIs; time/id sources are injectable. Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs",
-      "xUnit coverage: determinism, event types/counts, and boundaries (empty/full/no-candidates). Refs: Game.Core.Tests/Services/AIEcosystemDeterminismAndEventsTests.cs"
-    ],
-    "test_strategy": [
-      "xUnit: fixed time + fixed id generator + fixed seed; assert deterministic event sequences and positive join/leave cases.",
-      "If a playable demo is needed later: render an event summary in a Godot scene (demo-only, not the sole acceptance)."
-    ],
-    "taskmaster_id": 15,
-    "taskmaster_exported": true,
-    "contractRefs": [
-      "core.ai.ecosystem.step.completed",
-      "core.guild.member.joined",
-      "core.guild.member.left"
-    ],
-    "artifactRefs": []
-  },
-  {
-    "id": "GM-0102",
-    "story_id": "PRD-GUILD-MANAGER-CORE-AI-COORDINATOR",
-    "title": "实现 AI 协调器（AICoordinator）管理 NPC 公会与成员行为",
-    "description": "在 Game.Core 中实现 AICoordinator（或等价组件），负责管理 NPC 公会和成员 AI：处理 AI 周期、关系网络更新、冲突解决与 AI 事件生成，并通过接口向 EventEngine 与 Godot 适配层暴露能力，支撑 PRD-Guild-Manager 中“生态模拟与多主体 AI”要求。",
-    "status": "done",
-    "priority": "P2",
-    "layer": "core",
-    "depends_on": [
-      "GM-0201"
-    ],
-    "adr_refs": [
-      "ADR-0018",
-      "ADR-0004",
-      "ADR-0007",
-      "ADR-0005",
-      "ADR-0015"
-    ],
-    "chapter_refs": [
-      "CH01",
-      "CH04",
-      "CH05",
-      "CH06",
-      "CH07",
-      "CH09"
-    ],
-    "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-AI-Coordinator.md"
-    ],
-    "labels": [
-      "core",
-      "ai",
-      "simulation",
-      "guild"
-    ],
-    "owner": "architecture",
-    "test_refs": [
-      "Game.Core.Tests/Domain/AICoordinatorTests.cs",
-      "Game.Core.Tests/Domain/EventEngineTests.cs",
-      "Game.Core.Tests/Domain/AICoordinatorPerformanceTests.cs",
-      "Game.Core.Tests/Services/AICoordinatorConcurrencyTests.cs"
-    ],
-    "acceptance": [
-      "Game.Core 中存在 AICoordinator 类（或等价服务），负责在每个 AI 周期内驱动 NPC 公会与成员行为（决策、关系更新、事件生成）。 Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs",
-      "AICoordinator 对外暴露用于集成的接口（如 GenerateAiEvents），供 EventEngine 或 Godot 适配层调用。 Refs: Game.Core.Tests/Domain/EventEngineTests.cs",
-      "xUnit 测试涵盖基本 AI 行为（例如简单策略下的成员状态变化）、冲突场景（多个 NPC 目标冲突）以及性能边界（在模拟大量 NPC 时仍保持可接受性能）。 Refs: Game.Core.Tests/Domain/AICoordinatorTests.cs Game.Core.Tests/Domain/AICoordinatorPerformanceTests.cs",
-      "如采用多线程/ThreadPool 优化 AI 计算，AICoordinator 提供线程安全保证，并在测试中验证无竞态条件。 Refs: Game.Core.Tests/Services/AICoordinatorConcurrencyTests.cs Game.Core.Tests/Domain/AICoordinatorTests.cs"
-    ],
-    "test_strategy": [
-      "为小规模 NPC 集合设计 AI 周期测试，用 xUnit 验证行为决策与状态更新是否符合 PRD 中定义的规则。",
-      "构造典型冲突场景（例如资源争抢、公会关系冲突），验证 AICoordinator 能生成合理事件并与 EventEngine 协同处理。",
-      "在测试环境中逐步增加 NPC 数量，测量 AICoordinator 的执行时间，以便后续与 ADR-0015 的性能预算对齐。"
-    ],
-    "taskmaster_exported": true,
-    "taskmaster_id": 16,
-    "contractRefs": [
-      "core.ai.cycle.completed",
-      "core.ai.cycle.started",
-      "core.ai.intent.issued",
-      "core.game_turn.phase_changed"
     ],
     "artifactRefs": []
   },
@@ -2131,6 +2131,2097 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route7-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0322",
+    "taskmaster_id": 58,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法：招募到入会闭环调参与反馈（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "recruitment",
+      "balance",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T58",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+    ],
+    "depends_on": [
+      "GM-0321"
+    ],
+    "description": "强化申请-审批-入会闭环的平衡与可观测反馈。",
+    "acceptance": [
+      "ACC:T58.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+      "ACC:T58.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+      "ACC:T58.3 产出 logs/e2e/<date>/playability-route58-A-summary.json。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor)."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs"
+    ],
+    "contractRefs": [
+      "core.recruitment.offer.presented",
+      "core.recruitment.offer.resolved",
+      "core.guild.member.joined",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route58-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0323",
+    "taskmaster_id": 59,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法：Raid 结果驱动成长与排名联动（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "raid",
+      "balance",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T59",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+    ],
+    "depends_on": [
+      "GM-0322"
+    ],
+    "description": "统一 raid 结果与 XP/Reputation/Score 联动，避免跨次污染。",
+    "acceptance": [
+      "ACC:T59.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T59.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T59.3 产出 logs/e2e/<date>/playability-route59-A-summary.json。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor)."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs"
+    ],
+    "contractRefs": [
+      "core.raid.scheduled",
+      "core.raid.resolved",
+      "core.experience.changed",
+      "core.score.changed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route59-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0324",
+    "taskmaster_id": 60,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法：两周循环与存档回放一致性（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "save-load",
+      "regression",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T60",
+    "chapter_refs": [
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md"
+    ],
+    "depends_on": [
+      "GM-0323"
+    ],
+    "description": "在两周主循环下验证 save/load/replay 一致性。",
+    "acceptance": [
+      "ACC:T60.1 R2-A阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T60.2 R2-A阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T60.3 产出 logs/e2e/<date>/playability-route60-R2-A-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor)."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "contractRefs": [
+      "core.game_turn.week_advanced",
+      "core.save.requested",
+      "core.save.completed",
+      "core.load.requested",
+      "core.load.completed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route60-R2-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0325",
+    "taskmaster_id": 67,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：招募链路边界与异常分支（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "recruitment",
+      "depth-pass",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T67",
+    "chapter_refs": [
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+    ],
+    "depends_on": [
+      "GM-0324"
+    ],
+    "description": "补齐申请-审批-入会的异常分支与边界条件，避免重复入会和状态脏写。",
+    "acceptance": [
+      "ACC:T67.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+      "ACC:T67.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+      "ACC:T67.3 产出 logs/e2e/<date>/playability-route67-R2-A-summary.json。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs"
+    ],
+    "contractRefs": [
+      "core.recruitment.offer.presented",
+      "core.recruitment.offer.resolved",
+      "core.guild.member.joined",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route67-R2-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0326",
+    "taskmaster_id": 68,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：成员管理状态机与角色变更（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "members",
+      "depth-pass",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T68",
+    "chapter_refs": [
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md"
+    ],
+    "depends_on": [
+      "GM-0325"
+    ],
+    "description": "强化成员加入/离开/角色变更状态机，保证同一成员生命周期一致性。",
+    "acceptance": [
+      "ACC:T68.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs",
+      "ACC:T68.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs",
+      "ACC:T68.3 产出 logs/e2e/<date>/playability-route68-R2-A-summary.json。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Domain/GuildRosterServiceTests.cs"
+    ],
+    "contractRefs": [
+      "core.guild.member.joined",
+      "core.guild.member.left",
+      "core.guild.member.role_changed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route68-R2-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0327",
+    "taskmaster_id": 69,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：Raid 进阶规则与结果可解释性（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "raid",
+      "depth-pass",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T69",
+    "chapter_refs": [
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+    ],
+    "depends_on": [
+      "GM-0326"
+    ],
+    "description": "增强 raid 进阶规则与结果解释，确保 resolved 结果可追溯且无重复结算。",
+    "acceptance": [
+      "ACC:T69.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+      "ACC:T69.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+      "ACC:T69.3 产出 logs/e2e/<date>/playability-route69-R2-A-summary.json。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+    ],
+    "contractRefs": [
+      "core.raid.scheduled",
+      "core.raid.resolved",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route69-R2-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0328",
+    "taskmaster_id": 70,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：经济与后勤联动闭环（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "economy",
+      "depth-pass",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T70",
+    "chapter_refs": [
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md"
+    ],
+    "depends_on": [
+      "GM-0327"
+    ],
+    "description": "收敛资源消耗、收益回写与存档一致性，防止周推进后账目漂移。",
+    "acceptance": [
+      "ACC:T70.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+      "ACC:T70.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+      "ACC:T70.3 产出 logs/e2e/<date>/playability-route70-R2-A-summary.json。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs"
+    ],
+    "contractRefs": [
+      "core.score.changed",
+      "core.save.requested",
+      "core.save.completed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route70-R2-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0329",
+    "taskmaster_id": 71,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：媒体事件与声望反馈闭环（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "media",
+      "reputation",
+      "depth-pass",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T71",
+    "chapter_refs": [
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md"
+    ],
+    "depends_on": [
+      "GM-0328"
+    ],
+    "description": "强化媒体触发到声望变化的反馈路径，保证 UI 与领域结果一致。",
+    "acceptance": [
+      "ACC:T71.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Domain/ReputationTests.cs",
+      "ACC:T71.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/ReputationTests.cs",
+      "ACC:T71.3 产出 logs/e2e/<date>/playability-route71-R2-A-summary.json。 Refs: Game.Core.Tests/Domain/ReputationTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Domain/ReputationTests.cs"
+    ],
+    "contractRefs": [
+      "core.media.beat.triggered",
+      "core.reputation.changed",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route71-R2-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0330",
+    "taskmaster_id": 72,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法扩展：WorldBoss 从入口到可玩闭环（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "worldboss",
+      "expansion",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T72",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+    ],
+    "depends_on": [
+      "GM-0329"
+    ],
+    "description": "将 worldboss 从 stub 提升为可玩闭环，补齐入口、结算与回写证据。",
+    "acceptance": [
+      "ACC:T72.1 分解阶段A范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd",
+      "ACC:T72.2 分解阶段A关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd",
+      "ACC:T72.3 产出 logs/e2e/<date>/playability-route72-A-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd"
+    ],
+    "contractRefs": [
+      "core.worldboss.entered",
+      "core.worldboss.resolved",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route72-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0331",
+    "taskmaster_id": 73,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法扩展：PVP 从入口到匹配结算（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "pvp",
+      "expansion",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T73",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md"
+    ],
+    "depends_on": [
+      "GM-0330"
+    ],
+    "description": "将 pvp 从 stub 提升为可验收路径，补齐匹配、结果与回写闭环。",
+    "acceptance": [
+      "ACC:T73.1 分解阶段A范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T73.2 分解阶段A关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T73.3 产出 logs/e2e/<date>/playability-route73-A-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "contractRefs": [
+      "core.pvp.match.started",
+      "core.pvp.match.resolved",
+      "core.score.changed",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route73-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0332",
+    "taskmaster_id": 74,
+    "taskmaster_exported": true,
+    "title": "V1.1 平衡治理：玩法遥测与数值调参闭环（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "balance",
+      "telemetry",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T74",
+    "chapter_refs": [
+      "CH01",
+      "CH03",
+      "CH04",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md"
+    ],
+    "depends_on": [
+      "GM-0331"
+    ],
+    "description": "建立玩法平衡遥测闭环，支持参数调优与回归判定。",
+    "acceptance": [
+      "ACC:T74.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T74.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T74.3 产出 logs/e2e/<date>/playability-route74-A-summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "contractRefs": [
+      "core.activity.feed.appended",
+      "core.raid.resolved",
+      "core.reputation.changed",
+      "core.score.changed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route74-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0333",
+    "taskmaster_id": 75,
+    "taskmaster_exported": true,
+    "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "regression",
+      "release-readiness",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T75",
+    "chapter_refs": [
+      "CH03",
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0004",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "GM-0332"
+    ],
+    "description": "执行玩法全链路回归，形成可发布验收证据包。",
+    "acceptance": [
+      "ACC:T75.1 R2-A阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T75.2 R2-A阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T75.3 产出 logs/e2e/<date>/playability-route75-R2-A-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "contractRefs": [
+      "core.game_turn.week_advanced",
+      "core.raid.resolved",
+      "core.save.requested",
+      "core.load.requested",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route75-R2-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0334",
+    "taskmaster_id": 76,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法：招募到入会闭环调参与反馈（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T76",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+    ],
+    "depends_on": [
+      "GM-0333"
+    ],
+    "description": "承接 V1.1 玩法：招募到入会闭环调参与反馈 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T76.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+      "ACC:T76.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+      "ACC:T76.3 产出 logs/e2e/<date>/playability-route76-B-summary.json。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+    ],
+    "contractRefs": [
+      "core.recruitment.offer.presented",
+      "core.recruitment.offer.resolved",
+      "core.guild.member.joined",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route76-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0335",
+    "taskmaster_id": 77,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法：Raid 结果驱动成长与排名联动（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T77",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+    ],
+    "depends_on": [
+      "GM-0334"
+    ],
+    "description": "承接 V1.1 玩法：Raid 结果驱动成长与排名联动 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T77.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "ACC:T77.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "ACC:T77.3 产出 logs/e2e/<date>/playability-route77-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+    ],
+    "contractRefs": [
+      "core.raid.resolved",
+      "core.experience.changed",
+      "core.score.changed",
+      "core.reputation.changed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route77-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0336",
+    "taskmaster_id": 78,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法：两周循环与存档回放一致性（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T78",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md"
+    ],
+    "depends_on": [
+      "GM-0335"
+    ],
+    "description": "承接 V1.1 玩法：两周循环与存档回放一致性 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T78.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T78.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T78.3 产出 logs/e2e/<date>/playability-route78-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "contractRefs": [
+      "core.game_turn.week_advanced",
+      "core.save.requested",
+      "core.load.requested",
+      "core.raid.resolved"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route78-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0337",
+    "taskmaster_id": 81,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：招募链路边界与异常分支（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T81",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+    ],
+    "depends_on": [
+      "GM-0336"
+    ],
+    "description": "承接 V1.1 玩法深度：招募链路边界与异常分支 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T81.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+      "ACC:T81.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+      "ACC:T81.3 产出 logs/e2e/<date>/playability-route81-B-summary.json。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+    ],
+    "contractRefs": [
+      "core.recruitment.offer.presented",
+      "core.recruitment.offer.resolved",
+      "core.guild.member.joined",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route81-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0338",
+    "taskmaster_id": 82,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：成员管理状态机与角色变更（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T82",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md"
+    ],
+    "depends_on": [
+      "GM-0337"
+    ],
+    "description": "承接 V1.1 玩法深度：成员管理状态机与角色变更 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T82.1 分解阶段B范围完成且可验证。 Refs: Game.Core.Tests/Domain/GuildMemberTests.cs",
+      "ACC:T82.2 分解阶段B关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/GuildMemberTests.cs",
+      "ACC:T82.3 产出 logs/e2e/<date>/playability-route82-B-summary.json。 Refs: Game.Core.Tests/Domain/GuildMemberTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Domain/GuildMemberTests.cs"
+    ],
+    "contractRefs": [
+      "core.guild.member.joined",
+      "core.guild.member.left",
+      "core.guild.member.role_changed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route82-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0339",
+    "taskmaster_id": 83,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：Raid 进阶规则与结果可解释性（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T83",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+    ],
+    "depends_on": [
+      "GM-0338"
+    ],
+    "description": "承接 V1.1 玩法深度：Raid 进阶规则与结果可解释性 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T83.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+      "ACC:T83.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+      "ACC:T83.3 产出 logs/e2e/<date>/playability-route83-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+    ],
+    "contractRefs": [
+      "core.raid.scheduled",
+      "core.raid.resolved",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route83-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0340",
+    "taskmaster_id": 84,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：经济与后勤联动闭环（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T84",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md"
+    ],
+    "depends_on": [
+      "GM-0339"
+    ],
+    "description": "承接 V1.1 玩法深度：经济与后勤联动闭环 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T84.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+      "ACC:T84.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+      "ACC:T84.3 产出 logs/e2e/<date>/playability-route84-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+    ],
+    "contractRefs": [
+      "core.score.changed",
+      "core.save.requested",
+      "core.load.requested"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route84-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0341",
+    "taskmaster_id": 85,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：媒体事件与声望反馈闭环（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T85",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md"
+    ],
+    "depends_on": [
+      "GM-0340"
+    ],
+    "description": "承接 V1.1 玩法深度：媒体事件与声望反馈闭环 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T85.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd",
+      "ACC:T85.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd",
+      "ACC:T85.3 产出 logs/e2e/<date>/playability-route85-B-summary.json。 Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_hud_reputation_display.gd",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+    ],
+    "contractRefs": [
+      "core.media.beat.triggered",
+      "core.reputation.changed",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route85-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0342",
+    "taskmaster_id": 86,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法扩展：WorldBoss 从入口到可玩闭环（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T86",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+    ],
+    "depends_on": [
+      "GM-0341"
+    ],
+    "description": "承接 V1.1 玩法扩展：WorldBoss 从入口到可玩闭环 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T86.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T86.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T86.3 产出 logs/e2e/<date>/playability-route86-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "contractRefs": [
+      "core.worldboss.entered",
+      "core.worldboss.resolved",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route86-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0343",
+    "taskmaster_id": 87,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法扩展：WorldBoss 从入口到可玩闭环（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T87",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+    ],
+    "depends_on": [
+      "GM-0342"
+    ],
+    "description": "承接 V1.1 玩法扩展：WorldBoss 从入口到可玩闭环 的分解阶段C，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T87.1 分解阶段C范围完成且可验证。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+      "ACC:T87.2 分解阶段C关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+      "ACC:T87.3 产出 logs/e2e/<date>/playability-route87-C-summary.json。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+    ],
+    "contractRefs": [
+      "core.worldboss.entered",
+      "core.worldboss.resolved",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route87-C-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0344",
+    "taskmaster_id": 88,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法扩展：PVP 从入口到匹配结算（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T88",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md"
+    ],
+    "depends_on": [
+      "GM-0343"
+    ],
+    "description": "承接 V1.1 玩法扩展：PVP 从入口到匹配结算 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T88.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd",
+      "ACC:T88.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd",
+      "ACC:T88.3 产出 logs/e2e/<date>/playability-route88-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd"
+    ],
+    "contractRefs": [
+      "core.pvp.match.started",
+      "core.pvp.match.resolved",
+      "core.score.changed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route88-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0345",
+    "taskmaster_id": 89,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法扩展：PVP 从入口到匹配结算（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T89",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md"
+    ],
+    "depends_on": [
+      "GM-0344"
+    ],
+    "description": "承接 V1.1 玩法扩展：PVP 从入口到匹配结算 的分解阶段C，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T89.1 分解阶段C范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T89.2 分解阶段C关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T89.3 产出 logs/e2e/<date>/playability-route89-C-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "contractRefs": [
+      "core.pvp.match.resolved",
+      "core.score.changed",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route89-C-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0346",
+    "taskmaster_id": 90,
+    "taskmaster_exported": true,
+    "title": "V1.1 平衡治理：玩法遥测与数值调参闭环（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T90",
+    "chapter_refs": [
+      "CH01",
+      "CH03",
+      "CH04",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md"
+    ],
+    "depends_on": [
+      "GM-0345"
+    ],
+    "description": "承接 V1.1 平衡治理：玩法遥测与数值调参闭环 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T90.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T90.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T90.3 产出 logs/e2e/<date>/playability-route90-B-summary.json。 Refs: Tests.Godot/tests/UI/test_activity_feed_scene.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/UI/test_activity_feed_scene.gd"
+    ],
+    "contractRefs": [
+      "core.activity.feed.appended",
+      "core.reputation.changed",
+      "core.score.changed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route90-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0347",
+    "taskmaster_id": 91,
+    "taskmaster_exported": true,
+    "title": "V1.1 平衡治理：玩法遥测与数值调参闭环（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T91",
+    "chapter_refs": [
+      "CH01",
+      "CH03",
+      "CH04",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md"
+    ],
+    "depends_on": [
+      "GM-0346"
+    ],
+    "description": "承接 V1.1 平衡治理：玩法遥测与数值调参闭环 的分解阶段C，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T91.1 分解阶段C范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T91.2 分解阶段C关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T91.3 产出 logs/e2e/<date>/playability-route91-C-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "contractRefs": [
+      "core.activity.feed.appended",
+      "core.reputation.changed",
+      "core.score.changed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route91-C-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0348",
+    "taskmaster_id": 92,
+    "taskmaster_exported": true,
+    "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T92",
+    "chapter_refs": [
+      "CH03",
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0004",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "GM-0347"
+    ],
+    "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T92.1 R2-A阶段范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T92.2 R2-A阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T92.3 产出 logs/e2e/<date>/playability-route92-R2-A-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "contractRefs": [
+      "core.save.requested",
+      "core.load.requested",
+      "core.game_turn.week_advanced",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route92-R2-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0349",
+    "taskmaster_id": 93,
+    "taskmaster_exported": true,
+    "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T93",
+    "chapter_refs": [
+      "CH03",
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0004",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "GM-0348"
+    ],
+    "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的分解阶段C，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T93.1 R2-A阶段范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
+      "ACC:T93.2 R2-A阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
+      "ACC:T93.3 产出 logs/e2e/<date>/playability-route93-R2-A-summary.json。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+    ],
+    "contractRefs": [
+      "core.load.requested",
+      "core.load.completed",
+      "core.raid.resolved",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route93-R2-A-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0350",
+    "taskmaster_id": 94,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法：两周循环与存档回放一致性（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed-r2",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T94",
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md"
+    ],
+    "depends_on": [
+      "GM-0349"
+    ],
+    "description": "承接 V1.1 玩法：两周循环与存档回放一致性 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+    "acceptance": [
+      "ACC:T94.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+      "ACC:T94.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+      "ACC:T94.3 产出 logs/e2e/<date>/playability-route94-R2-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+    ],
+    "contractRefs": [
+      "core.game_turn.week_advanced",
+      "core.save.requested",
+      "core.save.completed",
+      "core.load.requested",
+      "core.load.completed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route94-R2-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0351",
+    "taskmaster_id": 95,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：招募链路边界与异常分支（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed-r2",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T95",
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+    ],
+    "depends_on": [
+      "GM-0350"
+    ],
+    "description": "承接 V1.1 玩法深度：招募链路边界与异常分支 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+    "acceptance": [
+      "ACC:T95.1 R2-B阶段范围完成且可验证。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.EdgeCases.cs",
+      "ACC:T95.2 R2-B阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.EdgeCases.cs",
+      "ACC:T95.3 产出 logs/e2e/<date>/playability-route95-R2-B-summary.json。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.EdgeCases.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Services/GuildRecruitmentServiceTests.EdgeCases.cs"
+    ],
+    "contractRefs": [
+      "core.recruitment.offer.presented",
+      "core.recruitment.offer.resolved",
+      "core.guild.member.joined",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route95-R2-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0352",
+    "taskmaster_id": 96,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：成员管理状态机与角色变更（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed-r2",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T96",
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md"
+    ],
+    "depends_on": [
+      "GM-0351"
+    ],
+    "description": "承接 V1.1 玩法深度：成员管理状态机与角色变更 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+    "acceptance": [
+      "ACC:T96.1 R2-B阶段范围完成且可验证。 Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs",
+      "ACC:T96.2 R2-B阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs",
+      "ACC:T96.3 产出 logs/e2e/<date>/playability-route96-R2-B-summary.json。 Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs"
+    ],
+    "contractRefs": [
+      "core.guild.member.joined",
+      "core.guild.member.left",
+      "core.guild.member.role_changed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route96-R2-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0353",
+    "taskmaster_id": 97,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：Raid 进阶规则与结果可解释性（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed-r2",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T97",
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+    ],
+    "depends_on": [
+      "GM-0352"
+    ],
+    "description": "承接 V1.1 玩法深度：Raid 进阶规则与结果可解释性 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+    "acceptance": [
+      "ACC:T97.1 R2-B阶段范围完成且可验证。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T97.2 R2-B阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T97.3 产出 logs/e2e/<date>/playability-route97-R2-B-summary.json。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs"
+    ],
+    "contractRefs": [
+      "core.raid.scheduled",
+      "core.raid.resolved",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route97-R2-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0354",
+    "taskmaster_id": 98,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：经济与后勤联动闭环（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed-r2",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T98",
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md"
+    ],
+    "depends_on": [
+      "GM-0353"
+    ],
+    "description": "承接 V1.1 玩法深度：经济与后勤联动闭环 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+    "acceptance": [
+      "ACC:T98.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T98.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T98.3 产出 logs/e2e/<date>/playability-route98-R2-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "contractRefs": [
+      "core.score.changed",
+      "core.save.requested",
+      "core.save.completed"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route98-R2-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0355",
+    "taskmaster_id": 99,
+    "taskmaster_exported": true,
+    "title": "V1.1 玩法深度：媒体事件与声望反馈闭环（阶段3）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed-r2",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T99",
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md"
+    ],
+    "depends_on": [
+      "GM-0354"
+    ],
+    "description": "承接 V1.1 玩法深度：媒体事件与声望反馈闭环 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+    "acceptance": [
+      "ACC:T99.1 R2-B阶段范围完成且可验证。 Refs: Game.Core.Tests/Domain/ReputationDomainEventsTests.cs",
+      "ACC:T99.2 R2-B阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/ReputationDomainEventsTests.cs",
+      "ACC:T99.3 产出 logs/e2e/<date>/playability-route99-R2-B-summary.json。 Refs: Game.Core.Tests/Domain/ReputationDomainEventsTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Domain/ReputationDomainEventsTests.cs"
+    ],
+    "contractRefs": [
+      "core.media.beat.triggered",
+      "core.reputation.changed",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route99-R2-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0356",
+    "taskmaster_id": 100,
+    "taskmaster_exported": true,
+    "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段4）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed-r2",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T100",
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "GM-0355"
+    ],
+    "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+    "acceptance": [
+      "ACC:T100.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+      "ACC:T100.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+      "ACC:T100.3 产出 logs/e2e/<date>/playability-route100-R2-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+    ],
+    "contractRefs": [
+      "core.raid.resolved",
+      "core.pvp.match.resolved",
+      "core.worldboss.resolved",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route100-R2-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0357",
+    "taskmaster_id": 101,
+    "taskmaster_exported": true,
+    "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段5）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed-r2",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T101",
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "GM-0356"
+    ],
+    "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+    "acceptance": [
+      "ACC:T101.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T101.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T101.3 产出 logs/e2e/<date>/playability-route101-R2-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "contractRefs": [
+      "core.save.requested",
+      "core.load.requested",
+      "core.game_turn.week_advanced",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route101-R2-B-summary.json"
+    ]
+  },
+  {
+    "id": "GM-0358",
+    "taskmaster_id": 102,
+    "taskmaster_exported": true,
+    "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段6）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "adapter",
+    "owner": "",
+    "labels": [
+      "playability",
+      "decomposed-r2",
+      "v1.1"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T102",
+    "chapter_refs": [
+      "CH01",
+      "CH05",
+      "CH06",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0015",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "GM-0357"
+    ],
+    "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+    "acceptance": [
+      "ACC:T102.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
+      "ACC:T102.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
+      "ACC:T102.3 产出 logs/e2e/<date>/playability-route102-R2-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+    ],
+    "test_strategy": [
+      "xUnit + GdUnit4 deterministic route checks.",
+      "TDD (red->green->refactor) with logs/** replay artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+    ],
+    "contractRefs": [
+      "core.load.requested",
+      "core.load.completed",
+      "core.game_turn.week_advanced",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/e2e/<date>/playability-route102-R2-B-summary.json"
     ]
   }
 ]

@@ -337,3 +337,17 @@ ADR-Refs:
 - `Game.Core/Contracts/Events/EventDefinition.cs`
 
 <!-- GENERATED_CONTRACTS_END -->
+
+### Activity
+
+- `core.activity.feed.appended` → `Game.Core/Contracts/Activity/ActivityFeedAppended.cs`
+
+### WorldBoss
+
+- `core.worldboss.entered` → `Game.Core/Contracts/WorldBoss/WorldBossEntered.cs`
+- `core.worldboss.resolved` → `Game.Core/Contracts/WorldBoss/WorldBossResolved.cs`
+
+### Pvp
+
+- `core.pvp.match.started` → `Game.Core/Contracts/Pvp/PvpMatchStarted.cs`
+- `core.pvp.match.resolved` → `Game.Core/Contracts/Pvp/PvpMatchResolved.cs`

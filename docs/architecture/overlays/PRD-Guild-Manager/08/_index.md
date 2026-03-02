@@ -108,3 +108,23 @@ Arch-Refs:
 
 - 校验任务引用的 overlay 路径是否存在：`py -3 scripts/python/validate_task_overlays.py`
 - 校验 overlay 的 Test-Refs 指向是否存在（如启用）：`py -3 scripts/python/validate_overlay_test_refs.py --overlay docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md --out logs/ci/<YYYY-MM-DD>/overlay-test-refs`
+
+<!-- V11_INDEX_START -->
+## V1.1 阶段任务导航（T53-T102）
+
+- 治理/安全/数据阶段总览：
+  - `08-FeatureSlice-V11-Governance-Stabilization.md`
+- 玩法深度阶段总览：
+  - `08-FeatureSlice-V11-Gameplay-Depth.md`
+
+映射规则：
+
+- `tasks.json` 为主 SSoT（T53-T102）
+- `tasks_back.json` 只承载治理/安全/数据任务
+- `tasks_gameplay.json` 只承载玩法功能任务
+
+执行策略：
+
+- 从 T53 起保持严格串行（前一任务完成后再执行下一任务）
+- 每个阶段任务必须具备 `ACC:T<id>.<n>` 对应证据与 `logs/**` 工件
+<!-- V11_INDEX_END -->
