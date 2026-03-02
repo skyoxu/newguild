@@ -10,6 +10,11 @@ Semantics (repo SSoT):
   - For tasks still pending/deferred/cancelled: missing EventType is allowed as a planning hint (WARNING),
     so CI doesn't get blocked by future contracts.
 
+Hard coverage rule (to avoid wiring leaks):
+- For tasks at/after `LAYER_MIN_ENFORCE_FROM_TASKMASTER_ID`, minimum `contractRefs` counts are enforced by layer.
+  - adapter -> >= 2
+  - core -> >= 1
+
 This script intentionally does NOT enforce existence for `artifactRefs`.
 
 Outputs:
@@ -29,6 +34,12 @@ VIEW_FILES = [
     ".taskmaster/tasks/tasks_back.json",
     ".taskmaster/tasks/tasks_gameplay.json",
 ]
+
+LAYER_MIN_CONTRACT_REFS: dict[str, int] = {
+    "adapter": 2,
+    "core": 1,
+}
+LAYER_MIN_ENFORCE_FROM_TASKMASTER_ID = 53
 
 
 def today_str() -> str:
@@ -94,10 +105,35 @@ def looks_like_event_type(s: str) -> bool:
     return v.startswith("core.") or v.startswith("ui.") or v.startswith("screen.")
 
 
-def main() -> int:
-    root = Path(__file__).resolve().parents[2]
+def _parse_taskmaster_id(value: Any) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, int):
+        return value
+    text = str(value).strip()
+    if text.isdigit():
+        return int(text)
+    m = re.match(r"^[Tt](\d+)$", text)
+    if m:
+        return int(m.group(1))
+    return None
+
+
+def _required_min_contract_refs(task: dict[str, Any], strict_contracts: bool) -> int:
+    if not strict_contracts:
+        return 0
+    tm_id = _parse_taskmaster_id(task.get("taskmaster_id"))
+    if tm_id is None or tm_id < LAYER_MIN_ENFORCE_FROM_TASKMASTER_ID:
+        return 0
+    layer = str(task.get("layer") or "").strip().lower()
+    return LAYER_MIN_CONTRACT_REFS.get(layer, 0)
+
+
+def run_validation(root: Path, out_path: Path | None = None) -> tuple[bool, dict[str, Any]]:
     out_dir = root / "logs" / "ci" / today_str() / "task-mapping"
-    out_dir.mkdir(parents=True, exist_ok=True)
+    if out_path is None:
+        out_path = out_dir / "validate-view-ref-semantics.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
     known_event_types = collect_contract_event_types(root / "Game.Core" / "Contracts")
 
@@ -109,6 +145,10 @@ def main() -> int:
             "test_refs": "MUST exist; MUST NOT include logs/** paths",
             "artifactRefs": "Gate artifacts; MAY include placeholders; existence NOT enforced",
             "contractRefs": "EventType constants; strict for in-progress/done, warning for pending/deferred/cancelled",
+            "contractRefs_min_coverage": (
+                f"For taskmaster_id >= {LAYER_MIN_ENFORCE_FROM_TASKMASTER_ID}: "
+                "adapter>=2, core>=1 (strict for in-progress/done)"
+            ),
         },
         "contracts_eventType_count": len(known_event_types),
     }
@@ -123,6 +163,8 @@ def main() -> int:
             tm_id = t.get("taskmaster_id")
             status_raw = str(t.get("status") or "").strip().lower()
             strict_contracts = status_raw not in non_strict_statuses
+
+            contract_refs = normalize_list(t.get("contractRefs"))
 
             # artifactRefs: must exist as a list field (schema consistency), but items may be placeholders.
             if "artifactRefs" not in t:
@@ -158,7 +200,7 @@ def main() -> int:
                     )
 
             # contractRefs: must exist in contracts
-            for c in normalize_list(t.get("contractRefs")):
+            for c in contract_refs:
                 if known_event_types and c not in known_event_types:
                     entry = {
                         "file": rel,
@@ -174,9 +216,35 @@ def main() -> int:
                         entry["warning"] = "contractRefs references unknown EventType (allowed for planning when task is pending/deferred/cancelled)"
                         report["warnings"].append(entry)
 
-    write_json(out_dir / "validate-view-ref-semantics.json", report)
+            required_min = _required_min_contract_refs(t, strict_contracts)
+            if required_min > 0 and len(contract_refs) < required_min:
+                report["errors"].append(
+                    {
+                        "file": rel,
+                        "id": tid,
+                        "taskmaster_id": tm_id,
+                        "layer": t.get("layer"),
+                        "status": status_raw or None,
+                        "error": (
+                            f"contractRefs minimum coverage not met: "
+                            f"required>={required_min}, actual={len(contract_refs)}"
+                        ),
+                    }
+                )
+
+    write_json(out_path, report)
     ok = len(report["errors"]) == 0
-    print(f"VIEW_REF_SEMANTICS status={'ok' if ok else 'fail'} out={out_dir}")
+    return ok, report
+
+
+def main() -> int:
+    root = Path(__file__).resolve().parents[2]
+    ok, report = run_validation(root)
+    out_dir = root / "logs" / "ci" / today_str() / "task-mapping"
+    print(
+        f"VIEW_REF_SEMANTICS status={'ok' if ok else 'fail'} "
+        f"errors={len(report.get('errors', []))} warnings={len(report.get('warnings', []))} out={out_dir}"
+    )
     return 0 if ok else 1
 
 

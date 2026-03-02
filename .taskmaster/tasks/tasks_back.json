@@ -2459,5 +2459,820 @@
     "artifactRefs": [
       "logs/e2e/<date>/playability-route7-summary.json"
     ]
+  },
+  {
+    "id": "NG-0052",
+    "taskmaster_id": 52,
+    "taskmaster_exported": true,
+    "title": "治理收口：Task/View 回链与门禁证据一致性",
+    "status": "done",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "taskmaster",
+      "traceability",
+      "quality-gate",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-GOVERNANCE-T52",
+    "chapter_refs": [
+      "CH01",
+      "CH04",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0049",
+      "NG-0050",
+      "NG-0051"
+    ],
+    "description": "对 T44-T51 的任务回链、视图映射与质量门禁证据做一次收口治理，确保后续任务扩展不出现语义漂移和引用断链。",
+    "acceptance": [
+      "tasks.json 的 T52 与 tasks_back 的 NG-0052 建立一一映射（id=52 <-> taskmaster_id=52），且字段语义一致。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "对 T44-T51 每一项任务，关键引用（adr_refs/chapter_refs/overlay_refs/test_refs）逐项可解析，且不存在空值、断链或单侧缺失。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "治理任务不新增玩法契约，且不减少 T44-T51 治理基线所要求的 contractRefs；仅允许做一致性校验与回链补齐。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "绑定 ACC:T52.1/ACC:T52.2 的治理证据必须落盘到 logs/ci/<date>/sc-acceptance-check-task-52/summary.json 与 logs/ci/<date>/sc-acceptance-check-task-52/task-links-validate-summary.json，且 Task/View 的 artifactRefs 指向同一证据集。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+    ],
+    "test_strategy": [
+      "xUnit: verify governance invariants for task mapping and contractRefs consistency.",
+      "Python gates: run task_links_validate.py and check_tasks_all_refs.py as deterministic hard checks.",
+      "Optional: TDD (red->green->refactor). Prioritize deterministic task-link/refs validation and reproducible logs/** governance artifacts."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+    ],
+    "contractRefs": [
+      "core.game_turn.week_advanced",
+      "core.experience.changed",
+      "core.level.changed",
+      "core.raid.resolved",
+      "core.save.requested",
+      "core.load.requested"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/sc-acceptance-check-task-52/summary.json",
+      "logs/ci/<date>/sc-acceptance-check-task-52/task-links-validate-summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe (single-player default). Governance scope is linkage/traceability only; no new gameplay contract is introduced."
+  },
+  {
+    "id": "NG-0053",
+    "taskmaster_id": 53,
+    "taskmaster_exported": true,
+    "title": "V1.1 治理：稳定性门禁基线统一",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "stability",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T53",
+    "chapter_refs": [
+      "CH03",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0003",
+      "ADR-0015"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0052"
+    ],
+    "description": "统一 flaky/retry/failure 分类与门禁阈值口径，减少 CI 波动。",
+    "acceptance": [
+      "ACC:T53.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T53.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T53.3 产出 logs/ci/<date>/v11-task-53/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "contractRefs": [
+      "core.game_turn.week_advanced",
+      "core.save.requested",
+      "core.load.requested",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/v11-task-53/summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0054",
+    "taskmaster_id": 54,
+    "taskmaster_exported": true,
+    "title": "V1.1 治理：Headless Flaky 采集与根因分类",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "flaky",
+      "headless",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T54",
+    "chapter_refs": [
+      "CH03",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0003"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0053"
+    ],
+    "description": "建立 flaky 样本采集、根因分类与回放证据，压降假红率。",
+    "acceptance": [
+      "ACC:T54.1 验收口径与引用链完整且可解析。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T54.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T54.3 产出 logs/ci/<date>/v11-task-54/summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "Tests.Godot/tests/UI/test_activity_feed_scene.gd"
+    ],
+    "contractRefs": [
+      "core.game_turn.week_advanced",
+      "core.raid.resolved",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/v11-task-54/summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0055",
+    "taskmaster_id": 55,
+    "taskmaster_exported": true,
+    "title": "V1.1 治理：测试编排与证据消费规范",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "orchestration",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T55",
+    "chapter_refs": [
+      "CH01",
+      "CH06",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0018"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0054"
+    ],
+    "description": "统一 unit/godot/acceptance 编排与 evidence 消费逻辑。",
+    "acceptance": [
+      "ACC:T55.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T55.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T55.3 产出 logs/ci/<date>/v11-task-55/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+    ],
+    "contractRefs": [
+      "core.activity.feed.appended",
+      "core.save.requested",
+      "core.load.requested"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/v11-task-55/summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0056",
+    "taskmaster_id": 56,
+    "taskmaster_exported": true,
+    "title": "V1.1 治理：性能预算硬门与场景基准",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "performance",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T56",
+    "chapter_refs": [
+      "CH03",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0015",
+      "ADR-0005",
+      "ADR-0003"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
+    ],
+    "depends_on": [
+      "NG-0055"
+    ],
+    "description": "把性能软门收敛为硬门，补齐关键场景 p95 基准。",
+    "acceptance": [
+      "ACC:T56.1 验收口径与引用链完整且可解析。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T56.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T56.3 产出 logs/ci/<date>/v11-task-56/summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+    ],
+    "contractRefs": [
+      "core.game_turn.started",
+      "core.game_turn.week_advanced",
+      "core.raid.resolved"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/v11-task-56/summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0057",
+    "taskmaster_id": 57,
+    "taskmaster_exported": true,
+    "title": "V1.1 安全治理：Release Health 门禁固化",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "security",
+    "owner": "architecture",
+    "labels": [
+      "security",
+      "release-health",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T57",
+    "chapter_refs": [
+      "CH02",
+      "CH03",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0005",
+      "ADR-0002"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0056"
+    ],
+    "description": "固化 Crash-Free 阈值判定链路与审计字段，支持发布阻断。",
+    "acceptance": [
+      "ACC:T57.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T57.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T57.3 产出 logs/ci/<date>/v11-task-57/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "contractRefs": [
+      "core.activity.feed.appended",
+      "core.game_turn.week_advanced"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/v11-task-57/summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0058",
+    "taskmaster_id": 61,
+    "taskmaster_exported": true,
+    "title": "V1.1 数据治理：schemaVersion 与迁移矩阵",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "data",
+      "migration",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T61",
+    "chapter_refs": [
+      "CH05",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0005"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0057"
+    ],
+    "description": "固化 schemaVersion 演进策略与向前兼容迁移矩阵。",
+    "acceptance": [
+      "ACC:T61.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs",
+      "ACC:T61.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs",
+      "ACC:T61.3 产出 logs/ci/<date>/v11-task-61/summary.json。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs",
+      "Game.Core.Tests/Contracts/Achievements/AchievementStateSnapshotMigrationTests.cs"
+    ],
+    "contractRefs": [
+      "core.save.requested",
+      "core.save.format.migration.applied",
+      "core.load.requested",
+      "core.load.completed",
+      "core.load.failed"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/v11-task-61/summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0059",
+    "taskmaster_id": 62,
+    "taskmaster_exported": true,
+    "title": "V1.1 数据治理：跨版本存档回放与损坏恢复（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "save",
+      "replay",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T62",
+    "chapter_refs": [
+      "CH03",
+      "CH05",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0005",
+      "ADR-0003"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0058"
+    ],
+    "description": "建立跨版本回放和损坏恢复验收，避免发布后存档不可用。",
+    "acceptance": [
+      "ACC:T62.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+      "ACC:T62.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+      "ACC:T62.3 产出 logs/ci/<date>/task-62-A-summary.json。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+      "Game.Core.Tests/Persistence/SaveLoad/WorldGenSaveLoadReplayTests.cs"
+    ],
+    "contractRefs": [
+      "core.save.requested",
+      "core.save.completed",
+      "core.load.requested",
+      "core.load.completed",
+      "core.save.format.migration.applied"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/task-62-A-summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0060",
+    "taskmaster_id": 63,
+    "taskmaster_exported": true,
+    "title": "V1.1 治理：观测与审计日志字段统一",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "observability",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T63",
+    "chapter_refs": [
+      "CH02",
+      "CH03",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0003",
+      "ADR-0005",
+      "ADR-0002"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
+    ],
+    "depends_on": [
+      "NG-0059"
+    ],
+    "description": "统一活动流与安全审计字段，保证跨日志可追溯。",
+    "acceptance": [
+      "ACC:T63.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T63.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T63.3 产出 logs/ci/<date>/v11-task-63/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "Tests.Godot/tests/UI/test_activity_feed_scene.gd"
+    ],
+    "contractRefs": [
+      "core.activity.feed.appended",
+      "core.media.beat.triggered",
+      "core.reputation.changed"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/v11-task-63/summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0061",
+    "taskmaster_id": 64,
+    "taskmaster_exported": true,
+    "title": "V1.1 治理：CI 诊断摘要与止损模板",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "ci",
+      "diagnostics",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T64",
+    "chapter_refs": [
+      "CH03",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0003"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0060"
+    ],
+    "description": "统一 CI 报错摘要结构与修复建议模板，降低排障成本。",
+    "acceptance": [
+      "ACC:T64.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T64.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T64.3 产出 logs/ci/<date>/v11-task-64/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "contractRefs": [
+      "core.activity.feed.appended",
+      "core.game_turn.week_advanced",
+      "core.raid.resolved"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/v11-task-64/summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0062",
+    "taskmaster_id": 65,
+    "taskmaster_exported": true,
+    "title": "V1.1 治理：Task/ADR/Overlay/Test-Refs 自动体检",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "task-links",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T65",
+    "chapter_refs": [
+      "CH04",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0004"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
+    ],
+    "depends_on": [
+      "NG-0061"
+    ],
+    "description": "自动扫描任务回链完整性，输出机器可消费诊断结果。",
+    "acceptance": [
+      "ACC:T65.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T65.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T65.3 产出 logs/ci/<date>/v11-task-65/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+    ],
+    "contractRefs": [
+      "core.guild.member.joined",
+      "core.raid.resolved",
+      "core.save.requested",
+      "core.load.requested"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/v11-task-65/summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0063",
+    "taskmaster_id": 66,
+    "taskmaster_exported": true,
+    "title": "V1.1 收口：RC 准入评审包（阶段1）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "release",
+      "rc",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T66",
+    "chapter_refs": [
+      "CH03",
+      "CH05",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0003",
+      "ADR-0015",
+      "ADR-0006"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0062"
+    ],
+    "description": "汇总稳定性、性能、迁移、发布健康证据，形成 RC 准入包。",
+    "acceptance": [
+      "ACC:T66.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T66.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T66.3 产出 logs/ci/<date>/task-66-A-summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/**."
+    ],
+    "test_refs": [
+      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+    ],
+    "contractRefs": [
+      "core.game_turn.week_advanced",
+      "core.raid.resolved",
+      "core.save.requested",
+      "core.load.requested",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/task-66-A-summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0064",
+    "taskmaster_id": 79,
+    "taskmaster_exported": true,
+    "title": "V1.1 数据治理：跨版本存档回放与损坏恢复（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "decomposed",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T79",
+    "chapter_refs": [
+      "CH03",
+      "CH05",
+      "CH07"
+    ],
+    "adr_refs": [
+      "ADR-0006",
+      "ADR-0005",
+      "ADR-0003"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0063"
+    ],
+    "description": "承接 V1.1 数据治理：跨版本存档回放与损坏恢复 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T79.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd",
+      "ACC:T79.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd",
+      "ACC:T79.3 产出 logs/ci/<date>/task-79-B-summary.json。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/** artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd"
+    ],
+    "contractRefs": [
+      "core.save.requested",
+      "core.save.completed",
+      "core.load.requested",
+      "core.load.completed",
+      "core.save.format.migration.applied",
+      "core.save.failed"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/task-79-B-summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+  },
+  {
+    "id": "NG-0065",
+    "taskmaster_id": 80,
+    "taskmaster_exported": true,
+    "title": "V1.1 收口：RC 准入评审包（阶段2）",
+    "status": "pending",
+    "priority": "P2",
+    "layer": "architecture",
+    "owner": "architecture",
+    "labels": [
+      "governance",
+      "decomposed",
+      "v1.1",
+      "backlog"
+    ],
+    "story_id": "PRD-GUILD-MANAGER-V11-T80",
+    "chapter_refs": [
+      "CH03",
+      "CH05",
+      "CH07",
+      "CH09"
+    ],
+    "adr_refs": [
+      "ADR-0005",
+      "ADR-0003",
+      "ADR-0015",
+      "ADR-0006"
+    ],
+    "overlay_refs": [
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+    ],
+    "depends_on": [
+      "NG-0064"
+    ],
+    "description": "承接 V1.1 收口：RC 准入评审包 的分解阶段B，聚焦单一交付闭环。",
+    "acceptance": [
+      "ACC:T80.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T80.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T80.3 产出 logs/ci/<date>/task-80-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "test_strategy": [
+      "Deterministic hard checks first.",
+      "TDD (red->green->refactor) with reproducible logs/** artifacts."
+    ],
+    "test_refs": [
+      "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+    ],
+    "contractRefs": [
+      "core.game_turn.week_advanced",
+      "core.raid.resolved",
+      "core.worldboss.resolved",
+      "core.pvp.match.resolved",
+      "core.save.requested",
+      "core.load.requested",
+      "core.activity.feed.appended"
+    ],
+    "artifactRefs": [
+      "logs/ci/<date>/task-80-B-summary.json"
+    ],
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
   }
 ]

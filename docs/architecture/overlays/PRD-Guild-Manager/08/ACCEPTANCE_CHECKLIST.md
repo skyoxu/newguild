@@ -249,3 +249,13 @@ Artifact-Refs:
 - T46: `Game.Core.Tests/Services/DemoGatePolicyTests.cs`
 - T47: `Tests.Godot/tests/Scenes/test_task47_acceptance.gd`
 - T47: `Game.Core.Tests/Tasks/Task47AcceptanceTests.cs`
+
+<!-- V11_ACCEPTANCE_START -->
+## 八、V1.1 阶段验收增量（T53-T102）
+
+- [ ] `T53-T102` 与视图任务映射一致：每个任务仅落在一个视图（治理到 back，玩法到 gameplay）
+- [ ] 从 `T53` 起保持严格串行依赖（`T53 -> T52`，其余任务依赖前一任务）
+- [ ] 所有阶段任务标题不再使用 `分解A/B/C` 或 `R2-A/B`，统一阶段命名
+- [ ] `08-FeatureSlice-V11-Governance-Stabilization.md` 与 `08-FeatureSlice-V11-Gameplay-Depth.md` 已更新并可作为审计入口
+- [ ] 阶段任务的 `ACC:T<id>.<n>` 在测试与工件中可回放（`logs/ci/**`、`logs/e2e/**`）
+<!-- V11_ACCEPTANCE_END -->

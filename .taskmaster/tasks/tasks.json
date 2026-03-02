@@ -1733,7 +1733,11 @@
           "Modal system can open/close deterministically (button + ESC), without node leaks or stuck input focus.",
           "Context menu/right-click interaction uses Godot input events and is testable in headless GdUnit4."
         ],
-        "testRefs": [],
+        "testRefs": [
+          "Tests.Godot/tests/Scenes/test_task46_acceptance.gd",
+          "Game.Core.Tests/Services/DemoGatePolicyTests.cs",
+          "Tests.Godot/tests/Scenes/test_task46_button_audit_acceptance.gd"
+        ],
         "testStrategy": "['Unit test each component for functionality. Conduct integration tests to ensure components work together seamlessly.']",
         "recommendedSubtasks": 2,
         "subtasks": [
@@ -1791,7 +1795,10 @@
           "Modal system can open/close deterministically (button + ESC), without node leaks or stuck input focus.",
           "Context menu/right-click interaction uses Godot input events and is testable in headless GdUnit4."
         ],
-        "testRefs": [],
+        "testRefs": [
+          "Tests.Godot/tests/Scenes/test_task47_acceptance.gd",
+          "Game.Core.Tests/Tasks/Task47AcceptanceTests.cs"
+        ],
         "testStrategy": "['Test each interaction pattern individually. Use user testing to ensure intuitive interactions.']",
         "recommendedSubtasks": 2,
         "subtasks": [
@@ -1911,7 +1918,7 @@
       {
         "id": "49",
         "title": "Playability 路线14：XP/Level 可视化增长与持久化",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "description": "验证 XP/Level 从玩法事件驱动增长、在 HUD 可见，并在 Save/Load 后保持一致。",
         "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-14\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Progression/ExperienceSystemTests.cs; Game.Core.Tests/Tasks/Task49GovernanceTests.cs; Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd\nSecurity Profile: SECURITY_PROFILE=host-safe (default for single-player delivery; local save/snapshot/process tampering is allowed). Use SECURITY_PROFILE=strict for SECURITY_TEST_MODE=1 and CI security checks.",
@@ -2013,7 +2020,7 @@
       {
         "id": "50",
         "title": "Playability 路线15：Achievement 解锁展示与持久化",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "description": "验证成就由领域事件触发解锁、UI 可见、并在 Save/Load 后保持一致。",
         "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-15\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs; Tests.Godot/tests/UI/test_achievements_smoke.gd; Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd\nSecurity Profile: SECURITY_PROFILE=host-safe (single-player default; local save/process tampering allowed; for CI security checks use SECURITY_PROFILE=strict + SECURITY_TEST_MODE=1).",
@@ -2097,7 +2104,7 @@
       {
         "id": "51",
         "title": "Playability 路线7：Raid 结算反馈闭环",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "description": "验证 Raid 从触发到结算反馈的闭环，包括结果可见、事件可观测与状态一致性。",
         "details": "Story: PRD-GUILD-MANAGER-PLAYABILITY-ROUTE-7\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs; Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs; Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd; Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
@@ -2179,6 +2186,4297 @@
         ],
         "updatedAt": "2026-02-08T09:55:19+00:00",
         "complexity": 4
+      },
+      {
+        "id": "52",
+        "title": "治理收口：Task/View 回链与门禁证据一致性",
+        "status": "done",
+        "priority": "medium",
+        "description": "对 T44-T51 的任务回链、视图映射与质量门禁证据做一次收口治理，确保后续任务扩展不出现语义漂移和引用断链。",
+        "details": "Story: PRD-GUILD-MANAGER-GOVERNANCE-T52\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe (single-player default).",
+        "dependencies": [
+          "49",
+          "50",
+          "51"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "tasks.json 的 T52 与 tasks_back 的 NG-0052 建立一一映射（id=52 <-> taskmaster_id=52），且字段语义一致。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "对 T44-T51 每一项任务，关键引用（adrRefs/chapterRefs/overlayRefs/testRefs）逐项可解析，且不存在空值、断链或单侧缺失。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "治理任务不新增玩法契约，且不减少 T44-T51 治理基线所要求的 contractRefs；仅允许做一致性校验与回链补齐。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "绑定 ACC:T52.1/ACC:T52.2 的治理证据必须落盘到 logs/ci/<date>/sc-acceptance-check-task-52/summary.json 与 logs/ci/<date>/sc-acceptance-check-task-52/task-links-validate-summary.json，且 Task/View 的 artifactRefs 指向同一证据集。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+        ],
+        "contractRefs": [
+          "core.game_turn.week_advanced",
+          "core.experience.changed",
+          "core.level.changed",
+          "core.raid.resolved",
+          "core.save.requested",
+          "core.load.requested"
+        ],
+        "artifactRefs": [
+          "logs/ci/<date>/sc-acceptance-check-task-52/summary.json",
+          "logs/ci/<date>/sc-acceptance-check-task-52/task-links-validate-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor). Prioritize deterministic task-link/refs validation and reproducible logs/** governance artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Sync task mapping between master and back view",
+            "description": "Add and verify T52/NG-0052 mapping with consistent core fields and references.",
+            "dependencies": [],
+            "details": "Guarantee tasks.json.master.tasks[].id=52 and tasks_back[].taskmaster_id=52 are aligned.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T52.1 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "52",
+            "updatedAt": "2026-03-01T00:00:00+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 2,
+            "title": "Harden refs and gate compatibility",
+            "description": "Stabilize ADR/Chapter/Overlay/Test references so validation scripts remain green.",
+            "dependencies": [
+              1
+            ],
+            "details": "Focus on link consistency and avoid introducing new gameplay logic.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T52.2 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "52",
+            "updatedAt": "2026-03-01T00:00:00+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          },
+          {
+            "id": 3,
+            "title": "Produce governance evidence artifacts",
+            "description": "Generate deterministic logs/ci evidence for mapping and refs validation.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind to ACC:T52.1/ACC:T52.2 and persist evidence under logs/ci/<date>/sc-acceptance-check-task-52/summary.json and logs/ci/<date>/sc-acceptance-check-task-52/task-links-validate-summary.json.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T52.4 anchor in referenced tests or deterministic evidence output.",
+            "parentId": "52",
+            "updatedAt": "2026-03-01T00:00:00+00:00",
+            "implementationNotes": "Keep changes minimal, deterministic, and traceable via acceptance/test_refs/artifactRefs."
+          }
+        ],
+        "updatedAt": "2026-03-01T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "53",
+        "title": "V1.1 治理：稳定性门禁基线统一",
+        "status": "pending",
+        "priority": "medium",
+        "description": "统一 flaky/retry/failure 分类与门禁阈值口径，减少 CI 波动。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T53\nADR Refs: ADR-0005; ADR-0003; ADR-0015\nChapters: CH01; CH03; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "52"
+        ],
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0003",
+          "ADR-0015"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH03",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T53.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "ACC:T53.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "ACC:T53.3 产出 logs/ci/<date>/v11-task-53/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/v11-task-53/summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define acceptance boundary",
+            "description": "Lock acceptance and refs before implementation.",
+            "dependencies": [],
+            "details": "Bind ACC:T53.1.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T53.1 anchor in deterministic checks.",
+            "parentId": "53",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify",
+            "description": "Implement minimal complete behavior and verify.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T53.2.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T53.2 anchor in deterministic checks.",
+            "parentId": "53",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence",
+            "description": "Persist reproducible evidence artifacts under logs/**.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T53.3.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T53.3 anchor in deterministic checks.",
+            "parentId": "53",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "54",
+        "title": "V1.1 治理：Headless Flaky 采集与根因分类",
+        "status": "pending",
+        "priority": "medium",
+        "description": "建立 flaky 样本采集、根因分类与回放证据，压降假红率。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T54\nADR Refs: ADR-0005; ADR-0003\nChapters: CH03; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "53"
+        ],
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0003"
+        ],
+        "archRefs": [
+          "CH03",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T54.1 验收口径与引用链完整且可解析。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T54.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T54.3 产出 logs/ci/<date>/v11-task-54/summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "Tests.Godot/tests/UI/test_activity_feed_scene.gd"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/v11-task-54/summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define acceptance boundary",
+            "description": "Lock acceptance and refs before implementation.",
+            "dependencies": [],
+            "details": "Bind ACC:T54.1.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T54.1 anchor in deterministic checks.",
+            "parentId": "54",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify",
+            "description": "Implement minimal complete behavior and verify.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T54.2.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T54.2 anchor in deterministic checks.",
+            "parentId": "54",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence",
+            "description": "Persist reproducible evidence artifacts under logs/**.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T54.3.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T54.3 anchor in deterministic checks.",
+            "parentId": "54",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "55",
+        "title": "V1.1 治理：测试编排与证据消费规范",
+        "status": "pending",
+        "priority": "medium",
+        "description": "统一 unit/godot/acceptance 编排与 evidence 消费逻辑。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T55\nADR Refs: ADR-0005; ADR-0018\nChapters: CH01; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs Tests.Godot/tests/Integration/test_backup_restore_savegame.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "54"
+        ],
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T55.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "ACC:T55.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "ACC:T55.3 产出 logs/ci/<date>/v11-task-55/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/v11-task-55/summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define acceptance boundary",
+            "description": "Lock acceptance and refs before implementation.",
+            "dependencies": [],
+            "details": "Bind ACC:T55.1.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T55.1 anchor in deterministic checks.",
+            "parentId": "55",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify",
+            "description": "Implement minimal complete behavior and verify.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T55.2.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T55.2 anchor in deterministic checks.",
+            "parentId": "55",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence",
+            "description": "Persist reproducible evidence artifacts under logs/**.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T55.3.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T55.3 anchor in deterministic checks.",
+            "parentId": "55",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "56",
+        "title": "V1.1 治理：性能预算硬门与场景基准",
+        "status": "pending",
+        "priority": "medium",
+        "description": "把性能软门收敛为硬门，补齐关键场景 p95 基准。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T56\nADR Refs: ADR-0015; ADR-0005; ADR-0003\nChapters: CH03; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "55"
+        ],
+        "adrRefs": [
+          "ADR-0015",
+          "ADR-0005",
+          "ADR-0003"
+        ],
+        "archRefs": [
+          "CH03",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+        "acceptance": [
+          "ACC:T56.1 验收口径与引用链完整且可解析。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T56.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T56.3 产出 logs/ci/<date>/v11-task-56/summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/v11-task-56/summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define acceptance boundary",
+            "description": "Lock acceptance and refs before implementation.",
+            "dependencies": [],
+            "details": "Bind ACC:T56.1.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T56.1 anchor in deterministic checks.",
+            "parentId": "56",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify",
+            "description": "Implement minimal complete behavior and verify.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T56.2.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T56.2 anchor in deterministic checks.",
+            "parentId": "56",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence",
+            "description": "Persist reproducible evidence artifacts under logs/**.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T56.3.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T56.3 anchor in deterministic checks.",
+            "parentId": "56",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "57",
+        "title": "V1.1 安全治理：Release Health 门禁固化",
+        "status": "pending",
+        "priority": "medium",
+        "description": "固化 Crash-Free 阈值判定链路与审计字段，支持发布阻断。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T57\nADR Refs: ADR-0003; ADR-0005; ADR-0002\nChapters: CH02; CH03; CH07; CH10\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "56"
+        ],
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0005",
+          "ADR-0002"
+        ],
+        "archRefs": [
+          "CH02",
+          "CH03",
+          "CH07",
+          "CH10"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T57.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T57.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T57.3 产出 logs/ci/<date>/v11-task-57/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/v11-task-57/summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define acceptance boundary",
+            "description": "Lock acceptance and refs before implementation.",
+            "dependencies": [],
+            "details": "Bind ACC:T57.1.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T57.1 anchor in deterministic checks.",
+            "parentId": "57",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify",
+            "description": "Implement minimal complete behavior and verify.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T57.2.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T57.2 anchor in deterministic checks.",
+            "parentId": "57",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence",
+            "description": "Persist reproducible evidence artifacts under logs/**.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T57.3.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T57.3 anchor in deterministic checks.",
+            "parentId": "57",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "58",
+        "title": "V1.1 玩法：招募到入会闭环调参与反馈（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "强化申请-审批-入会闭环的平衡与可观测反馈。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T58\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md\nTest Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "57"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md",
+        "acceptance": [
+          "ACC:T58.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+          "ACC:T58.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+          "ACC:T58.3 产出 logs/e2e/<date>/playability-route58-A-summary.json。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs"
+        ],
+        "contractRefs": [
+          "core.recruitment.offer.resolved",
+          "core.guild.member.joined"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route58-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (A)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T58.1 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T58.1 anchor in deterministic checks.",
+            "parentId": "58",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (A)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T58.2 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T58.2 anchor in deterministic checks.",
+            "parentId": "58",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (A)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T58.3 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T58.3 anchor in deterministic checks.",
+            "parentId": "58",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "59",
+        "title": "V1.1 玩法：Raid 结果驱动成长与排名联动（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "统一 raid 结果与 XP/Reputation/Score 联动，避免跨次污染。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T59\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md\nTest Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "58"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
+        "acceptance": [
+          "ACC:T59.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+          "ACC:T59.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+          "ACC:T59.3 产出 logs/e2e/<date>/playability-route59-A-summary.json。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs"
+        ],
+        "contractRefs": [
+          "core.raid.resolved",
+          "core.experience.changed"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route59-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (A)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T59.1 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T59.1 anchor in deterministic checks.",
+            "parentId": "59",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (A)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T59.2 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T59.2 anchor in deterministic checks.",
+            "parentId": "59",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (A)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T59.3 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T59.3 anchor in deterministic checks.",
+            "parentId": "59",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "60",
+        "title": "V1.1 玩法：两周循环与存档回放一致性（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "在两周主循环下验证 save/load/replay 一致性。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T60\nADR Refs: ADR-0004; ADR-0005\nChapters: CH01; CH04\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "59"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md",
+        "acceptance": [
+          "ACC:T60.1 R2-A阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T60.2 R2-A阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T60.3 产出 logs/e2e/<date>/playability-route60-R2-A-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "contractRefs": [
+          "core.game_turn.week_advanced"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route60-R2-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-A)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T60.1 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T60.1 anchor in deterministic checks.",
+            "parentId": "60",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-A)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T60.2 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T60.2 anchor in deterministic checks.",
+            "parentId": "60",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-A)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T60.3 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T60.3 anchor in deterministic checks.",
+            "parentId": "60",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "61",
+        "title": "V1.1 数据治理：schemaVersion 与迁移矩阵",
+        "status": "pending",
+        "priority": "medium",
+        "description": "固化 schemaVersion 演进策略与向前兼容迁移矩阵。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T61\nADR Refs: ADR-0006; ADR-0005\nChapters: CH05; CH07; CH11\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs Game.Core.Tests/Contracts/Achievements/AchievementStateSnapshotMigrationTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "60"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH05",
+          "CH07",
+          "CH11"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T61.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs",
+          "ACC:T61.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs",
+          "ACC:T61.3 产出 logs/ci/<date>/v11-task-61/summary.json。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs",
+          "Game.Core.Tests/Contracts/Achievements/AchievementStateSnapshotMigrationTests.cs"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/v11-task-61/summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define acceptance boundary",
+            "description": "Lock acceptance and refs before implementation.",
+            "dependencies": [],
+            "details": "Bind ACC:T61.1.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T61.1 anchor in deterministic checks.",
+            "parentId": "61",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify",
+            "description": "Implement minimal complete behavior and verify.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T61.2.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T61.2 anchor in deterministic checks.",
+            "parentId": "61",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence",
+            "description": "Persist reproducible evidence artifacts under logs/**.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T61.3.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T61.3 anchor in deterministic checks.",
+            "parentId": "61",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "62",
+        "title": "V1.1 数据治理：跨版本存档回放与损坏恢复（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "建立跨版本回放和损坏恢复验收，避免发布后存档不可用。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T62\nADR Refs: ADR-0006; ADR-0005; ADR-0003\nChapters: CH05; CH07; CH11\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs Game.Core.Tests/Persistence/SaveLoad/WorldGenSaveLoadReplayTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "61"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0005",
+          "ADR-0003"
+        ],
+        "archRefs": [
+          "CH05",
+          "CH07",
+          "CH11"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T62.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+          "ACC:T62.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+          "ACC:T62.3 产出 logs/ci/<date>/task-62-A-summary.json。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+          "Game.Core.Tests/Persistence/SaveLoad/WorldGenSaveLoadReplayTests.cs"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/task-62-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (A)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T62.1 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T62.1 anchor in deterministic checks.",
+            "parentId": "62",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (A)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T62.2 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T62.2 anchor in deterministic checks.",
+            "parentId": "62",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (A)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T62.3 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T62.3 anchor in deterministic checks.",
+            "parentId": "62",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "63",
+        "title": "V1.1 治理：观测与审计日志字段统一",
+        "status": "pending",
+        "priority": "medium",
+        "description": "统一活动流与安全审计字段，保证跨日志可追溯。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T63\nADR Refs: ADR-0003; ADR-0005; ADR-0002\nChapters: CH02; CH03; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nTest Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs Tests.Godot/tests/UI/test_activity_feed_scene.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "62"
+        ],
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0005",
+          "ADR-0002"
+        ],
+        "archRefs": [
+          "CH02",
+          "CH03",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+        "acceptance": [
+          "ACC:T63.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T63.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T63.3 产出 logs/ci/<date>/v11-task-63/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "Tests.Godot/tests/UI/test_activity_feed_scene.gd"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/v11-task-63/summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define acceptance boundary",
+            "description": "Lock acceptance and refs before implementation.",
+            "dependencies": [],
+            "details": "Bind ACC:T63.1.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T63.1 anchor in deterministic checks.",
+            "parentId": "63",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify",
+            "description": "Implement minimal complete behavior and verify.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T63.2.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T63.2 anchor in deterministic checks.",
+            "parentId": "63",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence",
+            "description": "Persist reproducible evidence artifacts under logs/**.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T63.3.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T63.3 anchor in deterministic checks.",
+            "parentId": "63",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "64",
+        "title": "V1.1 治理：CI 诊断摘要与止损模板",
+        "status": "pending",
+        "priority": "medium",
+        "description": "统一 CI 报错摘要结构与修复建议模板，降低排障成本。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T64\nADR Refs: ADR-0005; ADR-0003\nChapters: CH03; CH07; CH11\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "63"
+        ],
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0003"
+        ],
+        "archRefs": [
+          "CH03",
+          "CH07",
+          "CH11"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T64.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T64.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T64.3 产出 logs/ci/<date>/v11-task-64/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/v11-task-64/summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define acceptance boundary",
+            "description": "Lock acceptance and refs before implementation.",
+            "dependencies": [],
+            "details": "Bind ACC:T64.1.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T64.1 anchor in deterministic checks.",
+            "parentId": "64",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify",
+            "description": "Implement minimal complete behavior and verify.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T64.2.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T64.2 anchor in deterministic checks.",
+            "parentId": "64",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence",
+            "description": "Persist reproducible evidence artifacts under logs/**.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T64.3.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T64.3 anchor in deterministic checks.",
+            "parentId": "64",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "65",
+        "title": "V1.1 治理：Task/ADR/Overlay/Test-Refs 自动体检",
+        "status": "pending",
+        "priority": "medium",
+        "description": "自动扫描任务回链完整性，输出机器可消费诊断结果。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T65\nADR Refs: ADR-0005; ADR-0004\nChapters: CH01; CH04; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/_index.md\nTest Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "64"
+        ],
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0004"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+        "acceptance": [
+          "ACC:T65.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "ACC:T65.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "ACC:T65.3 产出 logs/ci/<date>/v11-task-65/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/v11-task-65/summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define acceptance boundary",
+            "description": "Lock acceptance and refs before implementation.",
+            "dependencies": [],
+            "details": "Bind ACC:T65.1.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T65.1 anchor in deterministic checks.",
+            "parentId": "65",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify",
+            "description": "Implement minimal complete behavior and verify.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T65.2.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T65.2 anchor in deterministic checks.",
+            "parentId": "65",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence",
+            "description": "Persist reproducible evidence artifacts under logs/**.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T65.3.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T65.3 anchor in deterministic checks.",
+            "parentId": "65",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "66",
+        "title": "V1.1 收口：RC 准入评审包（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "汇总稳定性、性能、迁移、发布健康证据，形成 RC 准入包。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T66\nADR Refs: ADR-0005; ADR-0003; ADR-0015; ADR-0006\nChapters: CH03; CH07; CH09; CH10; CH11\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "65"
+        ],
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0003",
+          "ADR-0015",
+          "ADR-0006"
+        ],
+        "archRefs": [
+          "CH03",
+          "CH07",
+          "CH09",
+          "CH10",
+          "CH11"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T66.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T66.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T66.3 产出 logs/ci/<date>/task-66-A-summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/task-66-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (A)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T66.1 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T66.1 anchor in deterministic checks.",
+            "parentId": "66",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (A)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T66.2 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T66.2 anchor in deterministic checks.",
+            "parentId": "66",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (A)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T66.3 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T66.3 anchor in deterministic checks.",
+            "parentId": "66",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "67",
+        "title": "V1.1 玩法深度：招募链路边界与异常分支（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "补齐申请-审批-入会的异常分支与边界条件，避免重复入会和状态脏写。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T67\nADR Refs: ADR-0004; ADR-0005\nChapters: CH01; CH04\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md\nTest Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "66"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md",
+        "acceptance": [
+          "ACC:T67.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+          "ACC:T67.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs",
+          "ACC:T67.3 产出 logs/e2e/<date>/playability-route67-R2-A-summary.json。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Services/GuildRecruitmentServiceTests.cs"
+        ],
+        "contractRefs": [
+          "core.recruitment.offer.resolved"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route67-R2-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic xUnit + GdUnit4 evidence.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-A)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T67.1 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T67.1 anchor in deterministic checks.",
+            "parentId": "67",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-A)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T67.2 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T67.2 anchor in deterministic checks.",
+            "parentId": "67",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-A)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T67.3 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T67.3 anchor in deterministic checks.",
+            "parentId": "67",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "68",
+        "title": "V1.1 玩法深度：成员管理状态机与角色变更（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "强化成员加入/离开/角色变更状态机，保证同一成员生命周期一致性。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T68\nADR Refs: ADR-0004; ADR-0005\nChapters: CH01; CH04\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md\nTest Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "67"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md",
+        "acceptance": [
+          "ACC:T68.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs",
+          "ACC:T68.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs",
+          "ACC:T68.3 产出 logs/e2e/<date>/playability-route68-R2-A-summary.json。 Refs: Game.Core.Tests/Domain/GuildRosterServiceTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Domain/GuildRosterServiceTests.cs"
+        ],
+        "contractRefs": [
+          "core.guild.member.joined"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route68-R2-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic xUnit + GdUnit4 evidence.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-A)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T68.1 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T68.1 anchor in deterministic checks.",
+            "parentId": "68",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-A)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T68.2 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T68.2 anchor in deterministic checks.",
+            "parentId": "68",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-A)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T68.3 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T68.3 anchor in deterministic checks.",
+            "parentId": "68",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "69",
+        "title": "V1.1 玩法深度：Raid 进阶规则与结果可解释性（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "增强 raid 进阶规则与结果解释，确保 resolved 结果可追溯且无重复结算。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T69\nADR Refs: ADR-0004; ADR-0005\nChapters: CH01; CH04\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md\nTest Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "68"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
+        "acceptance": [
+          "ACC:T69.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+          "ACC:T69.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+          "ACC:T69.3 产出 logs/e2e/<date>/playability-route69-R2-A-summary.json。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+        ],
+        "contractRefs": [
+          "core.raid.scheduled"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route69-R2-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic xUnit + GdUnit4 evidence.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-A)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T69.1 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T69.1 anchor in deterministic checks.",
+            "parentId": "69",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-A)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T69.2 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T69.2 anchor in deterministic checks.",
+            "parentId": "69",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-A)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T69.3 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T69.3 anchor in deterministic checks.",
+            "parentId": "69",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "70",
+        "title": "V1.1 玩法深度：经济与后勤联动闭环（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "收敛资源消耗、收益回写与存档一致性，防止周推进后账目漂移。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T70\nADR Refs: ADR-0004; ADR-0005\nChapters: CH01; CH04\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md\nTest Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "69"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+        "acceptance": [
+          "ACC:T70.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+          "ACC:T70.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+          "ACC:T70.3 产出 logs/e2e/<date>/playability-route70-R2-A-summary.json。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs"
+        ],
+        "contractRefs": [
+          "core.score.changed"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route70-R2-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic xUnit + GdUnit4 evidence.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-A)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T70.1 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T70.1 anchor in deterministic checks.",
+            "parentId": "70",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-A)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T70.2 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T70.2 anchor in deterministic checks.",
+            "parentId": "70",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-A)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T70.3 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T70.3 anchor in deterministic checks.",
+            "parentId": "70",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "71",
+        "title": "V1.1 玩法深度：媒体事件与声望反馈闭环（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "强化媒体触发到声望变化的反馈路径，保证 UI 与领域结果一致。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T71\nADR Refs: ADR-0004; ADR-0005\nChapters: CH01; CH04\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md\nTest Refs: Game.Core.Tests/Domain/ReputationTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "70"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md",
+        "acceptance": [
+          "ACC:T71.1 R2-A阶段范围完成且可验证。 Refs: Game.Core.Tests/Domain/ReputationTests.cs",
+          "ACC:T71.2 R2-A阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/ReputationTests.cs",
+          "ACC:T71.3 产出 logs/e2e/<date>/playability-route71-R2-A-summary.json。 Refs: Game.Core.Tests/Domain/ReputationTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Domain/ReputationTests.cs"
+        ],
+        "contractRefs": [
+          "core.media.beat.triggered"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route71-R2-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic xUnit + GdUnit4 evidence.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-A)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T71.1 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T71.1 anchor in deterministic checks.",
+            "parentId": "71",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-A)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T71.2 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T71.2 anchor in deterministic checks.",
+            "parentId": "71",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-A)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T71.3 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T71.3 anchor in deterministic checks.",
+            "parentId": "71",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "72",
+        "title": "V1.1 玩法扩展：WorldBoss 从入口到可玩闭环（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "将 worldboss 从 stub 提升为可玩闭环，补齐入口、结算与回写证据。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T72\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "71"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+        "acceptance": [
+          "ACC:T72.1 分解阶段A范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd",
+          "ACC:T72.2 分解阶段A关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd",
+          "ACC:T72.3 产出 logs/e2e/<date>/playability-route72-A-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd"
+        ],
+        "contractRefs": [
+          "core.worldboss.entered"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route72-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic xUnit + GdUnit4 evidence.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (A)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T72.1 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T72.1 anchor in deterministic checks.",
+            "parentId": "72",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (A)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T72.2 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T72.2 anchor in deterministic checks.",
+            "parentId": "72",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (A)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T72.3 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T72.3 anchor in deterministic checks.",
+            "parentId": "72",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "73",
+        "title": "V1.1 玩法扩展：PVP 从入口到匹配结算（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "将 pvp 从 stub 提升为可验收路径，补齐匹配、结果与回写闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T73\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "72"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md",
+        "acceptance": [
+          "ACC:T73.1 分解阶段A范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T73.2 分解阶段A关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T73.3 产出 logs/e2e/<date>/playability-route73-A-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "contractRefs": [
+          "core.pvp.match.started"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route73-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic xUnit + GdUnit4 evidence.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (A)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T73.1 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T73.1 anchor in deterministic checks.",
+            "parentId": "73",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (A)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T73.2 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T73.2 anchor in deterministic checks.",
+            "parentId": "73",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (A)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T73.3 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T73.3 anchor in deterministic checks.",
+            "parentId": "73",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "74",
+        "title": "V1.1 平衡治理：玩法遥测与数值调参闭环（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "建立玩法平衡遥测闭环，支持参数调优与回归判定。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T74\nADR Refs: ADR-0003; ADR-0004; ADR-0005; ADR-0015; ADR-0018\nChapters: CH01; CH03; CH04; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md\nTest Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "73"
+        ],
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0015",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH03",
+          "CH04",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md",
+        "acceptance": [
+          "ACC:T74.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T74.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+          "ACC:T74.3 产出 logs/e2e/<date>/playability-route74-A-summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+        ],
+        "contractRefs": [
+          "core.activity.feed.appended"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route74-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic xUnit + GdUnit4 evidence.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (A)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T74.1 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T74.1 anchor in deterministic checks.",
+            "parentId": "74",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (A)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T74.2 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T74.2 anchor in deterministic checks.",
+            "parentId": "74",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (A)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T74.3 for phase A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T74.3 anchor in deterministic checks.",
+            "parentId": "74",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "75",
+        "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段1）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "执行玩法全链路回归，形成可发布验收证据包。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T75\nADR Refs: ADR-0003; ADR-0004; ADR-0005\nChapters: CH01; CH03; CH04; CH05\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "74"
+        ],
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0004",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH03",
+          "CH04",
+          "CH05"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T75.1 R2-A阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T75.2 R2-A阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T75.3 产出 logs/e2e/<date>/playability-route75-R2-A-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "contractRefs": [
+          "core.game_turn.week_advanced"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route75-R2-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic xUnit + GdUnit4 evidence.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-A)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T75.1 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T75.1 anchor in deterministic checks.",
+            "parentId": "75",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-A)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T75.2 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T75.2 anchor in deterministic checks.",
+            "parentId": "75",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-A)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T75.3 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T75.3 anchor in deterministic checks.",
+            "parentId": "75",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "76",
+        "title": "V1.1 玩法：招募到入会闭环调参与反馈（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法：招募到入会闭环调参与反馈 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T76\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md\nTest Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "75"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md",
+        "acceptance": [
+          "ACC:T76.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+          "ACC:T76.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+          "ACC:T76.3 产出 logs/e2e/<date>/playability-route76-B-summary.json。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+        ],
+        "contractRefs": [
+          "core.activity.feed.appended"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route76-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T76.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T76.1 anchor in deterministic checks.",
+            "parentId": "76",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T76.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T76.2 anchor in deterministic checks.",
+            "parentId": "76",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T76.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T76.3 anchor in deterministic checks.",
+            "parentId": "76",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "77",
+        "title": "V1.1 玩法：Raid 结果驱动成长与排名联动（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法：Raid 结果驱动成长与排名联动 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T77\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "76"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
+        "acceptance": [
+          "ACC:T77.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+          "ACC:T77.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+          "ACC:T77.3 产出 logs/e2e/<date>/playability-route77-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+        ],
+        "contractRefs": [
+          "core.reputation.changed",
+          "core.score.changed"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route77-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T77.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T77.1 anchor in deterministic checks.",
+            "parentId": "77",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T77.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T77.2 anchor in deterministic checks.",
+            "parentId": "77",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T77.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T77.3 anchor in deterministic checks.",
+            "parentId": "77",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "78",
+        "title": "V1.1 玩法：两周循环与存档回放一致性（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法：两周循环与存档回放一致性 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T78\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md\nTest Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "77"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md",
+        "acceptance": [
+          "ACC:T78.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T78.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T78.3 产出 logs/e2e/<date>/playability-route78-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "contractRefs": [
+          "core.load.requested",
+          "core.raid.resolved"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route78-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T78.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T78.1 anchor in deterministic checks.",
+            "parentId": "78",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T78.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T78.2 anchor in deterministic checks.",
+            "parentId": "78",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T78.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T78.3 anchor in deterministic checks.",
+            "parentId": "78",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "79",
+        "title": "V1.1 数据治理：跨版本存档回放与损坏恢复（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 数据治理：跨版本存档回放与损坏恢复 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T79\nADR Refs: ADR-0006; ADR-0005; ADR-0003\nChapters: CH05; CH07; CH11\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "78"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0005",
+          "ADR-0003"
+        ],
+        "archRefs": [
+          "CH05",
+          "CH07",
+          "CH11"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T79.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd",
+          "ACC:T79.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd",
+          "ACC:T79.3 产出 logs/ci/<date>/task-79-B-summary.json。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/task-79-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T79.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T79.1 anchor in deterministic checks.",
+            "parentId": "79",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T79.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T79.2 anchor in deterministic checks.",
+            "parentId": "79",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T79.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T79.3 anchor in deterministic checks.",
+            "parentId": "79",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "80",
+        "title": "V1.1 收口：RC 准入评审包（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 收口：RC 准入评审包 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T80\nADR Refs: ADR-0005; ADR-0003; ADR-0015; ADR-0006\nChapters: CH03; CH07; CH09; CH10; CH11\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "79"
+        ],
+        "adrRefs": [
+          "ADR-0005",
+          "ADR-0003",
+          "ADR-0015",
+          "ADR-0006"
+        ],
+        "archRefs": [
+          "CH03",
+          "CH07",
+          "CH09",
+          "CH10",
+          "CH11"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T80.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T80.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T80.3 产出 logs/ci/<date>/task-80-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "contractRefs": [],
+        "artifactRefs": [
+          "logs/ci/<date>/task-80-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T80.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T80.1 anchor in deterministic checks.",
+            "parentId": "80",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T80.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T80.2 anchor in deterministic checks.",
+            "parentId": "80",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T80.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T80.3 anchor in deterministic checks.",
+            "parentId": "80",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "81",
+        "title": "V1.1 玩法深度：招募链路边界与异常分支（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：招募链路边界与异常分支 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T81\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md\nTest Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "80"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md",
+        "acceptance": [
+          "ACC:T81.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+          "ACC:T81.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+          "ACC:T81.3 产出 logs/e2e/<date>/playability-route81-B-summary.json。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+        ],
+        "contractRefs": [
+          "core.activity.feed.appended"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route81-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T81.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T81.1 anchor in deterministic checks.",
+            "parentId": "81",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T81.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T81.2 anchor in deterministic checks.",
+            "parentId": "81",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T81.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T81.3 anchor in deterministic checks.",
+            "parentId": "81",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "82",
+        "title": "V1.1 玩法深度：成员管理状态机与角色变更（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：成员管理状态机与角色变更 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T82\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md\nTest Refs: Game.Core.Tests/Domain/GuildMemberTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "81"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md",
+        "acceptance": [
+          "ACC:T82.1 分解阶段B范围完成且可验证。 Refs: Game.Core.Tests/Domain/GuildMemberTests.cs",
+          "ACC:T82.2 分解阶段B关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/GuildMemberTests.cs",
+          "ACC:T82.3 产出 logs/e2e/<date>/playability-route82-B-summary.json。 Refs: Game.Core.Tests/Domain/GuildMemberTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Domain/GuildMemberTests.cs"
+        ],
+        "contractRefs": [
+          "core.guild.member.role_changed"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route82-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T82.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T82.1 anchor in deterministic checks.",
+            "parentId": "82",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T82.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T82.2 anchor in deterministic checks.",
+            "parentId": "82",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T82.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T82.3 anchor in deterministic checks.",
+            "parentId": "82",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "83",
+        "title": "V1.1 玩法深度：Raid 进阶规则与结果可解释性（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：Raid 进阶规则与结果可解释性 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T83\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "82"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
+        "acceptance": [
+          "ACC:T83.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+          "ACC:T83.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+          "ACC:T83.3 产出 logs/e2e/<date>/playability-route83-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+        ],
+        "contractRefs": [
+          "core.activity.feed.appended"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route83-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T83.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T83.1 anchor in deterministic checks.",
+            "parentId": "83",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T83.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T83.2 anchor in deterministic checks.",
+            "parentId": "83",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T83.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T83.3 anchor in deterministic checks.",
+            "parentId": "83",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "84",
+        "title": "V1.1 玩法深度：经济与后勤联动闭环（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：经济与后勤联动闭环 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T84\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "83"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+        "acceptance": [
+          "ACC:T84.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+          "ACC:T84.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+          "ACC:T84.3 产出 logs/e2e/<date>/playability-route84-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+        ],
+        "contractRefs": [
+          "core.load.requested"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route84-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T84.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T84.1 anchor in deterministic checks.",
+            "parentId": "84",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T84.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T84.2 anchor in deterministic checks.",
+            "parentId": "84",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T84.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T84.3 anchor in deterministic checks.",
+            "parentId": "84",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "85",
+        "title": "V1.1 玩法深度：媒体事件与声望反馈闭环（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：媒体事件与声望反馈闭环 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T85\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md\nTest Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "84"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md",
+        "acceptance": [
+          "ACC:T85.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd",
+          "ACC:T85.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd",
+          "ACC:T85.3 产出 logs/e2e/<date>/playability-route85-B-summary.json。 Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/UI/test_hud_reputation_display.gd",
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd"
+        ],
+        "contractRefs": [
+          "core.activity.feed.appended"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route85-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T85.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T85.1 anchor in deterministic checks.",
+            "parentId": "85",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T85.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T85.2 anchor in deterministic checks.",
+            "parentId": "85",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T85.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T85.3 anchor in deterministic checks.",
+            "parentId": "85",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "86",
+        "title": "V1.1 玩法扩展：WorldBoss 从入口到可玩闭环（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法扩展：WorldBoss 从入口到可玩闭环 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T86\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nTest Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "85"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+        "acceptance": [
+          "ACC:T86.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T86.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T86.3 产出 logs/e2e/<date>/playability-route86-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "contractRefs": [
+          "core.worldboss.resolved"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route86-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T86.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T86.1 anchor in deterministic checks.",
+            "parentId": "86",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T86.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T86.2 anchor in deterministic checks.",
+            "parentId": "86",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T86.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T86.3 anchor in deterministic checks.",
+            "parentId": "86",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "87",
+        "title": "V1.1 玩法扩展：WorldBoss 从入口到可玩闭环（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法扩展：WorldBoss 从入口到可玩闭环 的分解阶段C，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T87\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md\nTest Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "86"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+        "acceptance": [
+          "ACC:T87.1 分解阶段C范围完成且可验证。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+          "ACC:T87.2 分解阶段C关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+          "ACC:T87.3 产出 logs/e2e/<date>/playability-route87-C-summary.json。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+        ],
+        "contractRefs": [
+          "core.activity.feed.appended"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route87-C-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (C)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T87.1 for phase C.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T87.1 anchor in deterministic checks.",
+            "parentId": "87",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (C)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T87.2 for phase C.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T87.2 anchor in deterministic checks.",
+            "parentId": "87",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (C)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T87.3 for phase C.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T87.3 anchor in deterministic checks.",
+            "parentId": "87",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "88",
+        "title": "V1.1 玩法扩展：PVP 从入口到匹配结算（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法扩展：PVP 从入口到匹配结算 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T88\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "87"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md",
+        "acceptance": [
+          "ACC:T88.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd",
+          "ACC:T88.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd",
+          "ACC:T88.3 产出 logs/e2e/<date>/playability-route88-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd"
+        ],
+        "contractRefs": [
+          "core.pvp.match.resolved"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route88-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T88.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T88.1 anchor in deterministic checks.",
+            "parentId": "88",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T88.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T88.2 anchor in deterministic checks.",
+            "parentId": "88",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T88.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T88.3 anchor in deterministic checks.",
+            "parentId": "88",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "89",
+        "title": "V1.1 玩法扩展：PVP 从入口到匹配结算（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法扩展：PVP 从入口到匹配结算 的分解阶段C，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T89\nADR Refs: ADR-0004; ADR-0005; ADR-0006; ADR-0018\nChapters: CH01; CH04; CH05; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md\nTest Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "88"
+        ],
+        "adrRefs": [
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH04",
+          "CH05",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md",
+        "acceptance": [
+          "ACC:T89.1 分解阶段C范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T89.2 分解阶段C关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T89.3 产出 logs/e2e/<date>/playability-route89-C-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "contractRefs": [
+          "core.score.changed"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route89-C-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (C)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T89.1 for phase C.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T89.1 anchor in deterministic checks.",
+            "parentId": "89",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (C)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T89.2 for phase C.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T89.2 anchor in deterministic checks.",
+            "parentId": "89",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (C)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T89.3 for phase C.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T89.3 anchor in deterministic checks.",
+            "parentId": "89",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "90",
+        "title": "V1.1 平衡治理：玩法遥测与数值调参闭环（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 平衡治理：玩法遥测与数值调参闭环 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T90\nADR Refs: ADR-0003; ADR-0004; ADR-0005; ADR-0015; ADR-0018\nChapters: CH01; CH03; CH04; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md\nTest Refs: Tests.Godot/tests/UI/test_activity_feed_scene.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "89"
+        ],
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0015",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH03",
+          "CH04",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md",
+        "acceptance": [
+          "ACC:T90.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+          "ACC:T90.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+          "ACC:T90.3 产出 logs/e2e/<date>/playability-route90-B-summary.json。 Refs: Tests.Godot/tests/UI/test_activity_feed_scene.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/UI/test_activity_feed_scene.gd"
+        ],
+        "contractRefs": [
+          "core.reputation.changed"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route90-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (B)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T90.1 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T90.1 anchor in deterministic checks.",
+            "parentId": "90",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (B)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T90.2 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T90.2 anchor in deterministic checks.",
+            "parentId": "90",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (B)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T90.3 for phase B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T90.3 anchor in deterministic checks.",
+            "parentId": "90",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "91",
+        "title": "V1.1 平衡治理：玩法遥测与数值调参闭环（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 平衡治理：玩法遥测与数值调参闭环 的分解阶段C，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T91\nADR Refs: ADR-0003; ADR-0004; ADR-0005; ADR-0015; ADR-0018\nChapters: CH01; CH03; CH04; CH06; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "90"
+        ],
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0004",
+          "ADR-0005",
+          "ADR-0015",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH03",
+          "CH04",
+          "CH06",
+          "CH07",
+          "CH09"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md",
+        "acceptance": [
+          "ACC:T91.1 分解阶段C范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T91.2 分解阶段C关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T91.3 产出 logs/e2e/<date>/playability-route91-C-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "contractRefs": [
+          "core.score.changed"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route91-C-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (C)",
+            "description": "Freeze acceptance scope and deterministic refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T91.1 for phase C.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T91.1 anchor in deterministic checks.",
+            "parentId": "91",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 2,
+            "title": "Implement behavior (C)",
+            "description": "Implement minimal complete behavior for current phase.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T91.2 for phase C.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T91.2 anchor in deterministic checks.",
+            "parentId": "91",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (C)",
+            "description": "Persist reproducible evidence artifacts for acceptance replay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T91.3 for phase C.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T91.3 anchor in deterministic checks.",
+            "parentId": "91",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable via logs/** artifacts."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 4
+      },
+      {
+        "id": "92",
+        "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段2）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的分解阶段B，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T92\nADR Refs: ADR-0003; ADR-0004; ADR-0005\nChapters: CH01; CH03; CH04; CH05\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "91"
+        ],
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0004",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH03",
+          "CH04",
+          "CH05"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T92.1 R2-A阶段范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T92.2 R2-A阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T92.3 产出 logs/e2e/<date>/playability-route92-R2-A-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "contractRefs": [
+          "core.save.requested"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route92-R2-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-A)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T92.1 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T92.1 anchor in deterministic checks.",
+            "parentId": "92",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-A)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T92.2 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T92.2 anchor in deterministic checks.",
+            "parentId": "92",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-A)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T92.3 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T92.3 anchor in deterministic checks.",
+            "parentId": "92",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "93",
+        "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的分解阶段C，聚焦单一交付闭环。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T93\nADR Refs: ADR-0003; ADR-0004; ADR-0005\nChapters: CH01; CH03; CH04; CH05\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "92"
+        ],
+        "adrRefs": [
+          "ADR-0003",
+          "ADR-0004",
+          "ADR-0005"
+        ],
+        "archRefs": [
+          "CH01",
+          "CH03",
+          "CH04",
+          "CH05"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T93.1 R2-A阶段范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
+          "ACC:T93.2 R2-A阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
+          "ACC:T93.3 产出 logs/e2e/<date>/playability-route93-R2-A-summary.json。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+        ],
+        "contractRefs": [
+          "core.load.requested"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route93-R2-A-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-A)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T93.1 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T93.1 anchor in deterministic checks.",
+            "parentId": "93",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-A)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T93.2 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T93.2 anchor in deterministic checks.",
+            "parentId": "93",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-A)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T93.3 for R2-A.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T93.3 anchor in deterministic checks.",
+            "parentId": "93",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "94",
+        "title": "V1.1 玩法：两周循环与存档回放一致性（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法：两周循环与存档回放一致性 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T94\nADR Refs: ADR-0006; ADR-0018\nChapters: CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "93"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md",
+        "acceptance": [
+          "ACC:T94.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+          "ACC:T94.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+          "ACC:T94.3 产出 logs/e2e/<date>/playability-route94-R2-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+        ],
+        "contractRefs": [
+          "core.save.requested"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route94-R2-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-B)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T94.1 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T94.1 anchor in deterministic checks.",
+            "parentId": "94",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-B)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T94.2 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T94.2 anchor in deterministic checks.",
+            "parentId": "94",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-B)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T94.3 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T94.3 anchor in deterministic checks.",
+            "parentId": "94",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "95",
+        "title": "V1.1 玩法深度：招募链路边界与异常分支（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：招募链路边界与异常分支 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T95\nADR Refs: ADR-0006; ADR-0018\nChapters: CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md\nTest Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.EdgeCases.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "94"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md",
+        "acceptance": [
+          "ACC:T95.1 R2-B阶段范围完成且可验证。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.EdgeCases.cs",
+          "ACC:T95.2 R2-B阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.EdgeCases.cs",
+          "ACC:T95.3 产出 logs/e2e/<date>/playability-route95-R2-B-summary.json。 Refs: Game.Core.Tests/Services/GuildRecruitmentServiceTests.EdgeCases.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Services/GuildRecruitmentServiceTests.EdgeCases.cs"
+        ],
+        "contractRefs": [
+          "core.guild.member.joined"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route95-R2-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-B)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T95.1 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T95.1 anchor in deterministic checks.",
+            "parentId": "95",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-B)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T95.2 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T95.2 anchor in deterministic checks.",
+            "parentId": "95",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-B)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T95.3 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T95.3 anchor in deterministic checks.",
+            "parentId": "95",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "96",
+        "title": "V1.1 玩法深度：成员管理状态机与角色变更（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：成员管理状态机与角色变更 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T96\nADR Refs: ADR-0006; ADR-0018\nChapters: CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md\nTest Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "95"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md",
+        "acceptance": [
+          "ACC:T96.1 R2-B阶段范围完成且可验证。 Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs",
+          "ACC:T96.2 R2-B阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs",
+          "ACC:T96.3 产出 logs/e2e/<date>/playability-route96-R2-B-summary.json。 Refs: Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Domain/GuildRosterAcceptanceTests.cs"
+        ],
+        "contractRefs": [
+          "core.guild.member.left"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route96-R2-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-B)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T96.1 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T96.1 anchor in deterministic checks.",
+            "parentId": "96",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-B)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T96.2 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T96.2 anchor in deterministic checks.",
+            "parentId": "96",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-B)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T96.3 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T96.3 anchor in deterministic checks.",
+            "parentId": "96",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "97",
+        "title": "V1.1 玩法深度：Raid 进阶规则与结果可解释性（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：Raid 进阶规则与结果可解释性 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T97\nADR Refs: ADR-0006; ADR-0018\nChapters: CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md\nTest Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "96"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
+        "acceptance": [
+          "ACC:T97.1 R2-B阶段范围完成且可验证。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+          "ACC:T97.2 R2-B阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+          "ACC:T97.3 产出 logs/e2e/<date>/playability-route97-R2-B-summary.json。 Refs: Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs"
+        ],
+        "contractRefs": [
+          "core.raid.resolved"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route97-R2-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-B)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T97.1 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T97.1 anchor in deterministic checks.",
+            "parentId": "97",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-B)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T97.2 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T97.2 anchor in deterministic checks.",
+            "parentId": "97",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-B)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T97.3 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T97.3 anchor in deterministic checks.",
+            "parentId": "97",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "98",
+        "title": "V1.1 玩法深度：经济与后勤联动闭环（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：经济与后勤联动闭环 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T98\nADR Refs: ADR-0006; ADR-0018\nChapters: CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "97"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+        "acceptance": [
+          "ACC:T98.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T98.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+          "ACC:T98.3 产出 logs/e2e/<date>/playability-route98-R2-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+        ],
+        "contractRefs": [
+          "core.save.requested"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route98-R2-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-B)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T98.1 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T98.1 anchor in deterministic checks.",
+            "parentId": "98",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-B)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T98.2 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T98.2 anchor in deterministic checks.",
+            "parentId": "98",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-B)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T98.3 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T98.3 anchor in deterministic checks.",
+            "parentId": "98",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "99",
+        "title": "V1.1 玩法深度：媒体事件与声望反馈闭环（阶段3）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 玩法深度：媒体事件与声望反馈闭环 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T99\nADR Refs: ADR-0006; ADR-0018\nChapters: CH05; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md\nTest Refs: Game.Core.Tests/Domain/ReputationDomainEventsTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "98"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH05",
+          "CH06",
+          "CH07"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md",
+        "acceptance": [
+          "ACC:T99.1 R2-B阶段范围完成且可验证。 Refs: Game.Core.Tests/Domain/ReputationDomainEventsTests.cs",
+          "ACC:T99.2 R2-B阶段关键行为通过确定性测试。 Refs: Game.Core.Tests/Domain/ReputationDomainEventsTests.cs",
+          "ACC:T99.3 产出 logs/e2e/<date>/playability-route99-R2-B-summary.json。 Refs: Game.Core.Tests/Domain/ReputationDomainEventsTests.cs"
+        ],
+        "testRefs": [
+          "Game.Core.Tests/Domain/ReputationDomainEventsTests.cs"
+        ],
+        "contractRefs": [
+          "core.reputation.changed"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route99-R2-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-B)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T99.1 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T99.1 anchor in deterministic checks.",
+            "parentId": "99",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-B)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T99.2 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T99.2 anchor in deterministic checks.",
+            "parentId": "99",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-B)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T99.3 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T99.3 anchor in deterministic checks.",
+            "parentId": "99",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "100",
+        "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段4）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T100\nADR Refs: ADR-0006; ADR-0015; ADR-0018\nChapters: CH06; CH07; CH09; CH10; CH11\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "99"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0015",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH06",
+          "CH07",
+          "CH09",
+          "CH10",
+          "CH11"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T100.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+          "ACC:T100.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd",
+          "ACC:T100.3 产出 logs/e2e/<date>/playability-route100-R2-B-summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
+        ],
+        "contractRefs": [
+          "core.raid.resolved"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route100-R2-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-B)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T100.1 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T100.1 anchor in deterministic checks.",
+            "parentId": "100",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-B)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T100.2 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T100.2 anchor in deterministic checks.",
+            "parentId": "100",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-B)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T100.3 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T100.3 anchor in deterministic checks.",
+            "parentId": "100",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "101",
+        "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段5）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T101\nADR Refs: ADR-0006; ADR-0015; ADR-0018\nChapters: CH06; CH07; CH09; CH10; CH11\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "100"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0015",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH06",
+          "CH07",
+          "CH09",
+          "CH10",
+          "CH11"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T101.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T101.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+          "ACC:T101.3 产出 logs/e2e/<date>/playability-route101-R2-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+        ],
+        "contractRefs": [
+          "core.save.requested"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route101-R2-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-B)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T101.1 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T101.1 anchor in deterministic checks.",
+            "parentId": "101",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-B)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T101.2 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T101.2 anchor in deterministic checks.",
+            "parentId": "101",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-B)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T101.3 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T101.3 anchor in deterministic checks.",
+            "parentId": "101",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
+      },
+      {
+        "id": "102",
+        "title": "V1.1 收口：玩法全链路回归与发布前验收（阶段6）",
+        "status": "pending",
+        "priority": "medium",
+        "description": "承接 V1.1 收口：玩法全链路回归与发布前验收 的第二轮分解阶段 R2-B，聚焦剩余复杂度。",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T102\nADR Refs: ADR-0006; ADR-0015; ADR-0018\nChapters: CH06; CH07; CH09; CH10; CH11\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "dependencies": [
+          "101"
+        ],
+        "adrRefs": [
+          "ADR-0006",
+          "ADR-0015",
+          "ADR-0018"
+        ],
+        "archRefs": [
+          "CH06",
+          "CH07",
+          "CH09",
+          "CH10",
+          "CH11"
+        ],
+        "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+        "acceptance": [
+          "ACC:T102.1 R2-B阶段范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
+          "ACC:T102.2 R2-B阶段关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
+          "ACC:T102.3 产出 logs/e2e/<date>/playability-route102-R2-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+        ],
+        "testRefs": [
+          "Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+        ],
+        "contractRefs": [
+          "core.load.requested"
+        ],
+        "artifactRefs": [
+          "logs/e2e/<date>/playability-route102-R2-B-summary.json"
+        ],
+        "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
+        "recommendedSubtasks": 3,
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lock scope (R2-B)",
+            "description": "Freeze acceptance boundary and refs.",
+            "dependencies": [],
+            "details": "Bind ACC:T102.1 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T102.1 anchor in deterministic checks.",
+            "parentId": "102",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 2,
+            "title": "Implement and verify (R2-B)",
+            "description": "Implement minimal complete behavior for this slice.",
+            "dependencies": [
+              1
+            ],
+            "details": "Bind ACC:T102.2 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T102.2 anchor in deterministic checks.",
+            "parentId": "102",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          },
+          {
+            "id": 3,
+            "title": "Persist evidence (R2-B)",
+            "description": "Persist reproducible logs/** artifacts.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Bind ACC:T102.3 for R2-B.",
+            "status": "pending",
+            "testStrategy": "Use ACC:T102.3 anchor in deterministic checks.",
+            "parentId": "102",
+            "updatedAt": "2026-03-02T00:00:00+00:00",
+            "implementationNotes": "Keep changes deterministic and traceable."
+          }
+        ],
+        "updatedAt": "2026-03-02T00:00:00+00:00",
+        "complexity": 3
       }
     ],
     "metadata": {

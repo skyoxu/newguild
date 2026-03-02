@@ -6,6 +6,7 @@ from pathlib import Path
 
 import check_tasks_all_refs
 import check_tasks_back_references
+import fix_view_chapter_refs_by_adr
 
 
 def main() -> None:
@@ -30,9 +31,22 @@ def main() -> None:
         default="",
         help="Optional summary json output path for all-mode.",
     )
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Auto-fix chapter_refs from adr_refs before validation.",
+    )
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
+
+    if args.fix:
+        fix_mode = "back" if args.mode == "backlog" else "all"
+        fix_result = fix_view_chapter_refs_by_adr.run_fix(root, mode=fix_mode, write=True)
+        print(
+            "TASK_LINKS_VALIDATE_FIX "
+            f"mode={fix_mode} changed={fix_result['changed_total']} report={fix_result['report_file']}"
+        )
 
     ok_backlog = True
     ok_all = True
