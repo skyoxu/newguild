@@ -120,11 +120,30 @@ def build_source_text_blocks(
     if not title_text:
         raise ValueError("master.title is required in source_blocks")
 
-    blocks: list[str] = [title_text, str(details or ""), str(test_strategy or "")]
+    details_text = str(details or "")
+    strategy_text = str(test_strategy or "")
+    blocks: list[str] = [title_text, details_text, strategy_text]
+    if details_text:
+        blocks.append(f"details: {details_text}")
+    if strategy_text:
+        blocks.append(f"testStrategy: {strategy_text}")
     for item in subtasks:
-        blocks.append(str(item.get("title") or ""))
-        blocks.append(str(item.get("details") or ""))
-        blocks.append(str(item.get("testStrategy") or ""))
+        sub_title = str(item.get("title") or "")
+        sub_details = str(item.get("details") or "")
+        sub_test_strategy = str(item.get("testStrategy") or "")
+        blocks.append(sub_title)
+        blocks.append(sub_details)
+        blocks.append(sub_test_strategy)
+        if sub_details:
+            blocks.append(f"details: {sub_details}")
+        if sub_test_strategy:
+            blocks.append(f"testStrategy: {sub_test_strategy}")
+        # Keep composed subtask phrases as source blocks because verdict excerpts
+        # frequently cite "SubtaskTitle :: SubtaskDetails".
+        if sub_title and sub_details:
+            blocks.append(f"{sub_title} :: {sub_details}")
+        if sub_title and sub_test_strategy:
+            blocks.append(f"{sub_title} :: {sub_test_strategy}")
 
     if not str(blocks[0] or "").strip():
         raise ValueError("source_blocks[0] must be non-empty master.title")
