@@ -39,7 +39,10 @@
     "acceptance": [
       "存在一份针对 newguild 的最小 PRD 片段（含输入/输出/状态/存储与非功能约束），并显式引用 ADR-0018/0004/0005/0023/0011。",
       "在 overlays/PRD-*/08 下新增或调整功能纵切文档，严格遵守 08 章只引用 01/02/03 口径的规则（不复制阈值）。",
-      "每个 Story 至少关联一条 Test-Ref（xUnit 或 GdUnit4），并在文档脚注中列出。"
+      "每个 Story 至少关联一条 Test-Ref（xUnit 或 GdUnit4），并在文档脚注中列出。",
+      "PRD 片段与 overlays 08 文档中的 Story 标识、输入/输出、状态与存储描述需相互一致；任一对应项缺失或冲突即判定未通过。",
+      "文档审阅结论需明确记录为“PRD 与 ADR/Phase 一致”后方可通过；若审阅结论为不一致，则本任务保持未通过状态。",
+      "任务/回链校验脚本结果需为通过（task-links-validate）；若脚本报告失败，则本任务验收不通过。"
     ],
     "test_strategy": [
       "文档审阅：由架构负责人确认 PRD 与 ADR/Phase 一致性。",
@@ -90,7 +93,9 @@
       "新增 scripts/python/smoke_headless.py（或等价脚本），支持 --godot-bin/--scene/--timeout-sec/--project-path 参数，并在 Windows 上可直接运行。",
       "非 strict 模式下，脚本行为与现有 PowerShell 版本等价，输出写入 logs/ci/<date>/smoke/**，并保留宽松判定。",
       "strict 模式下，仅当日志包含 [TEMPLATE_SMOKE_READY] 或 [DB] opened 时返回 0，否则返回非零并在日志中标记为 strict-failed。",
-      "ci-windows.yml 或 windows-quality-gate.yml 至少提供一条注释示例，展示如何在受保护分支启用 strict 模式。"
+      "ci-windows.yml 或 windows-quality-gate.yml 至少提供一条注释示例，展示如何在受保护分支启用 strict 模式。",
+      "在 Windows 本地通过 dev_cli.py 调用 Python 版 smoke 时，非 strict 与 strict 两种模式的退出码和日志结果可稳定复现，并生成 logs/ci/<date>/smoke/headless.log 与 logs/ci/<date>/smoke/selfcheck-summary.json。",
+      "在 CI 非受保护分支启用 strict 模式且日志不包含 [TEMPLATE_SMOKE_READY] 与 [DB] opened 时，smoke 门禁必须失败，且失败原因可在日志中定位到 strict-failed。"
     ],
     "test_strategy": [
       "本地运行：在 Windows 环境下通过 dev_cli.py 调用 Python 版 smoke，验证日志与退出码。",
@@ -143,7 +148,9 @@
       "scripts/python/run_dotnet.py 读取覆盖率结果并在 summary.json 中写入 lines/branches 与阈值配置（默认 90/85，可由环境变量覆盖）。",
       "当覆盖率低于阈值时，quality_gates.py 在 summary 中标记为 failed，并可配置为软/硬门禁（至少支持硬门禁）。",
       "quality_gates.py 能调用 run_gdunit.py 或等价封装，执行 Adapters+Security 硬门禁集合，并在 quality-gates-summary.json 中汇总结果。",
-      "Windows Quality Gate 工作流调用 quality_gates.py all 时，能在 Step Summary 中清晰展示 dotnet 覆盖率与 GdUnit4 集合结果。"
+      "Windows Quality Gate 工作流调用 quality_gates.py all 时，能在 Step Summary 中清晰展示 dotnet 覆盖率与 GdUnit4 集合结果。",
+      "在硬门禁模式下，只要 dotnet 覆盖率未达阈值或 Adapters+Security GdUnit4 集合失败，quality_gates.py all 必须返回非零 exit code，且 summary 保持 failed。",
+      "当 dotnet 覆盖率达标且 Adapters+Security GdUnit4 集合通过时，quality-gates-summary.json 必须同时包含两类结果并标记通过，不得以缺失子结果判定通过。"
     ],
     "test_strategy": [
       "本地模拟：手工降低测试覆盖率，验证 quality_gates.py 将其标记为 failed，并按配置返回非零 exit code。",
@@ -208,7 +215,13 @@
       "文件访问统一通过 SecurityFileAdapter（或等价组件）封装 FileAccess/DirAccess：仅允许 res:// 读取与 user:// 读写，拒绝绝对路径与 .. 越权访问，并将拒绝写入 security-audit.jsonl。",
       "OS.execute 默认在运行时禁用，或仅在开发/CI 模式通过 SecurityProcessAdapter 白名单执行，并记录审计日志。",
       "安全审计 JSONL（logs/ci/<date>/security-audit.jsonl 与 user://logs/security/**）均通过验证脚本检查：每行合法 JSON，至少包含 {ts, action, reason, target, caller} 字段。",
-      "相关 GdUnit4 Hard 测试覆盖允许/拒绝/非法三态场景，并在 CI 中作为硬门禁的一部分。"
+      "相关 GdUnit4 Hard 测试覆盖允许/拒绝/非法三态场景，并在 CI 中作为硬门禁的一部分。",
+      "GdUnit4 Hard 安全集测试需覆盖 URL、文件、进程三类适配器的 allow/deny/invalid/SSRF 四态，并以可复现报告证明测试结果为 100% 通过。",
+      "xUnit 单元测试（Game.Core.Tests/Services/SecurityAdapterTests.cs）持续验证安全契约，且关键放行/拒绝语义与 GdUnit4 集成测试结果一致。",
+      "SecurityUrlAdapter 的 Godot C# 与 GDScript 互操作路径可直接调用并通过 Hard 用例验证；在拒绝路径下必须产生可校验的 security-audit.jsonl 记录。",
+      "SecurityProcessAdapter 的审计输出不得包含明文敏感参数（如 password、token、api-key）；若检测到未脱敏值则验收失败。",
+      "scripts/python/validate_audit_logs.py 在 --strict 模式下对无效 JSON、缺失字段、非法时间戳或 action 命名不合规返回非 0 退出码，并输出可消费的错误报告。",
+      "架构验收命令 /acceptance-check 执行完成且结果为无 Critical Blockers。"
     ],
     "test_strategy": [
       "GdUnit4 安全用例：编写/扩展 Hard 集测试外链、文件、进程三类接口的 allow/deny/invalid 行为。",
@@ -266,7 +279,9 @@
       "Game.Core/Performance/** 下存在 PerformanceTracker/PerformanceMetrics/QueryPerformanceTracker 等类型，API 与 Phase-15 文档保持一致且不依赖 Godot API。",
       "xUnit 测试覆盖性能库的关键统计逻辑（P50/P95/平均值/最大值），并生成覆盖率报告。",
       "Godot 侧 PerfTracker 使用或适配 Game.Core 性能库的输出，将帧时间/关键路径指标写入 user://logs/perf/perf.json。",
-      "新增 scripts/python/performance_gates.py（或等价脚本），读取 PerfTracker JSON 与预算阈值（环境变量），在 logs/perf/<date>/summary.json 与 logs/ci/<date>/perf/** 中生成结果，并通过 exit code 暴露软/硬门禁。"
+      "新增 scripts/python/performance_gates.py（或等价脚本），读取 PerfTracker JSON 与预算阈值（环境变量），在 logs/perf/<date>/summary.json 与 logs/ci/<date>/perf/** 中生成结果，并通过 exit code 暴露软/硬门禁。",
+      "CI（windows-quality-gate 或等价流程）实际执行性能门禁步骤并消费上述 exit code：硬门禁超阈值时该步骤失败，未超阈值时通过，且 logs/ci/<date>/perf/** 工件可被归档。",
+      "当 perf.json 缺失、JSON 解析失败或必需指标缺失时，性能门禁不得默认为通过；脚本返回非 0 并在 logs/ci/<date>/perf/** 写出错误原因。"
     ],
     "test_strategy": [
       "单元测试：为性能库编写 xUnit 基准级测试，验证统计函数在不同样本上的正确性。",
@@ -333,7 +348,10 @@
       "Game.Godot 中新增 Observability Autoload（例如 Observability.cs），在游戏启动早期读取并暴露 Release/Environment，并在显式启用时通过 SentryClient（本地 JSONL sink）记录事件。 Refs: Tests.Godot/tests/Obs/test_observability_autoload.gd",
       "Game.Core 中存在 ObservabilityClient/StructuredLogger（或等价实现），通过接口注入到核心服务，避免直接依赖 Godot 或 Sentry。 Refs: Game.Core.Tests/Observability/ObservabilityClientTests.cs",
       "新增 scripts/python/release_health_gate.py，支持配置 SENTRY_* 环境变量与阈值 JSON；GD_OFFLINE_MODE=1 时禁止出网并使用注入的指标；在线模式下必须通过主机白名单校验；生成 logs/ci/<date>/release-health.json 并根据阈值返回 exit code。 Refs: Game.Core.Tests/CI/ReleaseHealthGateTests.cs",
-      "CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），仅在非 PR 事件且 secrets 配置正确时才运行；在线模式下能拉取 Sentry 数据并给出清晰的通过/失败原因。 Refs: Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs"
+      "CI 中存在可选 release-health 步骤（例如 windows-quality-gate 或独立 workflow），仅在非 PR 事件且 secrets 配置正确时才运行；在线模式下能拉取 Sentry 数据并给出清晰的通过/失败原因。 Refs: Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs",
+      "默认行为必须是仅本地 JSONL sink：未显式启用外部上报时，不得初始化或依赖 Sentry SDK，且该默认路径可通过启动与日志输出结果直接验证。",
+      "Game.Core 观测链路必须具备可测试的 PII 脱敏能力（可由 PiiDataScrubber 或等价组件实现）；脱敏后的结构化日志不得包含原始敏感字段值。",
+      "release_health_gate 在线判定必须同时覆盖 Crash-Free Sessions 与 Crash-Free Users 两类指标，并在 release-health.json 中输出阈值、实测值与通过/失败原因，口径与 ADR-0003/0015 一致。"
     ],
     "test_strategy": [
       "核心测试：为 ObservabilityClient 编写 xUnit 测试，验证日志结构化与 PII 脱敏行为。",
@@ -557,7 +575,11 @@
       "Tests.Godot 中存在至少一条完整的垂直切片 GdUnit4 用例：启动主场景 → 进入公会管理界面 → 执行一次最小管理操作（如创建公会或查看成员）→ 正常退出。",
       "Game.Core.Tests 中针对 Guild 与事件引擎的 xUnit 测试存在且可运行，覆盖基础行为与错误路径。",
       "上述代码与测试在 Windows CI（ci-windows.yml）中均能通过基本构建与测试步骤。",
-      "完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。"
+      "完成 T2 最小 Guild 领域事件契约集合：core.guild.created、core.guild.member.joined、core.guild.member.left 已分别在 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs 定义，并有至少一个 xUnit 测试类验证 EventType 常量与关键字段。",
+      "垂直切片 GdUnit4 用例必须通过断言证明最小管理操作产生了可观测结果（数据变化或查询结果可见），不能仅以场景可打开/可关闭判定通过。",
+      "Game.Core.Tests 中至少一条错误路径断言需验证拒绝或失败后的状态不发生非预期变更，防止“空操作”导致测试误通过。",
+      "Windows CI（ci-windows.yml）通过应来自实际执行构建与测试作业，且不得以跳过测试、禁用测试或空测试集满足通过条件。",
+      "针对 core.guild.created、core.guild.member.joined、core.guild.member.left 的测试需逐一校验 EventType 字符串与关键字段映射，不能只校验文件存在。"
     ],
     "test_strategy": [
       "单元测试：扩展 Game.Core.Tests 覆盖 Guild/GuildMember/Raid/Event 等核心类型的构造与业务规则。",
@@ -625,7 +647,9 @@
       "headless smoke 用例能够在不依赖交互的情况下启动游戏主场景，并输出 [TEMPLATE_SMOKE_READY] 或 [DB] opened 标记。",
       "至少存在一条覆盖 PRD 3.0.3 T2 可玩性场景流的端到端测试路径：Game.Core.Tests/Domain/GameTurnSystemTests.cs（或等价用例）验证三阶段一周循环的状态推进，Tests.Godot/tests/Scenes/test_main_scene_smoke.gd（或等价用例）验证从启动主场景进入首周公会管理界面并完成一次“推进一周”的 UI 流程。",
       "失败的测试或 smoke 能在 logs/ci 与 logs/e2e 目录下生成可用于排查的 JSON/文本日志，与 AGENTS.md 中的日志规范一致。",
-      "Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd 已作为 PRD 3.0.3 T2 可玩性场景流的最小测试入口，分别覆盖 Core 回合状态与场景可玩闭环，并挂接在 NG-0021 与 GM-0103 的 Test-Refs 中。"
+      "Game.Core.Tests/Domain/GameLoopTests.cs 与 Tests.Godot/tests/Scenes/Guild/T2PlayableSceneTests.gd 已作为 PRD 3.0.3 T2 可玩性场景流的最小测试入口，分别覆盖 Core 回合状态与场景可玩闭环，并挂接在 NG-0021 与 GM-0103 的 Test-Refs 中。",
+      "当 dotnet test 或 headless smoke 任一环节失败时，dev_cli.py run-ci-basic 与对应 Windows CI 作业必须返回失败状态（非零退出码），不得以“流程通过”结束。",
+      "不得通过跳过关键测试来满足验收：若 Game.Core.Tests 或 Tests.Godot 的目标用例被整体 skip/ignore，则判定该垂直切片测试流程未打通。"
     ],
     "test_strategy": [
       "本地：使用 dev_cli.py run-ci-basic 与 run-smoke-strict（如已实现）验证测试和 smoke 流程。",
@@ -684,7 +708,10 @@
       "docs/prd.txt 中存在 3.2.1 公会管理模块；Overlay/08/_index.md 与 08-FeatureSlice-Guild-Manager.md 的 Front-Matter 包含 PRD-ID=PRD-Guild-Manager 且 PRD-Refs 引用 docs/prd.txt。 Refs: Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs",
       "与公会管理相关的 ADR（至少 ADR-0018/0019/0004/0005）在 08-FeatureSlice-Guild-Manager.md 与 ACCEPTANCE_CHECKLIST.md 的引用集合一致（FeatureSlice 的 ADR 集合必须被清单覆盖）。 Refs: Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs",
       "Taskmaster 任务（Task 22 + NG-0022 视图）在 adrRefs/chapter_refs/overlay_refs/test_refs/artifactRefs 上与 PRD/Base/ADR/Overlay 建立可验证回链。 Refs: Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs",
-      "scripts/sc/acceptance_check.py 已接入 task_links_validate.py；且 ACCEPTANCE_CHECKLIST.md Front-Matter 的 Test-Refs 包含本测试文件，确保 CI 可追溯回链校验。 Refs: Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs"
+      "scripts/sc/acceptance_check.py 已接入 task_links_validate.py；且 ACCEPTANCE_CHECKLIST.md Front-Matter 的 Test-Refs 包含本测试文件，确保 CI 可追溯回链校验。 Refs: Game.Core.Tests/Docs/Task22DocsLinksAcceptanceTests.cs",
+      "Task 22 与 NG-0022 的 chapter_refs 必须覆盖并可解析到 CH01、CH02、CH03、CH04、CH06、CH07 对应 Base 章节；任一章节缺失、文件不存在或引用名不匹配即验收失败。",
+      "对 NG-00xx 与玩法任务执行 task_links_validate 校验时，story_id、adr_refs、chapter_refs、overlay_refs、test_refs 与文档声明必须一致；出现缺失、悬空或不一致时必须返回失败结果，不得以跳过校验或仅告警判定通过。",
+      "Overlay/08（含 _index、FeatureSlice、ACCEPTANCE_CHECKLIST）不得形成与 PRD/Base/ADR 相互冲突或重复口径的独立定义；若检测到重复阈值口径或断链引用，则验收失败。"
     ],
     "test_strategy": [
       "文档审阅：由架构/产品共同检查 PRD/Base/ADR/Overlay 是否互相引用、无矛盾口径。",
@@ -762,7 +789,10 @@
       "应对齐领域事件：发布/消费 contractRefs 中列出的事件（例如 core.ai.cycle.completed, core.ai.cycle.started, core.ai.ecosystem.step.completed, core.ai.intent.issued, core.content.manifest.loaded, core.event_catalog.loaded, core.game.ended, core.game.started ...）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs Game.Core.Tests/Domain/GameLoopContractsTests.cs",
       "应留证：在 logs/** 下产出最小审计/门禁证据（可复现、可追溯）。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs Game.Core.Tests/CI/ReleaseHealthWorkflowTests.cs",
       "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.ai.cycle.completed, core.ai.cycle.started, core.ai.ecosystem.step.completed, core.ai.intent.issued, core.content.manifest.loaded, core.event_catalog.loaded, core.game.ended, core.game.started ...）。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs Game.Core.Tests/Domain/GameLoopContractsTests.cs",
-      "Godot 场景信号/事件桥接冒烟：主场景可启动且不会发布旧的 game.* 事件类型（至少覆盖一次 Create/Play/进入主场景的最小路径）。 Refs: Tests.Godot/tests/Scenes/test_main_scene_signals.gd"
+      "Godot 场景信号/事件桥接冒烟：主场景可启动且不会发布旧的 game.* 事件类型（至少覆盖一次 Create/Play/进入主场景的最小路径）。 Refs: Tests.Godot/tests/Scenes/test_main_scene_signals.gd",
+      "对示例旧事件 game.started、score.changed、player.health.changed 的出现位置完成可验证迁移；迁移后事件类型均满足 core.*.* 模式且语义不变。",
+      "若任一测试、文档或场景桥接路径仍出现旧前缀 game.* 事件类型，则本任务验收失败，不得以“未执行到该路径”或“仅历史残留”判定通过。",
+      "事件常量集合、测试断言集合、Overlay 事件示例集合三者必须一致；差异项（缺失/多余/命名不一致）为 0。"
     ],
     "test_strategy": [
       "本地：运行 GameEngineCoreEventTests，并通过全文搜索核对事件类型常量。",
@@ -862,7 +892,9 @@
       "Game.Core/Observability 下存在 ObservabilityClient/StructuredLogger/PiiDataScrubber 等类型，且不引用任何 Godot API。",
       "核心服务通过依赖注入使用 ILogger/ObservabilityClient 接口，而不是直接依赖 Sentry 或具体实现。",
       "ObservabilityClient 能够生成包含 logger、level、tags、extra、breadcrumbs 的结构化日志对象，并在单元测试中可被验证。",
-      "至少一组 xUnit 测试验证 PII 字段在过滤逻辑中被正确脱敏或丢弃。"
+      "至少一组 xUnit 测试验证 PII 字段在过滤逻辑中被正确脱敏或丢弃。",
+      "在 Game.Core.Tests/Observability/ObservabilityClientTests.cs 中，使用 fake/spy 捕获 ObservabilityClient 的事件上报调用，至少断言事件名与负载字段可被验证；当输入不满足上报条件时，不得产生成功上报记录。",
+      "dotnet-unit 执行后，Observability 相关测试结果必须出现在测试与覆盖率产物中；若该测试未执行或未纳入覆盖率统计，则验收不通过。"
     ],
     "test_strategy": [
       "本地：为 ObservabilityClient 编写 xUnit 测试，使用 fake/spy 对象捕获日志与事件上报行为。",
@@ -1075,7 +1107,10 @@
     "acceptance": [
       "新增 scripts/python/validate_perf.py 与 scripts/python/validate_audit_logs.py，能够检查 P95 是否在预算内，以及 security-audit.jsonl 每行为合法 JSON 且包含必需字段。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
       "quality_gates.py 支持在 all 模式下调用上述校验脚本，并在失败时返回非零退出码。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
-      "CI 日志中可以看到 P95 与审计 JSONL 校验的摘要输出，并产生对应 JSON 摘要文件。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs"
+      "CI 日志中可以看到 P95 与审计 JSONL 校验的摘要输出，并产生对应 JSON 摘要文件。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "当 logs/perf/summary.json 中 P95 超过预算阈值、缺失关键字段或文件不可读时，性能校验必须失败并输出可定位原因到 JSON 摘要，不得静默跳过。",
+      "当 logs/ci/<date>/security-audit.jsonl 存在任一非法 JSON 行、缺失必需字段或文件不可读时，审计校验必须失败并输出可定位原因，不得以部分成功判定通过。",
+      "quality_gates.py 在 all 模式下仅当性能校验与审计校验均通过时返回 0；任一校验失败时返回非零，并在 CI 输出中明确标识失败项。"
     ],
     "test_strategy": [
       "单元：为 validate_perf 与 validate_audit_logs 编写测试，验证边界条件与错误路径。",
@@ -1620,7 +1655,9 @@
       "在 windows-quality-gate 或等价 CI 工作流中增加依赖护栏脚本的调用步骤（初期可为软门禁），当检测到违规依赖时在 Step Summary 中给出清晰的违规列表，后续可按需要将部分规则提升为硬门禁。 Refs: Game.Core.Tests/Architecture/DependencyGuardSummaryFormatTests.cs",
       "应完成：架构依赖护栏与依赖图校验骨架 Refs: Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs",
       "应有测试：至少新增/更新 1 个确定性测试并在 test_refs 中引用。 Refs: Game.Core.Tests/Architecture/DependencyGuardViolationDetectionTests.cs",
-      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/Architecture/DependencyGuardArtifactsTests.cs"
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/Architecture/DependencyGuardArtifactsTests.cs",
+      "当依赖矩阵规则全部满足时，logs/ci/<date>/dependency-guard.json 必须给出可机器读取的总体状态且 violations 为空；当任一规则被触发时，violations 必须非空并逐条包含 source、target、rule，防止“无违规明细仍判定通过”的空转结果。",
+      "校验结果必须能独立覆盖并报告以下收紧约束是否违反：Game.Core 禁止依赖 Godot、Game.Core 禁止依赖 Tests.*、Game.Godot 禁止依赖 Tests.*、Scripts/Adapters 不得反向依赖 Scripts/Scenes（UI）。"
     ],
     "test_strategy": [
       "本地：构造刻意违反依赖矩阵的示例（例如在 Game.Core 中添加 using Godot; 或在 Scripts/Core 中直接引用 Godot API），运行 dependency_guard 脚本验证其能正确发现并在 JSON/文本摘要中报告。",
@@ -1678,7 +1715,9 @@
     "acceptance": [
       "SECURITY_AUDIT_GAMELOOP_REPORT.md 以 ADR-0019 为基线，明确区分 T2_BLOCKING 与 NG_BACKLOG 安全问题，并与 cifix.txt 中的技术债记录一致。",
       "F001/F002/F005 至少映射到一条 T2 相关 NG/GM 任务，F003/F004/F006/F007 映射到 NG 安全或架构 backlog 任务，且在 tasks_back.json / tasks_gameplay.json 中补齐 adr_refs/chapter_refs/overlay_refs/test_refs。",
-      "运行 py -3 scripts/python/task_links_validate.py 时，GameLoop 相关任务不再因为 ADR/Chapter 映射或缺失 Test-Refs 报错。"
+      "运行 py -3 scripts/python/task_links_validate.py 时，GameLoop 相关任务不再因为 ADR/Chapter 映射或缺失 Test-Refs 报错。",
+      "tasks_back.json 与 tasks_gameplay.json 中，F001–F007 每一项都可追溯到至少一条任务，且每条任务必须明确归类为 T2_BLOCKING 或 NG_BACKLOG；若出现未归类或不可追溯项则验收失败。",
+      "若任一 GameLoop 相关任务缺失 adr_refs/chapter_refs/overlay_refs/test_refs 任一字段或字段为空，则该任务映射视为未完成，本任务不得标记通过。"
     ],
     "test_strategy": [
       "人工对比 logs/security-audit-gameloop.* 与 tasks_back.json / tasks_gameplay.json，确认每条 F00x 至少有一条对应任务可追踪。",
@@ -1746,7 +1785,9 @@
       "Game.Core/Domain/Turn 下新增 SaveIdValue（或等价类型），实现 [a-zA-Z0-9_-]{1,64} 的白名单校验，非法输入抛出 ArgumentException。",
       "GameTurnState / GameTurnSystem 在内部使用 SaveIdValue 作为 SaveId 的入口类型，确保后续事件与存储只接受经过校验的值。",
       "Game.Core.Tests 中新增 SaveIdValueTests 与针对无效 SaveId 的 GameTurnSystem / GameLoop 测试，覆盖空字符串、超长、SQL 片段、路径遍历等典型攻击向量。",
-      "dotnet test Game.Core.Tests 在本地与 CI 均可通过，且与 PRD 3.0.3 T2 可玩性场景流描述一致。"
+      "dotnet test Game.Core.Tests 在本地与 CI 均可通过，且与 PRD 3.0.3 T2 可玩性场景流描述一致。",
+      "当 SaveId 不满足白名单规则时，GameTurnSystem 与 GameLoop 对应流程必须显式拒绝该输入，并且不会产生新的状态变更、事件发布或存储写入。",
+      "白名单边界值验证必须可观察：长度为 1 和 64 的 SaveId 被接受，长度为 0 和 65 的 SaveId 被拒绝。"
     ],
     "test_strategy": [
       "单元测试：在 SaveIdValueTests 中穷举典型非法/合法输入，验证构造/工厂方法的行为与异常信息。",
@@ -1806,7 +1847,11 @@
       "应完成：GameLoop 架构骨架收敛：Ports/时间/状态整理 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs",
       "应有测试：至少包含并通过 test_refs 引用的测试（4 个）。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs",
       "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.game_turn.started）。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs",
-      "应留证：在 logs/** 下产出最小审计/门禁证据（可复现、可追溯）。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs"
+      "应留证：在 logs/** 下产出最小审计/门禁证据（可复现、可追溯）。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs",
+      "ACC:T45.1 必须有可复现实证据，证明 Ports 归档与首回合状态 record 化同时成立；若仍存在等价可变实例标志驱动首回合发布，则验收不通过。",
+      "ACC:T45.2 必须有可复现实证据，证明 dependency_guard.py（或等效守卫检查）通过且与本次变更对应；守卫失败或无结果文件均判定不通过。",
+      "Game.Core.Tests 全量回归结果必须为通过；若任一 GameLoop 相关测试失败或被跳过，则验收不通过。",
+      "证据应同时覆盖代码落点（GameTurnSystem、GameTurnState、DomainEvent）与测试/门禁输出；任一维度缺失则验收不通过。"
     ],
     "test_strategy": [
       "结构检查：通过现有 dependency_guard.py（或临时脚本）扫描接口文件位置与命名空间，确认 Ports/Domain/Engine 层次符合 ADR-0007。",
@@ -1864,7 +1909,10 @@
       "SqliteDataStore 对传入路径在检查前统一规范化分隔符，严格限制为 user:// 前缀并拒绝任何包含 .. 或 ..\\\\ 的路径。",
       "SqliteDataStore 增加数据库文件扩展名白名单（如 .db/.sqlite/.sqlite3），非法扩展名会被拒绝并记录审计日志。",
       "针对已有数据库文件增加简单的大小上限检查（防 DoS），超限时抛出安全异常并写入 security-audit.jsonl。",
-      "通过环境变量（例如 ALLOW_PLUGIN_BACKEND）或等价方案，将 plugin backend 限定在开发/实验环境，生产默认使用 managed backend，并在文档中明确记录。"
+      "通过环境变量（例如 ALLOW_PLUGIN_BACKEND）或等价方案，将 plugin backend 限定在开发/实验环境，生产默认使用 managed backend，并在文档中明确记录。",
+      "当路径不满足 user:// 前缀约束或命中目录穿越模式时，数据库打开/创建请求必须被拒绝，且目标文件状态保持不变（不创建、不覆盖、不写入）。",
+      "当扩展名不在白名单或文件大小超过上限时，数据库打开/创建请求必须失败，并在 security-audit.jsonl 记录可区分的拒绝原因字段。",
+      "在未显式允许 plugin backend 的配置下，运行时必须保持 managed backend；仅在允许且属于开发/实验环境时才可启用 plugin backend，并产生对应审计记录。"
     ],
     "test_strategy": [
       "单元/集成测试：为 SqliteDataStore 增加路径与扩展名相关的测试用例，覆盖非法前缀、..、非法扩展名、超大文件等场景。",
@@ -1920,7 +1968,10 @@
     "acceptance": [
       "GodotSQLiteDatabase 在 DEBUG 构建下仍然抛出包含路径/SQL 的详细异常，方便开发调试。",
       "在 Release/CI 环境下，同一代码路径仅向调用方暴露脱敏后的通用错误消息，详细路径与 SQL 片段被写入受控的审计/诊断日志。",
-      "新增或扩展现有 smoke/集成测试，验证在数据库打开失败、SQL 执行失败等典型失败场景下，错误信息不会直接泄露敏感实现细节。"
+      "新增或扩展现有 smoke/集成测试，验证在数据库打开失败、SQL 执行失败等典型失败场景下，错误信息不会直接泄露敏感实现细节。",
+      "当 OpenAsync 触发失败时，DEBUG 与 Release/CI 的调用方异常消息必须可观察到策略差异：DEBUG 包含诊断细节，Release/CI 仅为脱敏通用消息；若 Release/CI 消息出现路径或 SQL 片段则判定验收失败。",
+      "当任一 Execute* 路径触发失败时，Release/CI 必须同时满足两点：调用方消息不含路径/SQL 明细，且受控审计/诊断日志存在对应失败记录；任一条件不满足即判定验收失败。",
+      "最小 smoke/集成验证必须至少覆盖“数据库打开失败”和“SQL 执行失败”两类场景，并在 CI 可执行通过；若缺失任一场景或导致管线失败则不通过验收。"
     ],
     "test_strategy": [
       "环境对比测试：在 DEBUG 与 Release 配置下分别触发数据库异常，验证对调用方的异常消息差异以及 security-audit.jsonl 中的记录行为。",
@@ -2047,7 +2098,10 @@
       "应对齐领域事件：publish/consume contractRefs 中列出的事件（例如 core.game_turn.week_advanced）。 Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs",
       "应接线：对应屏幕/入口可达，关键按钮可点击（无透明层/MouseFilter 阻挡），状态可见。 Refs: Tests.Godot/tests/Scenes/test_task44_acceptance.gd",
       "应接线：UI 的显示/状态变化应由上述领域事件驱动（避免接线漏了但回链看似齐全）。 Refs: Tests.Godot/tests/Scenes/test_task44_acceptance.gd",
-      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs"
+      "应留证：按 artifactRefs 产出 logs/** 工件（可复现、可追溯）。 Refs: Game.Core.Tests/Tasks/Task44AcceptanceTests.cs",
+      "ACC:T44.1：触发一次 week advance 后，logs/ci/<date>/security-audit.jsonl 必须新增且仅新增可解析 JSONL 条目；该条目 ts/action/reason/target/caller 五字段均存在且非空，action 必须为 core.game_turn.week_advanced。",
+      "ACC:T44.2：CI 执行 scripts/python/validate_audit_logs.py --strict 时，本任务生成的 security-audit.jsonl 校验通过，并在相同输入下得到确定性的字段结构与条目计数。",
+      "未触发 week advance 的对照场景中，不得出现 action=core.game_turn.week_advanced 的新增审计条目（防止通过空实现或预置日志误判通过）。"
     ],
     "test_strategy": [
       "集成测试：在 headless Godot 测试或等价 Runner 中触发 week advance，并校验 logs/ci/<date>/security-audit.jsonl 的条目。",
@@ -2121,10 +2175,16 @@
       "Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd"
     ],
     "acceptance": [
-      "定义 Save/Load 的最小契约与事件类型（contractRefs），并在 master 任务实现中落盘到 Game.Core/Contracts（纯 C#，不依赖 Godot API）。\nRefs: Game.Core.Tests/Domain/PersistenceContractsTests.cs Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
-      "定义 SQLite schema 版本机制：至少包含 SchemaVersion 表（或等价元数据）与迁移 runner，支持从旧版本升级到新版本。\nRefs: Game.Core.Tests/Persistence/Migrations/SchemaMigrationTests.cs",
-      "迁移必须是幂等且可审计：失败时写入 security-audit.jsonl（五字段 JSONL），且错误信息在 Release/secure 模式下脱敏（不泄露路径/SQL）。\nRefs: Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd",
-      "Save/Load 必须限制在 user:// 且拒绝路径穿越与非白名单扩展名；文件大小上限与 DoS 防护策略在验收中明确。\nRefs: Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd"
+      "定义 Save/Load 的最小契约与事件类型（contractRefs），并在 master 任务实现中落盘到 Game.Core/Contracts（纯 C#，不依赖 Godot API）。 Refs: Game.Core.Tests/Domain/PersistenceContractsTests.cs Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+      "定义 SQLite schema 版本机制：至少包含 SchemaVersion 表（或等价元数据）与迁移 runner，支持从旧版本升级到新版本。 Refs: Game.Core.Tests/Persistence/Migrations/SchemaMigrationTests.cs",
+      "迁移必须是幂等且可审计：失败时写入 security-audit.jsonl（五字段 JSONL），且错误信息在 Release/secure 模式下脱敏（不泄露路径/SQL）。 Refs: Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd",
+      "Save/Load 必须限制在 user:// 且拒绝路径穿越与非白名单扩展名；文件大小上限与 DoS 防护策略在验收中明确。 Refs: Tests.Godot/tests/Adapters/Db/test_save_load_smoke.gd",
+      "Save/Load 契约必须完整覆盖 contractRefs 列表中的 7 个事件：core.save.requested、core.save.completed、core.save.failed、core.load.requested、core.load.completed、core.load.failed、core.save.format.migration.applied；缺少任一事件常量即验收失败。",
+      "在 overlays 的 08 章中仅允许引用 Base/ADR 口径，不得复制阈值/策略正文；若出现阈值重复落地则验收失败。",
+      "当 Save 因非法路径、非白名单扩展名或超出大小上限被拒绝时，数据存储状态必须保持拒绝前状态，且必须产生失败结果与对应审计记录。",
+      "Load 面对缺失或损坏数据库时必须进入恢复路径而非崩溃主循环；必须返回失败结果并发出 core.load.failed，且 reason 在 secure/release 模式下为脱敏文本（不含绝对路径、SQL 语句或连接细节）。",
+      "安全校验必须在路径规范化后执行；对 ../、绝对路径、以及等价百分号编码穿越输入一律拒绝，并为每次拒绝写入包含 ts/action/reason/target/caller 五字段的 JSONL 审计行。",
+      "必须提供至少 1 个 GdUnit4 冒烟套件覆盖 Save/Load 入口（Tests.Godot/tests/Adapters/Db），可通过 py -3 scripts/python/run_gdunit.py 执行，且报告与日志归档到 logs/e2e/<YYYY-MM-DD>/。"
     ],
     "test_strategy": [
       "xUnit：覆盖 schema version 迁移（升级路径 + 失败路径），以及 Save/Load 的 round-trip（最小模型）与错误脱敏。",
@@ -2233,7 +2293,11 @@
       "主流程支持连续两次推进回合（Week 1→2→3），并在 UI 可见当前 Week/Phase。 Refs: Game.Core.Tests/Domain/GameLoopTests.cs Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
       "跨界面切换（Guild/Activity/Settings）后返回主界面，不丢失当前周次与关键状态显示。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
       "回合推进事件链与 contractRefs 对齐，至少覆盖 started/phase_changed/week_advanced 的发布与消费。 Refs: Game.Core.Tests/Domain/GameTurnSystemTests.cs",
-      "产出可审计工件到 logs/**（artifactRefs: logs/e2e/<date>/playability-route2-summary.json），用于 CI 回归追踪。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+      "产出可审计工件到 logs/**（artifactRefs: logs/e2e/<date>/playability-route2-summary.json），用于 CI 回归追踪。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "若 Week 1→3 连续推进后的 Week/Phase 或关键状态与预期不一致，则判定该路线验收失败，不得以“页面可进入”替代状态一致性验收。",
+      "logs/e2e/<date>/playability-route2-summary.json 必须包含 ACC:T48.1 与 ACC:T48.2 的结果记录；任一缺失或不可判定则视为未通过。",
+      "logs/e2e/<date>/playability-route2-summary.json 必须包含 ACC:T48.3，并明确与 ACC:T48.1、ACC:T48.2 的同次执行绑定关系；任一锚点缺失或绑定关系不可判定则视为未通过。",
+      "在相同输入与相同初始状态下重复执行 Week 1→2→3 路线，最终 Week/Phase 与关键状态快照必须一致；若不一致则判定该路线不稳定并验收失败。"
     ],
     "test_strategy": [
       "xUnit: verify turn transitions and week increments deterministically.",
@@ -2298,7 +2362,13 @@
       "HUD 中 XP/Level 显示与事件驱动同步，不依赖手工刷新。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
       "Save/Load 后 XP/Level 与加载前一致，且不回退。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
       "对齐 contractRefs 字段与事件常量集合（experience/level/raid + guild/media/recruitment/reputation/score/save/load/security），避免口径漂移。 Refs: Game.Core.Tests/Tasks/Task49GovernanceTests.cs",
-      "单机安全口径：默认 SECURITY_PROFILE=host-safe（允许本地改档/快照），仅保护宿主系统边界；SECURITY_PROFILE=strict 仅用于安全门禁与测试。 Refs: docs/adr/ADR-0019-godot-security-baseline.md"
+      "单机安全口径：默认 SECURITY_PROFILE=host-safe（允许本地改档/快照），仅保护宿主系统边界；SECURITY_PROFILE=strict 仅用于安全门禁与测试。 Refs: docs/adr/ADR-0019-godot-security-baseline.md",
+      "覆盖 ACC:T49.1：在可重复的玩法流程中，事件管线必须实际产出并消费 XP/Level 相关事件后才发生数值变化；若未触发对应玩法事件，XP/Level 必须保持不变。",
+      "覆盖 ACC:T49.2：运行时首次进入与 Save/Load 恢复两条路径都必须自动刷新 HUD 的 XP/Level，任何需要手动刷新或重新进入界面才同步的情况均判定不通过。",
+      "覆盖 ACC:T49.3：必须产出 logs/e2e/<YYYY-MM-DD>/playability-route14-summary.json，且包含 ACC:T49.1、ACC:T49.2、ACC:T49.3 的结果与时间戳；文件缺失或缺字段判定不通过。",
+      "在 ACC:T49.1 对应流程中，必须提供可重复证据证明 XP/Level 变化由事件发布与消费闭环触发，而不是直接改写最终数值。",
+      "在 ACC:T49.2 对应流程中，Save 后立即 Load 的同回合验证必须保持核心状态与 HUD 一致，且 Load 过程不得额外发放 XP 或重复升级。",
+      "在 ACC:T49.3 证据文件中，三项锚点结果必须可机器判定为通过/失败并带时间戳；任一锚点缺失或不可判定即失败。"
     ],
     "test_strategy": [
       "xUnit: deterministic XP/Level progression and threshold checks.",
@@ -2371,7 +2441,12 @@
       "至少一个成就可由确定性事件触发解锁，并在 UI 中显示已解锁数量变化。 Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
       "成就列表/计数展示与事件驱动对齐，避免仅本地临时状态。 Refs: Tests.Godot/tests/UI/test_achievements_smoke.gd",
       "Save/Load 后已解锁成就保持一致，不重复解锁或丢失。 Refs: Game.Core.Tests/Domain/Achievements/AchievementTrackerTests.cs",
-      "contractRefs 覆盖触发成就的最小事件集合，并在测试中可观测。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd"
+      "contractRefs 覆盖触发成就的最小事件集合，并在测试中可观测。 Refs: Tests.Godot/tests/UI/test_hud_achievements_displays_unlocked.gd",
+      "对同一成就重复输入同一触发事件时，已解锁数量与该成就状态保持不变；不满足条件的事件不得触发该成就解锁（ACC:T50.1）。",
+      "成就界面的列表与计数只能在消费到对应领域事件后变化；仅刷新界面、重新进入页面或仅修改本地临时状态不得造成解锁显示变化（ACC:T50.2）。",
+      "路线15验收执行后必须生成 logs/e2e/<YYYY-MM-DD>/playability-route15-summary.json，且文件中可追溯记录 ACC:T50.1、ACC:T50.2、ACC:T50.3 的结果与时间戳；缺失或不可解析即验收失败（ACC:T50.3）。",
+      "在同一验收会话内，若未消费任何命中成就条件的领域事件，则成就状态与已解锁计数必须全程保持不变；否则判定失败。",
+      "执行一次完整 Save->Load 后，已解锁成就集合（按成就ID）必须与保存前完全一致，且 UI 列表与计数与该集合一致。"
     ],
     "test_strategy": [
       "xUnit: verify deterministic unlock conditions and tracker state transitions.",
@@ -2438,7 +2513,9 @@
       "Raid 流程必须形成 scheduled→resolved 单次闭环，success/failed 可区分；进入 resolved/failed 终态后不可继续推进或重复结算。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
       "UI 入口触发一次真实遭遇后必须展示结果摘要；当 demo 关闭（如 GD_ENABLE_PLAYABLE=0）时不得出现 resolved 摘要。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
       "Activity/Feed 必须观察到 core.raid.resolved，并校验该次 resolved 载荷含 result 字段且与同次 UI 反馈一致；单次触发不得产生重复 resolved。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
-      "必须产出可回放的 logs/** 证据，并校验 action/reason/target/caller 等审计字段完整。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd"
+      "必须产出可回放的 logs/** 证据，并校验 action/reason/target/caller 等审计字段完整。 Refs: Tests.Godot/tests/UI/test_hud_raid_encounter_demo.gd",
+      "Raid 的 Feed/结算反馈必须由同次 UI 入口触发的真实遭遇链路产生，不允许通过隐藏手工注入或旁路直接写入 resolved 反馈；未经过触发链路时，状态与 Feed 必须保持不变。",
+      "路线7执行必须持久化 logs/e2e/<YYYY-MM-DD>/playability-route7-summary.json，并在该文件中给出 ACC:T51.1、ACC:T51.2、ACC:T51.3 的可判定结果；任一项未通过时不得标记为通过。"
     ],
     "test_strategy": [
       "xUnit: verify raid state machine transitions and domain event emission deterministically.",
@@ -2502,7 +2579,9 @@
       "tasks.json 的 T52 与 tasks_back 的 NG-0052 建立一一映射（id=52 <-> taskmaster_id=52），且字段语义一致。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
       "对 T44-T51 每一项任务，关键引用（adr_refs/chapter_refs/overlay_refs/test_refs）逐项可解析，且不存在空值、断链或单侧缺失。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
       "治理任务不新增玩法契约，且不减少 T44-T51 治理基线所要求的 contractRefs；仅允许做一致性校验与回链补齐。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "绑定 ACC:T52.1/ACC:T52.2 的治理证据必须落盘到 logs/ci/<date>/sc-acceptance-check-task-52/summary.json 与 logs/ci/<date>/sc-acceptance-check-task-52/task-links-validate-summary.json，且 Task/View 的 artifactRefs 指向同一证据集。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+      "绑定 ACC:T52.1/ACC:T52.2 的治理证据必须落盘到 logs/ci/<date>/sc-acceptance-check-task-52/summary.json 与 logs/ci/<date>/sc-acceptance-check-task-52/task-links-validate-summary.json，且 Task/View 的 artifactRefs 指向同一证据集。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T52.4：在相同输入与同一日期目录下重复执行治理校验时，summary.json 与 task-links-validate-summary.json 的结论字段必须一致；任一文件缺失、不可解析或结论不一致即判定验收失败。",
+      "若检测到 T44-T51 任一任务存在引用断链、双向映射不一致或 artifactRefs 非同一证据集，验收必须返回失败，不得以“未改动”或“部分通过”判定通过。"
     ],
     "test_strategy": [
       "xUnit: verify governance invariants for task mapping and contractRefs consistency.",
@@ -2563,7 +2642,27 @@
     "acceptance": [
       "ACC:T53.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
       "ACC:T53.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "ACC:T53.3 产出 logs/ci/<date>/v11-task-53/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+      "ACC:T53.3 产出 logs/ci/<date>/v11-task-53/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "flaky、retry、failure 三类判定规则在同一基线下互斥且完备；同一失败样本不得在同次评估中被归入多个分类。",
+      "CI 门禁仅使用一套稳定性阈值口径进行判定；在相同输入与环境下重复运行得到相同通过/失败结果。",
+      "实现与验证必须由自动化确定性检查输出 machine-readable 的 pass/fail 结论，且不允许以人工解释替代自动判定。",
+      "logs/ci/<date>/v11-task-53/summary.json 至少包含 flaky、retry、failure 分类计数、重试统计、门禁阈值快照与最终 gate 结论；任一必填字段缺失即判定失败。",
+      "当分类口径未统一或门禁阈值未满足时，流程必须拒绝放行并保持失败状态，不得默认通过或静默降级。",
+      "稳定性基线定义必须同时覆盖 flaky、retry、failure 的判定边界与阈值来源，并可被自动化脚本解析；任一分类边界缺失或阈值来源不唯一即判定失败。",
+      "在固定输入样本与固定执行环境下，至少两次独立运行的分类结果、重试统计、阈值快照与 gate 结论必须逐项一致；出现差异即判定为不稳定并失败。",
+      "summary.json 必须包含可追溯到本次评估的数据标识（如 task_id 或 run_id 或等效字段）；标识缺失或与本次执行不一致即判定失败。",
+      "自动化检查失败时必须输出可机读的失败原因与对应分类/门禁项，且结论不得被后续步骤覆盖为通过。",
+      "ACC:T53.1、ACC:T53.2、ACC:T53.3 三个锚点在同一次评估中均需出现并可被校验；缺少任一锚点即整体验收失败。",
+      "flaky、retry、failure 的分类定义与门禁阈值来源必须在“计算、判定、落盘”三个阶段保持同一版本；任一阶段使用不同口径即判定失败。",
+      "ACC:T53.1 必须可被自动化检查映射到三类边界定义与唯一阈值来源，并输出 machine-readable 校验结果；映射或校验任一失败即失败。",
+      "ACC:T53.2 必须以自动化确定性检查完成实现验证，且同一规则下至少包含一个应失败样本和一个应通过样本的判定记录；任一记录缺失或需人工判读即失败。",
+      "ACC:T53.3 对应证据持久化在流程结束后必须可重读并与本次 gate 结论一致；summary.json 不存在、不可解析或结论不一致即失败。",
+      "在固定输入与固定环境（含 SECURITY_PROFILE=host-safe）下重复评估时，门禁结果与三类统计不得因执行顺序或重试次数变化而变化；发生变化即判定“未减少 CI 波动”并失败。",
+      "ADR Refs: ADR-0005; ADR-0003; ADR-0015 —— 自动化检查必须校验 ADR 引用集合完整且唯一，缺失、不可解析或出现未声明 ADR 即失败。",
+      "Chapters: CH01; CH03; CH07; CH09 —— 自动化检查必须验证章节回链完整且可解析，缺失、重复或不一致即失败。",
+      "Overlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md —— 两处记录必须与 summary.json 结论一致，否则 gate 失败。",
+      "Test Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs —— 两个测试引用必须执行并写入同一次评估 run_id 的机读结果。",
+      "TDD (red->green->refactor) with deterministic evidence artifacts. —— 验证流程必须体现 red->green->refactor 三阶段闭环并可审计。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2620,7 +2719,31 @@
     "acceptance": [
       "ACC:T54.1 验收口径与引用链完整且可解析。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
       "ACC:T54.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
-      "ACC:T54.3 产出 logs/ci/<date>/v11-task-54/summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+      "ACC:T54.3 产出 logs/ci/<date>/v11-task-54/summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T54.4 Headless 执行出现 flaky 时，必须采集并落盘可复现样本（至少包含用例标识、输入种子或等价确定性输入、环境摘要、失败症状）；未出现 flaky 时，summary.json 必须明确 flaky_samples=0，且不得写入虚假样本。",
+      "ACC:T54.5 每个 flaky 样本必须完成根因分类并写入结果；分类值不得为空，无法归类时必须标记为 unknown 且附 reason_code。",
+      "ACC:T54.6 每个已分类样本必须附带可回放证据，并在相同输入下可复现同类结论；若回放结论与分类不一致则验收失败。",
+      "ACC:T54.7 summary.json 必须给出假红率统计口径及 before/after 对比；当 after 不低于 before 时，必须输出未达标状态且不得判定通过。",
+      "ACC:T54.8 summary.json 必须包含 samples 数组；每个样本至少包含 sample_id、classification、replay_result、evidence_path，且当 classification=unknown 时必须包含 reason_code，任一字段缺失则验收失败。",
+      "ACC:T54.9 每个根因分类结果必须可回链到原始失败观测（断言名、错误码、日志症状三者至少其一）；不可回链的样本不得计入已分类统计。",
+      "ACC:T54.10 假红率 before/after 对比必须基于同一统计窗口、同一分母定义与同一用例集合；任一口径不一致时必须标记 comparison_invalid 且不得判定通过。",
+      "ACC:T54.11 对同一确定性输入至少进行两次 Headless 回放时，分类结论与回放结论必须一致；出现漂移必须标记为 nondeterministic 且任务不得判定通过。",
+      "ACC:T54.12 ACC:T54.1 对应的验收边界必须在 summary.json 中以机器可读方式落盘并可被校验；仅文档描述但无可解析证据视为未完成。",
+      "ACC:T54.13 ACC:T54.2 对应的确定性验证必须输出每个 case_id 的机器可读 verdict（pass|fail）；缺少 case 级结果时不得判定通过。",
+      "ACC:T54.14 ACC:T54.3 对应的证据落盘必须可验证 summary.json 存在且非空；文件缺失、空文件或不可读取时验收失败。",
+      "ACC:T54.15 当 flaky_samples>0 时，samples 中每个 evidence_path 必须存在且可读取；任一证据缺失时该样本不得计入统计且任务不得判定通过。",
+      "ACC:T54.16 假红率压降结论必须可由 summary.json 内原始计数字段复算；复算结果与声明不一致时必须标记 comparison_invalid 且不得判定通过。",
+      "ACC:T54.17 在相同确定性输入与环境摘要下重复执行一次 Headless 流程时，flaky_samples 与分类汇总结果必须一致；不一致必须标记 nondeterministic 且不得判定通过。",
+      "ACC:T54.18 Headless 流程必须在 SECURITY_PROFILE=host-safe 下执行，并在 summary.json 中落盘 security_profile=\"host-safe\"；缺失或不一致时验收失败。",
+      "ACC:T54.19 每个样本在采集、分类、回放三个阶段必须使用同一 sample_id 串联，并包含 deterministic_input_hash（或等价稳定输入标识）；任一阶段无法关联时该样本不得计入统计且任务不得判定通过。",
+      "ACC:T54.20 根因分类必须使用受控枚举（含 unknown），且 summary.json 必须输出各分类计数；出现枚举外值或计数与 samples 明细不一致时验收失败。",
+      "ACC:T54.21 每个回放证据必须可反查到原始失败样本，并包含回放时间戳与回放结论；无法反查或字段缺失时验收失败。",
+      "ACC:T54.22 假红率压降必须输出可复算字段 before_false_red_count、before_total、after_false_red_count、after_total 与 reduction_rate；当 reduction_rate<=0 时必须标记未达标且任务不得判定通过。",
+      "ACC:T54.23 确定性证据工件必须能区分 red、green、refactor 三阶段结果并可机器判定；任一阶段缺失时不得判定通过。",
+      "ADR Refs: ADR-0005; ADR-0003 —— 验收证据必须可回链到 ADR-0005 与 ADR-0003。",
+      "Chapters: CH03; CH07; CH09 —— 验收证据必须可回链到 CH03、CH07、CH09。",
+      "Overlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md —— 验收证据必须可解析回链到 overlay 索引与清单文件。",
+      "Test Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd —— 确定性验证回链必须同时覆盖两个 Test Refs。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2676,7 +2799,15 @@
     "acceptance": [
       "ACC:T55.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
       "ACC:T55.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "ACC:T55.3 产出 logs/ci/<date>/v11-task-55/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+      "ACC:T55.3 产出 logs/ci/<date>/v11-task-55/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "同一次治理流程必须统一编排并执行 unit、godot、acceptance 三类测试，并给出单一通过/失败结论；任一类别未执行时不得判定通过。",
+      "evidence 消费逻辑必须仅基于可机读工件计算结论，且在相同输入下重复执行得到一致结果。",
+      "当 evidence 缺失、不可解析或与预期路径不一致时，流程必须显式失败并在 logs/ci/<date>/v11-task-55/summary.json 记录失败原因。",
+      "最终汇总必须可追踪 ACC:T55.1、ACC:T55.2、ACC:T55.3 三个锚点的判定结果；缺少任一锚点视为验收未通过。",
+      "同一轮治理的聚合结论必须严格由该轮 unit/godot/acceptance 的实际执行结果与 evidence 解析结果得出；任一类别执行失败即总体失败。",
+      "ACC:T55.1 对应的验收边界必须在治理流程中被显式加载并参与判定；若边界未定义、未绑定或未被消费，则该轮验收直接失败。",
+      "ACC:T55.2 对应的实现验证必须由自动化确定性检查产出可机读结果；若仅存在人工说明、截图结论或不可复算输出，则 ACC:T55.2 判定失败。",
+      "ACC:T55.3 对应的证据持久化必须在流程结束前写入 logs/ci/<date>/v11-task-55/summary.json，且包含 ACC:T55.1/ACC:T55.2/ACC:T55.3 的判定字段；文件不存在、为空或缺字段时判定失败。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2733,7 +2864,21 @@
     "acceptance": [
       "ACC:T56.1 验收口径与引用链完整且可解析。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
       "ACC:T56.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
-      "ACC:T56.3 产出 logs/ci/<date>/v11-task-56/summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd"
+      "ACC:T56.3 产出 logs/ci/<date>/v11-task-56/summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T56.1 在任务元数据中，ADR-0015/ADR-0005/ADR-0003、CH03/CH07/CH09 及 Test Refs 条目均可解析；任一缺失或不可解析即不通过。",
+      "ACC:T56.2 性能预算门禁必须以硬门执行：任一关键场景 p95 超阈值时流程返回失败（非零退出码），不得标记为通过。",
+      "ACC:T56.2 仅当全部关键场景 p95 均不高于阈值时流程才可通过；若未覆盖全部关键场景不得给出通过结论。",
+      "ACC:T56.2 已补齐关键场景 p95 基准，且每个场景都记录 p95、p50、samples、threshold 与 gate 判定。",
+      "ACC:T56.2 在相同输入与环境下重复执行至少两次，关键场景 p95 结果应落在预设容差内；超出容差视为不通过。",
+      "ACC:T56.2 验证结论由自动化检查直接输出 pass/fail，不允许仅以人工阅读日志作为唯一判定方式。",
+      "ACC:T56.3 logs/ci/<date>/v11-task-56/summary.json 为合法 JSON，并包含 task_id、security_profile、scenes、gate_result、executed_at 字段。",
+      "ACC:T56.3 证据文件持久化后可追溯到本次执行（含运行标识），且不会静默覆盖既有批次；若覆盖或缺失则不通过。",
+      "ACC:T56.3 所有结论均在 SECURITY_PROFILE=host-safe 条件下生成；配置不匹配时必须拒绝输出“通过”。",
+      "ACC:T56.1 在任务元数据中，Story=PRD-GUILD-MANAGER-V11-T56 与 Overlay 路径 docs/architecture/overlays/PRD-Guild-Manager/08/_index.md 必须可解析且与本任务一致；不一致或不可解析即不通过。",
+      "ACC:T56.2 关键场景集合必须覆盖 play_route 与 raid_media_rep 两类可玩度路径，并各自产生可复核的 p95 基准记录；任一路径缺失或无记录即不通过。",
+      "ACC:T56.1 确定性检查流程必须显式评估 ACC:T56.1 锚点并输出机器可判定的 pass/fail；未评估该锚点即不通过。",
+      "ACC:T56.2 确定性检查流程必须显式评估 ACC:T56.2 锚点并输出机器可判定的 pass/fail；仅有日志文本且无自动判定结果即不通过。",
+      "ACC:T56.3 确定性检查流程必须显式评估 ACC:T56.3 锚点并验证证据落盘成功；证据缺失、写入失败或不可读取即不通过。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2790,7 +2935,29 @@
     "acceptance": [
       "ACC:T57.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
       "ACC:T57.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
-      "ACC:T57.3 产出 logs/ci/<date>/v11-task-57/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+      "ACC:T57.3 产出 logs/ci/<date>/v11-task-57/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T57.1 阈值判定边界可机读且可复现：输入至少包含统计窗口与 Crash-Free 实际值及阈值配置，输出仅允许 pass 或 block 两种结论；缺少任一必需输入时必须返回 block。",
+      "ACC:T57.2 在相同输入与环境下重复执行阈值判定，结论与关键比较值必须一致，并由自动化断言直接验证，不允许通过人工日志解读得出结果。",
+      "ACC:T57.3 summary.json 必须持久化本次判定证据并与执行结果一致，至少包含判定时间、统计窗口、实际值、阈值、结论与阻断原因（若为 block）。",
+      "ACC:T57.3 当结论为 block 时，发布流程必须被阻断且不得产生通过态产物或通过标记。",
+      "ACC:T57.1 判定链路必须显式以 Crash-Free 指标进行比较：输入中的 Crash-Free 实际值与阈值均为必需项，任一缺失、为空或不可解析时结论必须为 block。",
+      "ACC:T57.2 发布门禁必须覆盖 pass 与 block 两条可执行路径并由自动化断言验证：pass 继续后续步骤，block 立即终止流程。",
+      "ACC:T57.3 summary.json 的审计字段集合与类型必须在同版本内稳定且可机读；若字段缺失或类型不合法，本次执行必须判定为 block 并记录原因。",
+      "ACC:T57.2 门禁结论必须与任务执行状态一一对应且可自动断言：结论为 pass 时任务返回成功状态，结论为 block 时任务返回失败状态；若二者不一致，必须按 block 处理并记录原因。",
+      "ACC:T57.1 在 SECURITY_PROFILE=host-safe 下执行阈值判定时，Crash-Free 实际值、阈值与统计窗口输入必须可机读且可解析；任一输入因安全策略不可获得、被拒绝或不可解析时，结论必须为 block，并在 summary.json 写入可机读原因。",
+      "ACC:T57.1 生效阈值必须可追溯且可机读：若存在环境覆盖值则采用覆盖值，否则采用默认值；最终生效阈值必须写入 summary.json 并与本次比较使用值一致。",
+      "ACC:T57.2 判定结果与证据关键字段必须由自动化断言一致性校验（统计窗口、实际值、阈值、结论）；任一字段不一致时本次执行必须返回失败并按 block 处理。",
+      "ACC:T57.3 logs/ci/<date>/v11-task-57/summary.json 必须为单次执行唯一对应的有效 JSON 证据；文件缺失、JSON 非法或与当前执行不匹配时必须判定为 block。",
+      "ACC:T57.3 summary.json 必须记录本次 SECURITY_PROFILE 实际值且与运行环境一致；缺失或不一致时必须判定为 block 并写入可机读原因。",
+      "ACC:T57.1 验收边界定义必须覆盖阈值输入完整性、判定输出二值化（pass|block）与缺失输入拒绝三项，并可由自动化规则直接判定；任一项缺失时本次执行必须按 block 处理。",
+      "ACC:T57.2 实现验证必须覆盖从输入解析、阈值比较到结论输出的完整判定链路，并由确定性自动化断言验证；若任一链路步骤未被验证则本次执行必须按 block 处理。",
+      "ACC:T57.3 证据持久化必须在每次执行后写入与当前执行唯一对应的可机读审计字段快照，并可用于自动化比对结论一致性；若比对失败或无法比对则本次执行必须按 block 处理。",
+      "ACC:T57.2 当门禁结论为 block 时，发布流程状态、任务返回状态与 summary.json 结论必须一致为阻断；任一不一致时必须按 block 处理并记录原因。",
+      "TDD (red->green->refactor) with deterministic evidence artifacts. —— 验收必须可审计地覆盖 red 失败证据、green 通过证据、refactor 后结论不变三阶段；任一缺失即失败。",
+      "Story: PRD-GUILD-MANAGER-V11-T57 —— 产物与审计证据必须可机读回链该 Story 标识。",
+      "ADR Refs: ADR-0003; ADR-0005; ADR-0002 —— 验收链路必须可机读追溯到三个 ADR。",
+      "Chapters: CH02; CH03; CH07; CH10 —— 验收链路必须可机读追溯到四个章节。",
+      "Overlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md —— 验收链路必须显式绑定并校验两个 Overlay 路径。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2844,7 +3011,14 @@
     "acceptance": [
       "ACC:T61.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs",
       "ACC:T61.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs",
-      "ACC:T61.3 产出 logs/ci/<date>/v11-task-61/summary.json。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs"
+      "ACC:T61.3 产出 logs/ci/<date>/v11-task-61/summary.json。 Refs: Game.Core.Tests/Persistence/Migrations/GuildDbSchemaTests.cs",
+      "对每个受支持的历史 schemaVersion 输入，迁移结果必须可重复地产生同一目标版本，并由自动化测试断言通过。",
+      "迁移矩阵必须覆盖已声明历史版本到当前版本的有效路径；遇到未知或不受支持版本时必须显式失败且不改变持久化状态。",
+      "logs/ci/<date>/v11-task-61/summary.json 必须包含可机读迁移证据（至少含输入版本、输出版本、通过/失败），并可在 CI 中无人工判读地校验。",
+      "schemaVersion 演进策略必须满足单调升级到当前版本；对已是当前版本的数据重复执行迁移时，输出版本与数据摘要保持不变，并由自动化测试断言。",
+      "迁移矩阵中每条已声明路径都必须在 CI 执行并写入 logs/ci/<date>/v11-task-61/summary.json（至少含路径标识、起始版本、目标版本、结果）；任一路径缺失执行记录即判定失败。",
+      "向前兼容必须被验证：从历史 schemaVersion 迁移到当前版本后，核心业务快照可被当前契约稳定读取，且关键字段语义不丢失；任一断言失败即判定未通过。",
+      "迁移执行必须具备失败止损：当任一路径迁移失败时，必须输出可机读失败原因并禁止写回；持久化数据与 schemaVersion 保持迁移前状态，由自动化测试断言。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2904,7 +3078,24 @@
     "acceptance": [
       "ACC:T62.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
       "ACC:T62.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
-      "ACC:T62.3 产出 logs/ci/<date>/task-62-A-summary.json。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs"
+      "ACC:T62.3 产出 logs/ci/<date>/task-62-A-summary.json。 Refs: Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs",
+      "阶段A范围锁定结果明确列出纳入项与排除项，且纳入项至少覆盖“跨版本存档回放”和“损坏存档恢复”两类场景；缺失任一类则验收失败。",
+      "使用历史版本存档在当前版本执行回放时，关键业务状态与预期基线一致；若出现不一致则判定失败。",
+      "对同一历史存档和相同输入条件，回放至少重复执行两次且关键输出一致，以满足确定性要求。",
+      "对损坏存档输入，系统必须产生可观测结果：要么恢复为可加载状态，要么明确拒绝加载并返回错误原因；不得静默成功。",
+      "在损坏存档的拒绝或恢复失败路径下，既有可用存档与当前运行时关键状态保持不变，不得被覆盖或污染。",
+      "logs/ci/<date>/task-62-A-summary.json 中必须包含 ACC:T62.1、ACC:T62.2、ACC:T62.3 的逐项通过/失败状态、时间戳与对应确定性证据定位信息。",
+      "阶段A验收必须在 SECURITY_PROFILE=host-safe 配置下执行并记录到同批次证据；若未在该配置下执行则判定失败。",
+      "确定性证据必须覆盖跨版本回放与损坏恢复两类场景，并可追溯到 Game.Core.Tests/Persistence/SaveLoad/SaveLoadRoundTripTests.cs 与 Game.Core.Tests/Persistence/SaveLoad/WorldGenSaveLoadReplayTests.cs 的对应测试执行结果；任一缺失则失败。",
+      "任一验收项不得以“未执行”“跳过”或“无变化”直接判定为通过；若场景未实际触发对应结果（成功回放、恢复成功或明确拒绝）则该项失败。",
+      "阶段A通过判定以 ACC:T62.1、ACC:T62.2、ACC:T62.3 在同一验收批次内全部通过为准，任一未通过则阶段A不通过。",
+      "跨版本回放验收必须至少包含一个“由上一已发布版本生成、在当前版本回放”的实际样本并给出结果判定；未覆盖该样本则阶段A不通过。",
+      "损坏恢复验收必须至少覆盖两类可观测损坏输入（结构性损坏与截断/不完整损坏），且每类都满足“恢复成功或明确拒绝且说明原因”；任一类未满足则失败。",
+      "同一验收批次内，ACC:T62.1（范围锁定）、ACC:T62.2（行为实现）、ACC:T62.3（证据落盘）三项结论需与子任务1/2/3一一对应且可追溯；无法对应则视为未完成子任务。",
+      "验收批次产物必须标注 Story=PRD-GUILD-MANAGER-V11-T62，且该标识可追溯到阶段A最终通过/失败结论；缺失标识或无法追溯则失败。",
+      "阶段A验收记录必须显式对齐 ADR-0006、ADR-0005、ADR-0003 以及 CH05、CH07、CH11 的适用口径，并给出未偏离说明；任一缺失则失败。",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md 与 docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md 必须包含本批次阶段A结论或可追溯定位，且两处结论一致；缺失或不一致则失败。",
+      "确定性证据必须体现 TDD red->green->refactor 顺序：同一场景至少存在一次失败到通过的连续记录，并保留重构后回归通过记录；仅提供最终通过结果则失败。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2963,7 +3154,16 @@
     "acceptance": [
       "ACC:T63.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
       "ACC:T63.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
-      "ACC:T63.3 产出 logs/ci/<date>/v11-task-63/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+      "ACC:T63.3 产出 logs/ci/<date>/v11-task-63/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "同一业务事件在活动流与安全审计日志中必须可被同一追溯键关联，且统一字段名集合一致；出现缺字段、重名异义或无法关联即判定失败。",
+      "字段统一与跨日志追溯必须由自动化、确定性检查直接给出通过/失败结果，并输出机器可读差异信息；仅人工判读不构成通过依据。",
+      "logs/ci/<date>/v11-task-63/summary.json 除生成外，还必须记录 ACC:T63.1、ACC:T63.2、ACC:T63.3 的检查结论与证据定位；任一项失败时结论为 failed。",
+      "确定性检查必须能从活动流与安全审计两侧输入中提取可比对的字段来源摘录；任一侧摘录缺失时结果为 failed，并在机器可读差异中标记 DET_SOURCE_EXCERPT_NOT_FOUND。",
+      "跨日志追溯校验必须在同一业务事件样本上同时验证“追溯键值一致 + 统一字段名集合一致”；若未找到可比对样本或任一子校验未执行，结果为 failed。",
+      "ACC:T63.1 必须明确并输出可机器解析的验收边界：统一字段名集合、追溯键定义、以及对应失败条件；若边界未定义或不可解析则结果为 failed。",
+      "ACC:T63.2 对同一输入样本重复执行时，字段统一与跨日志追溯的检查结论必须一致；若同输入产生不一致结论则结果为 failed。",
+      "ACC:T63.2 检查结果必须分别给出“字段统一”和“跨日志追溯”两类校验状态，并可定位到对应样本；任一状态缺失或未执行则结果为 failed。",
+      "ACC:T63.3 summary.json 必须持久化记录本次执行的任务标识、样本统计、失败码与证据路径，并与实际检查结论一致；文件缺失、字段缺失或不一致均为 failed。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -3019,7 +3219,12 @@
     "acceptance": [
       "ACC:T64.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
       "ACC:T64.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
-      "ACC:T64.3 产出 logs/ci/<date>/v11-task-64/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+      "ACC:T64.3 产出 logs/ci/<date>/v11-task-64/summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T64.3 summary.json 必须同时包含诊断摘要与修复建议模板两个可机读区块，且字段命名与层级在不同 CI 失败样本间保持统一。",
+      "ACC:T64.2 对同一输入重复运行至少两次时，输出在显式可变字段之外保持一致；当输入缺失必需失败信息或不可解析时，必须返回明确拒绝原因，不得以空结果或默认成功状态通过。",
+      "ACC:T64.1 必须定义并可验证诊断边界：仅对约定失败类型生成摘要与修复建议；对边界外输入必须拒绝并保持既有工件状态不被覆盖。",
+      "ACC:T64.3 summary.json 必须包含 ACC:T64.1、ACC:T64.2、ACC:T64.3 的可追溯证据键（用于定位对应来源片段或等价定位信息），以支持确定性审计。",
+      "ACC:T64.2 对每个可解析失败样本，修复建议模板必须包含可执行止损信息（至少含触发条件、立即处置动作、恢复或回滚检查点）；若任一要素无法给出，必须显式标记 rejected 并提供原因。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -3073,7 +3278,14 @@
     "acceptance": [
       "ACC:T65.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
       "ACC:T65.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "ACC:T65.3 产出 logs/ci/<date>/v11-task-65/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+      "ACC:T65.3 产出 logs/ci/<date>/v11-task-65/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T65.1 扫描范围覆盖 Task/ADR/Overlay/Test-Refs 四类回链，并对每一类给出可解析、缺失或重复的判定结果。",
+      "ACC:T65.2 对同一输入重复执行时，除时间戳等运行时字段外，诊断结果应保持一致并可被自动化测试直接比对。",
+      "ACC:T65.2 当检测到任一回链缺失或不可解析时，诊断结果必须返回失败并列出具体失败项，不能只给出无明细结论。",
+      "ACC:T65.3 summary.json 必须包含机器可消费的扫描结论与问题计数字段，以支持 CI 在无人工判读下决策。",
+      "ACC:T65.1 诊断结果必须覆盖并输出 Story、ADR Refs、Chapters、Overlays、Test Refs 五类来源字段的逐项校验状态；任一来源片段未命中时必须标记失败并给出缺失字段名。",
+      "ACC:T65.3 summary.json 必须为可直接解析的有效 JSON，并包含 SECURITY_PROFILE=host-safe 的执行上下文记录，供 CI 与审计流水线消费。",
+      "ACC:T65.2 当 Story、ADR Refs、Chapters、Overlays、Test Refs 全部校验通过且不存在缺失、重复或不可解析项时，诊断结果必须返回成功状态且问题计数为 0。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -3133,7 +3345,23 @@
     "acceptance": [
       "ACC:T66.1 分解阶段A范围完成且可验证。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
       "ACC:T66.2 分解阶段A关键行为通过确定性测试。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
-      "ACC:T66.3 产出 logs/ci/<date>/task-66-A-summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+      "ACC:T66.3 产出 logs/ci/<date>/task-66-A-summary.json。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "RC 准入包必须同时包含稳定性、性能、迁移、发布健康四类证据及各自结论；任一类别缺失时，阶段1评审结论为不通过。",
+      "logs/ci/<date>/task-66-A-summary.json 必须可机读并包含 ACC:T66.1、ACC:T66.2、ACC:T66.3 的结果字段；任一字段缺失、为空或不可解析时判定失败。",
+      "确定性复核时，在相同输入与环境下重复生成的关键结论必须一致；若出现不一致，RC 准入包状态必须标记为拒绝并记录原因。",
+      "迁移证据必须给出明确状态（success 或 failed）及对应说明；若本阶段无迁移变更，必须显式记录 no-migration-change，禁止留空。",
+      "发布健康证据必须给出门禁判定结果（pass 或 fail）；当结果为 fail 时，RC 准入包不得标记为可准入。",
+      "性能证据必须至少包含 samples 与 p95 两个可核对字段及门禁结论；字段缺失或门禁失败时，RC 准入包不得标记为可准入。",
+      "稳定性证据必须给出可核对的错误/崩溃统计与结论（pass 或 fail）；统计或结论缺失时，RC 准入包不得标记为可准入。",
+      "阶段1 RC 准入包必须输出单一总判定字段（pass 或 fail），且该总判定与四类证据门禁及 ACC:T66.1、ACC:T66.2、ACC:T66.3 结果一致；任一不一致判定失败。",
+      "评审包必须声明并实际使用 SECURITY_PROFILE=host-safe；若证据生成时配置不匹配或未记录该配置，阶段1评审结论为不通过。",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md 与 docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md 必须登记本阶段证据入口与结论摘要；任一文档未更新或无法定位证据入口判定失败。",
+      "确定性证据必须可追溯到 Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs 的对应检查项，并在评审包中标注 ACC:T66.1、ACC:T66.2、ACC:T66.3 到测试结果的映射；映射缺失判定失败。",
+      "ACC:T66.1 的“范围锁定”必须以可机读清单落盘并纳入评审包（至少包含 include、exclude、version、locked_at）；任一字段缺失、为空或不可解析时判定失败。",
+      "ACC:T66.2 的“关键行为实现”必须提供确定性检查明细（每项含 check_id、expected、actual、result）；任一必需检查缺失或 result 非 pass 时判定失败。",
+      "ACC:T66.3 的证据持久化必须保证 logs/ci/<date>/task-66-A-summary.json 在复核窗口内可重复读取且结构稳定（除允许的时间戳类字段外）；不可读取或非允许字段漂移时判定失败。",
+      "RC 准入包必须提供 Story/ADR/Chapter 到证据条目的回链映射，至少覆盖 PRD-GUILD-MANAGER-V11-T66、ADR-0005、ADR-0003、ADR-0015、ADR-0006、CH03、CH07、CH09、CH10、CH11；任一缺失判定失败。",
+      "确定性证据工件必须体现 red->green->refactor 的执行轨迹或等价记录（至少含失败轮次与通过轮次标识）；仅有最终通过结果且无过程证据时判定失败。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -3191,7 +3419,13 @@
     "acceptance": [
       "ACC:T79.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd",
       "ACC:T79.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd",
-      "ACC:T79.3 产出 logs/ci/<date>/task-79-B-summary.json。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd"
+      "ACC:T79.3 产出 logs/ci/<date>/task-79-B-summary.json。 Refs: Tests.Godot/tests/Adapters/Db/test_savegame_persistence_cross_restart.gd",
+      "在 SECURITY_PROFILE=host-safe 下执行阶段B时，旧版本有效存档必须可被回放到可读取状态；损坏存档必须进入恢复路径并被拒绝写回，原有可用存档状态保持不变。",
+      "同一输入与环境下重复执行阶段B确定性检查两次，ACC:T79.1、ACC:T79.2、ACC:T79.3 的结论必须一致，且 logs/ci/<date>/task-79-B-summary.json 包含每个锚点的结果与证据定位信息。",
+      "阶段B验收执行必须同时覆盖“旧版本有效存档样本”和“损坏存档样本”，并分别产生“可读取回放结果”与“拒绝写回结果”；任一结果缺失即判定失败。",
+      "不得以“未执行检查”或“空结果”判定 ACC:T79.1、ACC:T79.2、ACC:T79.3 通过；若任一锚点缺少对应检查记录，则阶段B验收失败。",
+      "阶段B必须形成“单一交付闭环”判定：仅当 ACC:T79.1、ACC:T79.2、ACC:T79.3 三个锚点均有通过记录时阶段B才可判定通过；任一锚点失败或缺失即阶段B失败。",
+      "阶段B证据链必须体现 red->green->refactor 的确定性轨迹（同一锚点至少包含一次失败记录、修复后通过记录、重构后复测通过记录）；任一环节缺失则该锚点结论无效。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -3252,7 +3486,15 @@
     "acceptance": [
       "ACC:T80.1 分解阶段B范围完成且可验证。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
       "ACC:T80.2 分解阶段B关键行为通过确定性测试。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
-      "ACC:T80.3 产出 logs/ci/<date>/task-80-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd"
+      "ACC:T80.3 产出 logs/ci/<date>/task-80-B-summary.json。 Refs: Tests.Godot/tests/Integration/test_guild_vertical_slice.gd",
+      "ACC:T80.1 仅当阶段B交付范围与 ACC:T80.1 绑定一致且无越界项时方可判定通过；否则必须判定失败。",
+      "ACC:T80.2 对应确定性测试在固定输入下重复执行结果一致；任一用例失败或结果漂移即判定失败。",
+      "ACC:T80.3 logs/ci/<date>/task-80-B-summary.json 必须包含 ACC:T80.1、ACC:T80.2、ACC:T80.3 的明确结果与生成时间；文件缺失、为空或缺任一锚点结果即判定失败。",
+      "阶段B验收必须同时覆盖并通过三个子任务义务：Lock scope(B)=ACC:T80.1、Implement behavior(B)=ACC:T80.2、Persist evidence(B)=ACC:T80.3；任一义务未验证或未通过即判定失败。",
+      "确定性证据链必须可复现 TDD red->green->refactor 流程，并可追溯到 ACC:T80.1/ACC:T80.2/ACC:T80.3；若仅有最终通过结果而无过程证据，则判定失败。",
+      "阶段B验证执行环境必须满足 SECURITY_PROFILE=host-safe，且该配置需在证据中可核验；配置缺失、不一致或不可核验则判定失败。",
+      "阶段B评审闭环结论必须可在 docs/architecture/overlays/PRD-Guild-Manager/08/_index.md 与 docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md 中定位到对应锚点结果；任一文档缺失或锚点不可定位则判定失败。",
+      "task-80-B-summary.json 必须包含对 ADR-0005、ADR-0003、ADR-0015、ADR-0006 及 CH03/CH07/CH09/CH10/CH11 的可追溯依据标识；缺任一依据标识则判定失败。"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",

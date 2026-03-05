@@ -217,6 +217,11 @@ def apply_deterministic_guards(
     subtask_id_set = set(subtask_ids)
     covered_sources: set[str] = set()
 
+    if not obligations:
+        # Keep the failure deterministic but avoid noisy per-subtask misses when
+        # the model produced no obligations at all (commonly all_runs_failed_or_invalid).
+        det_issues.append("DET_OBLIGATIONS_EMPTY")
+
     raw_corpus = "\n".join([str(x or "") for x in source_text_blocks if str(x or "").strip()])
     norm_corpus = _normalize_ws(raw_corpus)
 
@@ -261,9 +266,10 @@ def apply_deterministic_guards(
                 hard_uncovered.append(oid)
                 expected_hard_uncovered.append(oid)
 
-    for sid in subtask_ids:
-        if sid not in covered_sources:
-            det_issues.append(f"DET_SUBTASK_SOURCE:{sid}")
+    if obligations:
+        for sid in subtask_ids:
+            if sid not in covered_sources:
+                det_issues.append(f"DET_SUBTASK_SOURCE:{sid}")
 
     declared_uncovered = obj.get("uncovered_obligation_ids") or []
     declared_uncovered_ids = _dedupe_keep_order([str(x or "") for x in declared_uncovered]) if isinstance(declared_uncovered, list) else []
