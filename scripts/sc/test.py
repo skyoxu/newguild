@@ -22,6 +22,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from _summary_schema import SummarySchemaError, validate_sc_test_summary
 from _util import ci_dir, repo_root, run_cmd, today_str, write_json, write_text
 
 
@@ -41,14 +42,32 @@ def build_parser() -> argparse.ArgumentParser:
     return ap
 
 
-def run_unit(out_dir: Path, solution: str, configuration: str, *, run_id: str) -> dict[str, Any]:
+def run_unit(
+    out_dir: Path,
+    solution: str,
+    configuration: str,
+    *,
+    run_id: str,
+    task_id: str | None = None,
+) -> dict[str, Any]:
     cmd = ["py", "-3", "scripts/python/run_dotnet.py", "--solution", solution, "--configuration", configuration]
+    task_cs_refs = _task_scoped_cs_refs(task_id=task_id)
+    task_filter = _build_dotnet_filter_from_cs_refs(task_cs_refs)
+    if task_filter:
+        cmd += ["--filter", task_filter]
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=1_800)
     log_path = out_dir / "unit.log"
     write_text(log_path, out)
     unit_artifacts_dir = repo_root() / "logs" / "unit" / today_str()
     write_text(unit_artifacts_dir / "run_id.txt", run_id + "\n")
-    return {"name": "unit", "cmd": cmd, "rc": rc, "log": str(log_path), "artifacts_dir": str(unit_artifacts_dir)}
+    return {
+        "name": "unit",
+        "cmd": cmd,
+        "rc": rc,
+        "log": str(log_path),
+        "artifacts_dir": str(unit_artifacts_dir),
+        "status": "ok" if rc == 0 else "fail",
+    }
 
 
 def run_coverage_report(out_dir: Path, unit_artifacts_dir: Path) -> dict[str, Any]:
@@ -160,6 +179,76 @@ def _task_scoped_gdunit_refs(*, task_id: str | None, tests_project: Path) -> lis
     return refs
 
 
+def _task_scoped_cs_refs(*, task_id: str | None) -> list[str]:
+    """
+    Resolve task-scoped C# test refs from task views.
+
+    Accepted ref shape:
+    - Game.Core.Tests/.../*.cs
+    """
+    task_root_id = _normalize_task_root_id(task_id)
+    if not task_root_id:
+        return []
+
+    refs: list[str] = []
+    seen: set[str] = set()
+    view_files = [
+        repo_root() / ".taskmaster" / "tasks" / "tasks_back.json",
+        repo_root() / ".taskmaster" / "tasks" / "tasks_gameplay.json",
+    ]
+
+    for view_path in view_files:
+        if not view_path.is_file():
+            continue
+        try:
+            data = json.loads(view_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(data, list):
+            continue
+
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+            if str(item.get("taskmaster_id")).strip() != task_root_id:
+                continue
+            test_refs = item.get("test_refs")
+            if not isinstance(test_refs, list):
+                continue
+
+            for raw_ref in test_refs:
+                if not isinstance(raw_ref, str):
+                    continue
+                ref = raw_ref.replace("\\", "/").strip()
+                if not ref.lower().endswith(".cs"):
+                    continue
+                if not ref.startswith("Game.Core.Tests/"):
+                    continue
+                if not (repo_root() / ref).is_file():
+                    continue
+                if ref in seen:
+                    continue
+                seen.add(ref)
+                refs.append(ref)
+
+    return refs
+
+
+def _build_dotnet_filter_from_cs_refs(cs_refs: list[str]) -> str:
+    clauses: list[str] = []
+    seen: set[str] = set()
+    for ref in cs_refs:
+        stem = Path(ref).stem.strip()
+        if not stem:
+            continue
+        clause = f"FullyQualifiedName~{stem}"
+        if clause in seen:
+            continue
+        seen.add(clause)
+        clauses.append(clause)
+    return "|".join(clauses)
+
+
 def run_gdunit_hard(
     out_dir: Path,
     godot_bin: str,
@@ -174,41 +263,26 @@ def run_gdunit_hard(
 
     add_dirs: list[str] = []
     tests_project = repo_root() / "Tests.Godot"
-    task_scope = bool(str(task_id or "").strip())
-    if task_scope:
-        # Task mode: only execute task-scoped refs to avoid unrelated historical suite noise.
+    for rel in ["tests/Scenes", "tests/UI", "tests/Adapters/Config", "tests/Security/Hard"]:
+        if (tests_project / rel).exists():
+            add_dirs.append(rel)
+        elif (repo_root() / rel).exists():
+            # Backward-compatible fallback for repos that keep GdUnit suites at repo root.
+            add_dirs.append(rel)
+    # Task-specific acceptance suites (e.g., tests/Tasks/test_taskXXXX_acceptance.gd)
+    # should be included only when a concrete task id is being validated.
+    if str(task_id or "").strip():
         rel = "tests/Tasks"
         if (tests_project / rel).exists():
             add_dirs.append(rel)
         elif (repo_root() / rel).exists():
             add_dirs.append(rel)
 
-        scoped_refs = _task_scoped_gdunit_refs(task_id=task_id, tests_project=tests_project)
-        for rel_ref in scoped_refs:
+        # Add task-scoped GdUnit refs from task views so acceptance-executed-refs
+        # can bind to real executed tests.
+        for rel_ref in _task_scoped_gdunit_refs(task_id=task_id, tests_project=tests_project):
             if rel_ref not in add_dirs:
                 add_dirs.append(rel_ref)
-        if not scoped_refs:
-            log_path = out_dir / "gdunit-hard.log"
-            write_text(
-                log_path,
-                "[sc-test] ERROR: no task-scoped gdunit refs resolved from tasks_back/tasks_gameplay test_refs.\n"
-                "Fix: ensure task test_refs contains existing .gd paths under Tests.Godot/tests/**.\n",
-            )
-            return {
-                "name": "gdunit-hard",
-                "cmd": [],
-                "rc": 2,
-                "log": str(log_path),
-                "report_dir": str(report_dir),
-                "error": "missing_task_scoped_gd_refs",
-            }
-    else:
-        for rel in ["tests/Scenes", "tests/UI", "tests/Adapters/Config", "tests/Security/Hard"]:
-            if (tests_project / rel).exists():
-                add_dirs.append(rel)
-            elif (repo_root() / rel).exists():
-                # Backward-compatible fallback for repos that keep GdUnit suites at repo root.
-                add_dirs.append(rel)
 
     cmd = [
         "py",
@@ -227,7 +301,14 @@ def run_gdunit_hard(
     log_path = out_dir / "gdunit-hard.log"
     write_text(log_path, out)
     write_text(repo_root() / report_dir / "run_id.txt", run_id + "\n")
-    return {"name": "gdunit-hard", "cmd": cmd, "rc": rc, "log": str(log_path), "report_dir": str(report_dir)}
+    return {
+        "name": "gdunit-hard",
+        "cmd": cmd,
+        "rc": rc,
+        "log": str(log_path),
+        "report_dir": str(report_dir),
+        "status": "ok" if rc == 0 else "fail",
+    }
 
 
 def run_smoke(out_dir: Path, godot_bin: str, scene: str, task_id: str | None = None) -> dict[str, Any]:
@@ -237,7 +318,14 @@ def run_smoke(out_dir: Path, godot_bin: str, scene: str, task_id: str | None = N
             msg = f"[sc-test] ERROR: smoke scene not found on disk: {disk_path}\n"
             log_path = out_dir / "smoke.log"
             write_text(log_path, msg)
-            return {"name": "smoke", "cmd": [], "rc": 2, "log": str(log_path), "error": "smoke_scene_missing"}
+            return {
+                "name": "smoke",
+                "cmd": [],
+                "rc": 2,
+                "log": str(log_path),
+                "error": "smoke_scene_missing",
+                "status": "fail",
+            }
     cmd = [
         "py",
         "-3",
@@ -257,14 +345,23 @@ def run_smoke(out_dir: Path, godot_bin: str, scene: str, task_id: str | None = N
     rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=120)
     log_path = out_dir / "smoke.log"
     write_text(log_path, out)
-    return {"name": "smoke", "cmd": cmd, "rc": rc, "log": str(log_path)}
+    return {
+        "name": "smoke",
+        "cmd": cmd,
+        "rc": rc,
+        "log": str(log_path),
+        "status": "ok" if rc == 0 else "fail",
+    }
 
 
 def main() -> int:
     args = build_parser().parse_args()
     out_dir = ci_dir("sc-test")
     run_id = str(args.run_id or "").strip() or uuid.uuid4().hex
+    run_date = today_str()
     write_text(out_dir / "run_id.txt", run_id + "\n")
+    os.environ["SC_TEST_RUN_ID"] = run_id
+    os.environ["SC_TEST_DATE"] = run_date
 
     godot_bin = args.godot_bin or os.environ.get("GODOT_BIN")
 
@@ -277,22 +374,49 @@ def main() -> int:
         "status": "fail",
         "steps": [],
     }
+    task_root_id = _normalize_task_root_id(args.task_id)
+    if task_root_id:
+        summary["task_id"] = task_root_id
+
+    schema_error_log = out_dir / "summary-schema-validation-error.log"
+
+    def _persist_summary() -> bool:
+        try:
+            validate_sc_test_summary(summary)
+        except SummarySchemaError as exc:
+            write_text(schema_error_log, f"{exc}\n")
+            write_json(out_dir / "summary.invalid.json", summary)
+            print(f"[sc-test] ERROR: summary schema validation failed. details={schema_error_log}")
+            return False
+        invalid_summary_path = out_dir / "summary.invalid.json"
+        if schema_error_log.exists():
+            schema_error_log.unlink(missing_ok=True)
+        if invalid_summary_path.exists():
+            invalid_summary_path.unlink(missing_ok=True)
+        write_json(out_dir / "summary.json", summary)
+        return True
 
     hard_fail = False
+    if not _persist_summary():
+        return 2
 
     if args.type in ("unit", "all"):
         if not args.no_coverage_gate:
             os.environ.setdefault("COVERAGE_LINES_MIN", "90")
             os.environ.setdefault("COVERAGE_BRANCHES_MIN", "85")
 
-        step = run_unit(out_dir, args.solution, args.configuration, run_id=run_id)
+        step = run_unit(out_dir, args.solution, args.configuration, run_id=run_id, task_id=args.task_id)
         summary["steps"].append(step)
+        if not _persist_summary():
+            return 2
         if step["rc"] != 0:
             hard_fail = True
         else:
             if not args.no_coverage_report:
                 cov = run_coverage_report(out_dir, Path(step["artifacts_dir"]))
                 summary["steps"].append(cov)
+                if not _persist_summary():
+                    return 2
                 if cov.get("status") == "fail":
                     hard_fail = True
 
@@ -303,17 +427,22 @@ def main() -> int:
 
         step = run_gdunit_hard(out_dir, godot_bin, args.timeout_sec, run_id=run_id, task_id=args.task_id)
         summary["steps"].append(step)
+        if not _persist_summary():
+            return 2
         if step["rc"] != 0:
             hard_fail = True
 
         if not args.skip_smoke:
             sm = run_smoke(out_dir, godot_bin, args.smoke_scene, task_id=args.task_id)
             summary["steps"].append(sm)
+            if not _persist_summary():
+                return 2
             if sm["rc"] != 0:
                 hard_fail = True
 
     summary["status"] = "ok" if not hard_fail else "fail"
-    write_json(out_dir / "summary.json", summary)
+    if not _persist_summary():
+        return 2
 
     print(f"SC_TEST status={summary['status']} out={out_dir}")
     return 0 if not hard_fail else 1

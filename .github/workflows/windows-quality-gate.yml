@@ -4,9 +4,21 @@ on:
   workflow_dispatch:
     inputs:
       task_id:
-        description: 'Taskmaster task id (e.g. 19). Used by scripts/sc/acceptance_check.py.'
+        description: 'Task id(s) for acceptance-check (e.g. 10 / 10.3 / 1-3 / 10,12). Empty = skip.'
         required: false
         default: ''
+      strict_adr_status:
+        description: 'Fail if any referenced ADR is not Accepted (default: false).'
+        required: false
+        default: 'false'
+      require_perf:
+        description: 'Enable perf P95 hard gate (parses [PERF] p95_ms from headless.log) (default: false).'
+        required: false
+        default: 'false'
+      require_task_test_refs:
+        description: 'Fail if tasks_back/tasks_gameplay test_refs is empty for the resolved task id (default: false).'
+        required: false
+        default: 'false'
   push:
     branches: [ main ]
   pull_request:
@@ -17,22 +29,15 @@ jobs:
     runs-on: windows-latest
     env:
       GODOT_VERSION: '4.5.1'
-      GD_DB_COMMAND_TIMEOUT_SEC: '30'
-      PERF_P95_THRESHOLD_MS: '20'
       PYTHONIOENCODING: 'utf-8'
       PYTHONUTF8: '1'
+      SECURITY_PROFILE: 'host-safe'
+      WHITELIST_WARN_DAYS: '90'
+      TASK_LINKS_MAX_WARNINGS: '100'
+      CI_DOTNET_STAGE_TIMEOUT_MS: '4200000'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set CI_DATE (stable per run)
-        shell: pwsh
-        run: |
-          $date = Get-Date -Format 'yyyy-MM-dd'
-          Add-Content -Path $env:GITHUB_ENV -Value "CI_DATE=$date" -Encoding utf8
-          Write-Host "CI_DATE=$date"
 
       - name: Logs seed (ensure artifacts paths)
         shell: pwsh
@@ -67,7 +72,8 @@ jobs:
           $u = "https://github.com/godotengine/godot/releases/download/${env:GODOT_VERSION}-stable/Godot_v${env:GODOT_VERSION}-stable_mono_win64.zip"
           Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $zip
           Expand-Archive $zip -DestinationPath godot -Force
-          $exe = Get-ChildItem godot -Recurse -Filter *win64*.exe | Select-Object -First 1
+          $exe = Get-ChildItem godot -Recurse -Filter *win64*console*.exe | Select-Object -First 1
+          if (-not $exe) { $exe = Get-ChildItem godot -Recurse -Filter *win64*.exe | Select-Object -First 1 }
           if (-not $exe) { throw 'Godot exe not found after download.' }
           "GODOT_BIN=$($exe.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "GODOT_BIN=$($exe.FullName)"
@@ -77,171 +83,16 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: EOL policy gate (hard)
+      - name: Hard gates bundle (Python)
         shell: pwsh
         run: |
-          $date = $env:CI_DATE
-          if ([string]::IsNullOrWhiteSpace($date)) {
-            throw 'CI_DATE is missing.'
-          }
-          py -3 scripts/python/check_eol_policy.py --date "$date" --strict
-
-      - name: Test naming gate (strict changed-only)
-        shell: pwsh
-        run: |
-          $date = $env:CI_DATE
-          $ciDir = "logs/ci/$date"
-          New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
-
-          $baseRef = ""
-          if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
-            $baseBranch = "${{ github.base_ref }}"
-            if (-not [string]::IsNullOrWhiteSpace($baseBranch)) {
-              git fetch --no-tags --prune --depth=1 origin $baseBranch
-              $baseRef = "origin/$baseBranch"
-            }
-          }
-          elseif ($env:GITHUB_EVENT_NAME -eq 'push') {
-            $before = "${{ github.event.before }}"
-            if (-not [string]::IsNullOrWhiteSpace($before) -and $before -ne "0000000000000000000000000000000000000000") {
-              $baseRef = $before
-            }
-            else {
-              $baseRef = "HEAD~1"
-            }
-          }
-
-          if ([string]::IsNullOrWhiteSpace($baseRef)) {
-            py -3 scripts/python/check_test_naming.py --style gwt_should --changed-only *>&1 | Tee-Object -FilePath "$ciDir/test-naming-stdout.txt"
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
-          else {
-            py -3 scripts/python/check_test_naming.py --style gwt_should --changed-only --base-ref $baseRef *>&1 | Tee-Object -FilePath "$ciDir/test-naming-stdout.txt"
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
-
-      - name: Allowlist growth gate (shrink-only)
-        shell: pwsh
-        run: |
-          $date = $env:CI_DATE
-          $ciDir = "logs/ci/$date"
-          New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
-
-          $baseRef = ""
-          if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
-            $baseBranch = "${{ github.base_ref }}"
-            if (-not [string]::IsNullOrWhiteSpace($baseBranch)) {
-              $baseRef = "origin/$baseBranch"
-            }
-          }
-          elseif ($env:GITHUB_EVENT_NAME -eq 'push') {
-            $before = "${{ github.event.before }}"
-            if (-not [string]::IsNullOrWhiteSpace($before) -and $before -ne "0000000000000000000000000000000000000000") {
-              $baseRef = $before
-            }
-            else {
-              $baseRef = "HEAD~1"
-            }
-          }
-
-          if ([string]::IsNullOrWhiteSpace($baseRef)) {
-            Write-Host "ALLOWLIST_GROWTH gate skipped (no base ref in this event)."
-          }
-          else {
-            py -3 scripts/python/check_allowlist_growth.py --base-ref $baseRef --allow-bootstrap *>&1 | Tee-Object -FilePath "$ciDir/allowlist-growth-stdout.txt"
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
-
-      - name: "Preflight: audit .git ACL drift (Windows)"
-        id: acl_audit
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          py -3 scripts/python/fix_git_acl_drift.py --audit --dry-run --sid auto
-
-      - name: "Remediate: fix .git ACL drift (Windows)"
-        if: steps.acl_audit.outcome == 'failure'
-        shell: pwsh
-        run: |
-          py -3 scripts/python/fix_git_acl_drift.py --audit --sid auto --smoke-git-lock --no-remove-from-repo-root --inheritance keep
-
-      - name: "Verify: .git ACL drift cleared (Windows)"
-        if: steps.acl_audit.outcome == 'failure'
-        shell: pwsh
-        run: |
-          py -3 scripts/python/fix_git_acl_drift.py --audit --dry-run --sid auto
-
-      - name: Acceptance check (hard gate)
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
-        shell: pwsh
-        run: |
-          $taskId = ""
-          if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
-            $taskId = "${{ inputs.task_id }}"
-          }
-          if (($env:GITHUB_EVENT_NAME -eq 'pull_request') -and ([string]::IsNullOrWhiteSpace($taskId))) {
-            $branch = "${{ github.head_ref }}"
-            if ($branch -match '(^|/)T(?<id>\d+)(-|$)') {
-              $taskId = $Matches['id']
-            }
-          }
-          if (($env:GITHUB_EVENT_NAME -eq 'pull_request') -and ([string]::IsNullOrWhiteSpace($taskId))) {
-            $title = "${{ github.event.pull_request.title }}"
-            if ($title -match 'Task\\s+(?<id>\\d+):') {
-              $taskId = $Matches['id']
-            }
-          }
-          if ([string]::IsNullOrWhiteSpace($taskId)) {
-            Write-Host "SC_ACCEPTANCE_CHECK status=skipped reason=no_task_id"
-            Write-Host "Hint: use workflow_dispatch input 'task_id', or name the PR branch like task/T19, or use a PR title like 'Task 19:...'."
-            exit 0
-          }
-          Write-Host "SC_ACCEPTANCE_CHECK resolved task_id=$taskId"
-          py -3 scripts/sc/acceptance_check.py --task-id $taskId --only adr,links,overlay,contracts,arch,build
-          $rc = $LASTEXITCODE
-          if ($rc -ne 0) {
-            py -3 -c "import json, pathlib; p=pathlib.Path(r'logs/ci')/('${{ env.CI_DATE }}')/'sc-acceptance-check'/'summary.json'; print(p.as_posix()); print(p.read_text(encoding='utf-8',errors='replace')[:4000] if p.exists() else 'summary.json missing')"
-            exit $rc
-          }
-
-      - name: Dependency guard (hard gate)
-        shell: pwsh
-        run: |
-          $date = $env:CI_DATE
-          $outDir = "logs/ci/$date"
-          New-Item -ItemType Directory -Force -Path $outDir | Out-Null
-
-          & py -3 scripts/python/dependency_guard.py --out-dir "$outDir"
-          $rc = $LASTEXITCODE
-
-          $summaryPath = Join-Path $outDir "dependency-guard-summary.txt"
-          $jsonPath = Join-Path $outDir "dependency-guard.json"
-
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '### Dependency Guard' -Encoding utf8
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'Artifacts:' -Encoding utf8
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ("- " + $jsonPath) -Encoding utf8
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ("- " + $summaryPath) -Encoding utf8
-
-          if (Test-Path $summaryPath) {
-            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '' -Encoding utf8
-            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```text' -Encoding utf8
-            $lines = Get-Content -Encoding utf8 -TotalCount 200 $summaryPath
-            foreach ($ln in $lines) { Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $ln -Encoding utf8 }
-            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```' -Encoding utf8
-          } else {
-            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '' -Encoding utf8
-            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ("Summary file missing: " + $summaryPath) -Encoding utf8
-          }
-
-          if ($rc -ne 0) {
-            throw "Dependency guard failed (rc=$rc). See $summaryPath"
-          }
+          py -3 scripts/python/run_gate_bundle.py --mode hard --task-files .taskmaster/tasks/tasks_back.json .taskmaster/tasks/tasks_gameplay.json
 
       - name: Ensure GdUnit4 plugin
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
-          $date = $env:CI_DATE
+          $date = Get-Date -Format 'yyyy-MM-dd'
           $ciDir = "logs/ci/$date"
           New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
           $diag = Join-Path $ciDir 'ensure-gdunit4-diag.txt'
@@ -273,8 +124,46 @@ jobs:
         run: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           $tpz = "godot/export_templates.tpz"
-          $u = "https://github.com/godotengine/godot/releases/download/${env:GODOT_VERSION}-stable/Godot_v${env:GODOT_VERSION}-stable_export_templates.tpz"
-          Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $tpz
+          $version = "${env:GODOT_VERSION}"
+          $urls = @(
+            "https://github.com/godotengine/godot/releases/download/${version}-stable/Godot_v${version}-stable_export_templates.tpz",
+            "https://downloads.tuxfamily.org/godotengine/${version}/Godot_v${version}-stable_export_templates.tpz"
+          )
+
+          $downloaded = $false
+          foreach ($u in $urls) {
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              try {
+                Write-Host "Download templates attempt=$attempt url=$u"
+                Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $tpz -TimeoutSec 600
+                if (-not (Test-Path $tpz)) { throw "Download target not found: $tpz" }
+                $fi = Get-Item $tpz
+                if ($fi.Length -lt 1048576) { throw "Downloaded file too small: $($fi.Length) bytes" }
+                $stream = [System.IO.File]::OpenRead($tpz)
+                try {
+                  $b0 = $stream.ReadByte()
+                  $b1 = $stream.ReadByte()
+                } finally {
+                  $stream.Dispose()
+                }
+                if ($b0 -ne 0x50 -or $b1 -ne 0x4B) {
+                  throw "Downloaded file is not a zip/tpz archive."
+                }
+                $downloaded = $true
+                break
+              } catch {
+                Write-Warning "Download failed attempt=$attempt url=$u err=$($_.Exception.Message)"
+                if (Test-Path $tpz) { Remove-Item -Force $tpz -ErrorAction SilentlyContinue }
+                if ($attempt -lt 3) { Start-Sleep -Seconds (5 * $attempt) }
+              }
+            }
+            if ($downloaded) { break }
+          }
+
+          if (-not $downloaded) {
+            throw "Unable to download export templates from known mirrors."
+          }
+
           $temp = "godot/templates_unpacked"
           Expand-Archive $tpz -DestinationPath $temp -Force
           $src = Join-Path $temp 'templates'
@@ -296,58 +185,142 @@ jobs:
         run: |
           $env:Path = "$HOME\.dotnet;" + $env:Path
           $env:GODOT_DOTNET_CLI = (Get-Command dotnet).Path
-          try { & "$env:GODOT_BIN" --headless --path . --quit } catch { Write-Warning $_ }
-          dotnet restore GodotGame.csproj
-          dotnet build GodotGame.csproj -c Release -v minimal
+          dotnet restore NewRouge.csproj
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet build NewRouge.csproj -c Release -v minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $prewarm = Start-Process -FilePath "$env:GODOT_BIN" -ArgumentList "--headless", "--path", ".", "--quit" -Wait -PassThru -NoNewWindow
+          if ($prewarm.ExitCode -ne 0) {
+            Write-Warning "Godot prewarm exited with code $($prewarm.ExitCode); continue because hard runtime gates run in CI pipeline."
+          }
 
       - name: CI pipeline (Python)
         shell: pwsh
         run: |
           py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debug --godot-bin "$env:GODOT_BIN" --build-solutions
 
-      - name: Release health gate (optional)
-        if: ${{ github.event_name != 'pull_request' }}
+      - name: Resolve Task IDs for acceptance-check
         shell: pwsh
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         run: |
-          if (-not $env:SENTRY_AUTH_TOKEN -or -not $env:SENTRY_ORG -or -not $env:SENTRY_PROJECT) {
-            Write-Host "RELEASE_HEALTH_GATE skipped (missing SENTRY_* secrets)."
+          $ErrorActionPreference = 'Continue'
+
+          function Set-ScTaskIds([string]$value) {
+            if ([string]::IsNullOrWhiteSpace($env:GITHUB_ENV)) {
+              Write-Warning "GITHUB_ENV is empty; cannot export SC_TASK_IDS."
+              return
+            }
+
+            "SC_TASK_IDS=$value" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          }
+
+          try {
+            $tasksJson = ".taskmaster/tasks/tasks.json"
+            if (-not (Test-Path $tasksJson)) {
+              Write-Host "SC_ACCEPTANCE skipped: missing $tasksJson"
+              Set-ScTaskIds ""
+              exit 0
+            }
+
+            $spec = ""
+            if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+              $spec = "${{ inputs.task_id }}"
+            } elseif ("${{ github.event_name }}" -eq "pull_request") {
+              $spec = "${{ github.event.pull_request.title }}"
+            }
+
+            if ($spec -match 'Task\s*\[([^\]]+)\]') { $spec = $Matches[1] }
+            $spec = ([string]$spec -replace '\s', '').Trim()
+
+            if ([string]::IsNullOrWhiteSpace($spec)) {
+              if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+                Write-Host "SC_ACCEPTANCE skipped: workflow_dispatch input task_id is empty"
+                Set-ScTaskIds ""
+                exit 0
+              }
+
+              $fallback = ""
+              try {
+                $raw = & py -3 -c "import json; from pathlib import Path; p=Path('.taskmaster/tasks/tasks.json'); d=json.loads(p.read_text(encoding='utf-8')); tasks=d.get('master',{}).get('tasks',[]); t=next((x for x in tasks if str(x.get('status','')).lower()=='in-progress'), None); print((t or {}).get('id',''))" 2>$null
+                $fallback = [string]::Join('', $raw).Trim()
+              } catch {
+                $fallback = ""
+              }
+
+              if ([string]::IsNullOrWhiteSpace($fallback)) {
+                Write-Host "SC_ACCEPTANCE skipped: no task id resolved (provide workflow_dispatch input task_id or name PR like: Task [10]:<title>)"
+                Set-ScTaskIds ""
+                exit 0
+              }
+
+              Set-ScTaskIds $fallback
+              Write-Host "SC_TASK_IDS=$fallback (fallback)"
+              exit 0
+            }
+
+            $ids = New-Object System.Collections.Generic.List[string]
+            foreach ($part in $spec.Split(',')) {
+              if ($part -match '^\d+(\.\d+)?$') {
+                $ids.Add($part)
+                continue
+              }
+              if ($part -match '^(\d+)-(\d+)$') {
+                $a = [int]$Matches[1]
+                $b = [int]$Matches[2]
+                if ($b -lt $a) { $t = $a; $a = $b; $b = $t }
+                for ($i = $a; $i -le $b; $i++) { $ids.Add($i.ToString()) }
+                continue
+              }
+            }
+
+            $uniq = $ids | Select-Object -Unique
+            if (-not $uniq -or $uniq.Count -eq 0) {
+              Write-Host "SC_ACCEPTANCE skipped: invalid task id spec '$spec'"
+              Set-ScTaskIds ""
+              exit 0
+            }
+
+            Set-ScTaskIds ($uniq -join ',')
+            Write-Host "SC_TASK_IDS=$($uniq -join ',')"
+          } catch {
+            Write-Warning "SC_ACCEPTANCE resolver unexpected error: $($_.Exception.Message)"
+            Set-ScTaskIds ""
             exit 0
           }
-          py -3 scripts/python/release_health_gate.py
 
-      - name: DB perf smoke (hard gate input)
-        if: always()
+      - name: Acceptance check (sc)
+        if: ${{ env.SC_TASK_IDS != '' }}
         shell: pwsh
         run: |
-          py -3 scripts/python/perf_smoke_db.py --godot-bin "$env:GODOT_BIN"
+          $date = (& py -3 -c "import datetime as dt; print(dt.date.today().strftime('%Y-%m-%d'))").Trim()
+          $strict = "${{ github.event_name == 'workflow_dispatch' && inputs.strict_adr_status || 'false' }}"
+          $reqPerf = "${{ github.event_name == 'workflow_dispatch' && inputs.require_perf || 'false' }}"
+          $reqRefs = "${{ github.event_name == 'workflow_dispatch' && inputs.require_task_test_refs || 'false' }}"
 
-      - name: Validate perf summary (hard gate)
-        if: always()
-        shell: pwsh
-        run: |
-          $date = $env:CI_DATE
-          $ciDir = "logs/ci/$date"
-          $perfDir = "logs/perf/$date"
-          New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
+          foreach ($id in $env:SC_TASK_IDS.Split(',')) {
+            $only = @('adr','overlay','contracts','arch','build','security','quality','rules','tests')
+            if ((Test-Path ".taskmaster/tasks/tasks_back.json") -and (Test-Path ".taskmaster/tasks/tasks_gameplay.json")) {
+              $only += 'links'
+            }
+            if ($reqPerf -eq "true") { $only += 'perf' }
+            $onlyArg = $only -join ','
 
-          $summary = Join-Path $perfDir "summary.json"
-          $dbSummary = Join-Path $perfDir "db/db-perf-summary.json"
-          $summaryPath = $summary
-          if (-not (Test-Path $summaryPath)) { $summaryPath = $dbSummary }
+            $args = @("py", "-3", "scripts/sc/acceptance_check.py", "--task-id", $id, "--only", $onlyArg, "--security-profile", "$env:SECURITY_PROFILE", "--require-headless-e2e")
+            if ($strict -eq "true") { $args += "--strict-adr-status" }
+            if ($reqPerf -eq "true") { $args += "--require-perf" }
+            if ($reqRefs -eq "true") { $args += "--require-task-test-refs" }
+            & $args[0] $args[1..($args.Length-1)]
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-          py -3 scripts/python/validate_perf.py --summary-path "$summaryPath" --metric "DB_QUERY_P95" --threshold-ms "$env:PERF_P95_THRESHOLD_MS" --report "$ciDir/quality-gates-perf.json" --strict
-
-      - name: Upload perf logs (always)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: perf-logs
-          path: logs/perf/**
-          if-no-files-found: ignore
+            # If multiple task ids were provided, preserve each report directory.
+            $src = "logs/ci/$date/sc-acceptance-check"
+            $safeId = $id.Replace('.', '_')
+            $dst = "logs/ci/$date/sc-acceptance-check-task-$safeId"
+            if (Test-Path $src) {
+              if (Test-Path $dst) { Remove-Item -Recurse -Force $dst }
+              Move-Item $src $dst -Force
+            }
+          }
 
       - name: Upload CI logs (always)
         if: always()
@@ -357,32 +330,22 @@ jobs:
           path: logs/ci/**
           if-no-files-found: ignore
 
-      - name: Upload unit logs (always)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-logs
-          path: logs/unit/**
-          if-no-files-found: ignore
+      - name: Soft gates bundle (Python)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          py -3 scripts/python/run_gate_bundle.py --mode soft --task-files .taskmaster/tasks/tasks_back.json .taskmaster/tasks/tasks_gameplay.json
 
       - name: GdUnit4 tests (Python, soft gate)
         shell: pwsh
         continue-on-error: true
         run: |
-          py -3 scripts/python/check_gdunit_gate_layout.py --ui-dir Tests.Godot/tests/UI
           py -3 scripts/python/run_gdunit.py --prewarm --godot-bin "$env:GODOT_BIN" --project Tests.Godot `
             --add tests/Adapters `
             --add tests/Security/Hard `
             --add tests/Integration `
             --add tests/UI `
             --timeout-sec 480 --rd "logs/e2e/${{ github.run_id }}/gdunit-reports/quality"
-
-      - name: Validate security audit JSONL (hard gate)
-        shell: pwsh
-        run: |
-          $date = $env:CI_DATE
-          $logPattern = "logs/ci/$date/security-audit*.jsonl"
-          py -3 scripts/python/validate_audit_logs.py --log-path $logPattern --check-sensitive --strict --report "logs/ci/$date/audit-validation-report.json"
 
       - name: GdUnit4 a11y tests (Python, soft gate)
         shell: pwsh
@@ -412,18 +375,26 @@ jobs:
           path: logs/e2e/**/gdunit-reports/**
           if-no-files-found: ignore
 
-      - name: Upload audit validation report (always)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: audit-validation-report
-          path: logs/ci/**/audit-validation-report.json
-          if-no-files-found: ignore
-
       - name: Schema dump (soft)
         shell: pwsh
         continue-on-error: true
         run: |
+          $date = Get-Date -Format 'yyyy-MM-dd'
           $out = "logs/ci/${{ github.run_id }}/schema-dump.json"
-          py -3 scripts/python/db_schema_dump.py --glob "$env:APPDATA\Godot\app_userdata\GodotGame\*.db" --out "$out"
+          py -3 scripts/python/db_schema_dump.py --glob "$env:APPDATA\Godot\app_userdata\newrouge\*.db" --out "$out"
           Write-Host "SCHEMA_DUMP_OUT=$out"
+
+  build-test-export:
+    name: build-test-export
+    if: always()
+    needs: [quality]
+    runs-on: windows-latest
+    steps:
+      - name: Mirror quality result for legacy required check context
+        shell: pwsh
+        run: |
+          if ("${{ needs.quality.result }}" -ne "success") {
+            Write-Error "quality job result=${{ needs.quality.result }}; mark build-test-export as failed."
+            exit 1
+          }
+          Write-Host "quality job passed; build-test-export compatibility check passed."

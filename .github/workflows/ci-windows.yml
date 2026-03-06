@@ -1,10 +1,12 @@
-name: Windows CI
+name: Windows CI (Manual)
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      acceptance_task_id:
+        description: 'Task id for acceptance post-evidence gate (default: 1)'
+        required: false
+        default: '1'
 
 jobs:
   build-test-export:
@@ -12,19 +14,16 @@ jobs:
     env:
       GODOT_VERSION: '4.5.1'
       EXPORT_SIZE_MAX_MB: '150'
-      GD_DB_COMMAND_TIMEOUT_SEC: '30'
       PYTHONIOENCODING: 'utf-8'
       PYTHONUTF8: '1'
+      SECURITY_PROFILE: 'host-safe'
+      SC_ACCEPTANCE_TASK_ID: ${{ inputs.acceptance_task_id }}
+      WHITELIST_WARN_DAYS: '90'
+      TASK_LINKS_MAX_WARNINGS: '100'
+      CI_DOTNET_STAGE_TIMEOUT_MS: '4200000'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set CI_DATE (stable per run)
-        shell: pwsh
-        run: |
-          $date = Get-Date -Format 'yyyy-MM-dd'
-          Add-Content -Path $env:GITHUB_ENV -Value "CI_DATE=$date" -Encoding utf8
-          Write-Host "CI_DATE=$date"
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
@@ -40,7 +39,8 @@ jobs:
           $u = "https://github.com/godotengine/godot/releases/download/${env:GODOT_VERSION}-stable/Godot_v${env:GODOT_VERSION}-stable_mono_win64.zip"
           Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $zip
           Expand-Archive $zip -DestinationPath godot -Force
-          $exe = Get-ChildItem godot -Recurse -Filter *win64*.exe | Select-Object -First 1
+          $exe = Get-ChildItem godot -Recurse -Filter *win64*console*.exe | Select-Object -First 1
+          if (-not $exe) { $exe = Get-ChildItem godot -Recurse -Filter *win64*.exe | Select-Object -First 1 }
           if (-not $exe) { throw 'Godot exe not found after download.' }
           "GODOT_BIN=$($exe.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "GODOT_BIN=$($exe.FullName)"
@@ -50,42 +50,16 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: EOL policy gate (hard)
+      - name: Hard gates bundle (Python)
         shell: pwsh
         run: |
-          $date = $env:CI_DATE
-          if ([string]::IsNullOrWhiteSpace($date)) {
-            throw 'CI_DATE is missing.'
-          }
-          py -3 scripts/python/check_eol_policy.py --date "$date" --strict
-
-      - name: "Preflight: audit .git ACL drift (Windows)"
-        id: acl_audit
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          py -3 scripts/python/fix_git_acl_drift.py --audit --dry-run --sid auto
-
-      - name: "Remediate: fix .git ACL drift (Windows)"
-        if: steps.acl_audit.outcome == 'failure'
-        shell: pwsh
-        run: |
-          py -3 scripts/python/fix_git_acl_drift.py --audit --sid auto --smoke-git-lock --no-remove-from-repo-root --inheritance keep
-
-      - name: "Verify: .git ACL drift cleared (Windows)"
-        if: steps.acl_audit.outcome == 'failure'
-        shell: pwsh
-        run: |
-          py -3 scripts/python/fix_git_acl_drift.py --audit --dry-run --sid auto
+          py -3 scripts/python/run_gate_bundle.py --mode hard --task-files .taskmaster/tasks/tasks_back.json .taskmaster/tasks/tasks_gameplay.json
 
       - name: Ensure GdUnit4 plugin
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
-          $date = $env:CI_DATE
-          if ([string]::IsNullOrWhiteSpace($date)) {
-            throw 'CI_DATE is missing.'
-          }
+          $date = Get-Date -Format 'yyyy-MM-dd'
           $ciDir = "logs/ci/$date"
           New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
           $diag = Join-Path $ciDir 'ensure-gdunit4-diag.txt'
@@ -117,8 +91,46 @@ jobs:
         run: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           $tpz = "godot/export_templates.tpz"
-          $u = "https://github.com/godotengine/godot/releases/download/${env:GODOT_VERSION}-stable/Godot_v${env:GODOT_VERSION}-stable_export_templates.tpz"
-          Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $tpz
+          $version = "${env:GODOT_VERSION}"
+          $urls = @(
+            "https://github.com/godotengine/godot/releases/download/${version}-stable/Godot_v${version}-stable_export_templates.tpz",
+            "https://downloads.tuxfamily.org/godotengine/${version}/Godot_v${version}-stable_export_templates.tpz"
+          )
+
+          $downloaded = $false
+          foreach ($u in $urls) {
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              try {
+                Write-Host "Download templates attempt=$attempt url=$u"
+                Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $tpz -TimeoutSec 600
+                if (-not (Test-Path $tpz)) { throw "Download target not found: $tpz" }
+                $fi = Get-Item $tpz
+                if ($fi.Length -lt 1048576) { throw "Downloaded file too small: $($fi.Length) bytes" }
+                $stream = [System.IO.File]::OpenRead($tpz)
+                try {
+                  $b0 = $stream.ReadByte()
+                  $b1 = $stream.ReadByte()
+                } finally {
+                  $stream.Dispose()
+                }
+                if ($b0 -ne 0x50 -or $b1 -ne 0x4B) {
+                  throw "Downloaded file is not a zip/tpz archive."
+                }
+                $downloaded = $true
+                break
+              } catch {
+                Write-Warning "Download failed attempt=$attempt url=$u err=$($_.Exception.Message)"
+                if (Test-Path $tpz) { Remove-Item -Force $tpz -ErrorAction SilentlyContinue }
+                if ($attempt -lt 3) { Start-Sleep -Seconds (5 * $attempt) }
+              }
+            }
+            if ($downloaded) { break }
+          }
+
+          if (-not $downloaded) {
+            throw "Unable to download export templates from known mirrors."
+          }
+
           $temp = "godot/templates_unpacked"
           Expand-Archive $tpz -DestinationPath $temp -Force
           $src = Join-Path $temp 'templates'
@@ -141,20 +153,29 @@ jobs:
         run: |
           $env:Path = "$HOME\.dotnet;" + $env:Path
           $env:GODOT_DOTNET_CLI = (Get-Command dotnet).Path
-          dotnet restore GodotGame.csproj
-          dotnet build GodotGame.csproj -c Release -v minimal
-          try { & "$env:GODOT_BIN" --headless --path . --quit } catch { Write-Warning $_ }
+          dotnet restore NewRouge.csproj
+          dotnet build NewRouge.csproj -c Release -v minimal
+
+          $prewarm = Start-Process -FilePath "$env:GODOT_BIN" -ArgumentList "--headless", "--path", ".", "--quit" -Wait -PassThru -NoNewWindow
+          if ($prewarm.ExitCode -ne 0) {
+            Write-Warning "Godot prewarm exited with code $($prewarm.ExitCode); continue because this step is non-blocking."
+          }
 
       - name: CI pipeline (Python)
         shell: pwsh
         run: |
           py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debug --godot-bin "$env:GODOT_BIN" --build-solutions
 
-      - name: Update AI assistants index (non-blocking)
+      - name: Acceptance check post-evidence gate (layer2)
         shell: pwsh
-        continue-on-error: true
         run: |
-          py -3 scripts/python/update_ai_index.py --write
+          $taskId = "$env:SC_ACCEPTANCE_TASK_ID".Trim()
+          if ([string]::IsNullOrWhiteSpace($taskId)) { $taskId = '1' }
+          if ($taskId -notmatch '^\d+(\.\d+)?$') {
+            throw "Invalid SC_ACCEPTANCE_TASK_ID='$taskId'. Expected numeric task id like 1 or 1.2."
+          }
+          Write-Host "SC_ACCEPTANCE_TASK_ID=$taskId"
+          py -3 scripts/sc/acceptance_check.py --task-id "$taskId" --only tests --security-profile "$env:SECURITY_PROFILE" --require-headless-e2e --godot-bin "$env:GODOT_BIN"
 
       - name: Upload CI logs (always)
         if: always()
@@ -164,15 +185,11 @@ jobs:
           path: logs/ci/**
           if-no-files-found: ignore
 
-      - name: Upload docs encoding + ai-index logs (always)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: docs-encoding-and-ai-index-logs
-          path: |
-            logs/ci/**/encoding/**
-            logs/ci/**/ai-index/**
-          if-no-files-found: ignore
+      - name: Soft gates bundle (Python)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          py -3 scripts/python/run_gate_bundle.py --mode soft --task-files .taskmaster/tasks/tasks_back.json .taskmaster/tasks/tasks_gameplay.json
 
       - name: Dotnet coverage (soft gate via Python, optional thresholds)
         shell: pwsh
@@ -215,14 +232,7 @@ jobs:
         shell: pwsh
         continue-on-error: true
         run: |
-          py -3 scripts/python/check_gdunit_gate_layout.py --ui-dir Tests.Godot/tests/UI
           py -3 scripts/python/run_gdunit.py --prewarm --godot-bin "$env:GODOT_BIN" --project Tests.Godot --add tests/UI --timeout-sec 480 --rd "logs/e2e/${{ github.run_id }}/gdunit-reports/ui"
-
-      - name: GdUnit4 playability (Phase2) tests (Python, soft gate)
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          py -3 scripts/python/run_gdunit.py --prewarm --godot-bin "$env:GODOT_BIN" --project Tests.Godot --add tests/Playability/Phase2 --timeout-sec 480 --rd "logs/e2e/${{ github.run_id }}/gdunit-reports/playability-phase2"
 
       - name: GdUnit4 a11y tests (Python, soft gate)
         shell: pwsh
@@ -248,23 +258,8 @@ jobs:
         shell: pwsh
         continue-on-error: true
         run: |
+          $date = Get-Date -Format 'yyyy-MM-dd'
           $out = "logs/ci/${{ github.run_id }}/schema-dump.json"
-          py -3 scripts/python/db_schema_dump.py --glob "$env:APPDATA\Godot\app_userdata\GodotGame\*.db" --out "$out"
+          py -3 scripts/python/db_schema_dump.py --glob "$env:APPDATA\Godot\app_userdata\newrouge\*.db" --out "$out"
           Write-Host "SCHEMA_DUMP_OUT=$out"
 
-      - name: Headless Smoke Test (Python, soft gate)
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          # Python headless smoke test - validates game can start and reach main scene
-          #
-          # MODE OPTIONS:
-          #   --mode loose (default): Never fails build, only logs PASS/FAIL hints
-          #   --mode strict: Returns non-zero if [TEMPLATE_SMOKE_READY] or [DB] opened markers missing
-          #
-          # PROTECTED BRANCH EXAMPLE (strict mode):
-          #   For main/production branches, enable strict mode to enforce quality gates:
-          #   py -3 scripts/python/smoke_headless.py --godot-bin "$env:GODOT_BIN" --project "." --scene "res://Game.Godot/Scenes/Main.tscn" --timeout-sec 5 --mode strict
-          #
-          # Current configuration: loose mode (non-blocking)
-          py -3 scripts/python/smoke_headless.py --godot-bin "$env:GODOT_BIN" --project "." --scene "res://Game.Godot/Scenes/Main.tscn" --timeout-sec 5 --mode loose
