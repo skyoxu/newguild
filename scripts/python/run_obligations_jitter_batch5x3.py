@@ -315,24 +315,35 @@ def main() -> int:
                     round_id=round_id,
                     args=args,
                 )
-                process = subprocess.run(
-                    cmd,
-                    cwd=str(root),
-                    capture_output=True,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                )
+                outer_timeout_sec = max(30, int(args.timeout_sec) + 120)
+                process_returncode = 0
+                stdout = ""
+                stderr = ""
+                try:
+                    process = subprocess.run(
+                        cmd,
+                        cwd=str(root),
+                        capture_output=True,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                        timeout=outer_timeout_sec,
+                    )
+                    process_returncode = int(process.returncode or 0)
+                    stdout = (process.stdout or "").strip()
+                    stderr = (process.stderr or "").strip()
+                except subprocess.TimeoutExpired as exc:
+                    process_returncode = 124
+                    stdout = str(exc.stdout or "").strip()
+                    stderr = str(exc.stderr or "").strip()
 
-                stdout = (process.stdout or "").strip()
-                stderr = (process.stderr or "").strip()
                 stdout_tail = stdout.splitlines()[-1] if stdout else ""
                 stderr_tail = stderr.splitlines()[-1] if stderr else ""
                 parsed_out_dir = parse_out_dir(stdout, stderr)
                 task_dir, summary, verdict = read_task_outputs(
                     task_id,
                     parsed_out_dir=parsed_out_dir,
-                    fallback_rc=process.returncode,
+                    fallback_rc=process_returncode,
                 )
 
                 uncovered_ids = verdict.get("uncovered_obligation_ids", [])
@@ -345,7 +356,7 @@ def main() -> int:
                     "round": round_index,
                     "task_id": task_id,
                     "round_id": round_id,
-                    "cp_returncode": process.returncode,
+                    "cp_returncode": process_returncode,
                     "stdout_tail": stdout_tail,
                     "stderr_tail": stderr_tail,
                     "out_dir": str(task_dir).replace("\\", "/") if task_dir else None,

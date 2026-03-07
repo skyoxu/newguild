@@ -3251,7 +3251,15 @@
       "对同一确定性输入至少执行两次阶段B验收时，ACC:T77.1/ACC:T77.2/ACC:T77.3 的判定结果与汇总文件核心字段（阶段、结果、失败原因）必须一致；不一致即判定失败。",
       "playability-route77-B-summary.json 必须显式记录阶段标识“B”与本次执行的 SECURITY_PROFILE 值；缺失任一字段即 ACC:T77.3 判定失败。",
       "仅当输入阶段标识为“B”且任务上下文匹配 Story=PRD-GUILD-MANAGER-V11-T77 时，才允许进入阶段B验收；任一不匹配必须拒绝并记录拒绝原因与未变更状态。",
-      "playability-route77-B-summary.json 必须包含可复现实验的确定性输入指纹（seed 或等效输入哈希）与执行时间戳；缺失任一字段即 ACC:T77.3 判定失败。"
+      "playability-route77-B-summary.json 必须包含可复现实验的确定性输入指纹（seed 或等效输入哈希）与执行时间戳；缺失任一字段即 ACC:T77.3 判定失败。",
+      "同一次阶段B执行必须形成单一交付闭环：以同一份确定性 Raid 输入完成阶段B范围判定、关键行为判定和证据落盘；若任一步骤需要脱离本次执行的补录、补算或人工拼接才能成立，则判定失败。",
+      "当 ACC:T77.2 判定通过时，成长变更与排名联动变更必须可在汇总证据中关联到同一 Raid 结果输入或同一结果标识；若两者无法证明由同一次 Raid 结果共同驱动，则判定失败。",
+      "playability-route77-B-summary.json 必须为 ACC:T77.1、ACC:T77.2、ACC:T77.3 分别记录至少一个可核验的观察证据（如输入摘要、状态前后对比、拒绝事件或输出文件信息）；缺少任一锚点的可核验证据即判定失败。",
+      "若阶段B执行被拒绝或判定失败，汇总证据必须同时保留拒绝或失败原因，以及成长、排名未变更或已回滚的最终状态；无法据此判断闭环未完成即判定失败。",
+      "ACC:T77.2 的确定性验证必须保留 red->green->refactor 三阶段证据链：同一测试入口与同一断言集先出现可复现失败，再转为通过，重构后再次通过且断言集不减少；任一步缺失即该项验收失败。",
+      "ACC:T77.3 playability-route77-B-summary.json 或同轮验收记录必须显式回链 ADR-0004、ADR-0005、ADR-0006、ADR-0018，证明阶段B验收遵循事件、质量、存储与玩法路线相关约束；缺失任一 ADR 回链即该项验收失败。",
+      "ACC:T77.3 playability-route77-B-summary.json 或同轮验收记录必须显式回链 CH01、CH04、CH05、CH06、CH07，证明阶段B验收结论对应的章节约束来源；缺失任一 Chapter 回链即该项验收失败。",
+      "ACC:T77.3 playability-route77-B-summary.json 或同轮验收记录必须显式回链 docs/architecture/overlays/PRD-Guild-Manager/08/_index.md 与 docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md，说明本轮阶段B证据对应的玩法切片位置；缺失任一路径回链即该项验收失败。"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
@@ -3518,7 +3526,15 @@
       "ACC:T83.3 阶段B完成后必须落盘 summary 文件且为可解析 JSON，并包含 taskId=83、phase=\"B\"、accAnchors=[\"T83.1\",\"T83.2\",\"T83.3\"] 与执行结论。",
       "ACC:T83.3 若阶段B任一确定性检查失败，summary 中必须记录失败原因并标记未通过，禁止以“通过”状态落证。",
       "ACC:T83.1/T83.2/T83.3 阶段B单一交付闭环的“完成”判定必须以三项锚点全部通过为前提；任一锚点缺失、未执行或失败时，闭环状态必须为未完成且不得对外报告通过。",
-      "ACC:T83.3 summary 必须按锚点输出可审计的确定性证据结果（每个锚点至少包含通过/失败状态及对应依据或失败原因）；任一锚点证据缺失即判定该项失败。"
+      "ACC:T83.3 summary 必须按锚点输出可审计的确定性证据结果（每个锚点至少包含通过/失败状态及对应依据或失败原因）；任一锚点证据缺失即判定该项失败。",
+      "ACC:T83.1 阶段B范围锁定必须在执行开始时给出可观察判定：仅当任务标识为 83 且阶段为 B 时才允许进入 Raid 进阶规则执行；若不满足，则必须返回拒绝结果，且不得产出阶段B行为结果或通过结论。",
+      "ACC:T83.2 阶段B的 Raid 进阶规则结果必须允许从输出中重建“输入条件 -> 被触发的规则 -> 关键贡献项 -> 最终结论”的因果链；任一步缺失、矛盾或无法重建时，该项失败。",
+      "ACC:T83.3 在 SECURITY_PROFILE=host-safe 下，阶段B每次执行都必须生成与 ACC:T83.1、ACC:T83.2、ACC:T83.3 对应的确定性落证结果，并可在不依赖外部主机交互的前提下完成闭环；若落证依赖外部主机、缺少任一锚点结果或无法完成 summary 持久化，则该次闭环失败。",
+      "ACC:T83.2 的确定性验证必须保留 red->green->refactor 三阶段可审计证据链：同一测试入口与同一断言集先 red 后 green，refactor 后再次通过且断言集不减少；任一步缺失即该项验收失败。",
+      "ACC:T83.2/ACC:T83.3 的确定性验证回链必须同时覆盖 Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd 与 Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd，并说明两者各自承担的 gate 或 summary 证据角色；任一 Test Ref 未被实际回链即验收失败。",
+      "ACC:T83.3 playability-route83-B-summary.json 或同轮验收记录必须显式回链 ADR-0004、ADR-0005、ADR-0006、ADR-0018，证明阶段B进阶规则与可解释性验收遵循事件、质量、存储与玩法路线相关约束；缺失任一 ADR 回链即该项验收失败。",
+      "ACC:T83.3 playability-route83-B-summary.json 或同轮验收记录必须显式回链 CH01、CH04、CH05、CH06、CH07，证明阶段B验收结论对应的章节约束来源；缺失任一 Chapter 回链即该项验收失败。",
+      "ACC:T83.3 playability-route83-B-summary.json 或同轮验收记录必须显式回链 docs/architecture/overlays/PRD-Guild-Manager/08/_index.md 与 docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md，说明本轮阶段B证据对应的玩法切片位置；缺失任一路径回链即该项验收失败。"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
@@ -3918,7 +3934,14 @@
       "ACC:T89.1 对应子任务 Lock scope (C)：判定时必须基于阶段C范围清单逐项给出通过/不通过结果并可追溯到同次执行证据；范围清单为空或无法逐项判定即不通过。",
       "ACC:T89.2 对应子任务 Implement behavior (C)：入口->匹配->结算闭环内的关键行为必须由确定性测试直接观测到状态/事件/输出断言；任一关键行为缺少可执行断言即不通过。",
       "ACC:T89.3 对应子任务 Persist evidence (C)：确定性检查完成后，证据汇总必须可指认 ACC:T89.1、ACC:T89.2、ACC:T89.3 三个锚点的最终判定；任一锚点缺失或不可指认即不通过。",
-      "阶段C测试证据需体现 red->green->refactor 的可复核轨迹，并与本次确定性产物关联；若无法证明该顺序或证据链断裂则判定不通过。"
+      "阶段C测试证据需体现 red->green->refactor 的可复核轨迹，并与本次确定性产物关联；若无法证明该顺序或证据链断裂则判定不通过。",
+      "阶段C范围验证仅可针对本任务阶段C的交付项进行判定，不得以其他阶段或阶段外产物替代；若证据无法区分阶段C与非阶段C内容，则 ACC:T89.1 判定不通过。",
+      "只有当入口触发、匹配完成、结算达成三段路径按顺序被同次确定性测试观测到时，阶段C闭环行为才可视为满足；若存在跳步、伪成功或仅部分路径通过，则 ACC:T89.2 判定不通过。",
+      "logs/e2e/<date>/playability-route89-C-summary.json 必须对应本次阶段C执行并可关联其最终验收结论；若复用历史文件、无法对应本次执行或无法关联闭环结果，则 ACC:T89.3 判定不通过。",
+      "阶段C最终通过结论必须可由同次执行生成的确定性证据独立复核，无需额外人工补充上下文；若离开该次执行产物后无法复核范围、行为与证据三项结论，则判定不通过。",
+      "ACC:T89.3 playability-route89-C-summary.json 或同轮验收记录必须显式回链 ADR-0004、ADR-0005、ADR-0006、ADR-0018，证明阶段C社交/PVP联动验收遵循事件、质量、存储与玩法路线相关约束；缺失任一 ADR 回链即该项验收失败。",
+      "ACC:T89.3 playability-route89-C-summary.json 或同轮验收记录必须显式回链 CH01、CH04、CH05、CH06、CH07、CH09，证明阶段C验收结论对应的章节约束来源；缺失任一 Chapter 回链即该项验收失败。",
+      "ACC:T89.3 playability-route89-C-summary.json 或同轮验收记录必须显式回链 docs/architecture/overlays/PRD-Guild-Manager/08/_index.md 与 docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md，说明本轮阶段C证据对应的玩法切片位置；缺失任一路径回链即该项验收失败。"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
@@ -4197,7 +4220,14 @@
       "ACC:T93.3 日志汇总需显式记录 ACC:T93.1/ACC:T93.2/ACC:T93.3 三个锚点的完成状态（pass/fail）与失败原因；任一锚点缺失状态或原因即该项验收失败。",
       "ACC:T93.1 的确定性检查记录必须显式绑定锚点 ACC:T93.1 且可回链到 R2-A 范围锁定结论；若缺少锚点或无法回链，则该项验收失败。",
       "ACC:T93.2 的确定性检查记录必须显式绑定锚点 ACC:T93.2，并可同时定位 red 阶段失败证据与 green 阶段通过证据；任一证据缺失或不可追溯即该项验收失败。",
-      "ACC:T93.3 的证据持久化必须显式绑定锚点 ACC:T93.3 且落盘成功；若仅存在控制台输出或临时结果而未形成可复核文件，则该项验收失败。"
+      "ACC:T93.3 的证据持久化必须显式绑定锚点 ACC:T93.3 且落盘成功；若仅存在控制台输出或临时结果而未形成可复核文件，则该项验收失败。",
+      "本阶段判定必须以 ACC:T93.1、ACC:T93.2、ACC:T93.3 构成同一次 R2-A 阶段C单一交付闭环为前提；若任一锚点未完成、顺序断裂或无法关联到同一轮验收执行，则本任务验收失败。",
+      "ACC:T93.2 的最终通过结果必须基于 ACC:T93.1 已锁定的 R2-A 纳入范围完成回归验证，并在最终交付态重复得到一致结论；若验证对象超出或遗漏锁定范围，或仅中间态通过而最终态未复验，则该项验收失败。",
+      "ACC:T93.3 落盘证据必须足以让外部评审不依赖控制台临时输出即可还原 R2-A 的范围锁定、确定性验证过程与最终结论；若仅能证明执行过测试而不能复核闭环结论，则该项验收失败。",
+      "ACC:T93.2 的确定性验证必须保留 red->green->refactor 三阶段可审计证据链：同一测试入口与同一断言集先出现可复现失败，再转为通过，refactor 后再次通过且断言集不减少；任一步缺失即该项验收失败。",
+      "ACC:T93.3 playability-route93-R2-A-summary.json 或同轮验收记录必须显式回链 ADR-0003、ADR-0004、ADR-0005，证明恢复链路验收遵循可观测性、事件契约与质量门禁相关约束；缺失任一 ADR 回链即该项验收失败。",
+      "ACC:T93.3 playability-route93-R2-A-summary.json 或同轮验收记录必须显式回链 CH01、CH03、CH04、CH05，证明恢复链路验收结论对应的章节约束来源；缺失任一 Chapter 回链即该项验收失败。",
+      "ACC:T93.3 playability-route93-R2-A-summary.json 或同轮验收记录必须显式回链 docs/architecture/overlays/PRD-Guild-Manager/08/_index.md 与 docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md，说明本轮恢复链路证据对应的验收切片位置；缺失任一路径回链即该项验收失败。"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
@@ -4722,7 +4752,14 @@
       "ACC:T101.2 按 red->green->refactor 顺序完成确定性校验：先出现可复现失败（red），再在同一断言集转为通过（green），重构后再次通过且断言集不减少（refactor）；任一步缺失即不通过。",
       "ACC:T101.1 R2-B范围锁定必须形成可核对清单（纳入项与排除项）并在同轮确定性检查中逐项对应；任一回归结果无法映射到清单项则该轮验收失败。",
       "ACC:T101.2 实现与验证必须构成闭环：同一测试入口、同一断言集先红后绿，并保留每次执行结果；若仅有代码变更而无对应验证记录则不通过。",
-      "ACC:T101.3 证据持久化必须与本轮R2-B执行同批次完成，且 summary.json 中每个 ACC 键均可追溯到对应测试结果；若存在不可追溯键则该 ACC 判定失败。"
+      "ACC:T101.3 证据持久化必须与本轮R2-B执行同批次完成，且 summary.json 中每个 ACC 键均可追溯到对应测试结果；若存在不可追溯键则该 ACC 判定失败。",
+      "ACC:T101.1 R2-B范围锁定必须明确仅覆盖第二轮分解中剩余复杂度项；若将已完成或不属于剩余复杂度的问题纳入本轮，或遗漏已识别的剩余复杂度项，则本轮验收失败。",
+      "ACC:T101.2 玩法全链路回归必须验证R2-B纳入路径从入口、关键状态推进到终态或退出的完整闭环；若仅验证局部片段、任一关键节点未被覆盖或链路中断，则不得判定通过。",
+      "ACC:T101.3 发布前验收仅在同一轮R2-B中 ACC:T101.1、ACC:T101.2、ACC:T101.3 全部通过且证据可复核时成立；若任一项失败、缺失证据或结果不可复核，则不得标记为 V1.1 阶段5通过。",
+      "ACC:T101.3 playability-route101-R2-B-summary.json 或同轮验收记录必须显式回链 ADR-0006、ADR-0015、ADR-0018，证明发布前回归验收遵循存储、性能预算与玩法路线相关约束；缺失任一 ADR 回链即该项验收失败。",
+      "ACC:T101.3 playability-route101-R2-B-summary.json 或同轮验收记录必须显式回链 CH06、CH07、CH09、CH10、CH11，证明发布前回归验收结论对应的章节约束来源；缺失任一 Chapter 回链即该项验收失败。",
+      "ACC:T101.3 playability-route101-R2-B-summary.json 或同轮验收记录必须显式回链 docs/architecture/overlays/PRD-Guild-Manager/08/_index.md 与 docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md，说明本轮发布前回归证据对应的验收切片位置；缺失任一路径回链即该项验收失败。",
+      "若 ACC:T101.1、ACC:T101.2、ACC:T101.3 任一失败、回链缺失或证据不可复核，则本轮 R2-B 不得作为 V1.1 发布前验收通过依据，且必须阻断 release-ready 或等价发布结论。"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
