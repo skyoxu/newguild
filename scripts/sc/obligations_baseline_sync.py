@@ -75,12 +75,19 @@ def _normalize_acceptance_text(text: str) -> str:
 
 def _find_latest_verdict(task_id: int) -> Path | None:
     root = repo_root() / "logs" / "ci"
-    pattern = f"**/sc-llm-obligations-task-{task_id}/verdict.json"
-    matches = [p for p in root.glob(pattern) if p.is_file()]
+    patterns = [
+        f"**/sc-llm-obligations-task-{task_id}-*/verdict.json",
+        f"**/sc-llm-obligations-task-{task_id}/verdict.json",
+    ]
+    matches: list[Path] = []
+    for pattern in patterns:
+        matches.extend([p for p in root.glob(pattern) if p.is_file()])
     if not matches:
         return None
-    matches.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-    return matches[0]
+    unique_matches = {str(path.resolve()): path for path in matches}
+    ordered = list(unique_matches.values())
+    ordered.sort(key=lambda path: path.stat().st_mtime, reverse=True)
+    return ordered[0]
 
 
 def _load_or_init_baseline(path: Path) -> dict[str, Any]:
