@@ -97,10 +97,34 @@ def summarize_task(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def build_group_lookup(groups: list[list[int]]) -> dict[int, int]:
+    lookup: dict[int, int] = {}
+    for index, group in enumerate(groups, start=1):
+        for task_id in group:
+            try:
+                lookup[int(task_id)] = index
+            except (TypeError, ValueError):
+                continue
+    return lookup
+
+
+def normalize_task_groups(task_stats: list[dict[str, Any]], groups: list[list[int]]) -> list[dict[str, Any]]:
+    lookup = build_group_lookup(groups)
+    normalized: list[dict[str, Any]] = []
+    for task in task_stats:
+        task_copy = dict(task)
+        task_id = int(task_copy["task_id"])
+        task_copy["group"] = int(lookup.get(task_id, task_copy.get("group", 0) or 0))
+        normalized.append(task_copy)
+    return normalized
+
+
 def build_batch_stats(groups: list[list[int]], task_stats: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    group_lookup = build_group_lookup(groups)
     by_group: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for task in task_stats:
-        by_group[int(task["group"])].append(task)
+        group_index = int(group_lookup.get(int(task["task_id"]), task.get("group", 0) or 0))
+        by_group[group_index].append(task)
 
     batch_stats: list[dict[str, Any]] = []
     for index, group in enumerate(groups, start=1):
@@ -208,6 +232,7 @@ def main() -> int:
         by_task[int(row["task_id"])].append(row)
 
     task_stats = [summarize_task(task_rows) for _, task_rows in sorted(by_task.items(), key=lambda item: item[0])]
+    task_stats = normalize_task_groups(task_stats, groups)
     batch_stats = build_batch_stats(groups, task_stats)
     aggregate = build_aggregate(task_stats)
 
