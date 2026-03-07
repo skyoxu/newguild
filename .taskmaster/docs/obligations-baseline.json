@@ -3,7 +3,7 @@
   "tasks": {
     "58": {
       "task_id": 58,
-      "verdict_path": "logs/ci/2026-03-06/sc-llm-obligations-task-58-round-jitter-g01-r03-t58/verdict.json",
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-58-round-jitter-g01-r03-t58/verdict.json",
       "uncovered_count": 0,
       "obligations": []
     },
@@ -57,19 +57,11 @@
     }
   },
   "task_ids": [
-    58,
-    77,
-    79,
-    82,
-    83,
-    89,
-    92,
-    93,
-    101
+    58
   ],
   "last_sync_mode": {
     "refresh_baseline": true,
-    "apply": true,
+    "apply": false,
     "verify": true
   }
 }
