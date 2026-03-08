@@ -54,14 +54,90 @@
       "verdict_path": "logs/ci/2026-03-07/sc-llm-obligations-task-101-round-jitter-g01-r01-t101/verdict.json",
       "uncovered_count": 0,
       "obligations": []
+    },
+    "55": {
+      "task_id": 55,
+      "verdict_path": "logs/ci/2026-03-09/sc-llm-obligations-task-55-round-jitter-g01-r03-t55/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "56": {
+      "task_id": 56,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-56-round-jitter-g01-r03-t56/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "63": {
+      "task_id": 63,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-63-round-jitter-g01-r03-t63/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "64": {
+      "task_id": 64,
+      "verdict_path": "logs/ci/2026-03-09/sc-llm-obligations-task-64-round-jitter-g01-r03-t64/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "68": {
+      "task_id": 68,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-68-round-jitter-g01-r03-t68/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "69": {
+      "task_id": 69,
+      "verdict_path": "logs/ci/2026-03-09/sc-llm-obligations-task-69-round-jitter-g01-r03-t69/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "71": {
+      "task_id": 71,
+      "verdict_path": "logs/ci/2026-03-09/sc-llm-obligations-task-71-round-jitter-g01-r03-t71/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "74": {
+      "task_id": 74,
+      "verdict_path": "logs/ci/2026-03-09/sc-llm-obligations-task-74-round-jitter-g01-r03-t74/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "76": {
+      "task_id": 76,
+      "verdict_path": "logs/ci/2026-03-09/sc-llm-obligations-task-76-round-jitter-g01-r03-t76/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "81": {
+      "task_id": 81,
+      "verdict_path": "logs/ci/2026-03-09/sc-llm-obligations-task-81-round-jitter-g02-r03-t81/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "97": {
+      "task_id": 97,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-97-round-jitter-g03-r03-t97/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
     }
   },
   "task_ids": [
-    58
+    55,
+    56,
+    63,
+    64,
+    68,
+    69,
+    71,
+    74,
+    76,
+    81,
+    97
   ],
   "last_sync_mode": {
     "refresh_baseline": true,
-    "apply": false,
+    "apply": true,
     "verify": true
   }
 }
