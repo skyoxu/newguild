@@ -2193,7 +2193,7 @@
         "status": "done",
         "priority": "medium",
         "description": "对 T44-T51 的任务回链、视图映射与质量门禁证据做一次收口治理，确保后续任务扩展不出现语义漂移和引用断链。",
-        "details": "Story: PRD-GUILD-MANAGER-GOVERNANCE-T52\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe (single-player default).",
+        "details": "Story: PRD-GUILD-MANAGER-GOVERNANCE-T52\nADR Refs: ADR-0004; ADR-0005; ADR-0018\nChapters: CH01; CH04; CH06; CH07\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe (single-player default).",
         "dependencies": [
           "49",
           "50",
@@ -2207,6 +2207,7 @@
         "archRefs": [
           "CH01",
           "CH04",
+          "CH06",
           "CH07"
         ],
         "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
