@@ -153,8 +153,8 @@ jobs:
         run: |
           $env:Path = "$HOME\.dotnet;" + $env:Path
           $env:GODOT_DOTNET_CLI = (Get-Command dotnet).Path
-          dotnet restore NewRouge.csproj
-          dotnet build NewRouge.csproj -c Release -v minimal
+          dotnet restore GodotGame.csproj
+          dotnet build GodotGame.csproj -c Release -v minimal
 
           $prewarm = Start-Process -FilePath "$env:GODOT_BIN" -ArgumentList "--headless", "--path", ".", "--quit" -Wait -PassThru -NoNewWindow
           if ($prewarm.ExitCode -ne 0) {
@@ -262,4 +262,3 @@ jobs:
           $out = "logs/ci/${{ github.run_id }}/schema-dump.json"
           py -3 scripts/python/db_schema_dump.py --glob "$env:APPDATA\Godot\app_userdata\newrouge\*.db" --out "$out"
           Write-Host "SCHEMA_DUMP_OUT=$out"
-
