@@ -99,7 +99,7 @@ def build_body(task_id: str, task: dict[str, Any]) -> str:
     lines.append("")
     lines.append(h_gates)
     lines.append("- Windows Quality Gate: `py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debug --godot-bin \"$env:GODOT_BIN\" --build-solutions`")
-    lines.append("- Notes: `encoding` is a soft gate; others in `ci_pipeline.py` are hard gates unless marked soft in workflows.")
+    lines.append("- Notes: `encoding` and `preflight_env_evidence` are soft gates; others in `ci_pipeline.py` are hard gates unless marked soft in workflows.")
 
     refs = [
         f"Task {task_id}",
