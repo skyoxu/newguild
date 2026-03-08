@@ -54,14 +54,473 @@
       "verdict_path": "logs/ci/2026-03-07/sc-llm-obligations-task-101-round-jitter-g01-r01-t101/verdict.json",
       "uncovered_count": 0,
       "obligations": []
+    },
+    "55": {
+      "task_id": 55,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-55-round-jitter-g01-r03-t55/verdict.json",
+      "uncovered_count": 2,
+      "obligations": [
+        {
+          "id": "O4",
+          "text": "治理实现必须按 TDD red->green->refactor 执行并形成可审计痕迹，而非仅验证最终绿态。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "治理证据必须包含 red->green->refactor 三阶段机读记录（至少含失败用例到通过用例的同轮关联ID）。",
+            "任一阶段证据缺失时，本轮治理结论必须为失败。",
+            "治理实现必须按 TDD red->green->refactor 执行并形成可审计痕迹，而非仅验证最终绿态。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T55.O4] 治理证据必须包含 red->green->refactor 三阶段机读记录（至少含失败用例到通过用例的同轮关联ID）。",
+            "[OBL:T55.O4] 任一阶段证据缺失时，本轮治理结论必须为失败。",
+            "[OBL:T55.O4] 治理实现必须按 TDD red->green->refactor 执行并形成可审计痕迹，而非仅验证最终绿态。"
+          ]
+        },
+        {
+          "id": "O5",
+          "text": "治理判定必须消费并核对已声明的 Test Refs（含 Core 与 Godot 集成用例）对应的实际执行证据；缺任一引用不得通过。",
+          "kind": "godot",
+          "source": "master",
+          "suggestions": [
+            "summary.json 必须列出并校验本任务声明的每个 Test-Ref 的执行状态与工件路径。",
+            "任一 Test-Ref 未执行、无工件或路径不匹配时，总体结论必须失败。",
+            "治理判定必须消费并核对已声明的 Test Refs（含 Core 与 Godot 集成用例）对应的实际执行证据；缺任一引用不得通过。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T55.O5] summary.json 必须列出并校验本任务声明的每个 Test-Ref 的执行状态与工件路径。",
+            "[OBL:T55.O5] 任一 Test-Ref 未执行、无工件或路径不匹配时，总体结论必须失败。",
+            "[OBL:T55.O5] 治理判定必须消费并核对已声明的 Test Refs（含 Core 与 Godot 集成用例）对应的实际执行证据；缺任一引用不得通过。"
+          ]
+        }
+      ]
+    },
+    "56": {
+      "task_id": 56,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-56-round-jitter-g01-r03-t56/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "63": {
+      "task_id": 63,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-63-round-jitter-g01-r03-t63/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "64": {
+      "task_id": 64,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-64-round-jitter-g01-r03-t64/verdict.json",
+      "uncovered_count": 4,
+      "obligations": [
+        {
+          "id": "O4",
+          "text": "必须按 TDD（red->green->refactor）流程执行，并留存可审计的确定性证据。",
+          "kind": "core",
+          "source": "master",
+          "suggestions": [
+            "ACC:T64.x 必须提供 red 失败与 green 通过的成对测试证据（同一用例ID可追溯）。",
+            "ACC:T64.x refactor 后行为快照与 green 基线一致（仅允许显式可变字段差异）。",
+            "必须按 TDD（red->green->refactor）流程执行，并留存可审计的确定性证据。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T64.O4] ACC:T64.x 必须提供 red 失败与 green 通过的成对测试证据（同一用例ID可追溯）。",
+            "[OBL:T64.O4] ACC:T64.x refactor 后行为快照与 green 基线一致（仅允许显式可变字段差异）。",
+            "[OBL:T64.O4] 必须按 TDD（red->green->refactor）流程执行，并留存可审计的确定性证据。"
+          ]
+        },
+        {
+          "id": "O5",
+          "text": "验收引用链必须显式覆盖 ADR-0005 与 ADR-0003 且可解析。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T64.x summary.json.traceability 必须包含 ADR-0005、ADR-0003 的可解析键。",
+            "ACC:T64.x 任一 ADR 键缺失或不可解析时判定 rejected。",
+            "验收引用链必须显式覆盖 ADR-0005 与 ADR-0003 且可解析。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T64.O5] ACC:T64.x summary.json.traceability 必须包含 ADR-0005、ADR-0003 的可解析键。",
+            "[OBL:T64.O5] ACC:T64.x 任一 ADR 键缺失或不可解析时判定 rejected。",
+            "[OBL:T64.O5] 验收引用链必须显式覆盖 ADR-0005 与 ADR-0003 且可解析。"
+          ]
+        },
+        {
+          "id": "O6",
+          "text": "验收引用链必须显式覆盖 CH03、CH07、CH11 且可解析。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T64.x summary.json.traceability 必须包含 CH03、CH07、CH11 的章节定位键。",
+            "ACC:T64.x 章节键不存在或无法定位来源片段时判定 rejected。",
+            "验收引用链必须显式覆盖 CH03、CH07、CH11 且可解析。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T64.O6] ACC:T64.x summary.json.traceability 必须包含 CH03、CH07、CH11 的章节定位键。",
+            "[OBL:T64.O6] ACC:T64.x 章节键不存在或无法定位来源片段时判定 rejected。",
+            "[OBL:T64.O6] 验收引用链必须显式覆盖 CH03、CH07、CH11 且可解析。"
+          ]
+        },
+        {
+          "id": "O7",
+          "text": "验收引用链必须显式覆盖指定 overlays 文件并可解析。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T64.x 必须验证并记录两个 overlay 路径的存在与可解析状态。",
+            "ACC:T64.x 任一路径缺失或解析失败时必须 rejected 且不得覆盖既有 summary.json。",
+            "验收引用链必须显式覆盖指定 overlays 文件并可解析。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T64.O7] ACC:T64.x 必须验证并记录两个 overlay 路径的存在与可解析状态。",
+            "[OBL:T64.O7] ACC:T64.x 任一路径缺失或解析失败时必须 rejected 且不得覆盖既有 summary.json。",
+            "[OBL:T64.O7] 验收引用链必须显式覆盖指定 overlays 文件并可解析。"
+          ]
+        }
+      ]
+    },
+    "68": {
+      "task_id": 68,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-68-round-jitter-g01-r03-t68/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
+    },
+    "69": {
+      "task_id": 69,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-69-round-jitter-g02-r03-t69/verdict.json",
+      "uncovered_count": 4,
+      "obligations": [
+        {
+          "id": "O9",
+          "text": "实现与验收需要对齐ADR-0004与ADR-0005约束。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T69.X 验收记录必须包含ADR-0004与ADR-0005回链字段，缺失任一即失败。",
+            "ACC:T69.X 对事件契约与质量门禁的检查结果需可追溯到ADR-0004/0005对应条款。",
+            "实现与验收需要对齐ADR-0004与ADR-0005约束。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T69.O9] ACC:T69.X 验收记录必须包含ADR-0004与ADR-0005回链字段，缺失任一即失败。",
+            "[OBL:T69.O9] ACC:T69.X 对事件契约与质量门禁的检查结果需可追溯到ADR-0004/0005对应条款。",
+            "[OBL:T69.O9] 实现与验收需要对齐ADR-0004与ADR-0005约束。"
+          ]
+        },
+        {
+          "id": "O10",
+          "text": "实现与验收需要对齐CH01与CH04章节约束。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T69.X 验收摘要必须声明CH01与CH04映射关系并通过一致性检查。",
+            "ACC:T69.X 若与CH01/CH04约束冲突，需判定失败并输出冲突字段。",
+            "实现与验收需要对齐CH01与CH04章节约束。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T69.O10] ACC:T69.X 验收摘要必须声明CH01与CH04映射关系并通过一致性检查。",
+            "[OBL:T69.O10] ACC:T69.X 若与CH01/CH04约束冲突，需判定失败并输出冲突字段。",
+            "[OBL:T69.O10] 实现与验收需要对齐CH01与CH04章节约束。"
+          ]
+        },
+        {
+          "id": "O11",
+          "text": "验收证据需要与指定overlay文档建立可审计关联。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T69.X playability-route69-R2-A-summary.json必须包含对应overlay文档路径与版本标识。",
+            "ACC:T69.X 自动化校验需验证证据中的overlay路径与任务声明完全一致。",
+            "验收证据需要与指定overlay文档建立可审计关联。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T69.O11] ACC:T69.X playability-route69-R2-A-summary.json必须包含对应overlay文档路径与版本标识。",
+            "[OBL:T69.O11] ACC:T69.X 自动化校验需验证证据中的overlay路径与任务声明完全一致。",
+            "[OBL:T69.O11] 验收证据需要与指定overlay文档建立可审计关联。"
+          ]
+        },
+        {
+          "id": "O12",
+          "text": "对未纳入R2-A范围的输入，系统必须拒绝或保持状态不变，不得推进结算。",
+          "kind": "core",
+          "source": "master",
+          "suggestions": [
+            "ACC:T69.X 对超范围输入返回拒绝标识，Encounter终态、奖励与结算计数保持不变。",
+            "ACC:T69.X 对超范围输入不得产生resolved事件与解释链路。",
+            "对未纳入R2-A范围的输入，系统必须拒绝或保持状态不变，不得推进结算。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T69.O12] ACC:T69.X 对超范围输入返回拒绝标识，Encounter终态、奖励与结算计数保持不变。",
+            "[OBL:T69.O12] ACC:T69.X 对超范围输入不得产生resolved事件与解释链路。",
+            "[OBL:T69.O12] 对未纳入R2-A范围的输入，系统必须拒绝或保持状态不变，不得推进结算。"
+          ]
+        }
+      ]
+    },
+    "71": {
+      "task_id": 71,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-71-round-jitter-g02-r03-t71/verdict.json",
+      "uncovered_count": 3,
+      "obligations": [
+        {
+          "id": "O6",
+          "text": "实现与验收应与指定Overlay文档保持可追溯一致。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T71.3f 验收摘要需记录并校验 Overlay 路径与版本戳，无法追溯到指定 Overlay 文档则判定 fail。",
+            "ACC:T71.1e 闭环行为规则需与 08-FeatureSlice-T3-Media-Reputation.md 的对应条目逐项对齐，不一致判定 fail。",
+            "实现与验收应与指定Overlay文档保持可追溯一致。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T71.O6] ACC:T71.3f 验收摘要需记录并校验 Overlay 路径与版本戳，无法追溯到指定 Overlay 文档则判定 fail。",
+            "[OBL:T71.O6] ACC:T71.1e 闭环行为规则需与 08-FeatureSlice-T3-Media-Reputation.md 的对应条目逐项对齐，不一致判定 fail。",
+            "[OBL:T71.O6] 实现与验收应与指定Overlay文档保持可追溯一致。"
+          ]
+        },
+        {
+          "id": "O7",
+          "text": "验收应体现ADR-0004与ADR-0005的约束回链。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T71.3g 每条闭环证据必须标注 ADR-0004 或 ADR-0005 回链键，缺失任一回链判定 fail。",
+            "ACC:T71.2f 若行为与 ADR-0004 事件契约或 ADR-0005 质量门禁不一致，验收必须失败。",
+            "验收应体现ADR-0004与ADR-0005的约束回链。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T71.O7] ACC:T71.3g 每条闭环证据必须标注 ADR-0004 或 ADR-0005 回链键，缺失任一回链判定 fail。",
+            "[OBL:T71.O7] ACC:T71.2f 若行为与 ADR-0004 事件契约或 ADR-0005 质量门禁不一致，验收必须失败。",
+            "[OBL:T71.O7] 验收应体现ADR-0004与ADR-0005的约束回链。"
+          ]
+        },
+        {
+          "id": "O8",
+          "text": "验收应体现CH01与CH04章节约束的可追溯性。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T71.3h playability-route71-R2-A-summary.json 每条记录需包含 CH01/CH04 章节映射字段，缺失则 fail。",
+            "ACC:T71.1f 范围锁定检查需明确区分 CH01/CH04 相关与非相关路径，无法判定则 fail。",
+            "验收应体现CH01与CH04章节约束的可追溯性。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T71.O8] ACC:T71.3h playability-route71-R2-A-summary.json 每条记录需包含 CH01/CH04 章节映射字段，缺失则 fail。",
+            "[OBL:T71.O8] ACC:T71.1f 范围锁定检查需明确区分 CH01/CH04 相关与非相关路径，无法判定则 fail。",
+            "[OBL:T71.O8] 验收应体现CH01与CH04章节约束的可追溯性。"
+          ]
+        }
+      ]
+    },
+    "74": {
+      "task_id": 74,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-74-round-jitter-g02-r03-t74/verdict.json",
+      "uncovered_count": 5,
+      "obligations": [
+        {
+          "id": "O1",
+          "text": "验收集必须覆盖本任务全部 must-have 义务，否则门禁不得判定通过。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "若 Story/ADR/Chapter/Overlay/Test-Ref/Security Profile 任一主约束未被验证，则阶段A门禁必须失败且不得标记完成。",
+            "门禁输出中必须列出未覆盖约束ID清单，禁止以“部分通过”推进。",
+            "验收集必须覆盖本任务全部 must-have 义务，否则门禁不得判定通过。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T74.O1] 若 Story/ADR/Chapter/Overlay/Test-Ref/Security Profile 任一主约束未被验证，则阶段A门禁必须失败且不得标记完成。",
+            "[OBL:T74.O1] 门禁输出中必须列出未覆盖约束ID清单，禁止以“部分通过”推进。",
+            "[OBL:T74.O1] 验收集必须覆盖本任务全部 must-have 义务，否则门禁不得判定通过。"
+          ]
+        },
+        {
+          "id": "O2",
+          "text": "阶段A证据必须与 Story=PRD-GUILD-MANAGER-V11-T74 建立可断言追踪关联。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "阶段A证据JSON必须包含 story_id=PRD-GUILD-MANAGER-V11-T74，缺失即失败。",
+            "阶段A证据必须与 Story=PRD-GUILD-MANAGER-V11-T74 建立可断言追踪关联。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T74.O2] 阶段A证据JSON必须包含 story_id=PRD-GUILD-MANAGER-V11-T74，缺失即失败。",
+            "[OBL:T74.O2] 阶段A证据必须与 Story=PRD-GUILD-MANAGER-V11-T74 建立可断言追踪关联。"
+          ]
+        },
+        {
+          "id": "O3",
+          "text": "阶段A产物需可追溯到 ADR-0003/0004/0005/0015/0018 的适用性声明。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "阶段A证据或测试断言必须包含 adr_refs 且与 ADR-0003/0004/0005/0015/0018 完全一致，不一致即失败。",
+            "阶段A产物需可追溯到 ADR-0003/0004/0005/0015/0018 的适用性声明。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T74.O3] 阶段A证据或测试断言必须包含 adr_refs 且与 ADR-0003/0004/0005/0015/0018 完全一致，不一致即失败。",
+            "[OBL:T74.O3] 阶段A产物需可追溯到 ADR-0003/0004/0005/0015/0018 的适用性声明。"
+          ]
+        },
+        {
+          "id": "O5",
+          "text": "阶段A闭环实现与证据必须回链指定 Overlay 文档路径。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "阶段A证据JSON必须包含 overlay_refs 且精确匹配给定两条路径，否则失败。",
+            "阶段A闭环实现与证据必须回链指定 Overlay 文档路径。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T74.O5] 阶段A证据JSON必须包含 overlay_refs 且精确匹配给定两条路径，否则失败。",
+            "[OBL:T74.O5] 阶段A闭环实现与证据必须回链指定 Overlay 文档路径。"
+          ]
+        },
+        {
+          "id": "O11",
+          "text": "执行与门禁上下文必须显式绑定 SECURITY_PROFILE=host-safe。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "阶段A证据JSON必须记录 security_profile=host-safe，缺失或不匹配即失败。",
+            "执行与门禁上下文必须显式绑定 SECURITY_PROFILE=host-safe。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T74.O11] 阶段A证据JSON必须记录 security_profile=host-safe，缺失或不匹配即失败。",
+            "[OBL:T74.O11] 执行与门禁上下文必须显式绑定 SECURITY_PROFILE=host-safe。"
+          ]
+        }
+      ]
+    },
+    "76": {
+      "task_id": 76,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-76-round-jitter-g02-r03-t76/verdict.json",
+      "uncovered_count": 5,
+      "obligations": [
+        {
+          "id": "O4",
+          "text": "测试策略必须体现 TDD red->green->refactor，并保留可审计证据链。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "新增：必须提供 red->green->refactor 三阶段可机读记录（含失败到通过的测试转变证据）。",
+            "新增：playability-route76-B-summary.json 中必须包含 tdd_phases 字段且三阶段均非空。",
+            "测试策略必须体现 TDD red->green->refactor，并保留可审计证据链。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T76.O4] 新增：必须提供 red->green->refactor 三阶段可机读记录（含失败到通过的测试转变证据）。",
+            "[OBL:T76.O4] 新增：playability-route76-B-summary.json 中必须包含 tdd_phases 字段且三阶段均非空。",
+            "[OBL:T76.O4] 测试策略必须体现 TDD red->green->refactor，并保留可审计证据链。"
+          ]
+        },
+        {
+          "id": "O5",
+          "text": "必须遵循 host-safe 路径边界：仅允许 res:// 与 user://，并拒绝 traversal/absolute escape。",
+          "kind": "core",
+          "source": "master",
+          "suggestions": [
+            "新增：阶段B相关文件访问仅允许 res:// 与 user://，绝对路径与路径穿越必须拒绝并记录审计结果。",
+            "新增：确定性验证结果必须包含 path_boundary_check=pass/fail 与拒绝样例计数。",
+            "必须遵循 host-safe 路径边界：仅允许 res:// 与 user://，并拒绝 traversal/absolute escape。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T76.O5] 新增：阶段B相关文件访问仅允许 res:// 与 user://，绝对路径与路径穿越必须拒绝并记录审计结果。",
+            "[OBL:T76.O5] 新增：确定性验证结果必须包含 path_boundary_check=pass/fail 与拒绝样例计数。",
+            "[OBL:T76.O5] 必须遵循 host-safe 路径边界：仅允许 res:// 与 user://，并拒绝 traversal/absolute escape。"
+          ]
+        },
+        {
+          "id": "O6",
+          "text": "必须禁止动态外部代码加载。",
+          "kind": "core",
+          "source": "master",
+          "suggestions": [
+            "新增：阶段B执行链路不得出现动态外部代码加载行为，检测结果必须为 0 次。",
+            "新增：summary.json 必须包含 dynamic_external_code_load=false。",
+            "必须禁止动态外部代码加载。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T76.O6] 新增：阶段B执行链路不得出现动态外部代码加载行为，检测结果必须为 0 次。",
+            "[OBL:T76.O6] 新增：summary.json 必须包含 dynamic_external_code_load=false。",
+            "[OBL:T76.O6] 必须禁止动态外部代码加载。"
+          ]
+        },
+        {
+          "id": "O7",
+          "text": "OS.execute 必须默认关闭，阶段B闭环不得依赖其推进。",
+          "kind": "godot",
+          "source": "master",
+          "suggestions": [
+            "新增：SECURITY_PROFILE=host-safe 下 OS.execute 必须为默认关闭且调用计数为 0。",
+            "新增：若检测到 OS.execute 调用则 ACC:T76.2 直接 fail。",
+            "OS.execute 必须默认关闭，阶段B闭环不得依赖其推进。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T76.O7] 新增：SECURITY_PROFILE=host-safe 下 OS.execute 必须为默认关闭且调用计数为 0。",
+            "[OBL:T76.O7] 新增：若检测到 OS.execute 调用则 ACC:T76.2 直接 fail。",
+            "[OBL:T76.O7] OS.execute 必须默认关闭，阶段B闭环不得依赖其推进。"
+          ]
+        },
+        {
+          "id": "O8",
+          "text": "外部 URL 必须满足 https + allowlist。",
+          "kind": "godot",
+          "source": "master",
+          "suggestions": [
+            "新增：阶段B涉及外链时仅允许 https 且主机在 allowlist 内，其他情况必须拒绝并可审计。",
+            "新增：确定性结果需包含 external_url_policy=pass/fail 与 deny_count。",
+            "外部 URL 必须满足 https + allowlist。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T76.O8] 新增：阶段B涉及外链时仅允许 https 且主机在 allowlist 内，其他情况必须拒绝并可审计。",
+            "[OBL:T76.O8] 新增：确定性结果需包含 external_url_policy=pass/fail 与 deny_count。",
+            "[OBL:T76.O8] 外部 URL 必须满足 https + allowlist。"
+          ]
+        }
+      ]
+    },
+    "81": {
+      "task_id": 81,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-81-round-jitter-g02-r03-t81/verdict.json",
+      "uncovered_count": 1,
+      "obligations": [
+        {
+          "id": "O4",
+          "text": "验证流程必须体现 TDD red->green->refactor，并提供对应的确定性证据工件。",
+          "kind": "meta",
+          "source": "master",
+          "suggestions": [
+            "ACC:T81.TDD 阶段B必须保留 red->green->refactor 三阶段执行证据（至少含失败用例、修复后通过、重构后回归通过）。",
+            "ACC:T81.TDD 每次阶段B验收的 summary.json 必须包含 tdd_cycle={red,green,refactor} 的 pass|fail 与对应证据路径。",
+            "验证流程必须体现 TDD red->green->refactor，并提供对应的确定性证据工件。"
+          ],
+          "acceptance_lines": [
+            "[OBL:T81.O4] ACC:T81.TDD 阶段B必须保留 red->green->refactor 三阶段执行证据（至少含失败用例、修复后通过、重构后回归通过）。",
+            "[OBL:T81.O4] ACC:T81.TDD 每次阶段B验收的 summary.json 必须包含 tdd_cycle={red,green,refactor} 的 pass|fail 与对应证据路径。",
+            "[OBL:T81.O4] 验证流程必须体现 TDD red->green->refactor，并提供对应的确定性证据工件。"
+          ]
+        }
+      ]
+    },
+    "97": {
+      "task_id": 97,
+      "verdict_path": "logs/ci/2026-03-08/sc-llm-obligations-task-97-round-jitter-g03-r03-t97/verdict.json",
+      "uncovered_count": 0,
+      "obligations": []
     }
   },
   "task_ids": [
-    58
+    55,
+    56,
+    63,
+    64,
+    68,
+    69,
+    71,
+    74,
+    76,
+    81,
+    97
   ],
   "last_sync_mode": {
     "refresh_baseline": true,
-    "apply": false,
+    "apply": true,
     "verify": true
   }
 }
