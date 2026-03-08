@@ -56,11 +56,11 @@ flowchart TD
 > 说明：以下命令以 PowerShell 为例；Python 使用 `py -3`；Godot 路径通过环境变量 `GODOT_BIN` 传入。
 
 ```bash
-# 1) 任务级确定性门禁（包含 ADR/Links/Overlay/Contracts/Arch/Build 等）
-py -3 scripts/sc/acceptance_check.py --task-id 43
+# 1) 任务级统一评审入口（串联 test + acceptance_check + llm_review）
+py -3 scripts/sc/run_review_pipeline.py --task-id 43 --security-profile host-safe
 
-# 2) 单测（含覆盖率门禁汇总写入 logs/unit/<date>/summary.json）
-py -3 scripts/sc/test.py --type unit
+# 2) TDD 绿灯阶段（含覆盖率门禁与产物汇总）
+py -3 scripts/sc/build.py tdd --task-id 43 --stage green
 
 # 3) 依赖护栏（本地可先跑；CI 会强制）
 py -3 scripts/python/dependency_guard.py
@@ -75,10 +75,10 @@ py -3 scripts/python/ci_pipeline.py all --solution Game.sln --configuration Debu
 
 ## G) 合并前验收清单（最小）
 
-- [ ] `py -3 scripts/sc/acceptance_check.py --task-id <id>` 通过（确定性证据落盘 `logs/ci/<date>/sc-acceptance-check/`）
+- [ ] `py -3 scripts/sc/run_review_pipeline.py --task-id <id> --security-profile host-safe` 通过（统一证据落盘 `logs/ci/<date>/sc-review-pipeline/`）
 - [ ] `py -3 scripts/python/dependency_guard.py` 通过（硬门禁；工件落盘 `logs/ci/<date>/dependency-guard.*`）
-- [ ] `py -3 scripts/sc/test.py --type unit` 通过且覆盖率门禁满足 `AGENTS.md` 6.2
-- [ ] `py -3 scripts/sc/test.py --type all --godot-bin "%GODOT_BIN%"` 可在 headless 下运行（若本次变更涉及 Godot）
+- [ ] `py -3 scripts/sc/build.py tdd --task-id <id> --stage green` 通过且覆盖率门禁满足 `AGENTS.md` 6.2
+- [ ] `py -3 scripts/sc/build.py tdd --task-id <id> --stage refactor` 通过（若本次变更涉及 Godot 则同时验证 headless 冒烟）
 - [ ] 性能/安全/发布健康相关变更：引用并遵循对应 ADR（ADR-0015/ADR-0002/ADR-0003）
 
 ## 7.y 架构依赖矩阵与依赖护栏（Dependency Guard）
