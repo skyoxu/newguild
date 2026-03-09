@@ -2681,7 +2681,8 @@
     "artifactRefs": [
       "logs/ci/<date>/v11-task-53/summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0054",
@@ -2761,7 +2762,8 @@
     "artifactRefs": [
       "logs/ci/<date>/v11-task-54/summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0055",
@@ -2825,7 +2827,8 @@
     "artifactRefs": [
       "logs/ci/<date>/v11-task-55/summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0056",
@@ -2896,7 +2899,8 @@
     "artifactRefs": [
       "logs/ci/<date>/v11-task-56/summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0057",
@@ -2973,7 +2977,8 @@
     "artifactRefs": [
       "logs/ci/<date>/v11-task-57/summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0058",
@@ -3038,7 +3043,8 @@
     "artifactRefs": [
       "logs/ci/<date>/v11-task-61/summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0059",
@@ -3115,7 +3121,8 @@
     "artifactRefs": [
       "logs/ci/<date>/task-62-A-summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0060",
@@ -3181,7 +3188,8 @@
     "artifactRefs": [
       "logs/ci/<date>/v11-task-63/summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0061",
@@ -3241,7 +3249,8 @@
     "artifactRefs": [
       "logs/ci/<date>/v11-task-64/summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0062",
@@ -3303,7 +3312,8 @@
     "artifactRefs": [
       "logs/ci/<date>/v11-task-65/summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0063",
@@ -3380,7 +3390,8 @@
     "artifactRefs": [
       "logs/ci/<date>/task-66-A-summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0064",
@@ -3445,7 +3456,8 @@
     "artifactRefs": [
       "logs/ci/<date>/task-79-B-summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   },
   {
     "id": "NG-0065",
@@ -3515,6 +3527,7 @@
     "artifactRefs": [
       "logs/ci/<date>/task-80-B-summary.json"
     ],
-    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks."
+    "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
+    "contract_refs": []
   }
 ]

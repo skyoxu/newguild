@@ -2313,6 +2313,10 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route58-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.recruitment.offer.resolved",
+      "core.guild.member.joined"
     ]
   },
   {
@@ -2395,6 +2399,10 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route59-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.raid.resolved",
+      "core.experience.changed"
     ]
   },
   {
@@ -2472,6 +2480,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route60-R2-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.game_turn.week_advanced"
     ]
   },
   {
@@ -2558,6 +2569,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route67-R2-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.recruitment.offer.resolved"
     ]
   },
   {
@@ -2628,6 +2642,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route68-R2-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.guild.member.joined"
     ]
   },
   {
@@ -2699,6 +2716,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route69-R2-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.raid.scheduled"
     ]
   },
   {
@@ -2773,6 +2793,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route70-R2-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.score.changed"
     ]
   },
   {
@@ -2841,6 +2864,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route71-R2-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.media.beat.triggered"
     ]
   },
   {
@@ -2912,6 +2938,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route72-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.worldboss.entered"
     ]
   },
   {
@@ -2997,6 +3026,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route73-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.pvp.match.started"
     ]
   },
   {
@@ -3070,6 +3102,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route74-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.activity.feed.appended"
     ]
   },
   {
@@ -3138,6 +3173,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route75-R2-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.game_turn.week_advanced"
     ]
   },
   {
@@ -3202,6 +3240,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route76-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.activity.feed.appended"
     ]
   },
   {
@@ -3276,6 +3317,10 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route77-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.reputation.changed",
+      "core.score.changed"
     ]
   },
   {
@@ -3343,6 +3388,10 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route78-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.load.requested",
+      "core.raid.resolved"
     ]
   },
   {
@@ -3410,6 +3459,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route81-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.activity.feed.appended"
     ]
   },
   {
@@ -3478,6 +3530,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route82-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.guild.member.role_changed"
     ]
   },
   {
@@ -3551,6 +3606,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route83-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.activity.feed.appended"
     ]
   },
   {
@@ -3619,6 +3677,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route84-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.load.requested"
     ]
   },
   {
@@ -3689,6 +3750,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route85-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.activity.feed.appended"
     ]
   },
   {
@@ -3755,6 +3819,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route86-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.worldboss.resolved"
     ]
   },
   {
@@ -3819,6 +3886,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route87-C-summary.json"
+    ],
+    "contract_refs": [
+      "core.activity.feed.appended"
     ]
   },
   {
@@ -3884,6 +3954,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route88-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.pvp.match.resolved"
     ]
   },
   {
@@ -3957,6 +4030,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route89-C-summary.json"
+    ],
+    "contract_refs": [
+      "core.score.changed"
     ]
   },
   {
@@ -4036,6 +4112,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route90-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.reputation.changed"
     ]
   },
   {
@@ -4104,6 +4183,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route91-C-summary.json"
+    ],
+    "contract_refs": [
+      "core.score.changed"
     ]
   },
   {
@@ -4172,6 +4254,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route92-R2-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.save.requested"
     ]
   },
   {
@@ -4244,6 +4329,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route93-R2-A-summary.json"
+    ],
+    "contract_refs": [
+      "core.load.requested"
     ]
   },
   {
@@ -4314,6 +4402,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route94-R2-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.save.requested"
     ]
   },
   {
@@ -4381,6 +4472,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route95-R2-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.guild.member.joined"
     ]
   },
   {
@@ -4447,6 +4541,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route96-R2-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.guild.member.left"
     ]
   },
   {
@@ -4512,6 +4609,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route97-R2-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.raid.resolved"
     ]
   },
   {
@@ -4573,6 +4673,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route98-R2-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.save.requested"
     ]
   },
   {
@@ -4636,6 +4739,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route99-R2-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.reputation.changed"
     ]
   },
   {
@@ -4701,6 +4807,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route100-R2-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.raid.resolved"
     ]
   },
   {
@@ -4776,6 +4885,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route101-R2-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.save.requested"
     ]
   },
   {
@@ -4850,6 +4962,9 @@
     ],
     "artifactRefs": [
       "logs/e2e/<date>/playability-route102-R2-B-summary.json"
+    ],
+    "contract_refs": [
+      "core.load.requested"
     ]
   }
 ]
