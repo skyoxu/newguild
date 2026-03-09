@@ -259,3 +259,65 @@ Artifact-Refs:
 - [ ] `08-FeatureSlice-V11-Governance-Stabilization.md` 与 `08-FeatureSlice-V11-Gameplay-Depth.md` 已更新并可作为审计入口
 - [ ] 阶段任务的 `ACC:T<id>.<n>` 在测试与工件中可回放（`logs/ci/**`、`logs/e2e/**`）
 <!-- V11_ACCEPTANCE_END -->
+
+<!-- BEGIN:T53-T102-MAP -->
+## T53-T102 ????????????
+
+> ???? `tasks.json` ? `tasks_back/tasks_gameplay` ???? overlay ????????????????????
+
+| Task | Title | Status | Back IDs | Gameplay IDs | Overlay |
+|---|---|---|---|---|---|
+| T53 | V1.1 治理：稳定性门禁基线统一 | pending | NG-0053 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T54 | V1.1 治理：Headless Flaky 采集与根因分类 | pending | NG-0054 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T55 | V1.1 治理：测试编排与证据消费规范 | pending | NG-0055 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T56 | V1.1 治理：性能预算硬门与场景基准 | pending | NG-0056 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/_index.md` |
+| T57 | V1.1 安全治理：Release Health 门禁固化 | pending | NG-0057 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T58 | V1.1 玩法：招募到入会闭环调参与反馈（阶段1） | pending | - | GM-0322 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md` |
+| T59 | V1.1 玩法：Raid 结果驱动成长与排名联动（阶段1） | pending | - | GM-0323 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md` |
+| T60 | V1.1 玩法：两周循环与存档回放一致性（阶段1） | pending | - | GM-0324 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md` |
+| T61 | V1.1 数据治理：schemaVersion 与迁移矩阵 | pending | NG-0058 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T62 | V1.1 数据治理：跨版本存档回放与损坏恢复（阶段1） | pending | NG-0059 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T63 | V1.1 治理：观测与审计日志字段统一 | pending | NG-0060 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/_index.md` |
+| T64 | V1.1 治理：CI 诊断摘要与止损模板 | pending | NG-0061 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T65 | V1.1 治理：Task/ADR/Overlay/Test-Refs 自动体检 | pending | NG-0062 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/_index.md` |
+| T66 | V1.1 收口：RC 准入评审包（阶段1） | pending | NG-0063 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T67 | V1.1 玩法深度：招募链路边界与异常分支（阶段1） | pending | - | GM-0325 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md` |
+| T68 | V1.1 玩法深度：成员管理状态机与角色变更（阶段1） | pending | - | GM-0326 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md` |
+| T69 | V1.1 玩法深度：Raid 进阶规则与结果可解释性（阶段1） | pending | - | GM-0327 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md` |
+| T70 | V1.1 玩法深度：经济与后勤联动闭环（阶段1） | pending | - | GM-0328 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md` |
+| T71 | V1.1 玩法深度：媒体事件与声望反馈闭环（阶段1） | pending | - | GM-0329 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md` |
+| T72 | V1.1 玩法扩展：WorldBoss 从入口到可玩闭环（阶段1） | pending | - | GM-0330 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md` |
+| T73 | V1.1 玩法扩展：PVP 从入口到匹配结算（阶段1） | pending | - | GM-0331 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md` |
+| T74 | V1.1 平衡治理：玩法遥测与数值调参闭环（阶段1） | pending | - | GM-0332 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md` |
+| T75 | V1.1 收口：玩法全链路回归与发布前验收（阶段1） | pending | - | GM-0333 | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T76 | V1.1 玩法：招募到入会闭环调参与反馈（阶段2） | pending | - | GM-0334 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md` |
+| T77 | V1.1 玩法：Raid 结果驱动成长与排名联动（阶段2） | pending | - | GM-0335 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md` |
+| T78 | V1.1 玩法：两周循环与存档回放一致性（阶段2） | pending | - | GM-0336 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md` |
+| T79 | V1.1 数据治理：跨版本存档回放与损坏恢复（阶段2） | pending | NG-0064 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T80 | V1.1 收口：RC 准入评审包（阶段2） | pending | NG-0065 | - | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T81 | V1.1 玩法深度：招募链路边界与异常分支（阶段2） | pending | - | GM-0337 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md` |
+| T82 | V1.1 玩法深度：成员管理状态机与角色变更（阶段2） | pending | - | GM-0338 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md` |
+| T83 | V1.1 玩法深度：Raid 进阶规则与结果可解释性（阶段2） | pending | - | GM-0339 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md` |
+| T84 | V1.1 玩法深度：经济与后勤联动闭环（阶段2） | pending | - | GM-0340 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md` |
+| T85 | V1.1 玩法深度：媒体事件与声望反馈闭环（阶段2） | pending | - | GM-0341 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md` |
+| T86 | V1.1 玩法扩展：WorldBoss 从入口到可玩闭环（阶段2） | pending | - | GM-0342 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md` |
+| T87 | V1.1 玩法扩展：WorldBoss 从入口到可玩闭环（阶段3） | pending | - | GM-0343 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md` |
+| T88 | V1.1 玩法扩展：PVP 从入口到匹配结算（阶段2） | pending | - | GM-0344 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md` |
+| T89 | V1.1 玩法扩展：PVP 从入口到匹配结算（阶段3） | pending | - | GM-0345 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md` |
+| T90 | V1.1 平衡治理：玩法遥测与数值调参闭环（阶段2） | pending | - | GM-0346 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md` |
+| T91 | V1.1 平衡治理：玩法遥测与数值调参闭环（阶段3） | pending | - | GM-0347 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md` |
+| T92 | V1.1 收口：玩法全链路回归与发布前验收（阶段2） | pending | - | GM-0348 | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T93 | V1.1 收口：玩法全链路回归与发布前验收（阶段3） | pending | - | GM-0349 | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T94 | V1.1 玩法：两周循环与存档回放一致性（阶段3） | pending | - | GM-0350 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md` |
+| T95 | V1.1 玩法深度：招募链路边界与异常分支（阶段3） | pending | - | GM-0351 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md` |
+| T96 | V1.1 玩法深度：成员管理状态机与角色变更（阶段3） | pending | - | GM-0352 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md` |
+| T97 | V1.1 玩法深度：Raid 进阶规则与结果可解释性（阶段3） | pending | - | GM-0353 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md` |
+| T98 | V1.1 玩法深度：经济与后勤联动闭环（阶段3） | pending | - | GM-0354 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md` |
+| T99 | V1.1 玩法深度：媒体事件与声望反馈闭环（阶段3） | pending | - | GM-0355 | `docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md` |
+| T100 | V1.1 收口：玩法全链路回归与发布前验收（阶段4） | pending | - | GM-0356 | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T101 | V1.1 收口：玩法全链路回归与发布前验收（阶段5） | pending | - | GM-0357 | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| T102 | V1.1 收口：玩法全链路回归与发布前验收（阶段6） | pending | - | GM-0358 | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+
+- ?????`.taskmaster/tasks/tasks.json` + `.taskmaster/tasks/tasks_back.json` + `.taskmaster/tasks/tasks_gameplay.json`
+- ?????2026-03-09
+<!-- END:T53-T102-MAP -->
