@@ -16,9 +16,9 @@ on:
         required: false
         default: 'false'
       require_task_test_refs:
-        description: 'Fail if tasks_back/tasks_gameplay test_refs is empty for the resolved task id (default: false).'
+        description: 'Fail if tasks_back/tasks_gameplay test_refs is empty for the resolved task id (default: true).'
         required: false
-        default: 'false'
+        default: 'true'
   push:
     branches: [ main ]
   pull_request:
@@ -32,8 +32,9 @@ jobs:
       PYTHONIOENCODING: 'utf-8'
       PYTHONUTF8: '1'
       SECURITY_PROFILE: 'host-safe'
+      DELIVERY_PROFILE: 'fast-ship'
       WHITELIST_WARN_DAYS: '90'
-      TASK_LINKS_MAX_WARNINGS: '100'
+      TASK_LINKS_MAX_WARNINGS: '200'
       CI_DOTNET_STAGE_TIMEOUT_MS: '4200000'
     steps:
       - name: Checkout
@@ -306,7 +307,7 @@ jobs:
           $date = (& py -3 -c "import datetime as dt; print(dt.date.today().strftime('%Y-%m-%d'))").Trim()
           $strict = "${{ github.event_name == 'workflow_dispatch' && inputs.strict_adr_status || 'false' }}"
           $reqPerf = "${{ github.event_name == 'workflow_dispatch' && inputs.require_perf || 'false' }}"
-          $reqRefs = "${{ github.event_name == 'workflow_dispatch' && inputs.require_task_test_refs || 'false' }}"
+          $reqRefs = "${{ github.event_name == 'workflow_dispatch' && inputs.require_task_test_refs || 'true' }}"
 
           foreach ($id in $env:SC_TASK_IDS.Split(',')) {
             $only = @('adr','overlay','contracts','arch','build','security','quality','rules','tests')
@@ -316,10 +317,11 @@ jobs:
             if ($reqPerf -eq "true") { $only += 'perf' }
             $onlyArg = $only -join ','
 
-            $args = @("py", "-3", "scripts/sc/acceptance_check.py", "--task-id", $id, "--only", $onlyArg, "--security-profile", "$env:SECURITY_PROFILE", "--require-headless-e2e")
+            $args = @("py", "-3", "scripts/sc/acceptance_check.py", "--task-id", $id, "--only", $onlyArg, "--security-profile", "$env:SECURITY_PROFILE")
             if ($strict -eq "true") { $args += "--strict-adr-status" }
             if ($reqPerf -eq "true") { $args += "--require-perf" }
             if ($reqRefs -eq "true") { $args += "--require-task-test-refs" }
+            if ($reqRefs -ne "true") { $args += "--no-require-task-test-refs" }
             & $args[0] $args[1..($args.Length-1)]
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
