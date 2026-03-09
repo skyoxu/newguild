@@ -206,7 +206,23 @@ def load_tasks_from_file(task_file: Path) -> list[dict[str, Any]]:
     return []
 
 
-def validate_task_file(root: Path, task_file: Path, label: str, adr_ids: set[str]) -> tuple[int, int]:
+def _task_matches_id(task: dict[str, Any], target_task_id: str | None) -> bool:
+    if not str(target_task_id or "").strip():
+        return True
+    target = str(target_task_id).strip()
+    task_id = str(task.get("id", "")).strip()
+    taskmaster_id = str(task.get("taskmaster_id", "")).strip()
+    return task_id == target or taskmaster_id == target
+
+
+def validate_task_file(
+    root: Path,
+    task_file: Path,
+    label: str,
+    adr_ids: set[str],
+    *,
+    task_id: str | None = None,
+) -> tuple[int, int]:
     """Validate overlay references for a single task file.
 
     Returns: (tasks_with_overlays, tasks_passed)
@@ -225,8 +241,11 @@ def validate_task_file(root: Path, task_file: Path, label: str, adr_ids: set[str
     passed = 0
     forced_errors: list[str] = []
 
-    for task in sorted(tasks, key=lambda x: str(x.get("id", ""))):
+    scoped_tasks = [t for t in tasks if _task_matches_id(t, task_id)]
+    for task in sorted(scoped_tasks, key=lambda x: str(x.get("id", x.get("taskmaster_id", "")))):
         tid = task.get("id")
+        if tid is None:
+            tid = task.get("taskmaster_id")
 
         overlay_refs = task.get("overlay_refs")
         if overlay_refs:
@@ -342,6 +361,7 @@ def main() -> int:
         type=str,
         help="Task file path to validate (default: all .taskmaster/tasks/*.json).",
     )
+    parser.add_argument("--task-id", type=str, default=None, help="Validate a single task id/taskmaster_id.")
 
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
@@ -362,7 +382,7 @@ def main() -> int:
     total_checked = 0
     total_passed = 0
     for task_file in task_files:
-        checked, passed = validate_task_file(root, task_file, task_file.name, adr_ids)
+        checked, passed = validate_task_file(root, task_file, task_file.name, adr_ids, task_id=args.task_id)
         total_checked += checked
         total_passed += passed
 

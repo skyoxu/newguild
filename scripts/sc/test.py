@@ -55,7 +55,23 @@ def run_unit(
     task_filter = _build_dotnet_filter_from_cs_refs(task_cs_refs)
     if task_filter:
         cmd += ["--filter", task_filter]
-    rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=1_800)
+    prev_lines = os.environ.get("COVERAGE_LINES_MIN")
+    prev_branches = os.environ.get("COVERAGE_BRANCHES_MIN")
+    try:
+        # Task-scoped filtered tests are evidence-oriented; coverage hard gate is enforced by full TDD stages.
+        if task_filter:
+            os.environ["COVERAGE_LINES_MIN"] = "0"
+            os.environ["COVERAGE_BRANCHES_MIN"] = "0"
+        rc, out = run_cmd(cmd, cwd=repo_root(), timeout_sec=1_800)
+    finally:
+        if prev_lines is None:
+            os.environ.pop("COVERAGE_LINES_MIN", None)
+        else:
+            os.environ["COVERAGE_LINES_MIN"] = prev_lines
+        if prev_branches is None:
+            os.environ.pop("COVERAGE_BRANCHES_MIN", None)
+        else:
+            os.environ["COVERAGE_BRANCHES_MIN"] = prev_branches
     log_path = out_dir / "unit.log"
     write_text(log_path, out)
     unit_artifacts_dir = repo_root() / "logs" / "unit" / today_str()

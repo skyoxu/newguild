@@ -8,7 +8,7 @@ namespace Game.Core.Tests.CI
     {
         // ACC:T33.7
         [Fact]
-        public void ShouldDefineExpectedArtifactPathPrefix()
+        public void ShouldDefineExpectedArtifactPathPrefix_WhenCheckingCiArtifactConvention()
         {
             var logsRoot = Path.Combine("logs", "ci");
             var expected = $"logs{Path.DirectorySeparatorChar}ci";

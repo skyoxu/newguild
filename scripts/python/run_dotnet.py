@@ -214,6 +214,7 @@ def main():
     ap.add_argument('--solution', default='Game.sln')
     ap.add_argument('--configuration', default='Debug')
     ap.add_argument('--out-dir', default=None)
+    ap.add_argument('--filter', default=None, help='Optional dotnet test filter expression.')
     args = ap.parse_args()
 
     root = os.getcwd()
@@ -323,6 +324,9 @@ def main():
                 '--collect:XPlat Code Coverage',
                 '--logger', f'trx;LogFileName={trx_name}',
                 '--results-directory', results_dir,
+            ]
+            + (['--filter', str(args.filter)] if str(args.filter or '').strip() else [])
+            + [
                 '--',
                 '-m:1',
             ],

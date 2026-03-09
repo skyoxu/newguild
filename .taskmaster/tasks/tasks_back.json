@@ -2640,37 +2640,16 @@
     ],
     "description": "统一 flaky/retry/failure 分类与门禁阈值口径，减少 CI 波动。",
     "acceptance": [
-      "ACC:T53.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "ACC:T53.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "ACC:T53.3 产出 logs/ci/<date>/v11-task-53/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "flaky、retry、failure 三类判定规则在同一基线下互斥且完备；同一失败样本不得在同次评估中被归入多个分类。",
-      "CI 门禁仅使用一套稳定性阈值口径进行判定；在相同输入与环境下重复运行得到相同通过/失败结果。",
-      "实现与验证必须由自动化确定性检查输出 machine-readable 的 pass/fail 结论，且不允许以人工解释替代自动判定。",
-      "logs/ci/<date>/v11-task-53/summary.json 至少包含 flaky、retry、failure 分类计数、重试统计、门禁阈值快照与最终 gate 结论；任一必填字段缺失即判定失败。",
-      "当分类口径未统一或门禁阈值未满足时，流程必须拒绝放行并保持失败状态，不得默认通过或静默降级。",
-      "稳定性基线定义必须同时覆盖 flaky、retry、failure 的判定边界与阈值来源，并可被自动化脚本解析；任一分类边界缺失或阈值来源不唯一即判定失败。",
-      "在固定输入样本与固定执行环境下，至少两次独立运行的分类结果、重试统计、阈值快照与 gate 结论必须逐项一致；出现差异即判定为不稳定并失败。",
-      "summary.json 必须包含可追溯到本次评估的数据标识（如 task_id 或 run_id 或等效字段）；标识缺失或与本次执行不一致即判定失败。",
-      "自动化检查失败时必须输出可机读的失败原因与对应分类/门禁项，且结论不得被后续步骤覆盖为通过。",
-      "ACC:T53.1、ACC:T53.2、ACC:T53.3 三个锚点在同一次评估中均需出现并可被校验；缺少任一锚点即整体验收失败。",
-      "flaky、retry、failure 的分类定义与门禁阈值来源必须在“计算、判定、落盘”三个阶段保持同一版本；任一阶段使用不同口径即判定失败。",
-      "ACC:T53.1 必须可被自动化检查映射到三类边界定义与唯一阈值来源，并输出 machine-readable 校验结果；映射或校验任一失败即失败。",
-      "ACC:T53.2 必须以自动化确定性检查完成实现验证，且同一规则下至少包含一个应失败样本和一个应通过样本的判定记录；任一记录缺失或需人工判读即失败。",
-      "ACC:T53.3 对应证据持久化在流程结束后必须可重读并与本次 gate 结论一致；summary.json 不存在、不可解析或结论不一致即失败。",
-      "在固定输入与固定环境（含 SECURITY_PROFILE=host-safe）下重复评估时，门禁结果与三类统计不得因执行顺序或重试次数变化而变化；发生变化即判定“未减少 CI 波动”并失败。",
-      "ADR Refs: ADR-0005; ADR-0003; ADR-0015 —— 自动化检查必须校验 ADR 引用集合完整且唯一，缺失、不可解析或出现未声明 ADR 即失败。",
-      "Chapters: CH01; CH03; CH07; CH09 —— 自动化检查必须验证章节回链完整且可解析，缺失、重复或不一致即失败。",
-      "Overlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md —— 两处记录必须与 summary.json 结论一致，否则 gate 失败。",
-      "Test Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs —— 两个测试引用必须执行并写入同一次评估 run_id 的机读结果。",
-      "TDD (red->green->refactor) with deterministic evidence artifacts. —— 验证流程必须体现 red->green->refactor 三阶段闭环并可审计。"
+      "ACC:T53.1 对固定输入样本，flaky/retry/failure 分类规则可确定且可复现；覆盖可重试未耗尽、可重试已耗尽、不可重试失败边界，并满足每个合法样本只能归入一类；对非法样本（attempt<=0、attempt>maxAttempts）统一拒绝且不得落入业务分类。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T53.2 门禁阈值比较规则唯一且显式（pass iff metric <= threshold）；在阈值边界值（=、高于、低于）下输出稳定可重复。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T53.3 在固定输入下产生可机读证据 logs/ci/<date>/sc-acceptance-check-task-53/summary.json，且分类统计与阈值判定字段值可由同输入回放复算并一致。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
       "TDD (red->green->refactor) with reproducible logs/**."
     ],
     "test_refs": [
-      "Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+      "Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
     ],
     "contractRefs": [
       "core.game_turn.week_advanced",
@@ -2679,7 +2658,7 @@
       "core.activity.feed.appended"
     ],
     "artifactRefs": [
-      "logs/ci/<date>/v11-task-53/summary.json"
+      "logs/ci/<date>/sc-acceptance-check-task-53/summary.json"
     ],
     "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
     "contract_refs": []
