@@ -1,0 +1,85 @@
+name: Nightly Strict Headless E2E
+
+on:
+  schedule:
+    - cron: "30 18 * * *"
+  workflow_dispatch:
+    inputs:
+      acceptance_task_id:
+        description: "Task id for strict acceptance evidence check (default: 1)"
+        required: false
+        default: "1"
+
+jobs:
+  strict-headless-e2e:
+    runs-on: windows-latest
+    env:
+      GODOT_VERSION: "4.5.1"
+      PYTHONIOENCODING: "utf-8"
+      PYTHONUTF8: "1"
+      SECURITY_PROFILE: "strict"
+      DELIVERY_PROFILE: "strict-nightly"
+      GD_SECURE_MODE: "1"
+      SECURITY_TEST_MODE: "1"
+      ALLOWED_EXTERNAL_HOSTS: "example.com"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Download Godot .NET (GitHub Releases)
+        shell: pwsh
+        run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          New-Item -ItemType Directory -Force -Path godot | Out-Null
+          $zip = "godot/godot.zip"
+          $u = "https://github.com/godotengine/godot/releases/download/${env:GODOT_VERSION}-stable/Godot_v${env:GODOT_VERSION}-stable_mono_win64.zip"
+          Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $zip
+          Expand-Archive $zip -DestinationPath godot -Force
+          $exe = Get-ChildItem godot -Recurse -Filter *win64*console*.exe | Select-Object -First 1
+          if (-not $exe) { $exe = Get-ChildItem godot -Recurse -Filter *win64*.exe | Select-Object -First 1 }
+          if (-not $exe) { throw 'Godot exe not found after download.' }
+          "GODOT_BIN=$($exe.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "GODOT_BIN=$($exe.FullName)"
+
+      - name: Ensure GdUnit4 plugin
+        shell: pwsh
+        run: |
+          py -3 scripts/python/ensure_gdunit_plugin.py --project Tests.Godot --version v6.0.0
+
+      - name: Build Godot tests project
+        shell: pwsh
+        run: |
+          dotnet build Tests.Godot/Tests.Godot.csproj -c Debug
+
+      - name: Strict headless e2e (sc-test)
+        shell: pwsh
+        run: |
+          py -3 scripts/sc/test.py --type e2e --godot-bin "$env:GODOT_BIN" --timeout-sec 900
+
+      - name: Strict acceptance evidence gate (headless required)
+        shell: pwsh
+        run: |
+          $taskId = "${{ inputs.acceptance_task_id }}"
+          if ([string]::IsNullOrWhiteSpace($taskId)) { $taskId = "1" }
+          py -3 scripts/sc/acceptance_check.py --task-id "$taskId" --only tests --security-profile strict --require-headless-e2e --godot-bin "$env:GODOT_BIN"
+
+      - name: Upload CI logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-strict-headless-e2e-logs
+          path: |
+            logs/ci/**
+            logs/e2e/**
+          if-no-files-found: ignore

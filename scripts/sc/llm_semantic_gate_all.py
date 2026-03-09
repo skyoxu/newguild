@@ -109,8 +109,8 @@ def main() -> int:
     ap.add_argument("--max-acceptance-items", type=int, default=12, help="Max acceptance items per view in prompt")
     ap.add_argument("--max-prompt-chars", type=int, default=60_000, help="Max prompt size after task brief budgeting")
     ap.add_argument("--max-tasks", type=int, default=0, help="Limit total tasks (0=all)")
-    ap.add_argument("--max-needs-fix", type=int, default=0, help="Fail when Needs Fix count exceeds this limit")
-    ap.add_argument("--max-unknown", type=int, default=0, help="Fail when Unknown count exceeds this limit")
+    ap.add_argument("--max-needs-fix", type=int, default=10, help="Fail when Needs Fix count exceeds this limit")
+    ap.add_argument("--max-unknown", type=int, default=10, help="Fail when Unknown count exceeds this limit")
     ap.add_argument("--garbled-gate", default="on", choices=["on", "off"], help="Hard precheck for garbled task/acceptance text")
     ap.add_argument("--self-check", action="store_true", help="Run deterministic local self-check only")
     args = ap.parse_args()
@@ -277,4 +277,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

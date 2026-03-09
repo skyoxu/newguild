@@ -287,9 +287,9 @@ def _run_group(mode: str, commands: list[dict[str, Any]], strict_soft: bool, out
 
 def main() -> int:
     try:
-        env_task_links_budget = int((os.getenv("TASK_LINKS_MAX_WARNINGS", "") or "-1").strip())
+        env_task_links_budget = int((os.getenv("TASK_LINKS_MAX_WARNINGS", "") or "200").strip())
     except ValueError:
-        env_task_links_budget = -1
+        env_task_links_budget = 200
 
     parser = argparse.ArgumentParser(description="Run grouped hard/soft gates.")
     parser.add_argument("--mode", choices=["hard", "soft", "all"], default="all")

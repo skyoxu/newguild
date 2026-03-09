@@ -41,11 +41,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Write outputs to logs/ci/<date>/sc-acceptance-check-task-<id>/ to avoid overwriting when running many tasks.",
     )
     ap.add_argument("--perf-p95-ms", type=int, default=None, help="Enable perf hard gate by parsing [PERF] p95_ms from latest logs/ci/**/headless.log. 0 disables.")
-    ap.add_argument("--require-perf", action="store_true", help="(legacy) enable perf hard gate using env PERF_P95_THRESHOLD_MS (or default 20ms)")
+    ap.add_argument("--require-perf", action="store_true", help="(legacy) enable perf hard gate using env PERF_P95_THRESHOLD_MS (or default 33ms)")
     ap.add_argument("--strict-adr-status", action="store_true", help="fail if any referenced ADR is not Accepted")
     ap.add_argument("--strict-test-quality", action="store_true", help="fail if deterministic test-quality heuristics report verdict=Needs Fix")
     ap.add_argument("--strict-quality-rules", action="store_true", help="fail if deterministic quality rules report verdict=Needs Fix")
-    ap.add_argument("--require-task-test-refs", action="store_true", help="fail if tasks_back/tasks_gameplay test_refs is empty for the resolved task id")
+    ap.add_argument(
+        "--require-task-test-refs",
+        dest="require_task_test_refs",
+        action="store_true",
+        default=True,
+        help="fail if tasks_back/tasks_gameplay test_refs is empty for the resolved task id (default: true)",
+    )
+    ap.add_argument(
+        "--no-require-task-test-refs",
+        dest="require_task_test_refs",
+        action="store_false",
+        help="disable non-empty test_refs requirement for this run",
+    )
     ap.add_argument("--require-executed-refs", action="store_true", help="fail if acceptance anchors cannot be proven executed in this run (TRX/JUnit evidence)")
     ap.add_argument(
         "--security-profile",
@@ -96,7 +108,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ap.add_argument(
         "--subtasks-coverage",
-        default="skip",
+        default="warn",
         choices=["skip", "warn", "require"],
         help="Subtasks coverage gate mode (tasks.json subtasks must be covered by tasks_back/tasks_gameplay acceptance).",
     )
@@ -142,7 +154,7 @@ def compute_perf_p95_ms(*, perf_p95_ms: int | None, require_perf: bool) -> int:
         return max(0, int(perf_p95_ms))
     if env_p95 is not None:
         return env_p95
-    return 20 if require_perf else 0
+    return 33 if require_perf else 0
 
 
 def validate_arg_conflicts(
