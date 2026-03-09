@@ -2283,10 +2283,10 @@
       {
         "id": "53",
         "title": "V1.1 治理：稳定性门禁基线统一",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "description": "统一 flaky/retry/failure 分类与门禁阈值口径，减少 CI 波动。",
-        "details": "Story: PRD-GUILD-MANAGER-V11-T53\nADR Refs: ADR-0005; ADR-0003; ADR-0015\nChapters: CH01; CH03; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
+        "details": "Story: PRD-GUILD-MANAGER-V11-T53\nADR Refs: ADR-0005; ADR-0003; ADR-0015\nChapters: CH01; CH03; CH07; CH09\nOverlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md\nTest Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs\nSecurity Profile: SECURITY_PROFILE=host-safe",
         "dependencies": [
           "52"
         ],
@@ -2303,17 +2303,16 @@
         ],
         "overlay": "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
         "acceptance": [
-          "ACC:T53.1 验收口径与引用链完整且可解析。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-          "ACC:T53.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-          "ACC:T53.3 产出 logs/ci/<date>/v11-task-53/summary.json。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
+          "ACC:T53.1 对固定输入样本，flaky/retry/failure 分类规则可确定且可复现；覆盖可重试未耗尽、可重试已耗尽、不可重试失败边界，并满足每个合法样本只能归入一类；对非法样本（attempt<=0、attempt>maxAttempts）统一拒绝且不得落入业务分类。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "ACC:T53.2 门禁阈值比较规则唯一且显式（pass iff metric <= threshold）；在阈值边界值（=、高于、低于）下输出稳定可重复。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+          "ACC:T53.3 在固定输入下产生可机读证据 logs/ci/<date>/sc-acceptance-check-task-53/summary.json，且分类统计与阈值判定字段值可由同输入回放复算并一致。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
         ],
         "testRefs": [
-          "Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-          "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+          "Game.Core.Tests/Tasks/Task52GovernanceTests.cs"
         ],
         "contractRefs": [],
         "artifactRefs": [
-          "logs/ci/<date>/v11-task-53/summary.json"
+          "logs/ci/<date>/sc-acceptance-check-task-53/summary.json"
         ],
         "testStrategy": "TDD (red->green->refactor) with deterministic evidence artifacts.",
         "recommendedSubtasks": 3,

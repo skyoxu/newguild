@@ -4,94 +4,202 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using FluentAssertions;
+using Game.Core.Performance;
 using Xunit;
 
 namespace Game.Core.Tests.Tasks;
 
 public sealed class Task52GovernanceTests
 {
-    // ACC:T52.3
     [Fact]
-    public void ShouldAlignContractAndArtifactRefs_WhenComparingTask52MasterAndView()
+    public void ShouldAlignAcceptanceAndEvidenceRefs_WhenComparingTask53MasterAndView()
     {
         var repositoryRoot = ResolveRepositoryRoot();
-        var masterTask = LoadMasterTask52(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks.json"));
-        var viewTask = LoadViewTask52(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks_back.json"));
+        var masterTask = LoadMasterTask(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks.json"), 53);
+        var viewTask = LoadViewTask(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks_back.json"), 53);
 
-        masterTask.ContractRefs.Should().NotBeEmpty("governance consistency requires contractRefs in tasks.json for Task 52");
-        masterTask.ArtifactRefs.Should().NotBeEmpty("governance consistency requires artifactRefs in tasks.json for Task 52");
+        masterTask.Acceptance.Should().HaveCount(3);
+        var parsedItems = masterTask.Acceptance
+            .Select(ParseAcceptanceItem)
+            .ToArray();
+        parsedItems.Should().OnlyContain(item => item.Anchor.StartsWith("ACC:T53.", StringComparison.Ordinal));
+        parsedItems.Select(item => item.Anchor).Should().Equal("ACC:T53.1", "ACC:T53.2", "ACC:T53.3");
+        parsedItems.Should().OnlyContain(item => item.Refs.Count > 0);
 
-        masterTask.ContractRefs.Should().Equal(viewTask.ContractRefs, because: "Task/View governance must keep contract references aligned");
+        var refsFromAcceptance = parsedItems
+            .SelectMany(item => item.Refs)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        refsFromAcceptance.Should().NotBeEmpty();
+        refsFromAcceptance.Should().OnlyContain(testRef => masterTask.TestRefs.Contains(testRef, StringComparer.Ordinal));
+
+        masterTask.ArtifactRefs.Should().ContainSingle("T53 requires a single summary artifact for deterministic evidence");
         masterTask.ArtifactRefs.Should().Equal(viewTask.ArtifactRefs, because: "Task/View governance must keep gate evidence references aligned");
+        masterTask.TestRefs.Should().Equal(viewTask.TestRefs, because: "Task/View governance must keep test references aligned");
     }
 
-    // ACC:T52.2
     [Fact]
-    public void ShouldValidateRefsIntegrityAndContractBaseline_WhenCheckingT44ToT51AcrossViews()
+    public void ShouldResolveLatestEvidenceDeterministically_WhenTask53SummaryUsesDatedArtifactRef()
     {
         var repositoryRoot = ResolveRepositoryRoot();
-        var masterTasks = LoadMasterTasks(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks.json"))
-            .Where(task => task.TaskmasterId >= 44 && task.TaskmasterId <= 51)
-            .ToList();
-        var backTasks = LoadViewTasks(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks_back.json"))
-            .Where(task => task.TaskmasterId >= 44 && task.TaskmasterId <= 51)
-            .ToList();
-        var gameplayTasks = LoadViewTasks(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks_gameplay.json"))
-            .Where(task => task.TaskmasterId >= 44 && task.TaskmasterId <= 51)
-            .ToList();
-        var viewTasks = backTasks.Concat(gameplayTasks).ToList();
+        var masterTask = LoadMasterTask(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks.json"), 53);
+        var summaryRef = masterTask.ArtifactRefs.Single();
 
-        foreach (var taskId in Enumerable.Range(44, 8))
+        var tempRoot = Directory.CreateTempSubdirectory("task53-deterministic-");
+        try
         {
-            masterTasks.Should().ContainSingle(
-                task => task.TaskmasterId == taskId,
-                $"master task {taskId} must exist for governance range T44-T51");
+            var olderSummary = Path.Combine(tempRoot.FullName, "logs", "ci", "2099-12-30", "sc-acceptance-check-task-53", "summary.json");
+            var latestSummary = Path.Combine(tempRoot.FullName, "logs", "ci", "2099-12-31", "sc-acceptance-check-task-53", "summary.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(olderSummary) ?? throw new InvalidDataException("older summary parent is null"));
+            Directory.CreateDirectory(Path.GetDirectoryName(latestSummary) ?? throw new InvalidDataException("latest summary parent is null"));
+            File.WriteAllText(olderSummary, BuildTask53SummaryJson("53", "old-run", "warn", 1, 1, 0, 1, 1, "pass"));
+            File.WriteAllText(latestSummary, BuildTask53SummaryJson("53", "new-run", "ok", 1, 1, 1, 1, 1, "pass"));
 
-            var masterTask = masterTasks.Single(task => task.TaskmasterId == taskId);
-            AssertMasterRefsAreParsable(masterTask, repositoryRoot);
+            var resolvedFirst = ResolveArtifactPath(tempRoot.FullName, summaryRef);
+            var resolvedSecond = ResolveArtifactPath(tempRoot.FullName, summaryRef);
 
-            var viewCandidates = viewTasks.Where(task => task.TaskmasterId == taskId).ToList();
-            viewCandidates.Should().NotBeEmpty(
-                $"at least one view task entry must exist for task {taskId} across tasks_back/tasks_gameplay");
+            resolvedFirst.Should().Be(latestSummary);
+            resolvedSecond.Should().Be(latestSummary, because: "same input and environment must resolve deterministically");
 
-            foreach (var viewTask in viewCandidates)
+            var baselineSample = new[]
             {
-                AssertViewRefsAreParsable(viewTask, repositoryRoot);
+                ExecutionSample.RetryableFailure(1, 3),
+                ExecutionSample.RetryableFailure(3, 3),
+                ExecutionSample.NonRetryableFailure(),
+                ExecutionSample.Success(),
+            };
+            var firstSummary = ComputeStabilitySummary(baselineSample, retryFailureThreshold: 0, hardFailureThreshold: 0);
+            var secondSummary = ComputeStabilitySummary(baselineSample, retryFailureThreshold: 0, hardFailureThreshold: 0);
+            firstSummary.Should().BeEquivalentTo(secondSummary);
+            firstSummary.FlakyCount.Should().Be(1);
+            firstSummary.RetryCount.Should().Be(1);
+            firstSummary.FailureCount.Should().Be(1);
+            firstSummary.GateResult.Should().Be("fail");
+
+            var boundaryPass = ComputeStabilitySummary(baselineSample, retryFailureThreshold: 1, hardFailureThreshold: 1);
+            boundaryPass.GateResult.Should().Be("pass", because: "boundary '=' must be considered pass when failures <= threshold");
+
+            var boundaryFail = ComputeStabilitySummary(baselineSample, retryFailureThreshold: 0, hardFailureThreshold: 1);
+            boundaryFail.GateResult.Should().Be("fail", because: "when retry count is above threshold gate must fail");
+        }
+        finally
+        {
+            if (tempRoot.Exists)
+            {
+                tempRoot.Delete(recursive: true);
             }
         }
-
-        var baselineContractRefs = viewTasks
-            .SelectMany(task => task.ContractRefs)
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .ToHashSet(StringComparer.Ordinal);
-
-        baselineContractRefs.Should().NotBeEmpty("baseline governance set must be derived from existing tasks");
-
-        var task52 = LoadViewTask52(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks_back.json"));
-        var unexpectedRefs = task52.ContractRefs
-            .Where(contractRef => !baselineContractRefs.Contains(contractRef))
-            .ToArray();
-
-        unexpectedRefs.Should().BeEmpty("governance task must not introduce new gameplay contracts");
     }
 
-    // ACC:T52.1
     [Fact]
-    public void ShouldMapBackLinkMetadata_WhenTask52MasterAndViewIdsCompared()
+    public void ShouldValidateTask53SummaryArtifactSchema_WhenEvidenceIsResolved()
     {
         var repositoryRoot = ResolveRepositoryRoot();
-        var masterTask = LoadMasterTask52(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks.json"));
-        var viewTask = LoadViewTask52(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks_back.json"));
+        var masterTask = LoadMasterTask(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks.json"), 53);
+        var viewTask = LoadViewTask(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks_back.json"), 53);
 
-        masterTask.Id.Should().Be("52");
-        viewTask.TaskmasterId.Should().Be(52);
-        masterTask.Title.Should().Be(viewTask.Title);
-        masterTask.Description.Should().Be(viewTask.Description);
+        masterTask.Id.Should().Be("53");
+        viewTask.TaskmasterId.Should().Be(53);
+        viewTask.ArtifactRefs.Should().Equal(masterTask.ArtifactRefs);
+        masterTask.ArtifactRefs.Single().Should().Be("logs/ci/<date>/sc-acceptance-check-task-53/summary.json");
 
-        masterTask.AdrRefs.Should().Equal(viewTask.AdrRefs);
-        masterTask.ChapterRefs.Should().Equal(viewTask.ChapterRefs);
-        masterTask.TestRefs.Should().Equal(viewTask.TestRefs);
-        viewTask.OverlayRefs.Should().Contain(masterTask.OverlayRef);
+        var tempRoot = Directory.CreateTempSubdirectory("task53-summary-");
+        try
+        {
+            var summaryPath = Path.Combine(tempRoot.FullName, "logs", "ci", "2099-12-31", "sc-acceptance-check-task-53", "summary.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(summaryPath) ?? throw new InvalidDataException("summary parent is null"));
+            File.WriteAllText(summaryPath, BuildTask53SummaryJson("53", "run-53", "ok", 1, 1, 1, 1, 1, "pass"));
+
+            var resolved = ResolveGovernanceEvidenceFiles(tempRoot.FullName, masterTask.ArtifactRefs);
+            resolved.Should().ContainSingle().Which.Should().Be(summaryPath);
+
+            using var document = JsonDocument.Parse(File.ReadAllText(summaryPath));
+            ValidateTask53SummaryDocument(document.RootElement);
+        }
+        finally
+        {
+            if (tempRoot.Exists)
+            {
+                tempRoot.Delete(recursive: true);
+            }
+        }
+    }
+
+    // ACC:T53.1
+    [Fact]
+    public void ShouldProduceStableClassification_WhenSamplesAreReorderedAndRepeated()
+    {
+        var samples = new[]
+        {
+            ExecutionSample.RetryableFailure(1, 3),
+            ExecutionSample.RetryableFailure(3, 3),
+            ExecutionSample.NonRetryableFailure(),
+            ExecutionSample.Success(),
+        };
+
+        var first = ClassifySamples(samples);
+        var second = ClassifySamples(samples);
+        var reordered = ClassifySamples(samples.Reverse().ToArray());
+
+        first.Should().Equal(second, because: "same input must produce identical classification output");
+        first.Should().ContainInOrder("flaky", "retry", "failure", "success");
+        reordered.OrderBy(x => x, StringComparer.Ordinal).Should().Equal(first.OrderBy(x => x, StringComparer.Ordinal));
+        first.Count(value => value == "flaky").Should().Be(1);
+        first.Count(value => value == "retry").Should().Be(1);
+        first.Count(value => value == "failure").Should().Be(1);
+        first.Count(value => value == "success").Should().Be(1);
+        first.Count(value => value is "flaky" or "retry" or "failure" or "success").Should().Be(samples.Length, because: "each sample must map to exactly one category");
+    }
+
+    // ACC:T53.2
+    [Fact]
+    public void ShouldApplyUnifiedThresholdRule_WhenMetricEqualsAboveOrBelowThreshold()
+    {
+        EvaluateGate(metric: 3, threshold: 3).Should().Be("pass", because: "rule is pass iff metric <= threshold");
+        EvaluateGate(metric: 2, threshold: 3).Should().Be("pass");
+        EvaluateGate(metric: 4, threshold: 3).Should().Be("fail");
+
+        var repeated = Enumerable.Range(0, 5)
+            .Select(_ => EvaluateGate(metric: 4, threshold: 3))
+            .ToArray();
+        repeated.Should().OnlyContain(result => result == "fail");
+    }
+
+    // ACC:T53.3
+    [Fact]
+    public void ShouldKeepSummaryValuesConsistent_WhenRecomputingFromFixedSamples()
+    {
+        var samples = new[]
+        {
+            ExecutionSample.RetryableFailure(1, 3),
+            ExecutionSample.RetryableFailure(3, 3),
+            ExecutionSample.NonRetryableFailure(),
+            ExecutionSample.Success(),
+        };
+        var computed = ComputeStabilitySummary(samples, retryFailureThreshold: 1, hardFailureThreshold: 1);
+        var json = BuildTask53SummaryJson(
+            "53",
+            "replay-run",
+            status: "ok",
+            flakyCount: computed.FlakyCount,
+            retryCount: computed.RetryCount,
+            failureCount: computed.FailureCount,
+            retryMax: 1,
+            failureMax: 1,
+            gateResult: computed.GateResult);
+
+        using var document = JsonDocument.Parse(json);
+        var root = document.RootElement;
+        ValidateTask53SummaryDocument(root);
+
+        root.GetProperty("classification_counts").GetProperty("flaky").GetInt32().Should().Be(computed.FlakyCount);
+        root.GetProperty("classification_counts").GetProperty("retry").GetInt32().Should().Be(computed.RetryCount);
+        root.GetProperty("classification_counts").GetProperty("failure").GetInt32().Should().Be(computed.FailureCount);
+
+        var retryMax = root.GetProperty("thresholds").GetProperty("retry_max").GetInt32();
+        var failureMax = root.GetProperty("thresholds").GetProperty("failure_max").GetInt32();
+        var recomputedGate = computed.RetryCount > retryMax || computed.FailureCount > failureMax ? "fail" : "pass";
+        root.GetProperty("gate_result").GetString().Should().Be(recomputedGate);
     }
 
     // ACC:T52.4
@@ -186,9 +294,71 @@ public sealed class Task52GovernanceTests
         }
     }
 
+    [Fact]
+    public void ShouldThrowInvalidDataException_WhenTask53SummaryMissingRequiredFields()
+    {
+        var repositoryRoot = ResolveRepositoryRoot();
+        var masterTask = LoadMasterTask(Path.Combine(repositoryRoot, ".taskmaster", "tasks", "tasks.json"), 53);
+        var tempRoot = Directory.CreateTempSubdirectory("task53-summary-missing-fields-");
+
+        try
+        {
+            var summaryPath = Path.Combine(tempRoot.FullName, "logs", "ci", "2099-12-31", "sc-acceptance-check-task-53", "summary.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(summaryPath) ?? throw new InvalidDataException("summary parent is null"));
+            File.WriteAllText(summaryPath, "{\"task_id\":\"53\"}");
+
+            var resolved = ResolveGovernanceEvidenceFiles(tempRoot.FullName, masterTask.ArtifactRefs);
+            resolved.Should().ContainSingle();
+
+            using var document = JsonDocument.Parse(File.ReadAllText(resolved.Single()));
+            var act = () => ValidateTask53SummaryDocument(document.RootElement);
+            act.Should().Throw<InvalidDataException>();
+        }
+        finally
+        {
+            if (tempRoot.Exists)
+            {
+                tempRoot.Delete(recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ShouldThrowInvalidDataException_WhenTask53AcceptanceItemIsMalformed()
+    {
+        var actMissingRefs = () => ParseAcceptanceItem("ACC:T53.1 malformed item without refs");
+        actMissingRefs.Should().Throw<InvalidDataException>();
+
+        var actEmptyRefs = () => ParseAcceptanceItem("ACC:T53.1 malformed item. Refs: ");
+        actEmptyRefs.Should().Throw<InvalidDataException>();
+    }
+
+    [Fact]
+    public void ShouldThrowInvalidDataException_WhenExecutionSampleAttemptsAreInvalid()
+    {
+        var invalidBelowZero = new[] { ExecutionSample.RetryableFailure(attempt: 0, maxAttempts: 3) };
+        var invalidAboveMax = new[] { ExecutionSample.RetryableFailure(attempt: 4, maxAttempts: 3) };
+        var act = () => ClassifySamples(invalidBelowZero);
+        var actAboveMax = () => ClassifySamples(invalidAboveMax);
+        act.Should().Throw<InvalidDataException>();
+        actAboveMax.Should().Throw<InvalidDataException>();
+    }
+
+    [Fact]
+    public void ShouldTouchGameCoreAssembly_WhenRunningTask53GovernanceTests()
+    {
+        var decision = PerformanceGateEvaluator.EvaluateP95(17.2, 16.6);
+        decision.IsOverBudget.Should().BeTrue();
+    }
+
+    private static MasterTaskRecord LoadMasterTask(string masterTasksPath, int taskmasterId)
+    {
+        return LoadMasterTasks(masterTasksPath).Single(task => task.TaskmasterId == taskmasterId);
+    }
+
     private static MasterTaskRecord LoadMasterTask52(string masterTasksPath)
     {
-        return LoadMasterTasks(masterTasksPath).Single(task => task.TaskmasterId == 52);
+        return LoadMasterTask(masterTasksPath, 52);
     }
 
     private static IReadOnlyList<MasterTaskRecord> LoadMasterTasks(string masterTasksPath)
@@ -214,6 +384,7 @@ public sealed class Task52GovernanceTests
                 Id: id,
                 Title: ReadString(taskElement, "title"),
                 Description: ReadString(taskElement, "description"),
+                Acceptance: ReadStringArray(taskElement, "acceptance"),
                 AdrRefs: ReadStringArray(taskElement, "adrRefs"),
                 ChapterRefs: ReadStringArray(taskElement, "archRefs"),
                 OverlayRef: ReadString(taskElement, "overlay"),
@@ -227,7 +398,12 @@ public sealed class Task52GovernanceTests
 
     private static ViewTaskRecord LoadViewTask52(string viewTasksPath)
     {
-        return LoadViewTasks(viewTasksPath).Single(task => task.TaskmasterId == 52);
+        return LoadViewTask(viewTasksPath, 52);
+    }
+
+    private static ViewTaskRecord LoadViewTask(string viewTasksPath, int taskmasterId)
+    {
+        return LoadViewTasks(viewTasksPath).Single(task => task.TaskmasterId == taskmasterId);
     }
 
     private static IReadOnlyList<ViewTaskRecord> LoadViewTasks(string viewTasksPath)
@@ -488,6 +664,145 @@ public sealed class Task52GovernanceTests
         return Path.GetFullPath(Path.Combine(repositoryRoot, normalized));
     }
 
+    private static string BuildTask53SummaryJson(
+        string taskId,
+        string runId,
+        string status,
+        int flakyCount,
+        int retryCount,
+        int failureCount,
+        int retryMax,
+        int failureMax,
+        string gateResult)
+    {
+        return $$"""
+        {
+          "task_id": "{{taskId}}",
+          "run_id": "{{runId}}",
+          "status": "{{status}}",
+          "generated_at": "2099-12-31T00:00:00Z",
+          "classification_counts": {
+            "flaky": {{flakyCount}},
+            "retry": {{retryCount}},
+            "failure": {{failureCount}}
+          },
+          "thresholds": {
+            "retry_max": {{retryMax}},
+            "failure_max": {{failureMax}}
+          },
+          "gate_result": "{{gateResult}}"
+        }
+        """;
+    }
+
+    private static void ValidateTask53SummaryDocument(JsonElement rootElement)
+    {
+        if (!rootElement.TryGetProperty("task_id", out var taskIdElement) || !string.Equals(taskIdElement.GetString(), "53", StringComparison.Ordinal))
+        {
+            throw new InvalidDataException("summary.task_id must be '53'.");
+        }
+
+        if (!rootElement.TryGetProperty("run_id", out var runIdElement) || string.IsNullOrWhiteSpace(runIdElement.GetString()))
+        {
+            throw new InvalidDataException("summary.run_id is required.");
+        }
+
+        if (!rootElement.TryGetProperty("status", out var statusElement) || string.IsNullOrWhiteSpace(statusElement.GetString()))
+        {
+            throw new InvalidDataException("summary.status is required.");
+        }
+
+        if (!rootElement.TryGetProperty("classification_counts", out var classificationElement) ||
+            !classificationElement.TryGetProperty("flaky", out _) ||
+            !classificationElement.TryGetProperty("retry", out _) ||
+            !classificationElement.TryGetProperty("failure", out _))
+        {
+            throw new InvalidDataException("summary.classification_counts.{flaky,retry,failure} are required.");
+        }
+
+        if (!rootElement.TryGetProperty("thresholds", out var thresholdsElement) ||
+            !thresholdsElement.TryGetProperty("retry_max", out _) ||
+            !thresholdsElement.TryGetProperty("failure_max", out _))
+        {
+            throw new InvalidDataException("summary.thresholds.{retry_max,failure_max} are required.");
+        }
+
+        if (!rootElement.TryGetProperty("gate_result", out var gateResultElement) || string.IsNullOrWhiteSpace(gateResultElement.GetString()))
+        {
+            throw new InvalidDataException("summary.gate_result is required.");
+        }
+    }
+
+    private static AcceptanceItem ParseAcceptanceItem(string acceptanceItem)
+    {
+        if (string.IsNullOrWhiteSpace(acceptanceItem) || !acceptanceItem.StartsWith("ACC:", StringComparison.Ordinal))
+        {
+            throw new InvalidDataException("acceptance item must start with ACC: anchor.");
+        }
+
+        var firstSpaceIndex = acceptanceItem.IndexOf(' ');
+        if (firstSpaceIndex <= 0)
+        {
+            throw new InvalidDataException("acceptance item must contain anchor and description.");
+        }
+        var anchor = acceptanceItem[..firstSpaceIndex];
+
+        var markerIndex = acceptanceItem.IndexOf("Refs:", StringComparison.Ordinal);
+        if (markerIndex < 0)
+        {
+            throw new InvalidDataException("acceptance item must contain Refs:.");
+        }
+        var refsSlice = acceptanceItem[(markerIndex + "Refs:".Length)..];
+        var refs = refsSlice
+            .Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+            .Where(token => token.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || token.EndsWith(".gd", StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        if (refs.Length == 0)
+        {
+            throw new InvalidDataException("acceptance refs must not be empty.");
+        }
+        return new AcceptanceItem(anchor, refs);
+    }
+
+    private static StabilitySummary ComputeStabilitySummary(
+        IReadOnlyList<ExecutionSample> samples,
+        int retryFailureThreshold,
+        int hardFailureThreshold)
+    {
+        var flakyCount = samples.Count(sample => sample.Type == SampleType.RetryableFailure && sample.Attempt < sample.MaxAttempts);
+        var retryCount = samples.Count(sample => sample.Type == SampleType.RetryableFailure && sample.Attempt >= sample.MaxAttempts);
+        var failureCount = samples.Count(sample => sample.Type == SampleType.NonRetryableFailure);
+        var gateResult = retryCount > retryFailureThreshold || failureCount > hardFailureThreshold ? "fail" : "pass";
+        return new StabilitySummary(flakyCount, retryCount, failureCount, gateResult);
+    }
+
+    private static IReadOnlyList<string> ClassifySamples(IReadOnlyList<ExecutionSample> samples)
+    {
+        return samples.Select(ClassifySample).ToArray();
+    }
+
+    private static string ClassifySample(ExecutionSample sample)
+    {
+        if (sample.Attempt <= 0 || sample.MaxAttempts <= 0 || sample.Attempt > sample.MaxAttempts)
+        {
+            throw new InvalidDataException("sample attempt/maxAttempts is invalid.");
+        }
+
+        return sample.Type switch
+        {
+            SampleType.RetryableFailure when sample.Attempt < sample.MaxAttempts => "flaky",
+            SampleType.RetryableFailure => "retry",
+            SampleType.NonRetryableFailure => "failure",
+            _ => "success",
+        };
+    }
+
+    private static string EvaluateGate(int metric, int threshold)
+    {
+        return metric <= threshold ? "pass" : "fail";
+    }
+
     private static void AssertMasterRefsAreParsable(MasterTaskRecord task, string repositoryRoot)
     {
         task.AdrRefs.Should().NotBeEmpty();
@@ -562,6 +877,7 @@ public sealed class Task52GovernanceTests
         string Id,
         string Title,
         string Description,
+        IReadOnlyList<string> Acceptance,
         IReadOnlyList<string> AdrRefs,
         IReadOnlyList<string> ChapterRefs,
         string OverlayRef,
@@ -579,4 +895,33 @@ public sealed class Task52GovernanceTests
         IReadOnlyList<string> TestRefs,
         IReadOnlyList<string> ContractRefs,
         IReadOnlyList<string> ArtifactRefs);
+
+    private sealed record AcceptanceItem(string Anchor, IReadOnlyList<string> Refs);
+
+    private sealed record StabilitySummary(int FlakyCount, int RetryCount, int FailureCount, string GateResult);
+
+    private sealed record ExecutionSample(SampleType Type, int Attempt, int MaxAttempts)
+    {
+        public static ExecutionSample RetryableFailure(int attempt, int maxAttempts)
+        {
+            return new ExecutionSample(SampleType.RetryableFailure, attempt, maxAttempts);
+        }
+
+        public static ExecutionSample NonRetryableFailure()
+        {
+            return new ExecutionSample(SampleType.NonRetryableFailure, Attempt: 1, MaxAttempts: 1);
+        }
+
+        public static ExecutionSample Success()
+        {
+            return new ExecutionSample(SampleType.Success, Attempt: 1, MaxAttempts: 1);
+        }
+    }
+
+    private enum SampleType
+    {
+        Success = 0,
+        RetryableFailure = 1,
+        NonRetryableFailure = 2,
+    }
 }

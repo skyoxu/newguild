@@ -177,12 +177,27 @@ def step_acceptance_anchors_validate(out_dir: Path, triplet: TaskmasterTriplet) 
 
 
 def step_overlay_validate(out_dir: Path, triplet: TaskmasterTriplet) -> StepResult:
-    primary = run_and_capture(
-        out_dir,
-        name="validate-task-overlays",
-        cmd=["py", "-3", "scripts/python/validate_task_overlays.py"],
-        timeout_sec=300,
-    )
+    task_file_args: list[list[str]] = []
+    if triplet.back is not None:
+        task_file_args.append(["--task-file", triplet.tasks_back_path])
+    if triplet.gameplay is not None:
+        task_file_args.append(["--task-file", triplet.tasks_gameplay_path])
+    if not task_file_args:
+        task_file_args.append([])
+
+    primary_results: list[StepResult] = []
+    for extra in task_file_args:
+        result = run_and_capture(
+            out_dir,
+            name="validate-task-overlays",
+            cmd=["py", "-3", "scripts/python/validate_task_overlays.py", *extra, "--task-id", str(triplet.task_id)],
+            timeout_sec=300,
+        )
+        primary_results.append(result)
+
+    primary_ok = all(r.status == "ok" for r in primary_results)
+    primary_log = next((r.log for r in primary_results if r.status != "ok" and r.log), primary_results[0].log if primary_results else None)
+
     overlay = triplet.overlay()
     test_refs = None
     if overlay:
@@ -201,15 +216,19 @@ def step_overlay_validate(out_dir: Path, triplet: TaskmasterTriplet) -> StepResu
             timeout_sec=60,
         )
 
-    ok = primary.status == "ok" and (test_refs is None or test_refs.status == "ok")
-    details = {"primary": primary.__dict__, "test_refs": test_refs.__dict__ if test_refs else None, "overlay": overlay}
+    ok = primary_ok and (test_refs is None or test_refs.status == "ok")
+    details = {
+        "primary": [r.__dict__ for r in primary_results],
+        "test_refs": test_refs.__dict__ if test_refs else None,
+        "overlay": overlay,
+    }
     write_json(out_dir / "overlay-validate.json", details)
     return StepResult(
         name="validate-task-overlays",
         status="ok" if ok else "fail",
         rc=0 if ok else 1,
-        cmd=primary.cmd,
-        log=primary.log,
+        cmd=primary_results[0].cmd if primary_results else None,
+        log=primary_log,
         details=details,
     )
 
