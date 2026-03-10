@@ -26,16 +26,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Event-Engine.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "core",
@@ -99,16 +92,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-AI-Coordinator.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "core",
@@ -174,16 +161,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "core",
@@ -252,16 +232,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-AI-Ecosystem.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "core",
@@ -323,16 +297,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "ui",
@@ -396,16 +364,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "ui",
@@ -472,16 +434,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "core",
@@ -543,16 +499,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "core",
@@ -616,16 +566,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Allowed-External-Hosts.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvent.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "core",
@@ -692,13 +636,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-SaveLoad-UI.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "ui",
@@ -753,7 +694,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Content-Loading.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -829,7 +772,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Events-ContentDriven.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -897,7 +842,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Events-ContentDriven.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -966,7 +913,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1026,7 +975,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1090,7 +1042,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1161,7 +1116,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-UI-Usability.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1264,7 +1222,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1336,7 +1297,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1410,7 +1374,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1482,7 +1449,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1559,7 +1529,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Officers.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1638,7 +1611,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Officers.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1710,7 +1686,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Worldgen.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "owner": "architecture",
@@ -1776,9 +1755,7 @@
       "CH07"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Worldgen.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "owner": "architecture",
     "labels": [
@@ -1856,7 +1833,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [],
     "description": "Develop the main navigation, side panel, content area, and modal system as per the UI specifications.",
@@ -1914,7 +1891,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0316"
@@ -1970,8 +1947,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0103",
@@ -2045,8 +2021,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0309",
@@ -2131,8 +2106,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0310",
@@ -2207,8 +2181,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0204",
@@ -2274,8 +2247,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0321"
@@ -2349,8 +2321,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0322"
@@ -2430,8 +2401,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0323"
@@ -2510,8 +2480,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0324"
@@ -2599,8 +2568,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0325"
@@ -2672,8 +2640,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0326"
@@ -2683,31 +2650,37 @@
       "ACC:T69.1 已锁定并公布 R2-A 阶段范围，且该范围可被测试用例直接验证。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
       "ACC:T69.2 R2-A 阶段关键行为在确定性测试中全部通过，失败可复现。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
       "ACC:T69.3 产出 logs/e2e/<date>/playability-route69-R2-A-summary.json 且可读取。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
-      "ACC:T69.1 R2-A 范围锁定后，验收只覆盖已声明的 Raid 进阶规则；未纳入 R2-A 的输入必须被显式拒绝或保持状态不变。",
-      "ACC:T69.2 在固定随机种子与相同输入下，Raid resolved 结果（胜负、奖励、状态变更）及解释输出逐次一致，并可由确定性测试稳定复现。",
-      "ACC:T69.2 同一 Encounter 已 resolved 后再次触发结算，不得产生二次奖励或二次状态迁移，且必须返回可审计的拒绝结果。",
-      "ACC:T69.3 playability-route69-R2-A-summary.json 必须存在且为有效 JSON，至少包含场景标识、执行结果、resolved 可追溯信息（规则链路或语义等价字段）与重复结算防重验证结果。",
-      "ACC:T69.1 对 R2-A 已声明的每条 Raid 进阶规则，必须有可执行断言将输入条件映射到预期 resolved 结果与解释字段；未声明规则不得参与本阶段结算。",
-      "ACC:T69.2 resolved 解释输出必须包含可回放的规则命中序列（或语义等价字段集合），并可据此唯一还原该次胜负、奖励与状态变更结论。",
-      "ACC:T69.2 在重复事件、重试或并发重复请求场景下，同一 Encounter 的最终状态与奖励累计值保持不变，并返回“重复结算被拒绝”或语义等价标识。",
-      "ACC:T69.3 playability-route69-R2-A-summary.json 必须记录本次执行的固定种子（或语义等价确定性来源）与输入摘要，以支持 resolved 结果与解释复验。",
-      "ACC:T69.3 playability-route69-R2-A-summary.json 必须同时包含至少一条首次结算成功记录和一条同 Encounter 重复结算拒绝记录，用于防重审计闭环。",
-      "ACC:T69.1 在 R2-A 执行前必须固化并可读取本阶段规则清单；执行期间若命中未声明规则，必须返回拒绝结果且不得改变既有 Encounter 结算状态。",
-      "ACC:T69.2 除胜负、奖励、状态变更外，resolved 解释中的规则命中顺序与关键判定字段在相同输入+固定种子下必须完全一致，任一字段漂移即判定失败。",
-      "ACC:T69.3 必须提供与本次规则验证对应的引擎侧可复验证据（GdUnit4 或语义等价 headless 场景测试）并与确定性 xUnit 结论一致，不一致则验收失败。",
-      "ACC:T69.3 验收执行需满足 SECURITY_PROFILE=host-safe；若出现被拒绝的外部操作或越界行为，summary 中必须记录目标与拒绝原因，且最终 resolved 与奖励结果不受影响。",
-      "ACC:T69.1 验收输入集必须同时覆盖 R2-A 范围内样本与超范围样本；仅范围内样本允许进入结算，超范围样本必须返回拒绝且 Encounter 关键状态前后一致。",
-      "ACC:T69.2 每个成功 resolved 结果的解释输出必须同时包含规则标识、关键判定值和结果映射字段；缺失任一字段即判定为不可追溯并验收失败。",
-      "ACC:T69.2 同一 Encounter 在首次 resolved 成功后再次请求结算时，奖励总额、终态快照和结算计数必须与重复请求前完全一致，任一变化即判定失败。",
-      "ACC:T69.3 logs/e2e/<date>/playability-route69-R2-A-summary.json 必须可被自动化流程一次性读取并校验通过；JSON 解析失败、必填字段缺失或类型不匹配均判定失败。",
-      "ACC:T69.3 验收证据必须同时包含确定性 xUnit 结果与引擎侧 GdUnit4（或语义等价 headless）结果，并明确标注二者结论一致；任一缺失或结论冲突即判定失败。"
+      "ACC:T69.1 R2-A 范围锁定后，验收只覆盖已声明的 Raid 进阶规则；未纳入 R2-A 的输入必须被显式拒绝或保持状态不变。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T69.2 在固定随机种子与相同输入下，Raid resolved 结果（胜负、奖励、状态变更）及解释输出逐次一致，并可由确定性测试稳定复现。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T69.2 同一 Encounter 已 resolved 后再次触发结算，不得产生二次奖励或二次状态迁移，且必须返回可审计的拒绝结果。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T69.3 playability-route69-R2-A-summary.json 必须存在且为有效 JSON，至少包含场景标识、执行结果、resolved 可追溯信息（规则链路或语义等价字段）与重复结算防重验证结果。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "ACC:T69.1 对 R2-A 已声明的每条 Raid 进阶规则，必须有可执行断言将输入条件映射到预期 resolved 结果与解释字段；未声明规则不得参与本阶段结算。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "ACC:T69.2 resolved 解释输出必须包含可回放的规则命中序列（或语义等价字段集合），并可据此唯一还原该次胜负、奖励与状态变更结论。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "ACC:T69.2 在重复事件、重试或并发重复请求场景下，同一 Encounter 的最终状态与奖励累计值保持不变，并返回“重复结算被拒绝”或语义等价标识。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T69.3 playability-route69-R2-A-summary.json 必须记录本次执行的固定种子（或语义等价确定性来源）与输入摘要，以支持 resolved 结果与解释复验。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "ACC:T69.3 playability-route69-R2-A-summary.json 必须同时包含至少一条首次结算成功记录和一条同 Encounter 重复结算拒绝记录，用于防重审计闭环。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "ACC:T69.1 在 R2-A 执行前必须固化并可读取本阶段规则清单；执行期间若命中未声明规则，必须返回拒绝结果且不得改变既有 Encounter 结算状态。 Refs: Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+      "ACC:T69.2 除胜负、奖励、状态变更外，resolved 解释中的规则命中顺序与关键判定字段在相同输入+固定种子下必须完全一致，任一字段漂移即判定失败。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "ACC:T69.3 必须提供与本次规则验证对应的引擎侧可复验证据（GdUnit4 或语义等价 headless 场景测试）并与确定性 xUnit 结论一致，不一致则验收失败。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "ACC:T69.3 验收执行需满足 SECURITY_PROFILE=host-safe；若出现被拒绝的外部操作或越界行为，summary 中必须记录目标与拒绝原因，且最终 resolved 与奖励结果不受影响。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+      "ACC:T69.1 验收输入集必须同时覆盖 R2-A 范围内样本与超范围样本；仅范围内样本允许进入结算，超范围样本必须返回拒绝且 Encounter 关键状态前后一致。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T69.2 每个成功 resolved 结果的解释输出必须同时包含规则标识、关键判定值和结果映射字段；缺失任一字段即判定为不可追溯并验收失败。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Domain/RaidEncounterEventContractsTests.cs",
+      "ACC:T69.2 同一 Encounter 在首次 resolved 成功后再次请求结算时，奖励总额、终态快照和结算计数必须与重复请求前完全一致，任一变化即判定失败。 Refs: Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "ACC:T69.3 logs/e2e/<date>/playability-route69-R2-A-summary.json 必须可被自动化流程一次性读取并校验通过；JSON 解析失败、必填字段缺失或类型不匹配均判定失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "ACC:T69.3 验收证据必须同时包含确定性 xUnit 结果与引擎侧 GdUnit4（或语义等价 headless）结果，并明确标注二者结论一致；任一缺失或结论冲突即判定失败。 Refs: Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
       "TDD (red->green->refactor) with logs/** replay artifacts."
     ],
     "test_refs": [
-      "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs"
+      "Game.Core.Tests/Services/RaidEncounterStateMachineTests.cs",
+      "Game.Core.Tests/Services/RaidEncounterDomainEventsTests.cs",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "Tests.Godot/tests/Scenes/Guild/test_scene_tactical_center_raid_flow.gd",
+      "Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+      "Game.Core.Tests/Domain/RaidEncounterEventContractsTests.cs"
     ],
     "contractRefs": [
       "core.raid.scheduled",
@@ -2719,7 +2692,8 @@
     ],
     "contract_refs": [
       "core.raid.scheduled"
-    ]
+    ],
+    "evidence_refs": []
   },
   {
     "id": "GM-0328",
@@ -2746,8 +2720,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0327"
@@ -2824,8 +2797,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0328"
@@ -2835,27 +2807,37 @@
       "ACC:T71.1 已完成并锁定 R2-A 阶段范围，且范围锁定结果可被独立验证。 Refs: Game.Core.Tests/Domain/ReputationTests.cs",
       "ACC:T71.2 R2-A 阶段的关键闭环行为已实现，并通过可重复的确定性测试验证。 Refs: Game.Core.Tests/Domain/ReputationTests.cs",
       "ACC:T71.3 已在 logs/e2e/<date>/ 产出本次执行的 playability-route71-R2-A-summary.json 作为验收证据。 Refs: Game.Core.Tests/Domain/ReputationTests.cs",
-      "ACC:T71.1a 在 R2-A 范围内，至少执行一条“媒体事件触发→领域声望结算”路径；当满足触发条件时，声望必须按规则发生可观测变化。",
-      "ACC:T71.1b 当媒体事件不满足触发条件时，领域声望必须保持不变，并返回可判定的拒绝结果，不得出现静默成功。",
-      "ACC:T71.2a 对同一媒体事件输入与同一初始状态重复执行时，声望变化量与最终声望值必须完全一致，不得出现非确定性差异。",
-      "ACC:T71.2b UI 消费领域结果后展示的声望值必须等于领域最终声望值；若任一步失败，UI 不得展示成功变更后的值。",
-      "ACC:T71.3a logs/e2e/<date>/playability-route71-R2-A-summary.json 至少包含一条闭环证据，字段含事件标识、处理前声望、处理后声望、UI 展示声望、一致性判定。",
-      "ACC:T71.1c R2-A 范围外路径在相同输入下不得产生变化；领域声望与 UI 展示必须保持基线值不变。",
-      "ACC:T71.2c 确定性验证必须覆盖“触发成功”和“触发拒绝”两类输入；每类在同一初始状态下至少重复 2 次且每次领域与 UI 结果一致。",
-      "ACC:T71.3b playability-route71-R2-A-summary.json 中每条闭环记录必须可追溯到 ACC:T71.1、ACC:T71.2、ACC:T71.3 至少一项，并给出明确 pass/fail 判定。",
-      "ACC:T71.3c 若证据文件缺失、不可解析或缺少关键字段（事件标识、处理前声望、处理后声望、UI 展示声望、一致性判定），验收必须判定失败。",
-      "ACC:T71.2d 验收证据必须同时包含确定性 xUnit（领域）与 GdUnit4（UI/场景）结果，且使用同一事件用例标识；任一缺失或结论不一致即失败。",
-      "ACC:T71.1d R2-A 范围锁定验证必须提供非闭环输入的基线前后对照；若领域声望或 UI 展示偏离基线，则判定越界变更。",
-      "ACC:T71.2e 闭环处理顺序必须可判定为“触发判定→领域结算→UI 刷新”；任一步未发生、顺序错误或结果不可判定即该用例 fail。",
-      "ACC:T71.3d 证据持久化必须在本次执行日期目录 logs/e2e/<date>/ 下生成或更新 playability-route71-R2-A-summary.json；仅复用历史文件且无本次执行痕迹则失败。",
-      "ACC:T71.3e 在 SECURITY_PROFILE=host-safe 下执行闭环验收时，如出现外链、越权文件或权限请求，必须拒绝且保持领域声望与 UI 展示不变；出现隐式成功即失败。"
+      "ACC:T71.1a 在 R2-A 范围内，至少执行一条“媒体事件触发→领域声望结算”路径；当满足触发条件时，声望必须按规则发生可观测变化。 Refs: Game.Core.Tests/Domain/MediaBeatSystemTests.cs Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "ACC:T71.1b 当媒体事件不满足触发条件时，领域声望必须保持不变，并返回可判定的拒绝结果，不得出现静默成功。 Refs: Game.Core.Tests/Domain/MediaBeatSystemTests.cs Game.Core.Tests/Domain/ReputationTests.cs",
+      "ACC:T71.2a 对同一媒体事件输入与同一初始状态重复执行时，声望变化量与最终声望值必须完全一致，不得出现非确定性差异。 Refs: Game.Core.Tests/Domain/EventEngineContentDrivenDeterminismTests.cs Game.Core.Tests/Domain/MediaBeatSystemTests.cs",
+      "ACC:T71.2b UI 消费领域结果后展示的声望值必须等于领域最终声望值；若任一步失败，UI 不得展示成功变更后的值。 Refs: Tests.Godot/tests/UI/test_hud_reputation_display.gd Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "ACC:T71.3a logs/e2e/<date>/playability-route71-R2-A-summary.json 至少包含一条闭环证据，字段含事件标识、处理前声望、处理后声望、UI 展示声望、一致性判定。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "ACC:T71.1c R2-A 范围外路径在相同输入下不得产生变化；领域声望与 UI 展示必须保持基线值不变。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+      "ACC:T71.2c 确定性验证必须覆盖“触发成功”和“触发拒绝”两类输入；每类在同一初始状态下至少重复 2 次且每次领域与 UI 结果一致。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "ACC:T71.3b playability-route71-R2-A-summary.json 中每条闭环记录必须可追溯到 ACC:T71.1、ACC:T71.2、ACC:T71.3 至少一项，并给出明确 pass/fail 判定。 Refs: Game.Core.Tests/CI/ArtifactsEvidenceTests.cs Game.Core.Tests/CI/LogArtifactsConventionsTests.cs",
+      "ACC:T71.3c 若证据文件缺失、不可解析或缺少关键字段（事件标识、处理前声望、处理后声望、UI 展示声望、一致性判定），验收必须判定失败。 Refs: Game.Core.Tests/CI/ArtifactsEvidenceTests.cs Game.Core.Tests/CI/LogArtifactsConventionsTests.cs",
+      "ACC:T71.2d 验收证据必须同时包含确定性 xUnit（领域）与 GdUnit4（UI/场景）结果，且使用同一事件用例标识；任一缺失或结论不一致即失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "ACC:T71.1d R2-A 范围锁定验证必须提供非闭环输入的基线前后对照；若领域声望或 UI 展示偏离基线，则判定越界变更。 Refs: Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+      "ACC:T71.2e 闭环处理顺序必须可判定为“触发判定→领域结算→UI 刷新”；任一步未发生、顺序错误或结果不可判定即该用例 fail。 Refs: Tests.Godot/tests/UI/test_hud_updates_on_events.gd",
+      "ACC:T71.3d 证据持久化必须在本次执行日期目录 logs/e2e/<date>/ 下生成或更新 playability-route71-R2-A-summary.json；仅复用历史文件且无本次执行痕迹则失败。 Refs: Game.Core.Tests/CI/LogArtifactsConventionsTests.cs Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T71.3e 在 SECURITY_PROFILE=host-safe 下执行闭环验收时，如出现外链、越权文件或权限请求，必须拒绝且保持领域声望与 UI 展示不变；出现隐式成功即失败。 Refs: Tests.Godot/tests/Security/Hard/test_security_integration.gd"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
       "TDD (red->green->refactor) with logs/** replay artifacts."
     ],
     "test_refs": [
-      "Game.Core.Tests/Domain/ReputationTests.cs"
+      "Game.Core.Tests/Domain/ReputationTests.cs",
+      "Game.Core.Tests/Domain/MediaBeatSystemTests.cs",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_raid_media_rep.gd",
+      "Game.Core.Tests/Domain/EventEngineContentDrivenDeterminismTests.cs",
+      "Tests.Godot/tests/UI/test_hud_reputation_display.gd",
+      "Tests.Godot/tests/Playability/Phase2/test_task51_raid_feedback_feed.gd",
+      "Game.Core.Tests/CI/ArtifactsEvidenceTests.cs",
+      "Game.Core.Tests/CI/LogArtifactsConventionsTests.cs",
+      "Tests.Godot/tests/UI/test_hud_updates_on_events.gd",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "Tests.Godot/tests/Security/Hard/test_security_integration.gd"
     ],
     "contractRefs": [
       "core.media.beat.triggered",
@@ -2867,7 +2849,8 @@
     ],
     "contract_refs": [
       "core.media.beat.triggered"
-    ]
+    ],
+    "evidence_refs": []
   },
   {
     "id": "GM-0330",
@@ -2899,8 +2882,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0329"
@@ -2973,8 +2955,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0330"
@@ -3063,8 +3044,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0331"
@@ -3074,25 +3054,31 @@
       "ACC:T74.1 阶段A范围已锁定并可被测试断言验证。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
       "ACC:T74.2 阶段A关键行为已实现，且通过确定性测试验证。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
       "ACC:T74.3 已产出 logs/e2e/<date>/playability-route74-A-summary.json 作为阶段A证据。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
-      "阶段A闭环证据可追溯到同一轮输入、参数版本与输出判定，并且在同一测试数据上可确定性重放得到一致结果，否则判定失败。",
-      "调参证据必须包含“调参前基线 vs 调参后结果”的可比较记录，并给出明确回归结论（通过或失败）；缺任一项则判定失败。",
-      "对预置退化样本执行回归时必须得到失败结论并记录可审计原因；空结果或未执行不得计为通过。",
-      "当样本不足或参数未变更时，必须输出“未满足判定条件”，且不得输出“回归通过/调优完成”。",
-      "阶段1测试证据必须覆盖 red->green->refactor 最小闭环，并提供可核验的确定性 xUnit 与 GdUnit4 结果。",
-      "ACC:T74.1 的范围锁定必须产出可断言的范围清单（至少含纳入项与排除项），且执行内容与清单一致；清单缺失、为空或不一致即失败。",
-      "ACC:T74.2 的关键行为在相同输入与相同参数版本下必须可确定性复现且判定一致；出现结果漂移或不可复现即失败。",
-      "ACC:T74.3 的证据文件必须是可解析 JSON，且至少包含基线结果、调参后结果与回归判定；文件缺失、空文件或解析失败均判定失败。",
-      "阶段A必须形成“采集玩法遥测 -> 应用参数调优 -> 执行回归判定”的完整闭环证据，且三步可在同一轮任务上下文内关联；任一步缺失即失败。",
-      "对同一测试数据与同一参数版本重复执行闭环时，关键指标与最终回归结论必须一致；结论不一致或指标不可比对即失败。",
-      "当调参后结果未达到或劣于调参前基线时，必须输出“回归失败”并记录失败原因；不得以“通过”或“未判定”替代。",
-      "阶段A闭环证据必须可被自动化测试读取并完成断言；仅有人工说明或控制台瞬时输出、无可读取证据文件时不得判定完成。"
+      "阶段A闭环证据可追溯到同一轮输入、参数版本与输出判定，并且在同一测试数据上可确定性重放得到一致结果，否则判定失败。 Refs: Game.Core.Tests/Telemetry/BalanceLoopDeterminismTests.cs Game.Core.Tests/Telemetry/BalanceLoopOrchestrationTests.cs",
+      "调参证据必须包含“调参前基线 vs 调参后结果”的可比较记录，并给出明确回归结论（通过或失败）；缺任一项则判定失败。 Refs: Game.Core.Tests/Telemetry/BalanceRegressionDecisionTests.cs",
+      "对预置退化样本执行回归时必须得到失败结论并记录可审计原因；空结果或未执行不得计为通过。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "当样本不足或参数未变更时，必须输出“未满足判定条件”，且不得输出“回归通过/调优完成”。 Refs: Game.Core.Tests/Telemetry/BalanceRegressionDecisionTests.cs",
+      "阶段1测试证据必须覆盖 red->green->refactor 最小闭环，并提供可核验的确定性 xUnit 与 GdUnit4 结果。 Refs: Tests.Godot/tests/Playability/V11/test_balance_loop_headless.gd",
+      "ACC:T74.1 的范围锁定必须产出可断言的范围清单（至少含纳入项与排除项），且执行内容与清单一致；清单缺失、为空或不一致即失败。 Refs: Game.Core.Tests/Telemetry/BalanceScopeManifestTests.cs",
+      "ACC:T74.2 的关键行为在相同输入与相同参数版本下必须可确定性复现且判定一致；出现结果漂移或不可复现即失败。 Refs: Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "ACC:T74.3 的证据文件必须是可解析 JSON，且至少包含基线结果、调参后结果与回归判定；文件缺失、空文件或解析失败均判定失败。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "阶段A必须形成“采集玩法遥测 -> 应用参数调优 -> 执行回归判定”的完整闭环证据，且三步可在同一轮任务上下文内关联；任一步缺失即失败。 Refs: Game.Core.Tests/Telemetry/BalanceLoopOrchestrationTests.cs Tests.Godot/tests/Playability/V11/test_balance_loop_headless.gd",
+      "对同一测试数据与同一参数版本重复执行闭环时，关键指标与最终回归结论必须一致；结论不一致或指标不可比对即失败。 Refs: Game.Core.Tests/Telemetry/BalanceLoopDeterminismTests.cs",
+      "当调参后结果未达到或劣于调参前基线时，必须输出“回归失败”并记录失败原因；不得以“通过”或“未判定”替代。 Refs: Game.Core.Tests/Telemetry/BalanceRegressionDecisionTests.cs",
+      "阶段A闭环证据必须可被自动化测试读取并完成断言；仅有人工说明或控制台瞬时输出、无可读取证据文件时不得判定完成。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
       "TDD (red->green->refactor) with logs/** replay artifacts."
     ],
     "test_refs": [
-      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "Game.Core.Tests/Telemetry/BalanceLoopDeterminismTests.cs",
+      "Game.Core.Tests/Telemetry/BalanceLoopOrchestrationTests.cs",
+      "Game.Core.Tests/Telemetry/BalanceRegressionDecisionTests.cs",
+      "Tests.Godot/tests/Playability/V11/test_balance_loop_headless.gd",
+      "Game.Core.Tests/Telemetry/BalanceScopeManifestTests.cs",
+      "Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs"
     ],
     "contractRefs": [
       "core.activity.feed.appended",
@@ -3105,7 +3091,8 @@
     ],
     "contract_refs": [
       "core.activity.feed.appended"
-    ]
+    ],
+    "evidence_refs": []
   },
   {
     "id": "GM-0333",
@@ -3134,8 +3121,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0332"
@@ -3207,8 +3193,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0333"
@@ -3218,19 +3203,24 @@
       "ACC:T76.1 必须完成并通过可重复验证的阶段B范围锁定（仅针对本阶段交付）。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
       "ACC:T76.2 阶段B定义的关键闭环行为必须在确定性测试中通过。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
       "ACC:T76.3 必须产出 logs/e2e/<date>/playability-route76-B-summary.json 作为阶段B证据。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
-      "ACC:T76.1 阶段B验收范围仅限“招募→申请→审批→入会反馈”单一闭环；若需要阶段外能力才能判定通过，则判定失败。",
-      "ACC:T76.2 在相同初始数据与相同输入下，闭环结果必须一致且可重复：候选成员状态从未入会变为已入会，并归属目标公会。",
-      "ACC:T76.2 对拒绝申请或无效申请路径，必须满足显式不变性：成员保持未入会，且不得新增会籍记录或等价副作用。",
-      "ACC:T76.3 playability-route76-B-summary.json 必须包含非空、可机读的确定性验证结果，且至少覆盖 ACC:T76.1、ACC:T76.2、ACC:T76.3。",
-      "ACC:T76.3 playability-route76-B-summary.json 必须记录 SECURITY_PROFILE=host-safe 且值匹配；字段缺失或值不匹配即判定失败。",
-      "ACC:T76.1 确定性验证记录必须显式给出阶段B范围锁定结论并绑定锚点 ACC:T76.1（pass/fail）；仅有过程描述、无结论或依赖阶段外能力均判定失败。"
+      "ACC:T76.1 阶段B验收范围仅限“招募→申请→审批→入会反馈”单一闭环；若需要阶段外能力才能判定通过，则判定失败。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T76.2 在相同初始数据与相同输入下，闭环结果必须一致且可重复：候选成员状态从未入会变为已入会，并归属目标公会。 Refs: Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+      "ACC:T76.2 对拒绝申请或无效申请路径，必须满足显式不变性：成员保持未入会，且不得新增会籍记录或等价副作用。 Refs: Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs Tests.Godot/tests/Playability/Phase2/test_phase2_officers_persistence.gd",
+      "ACC:T76.3 playability-route76-B-summary.json 必须包含非空、可机读的确定性验证结果，且至少覆盖 ACC:T76.1、ACC:T76.2、ACC:T76.3。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd",
+      "ACC:T76.3 playability-route76-B-summary.json 必须记录 SECURITY_PROFILE=host-safe 且值匹配；字段缺失或值不匹配即判定失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T76.1 确定性验证记录必须显式给出阶段B范围锁定结论并绑定锚点 ACC:T76.1（pass/fail）；仅有过程描述、无结论或依赖阶段外能力均判定失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
       "TDD (red->green->refactor) with logs/** replay artifacts."
     ],
     "test_refs": [
-      "Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+      "Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_officers_persistence.gd",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_guild_vertical_slice.gd"
     ],
     "contractRefs": [
       "core.recruitment.offer.presented",
@@ -3243,7 +3233,8 @@
     ],
     "contract_refs": [
       "core.activity.feed.appended"
-    ]
+    ],
+    "evidence_refs": []
   },
   {
     "id": "GM-0335",
@@ -3274,8 +3265,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0334"
@@ -3352,8 +3342,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0335"
@@ -3423,8 +3412,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0336"
@@ -3434,22 +3422,26 @@
       "ACC:T81.1 必须完成并锁定阶段B验收范围，且可通过确定性检查给出可复现结论。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
       "ACC:T81.2 阶段B关键行为必须通过确定性测试，并产生可观察的通过/失败结果。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
       "ACC:T81.3 每次阶段B执行后必须产出 logs/e2e/<date>/playability-route81-B-summary.json 作为证据。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
-      "ACC:T81.1 验收仅覆盖阶段B定义范围；向阶段B校验输入非阶段B路径时，必须被明确拒绝或标记不适用，且不得计为通过。",
-      "ACC:T81.2 招募链路边界与异常分支必须可重复验证：相同初始状态与输入下结果一致；前置条件不满足时必须拒绝并保持既有状态不变。",
-      "ACC:T81.3 每次阶段B验证后都必须生成 logs/e2e/<date>/playability-route81-B-summary.json；文件缺失、不可解析或未记录 ACC:T81.1/ACC:T81.2/ACC:T81.3 结果即失败。",
-      "ACC:T81.1 阶段B范围锁定后，结果中必须显式包含范围内/范围外判定与 ACC:T81.1 的 pass|fail；任一字段缺失或范围外用例被计为通过即失败。",
-      "ACC:T81.2 在固定初始状态与固定输入序列下重复执行边界与异常分支校验，两次在状态迁移、拒绝原因与输出事件上必须一致，并记录 ACC:T81.2 的 pass|fail；任一不一致即失败。",
-      "ACC:T81.3 每次阶段B执行结束后，logs/e2e/<date>/playability-route81-B-summary.json 必须可解析，且包含 ACC:T81.1、ACC:T81.2、ACC:T81.3 三个锚点的 pass|fail；任一锚点缺失或值非法即失败。",
-      "ACC:T81.1 阶段B范围锁定的确定性检查必须以 ACC:T81.1 为锚点输出 pass|fail；同一输入重复执行若结论不一致，则本次阶段B验收失败。",
-      "ACC:T81.2 阶段B行为实现的确定性检查必须以 ACC:T81.2 为锚点，并同时覆盖边界输入处理与异常分支拒绝两类可观察结果；任一缺失或不可重复即失败。",
-      "ACC:T81.3 阶段B证据持久化检查必须以 ACC:T81.3 为锚点，且可由该次 summary.json 回溯到 ACC:T81.1 与 ACC:T81.2 的当次判定；无法回溯即失败。"
+      "ACC:T81.1 验收仅覆盖阶段B定义范围；向阶段B校验输入非阶段B路径时，必须被明确拒绝或标记不适用，且不得计为通过。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "ACC:T81.2 招募链路边界与异常分支必须可重复验证：相同初始状态与输入下结果一致；前置条件不满足时必须拒绝并保持既有状态不变。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "ACC:T81.3 每次阶段B验证后都必须生成 logs/e2e/<date>/playability-route81-B-summary.json；文件缺失、不可解析或未记录 ACC:T81.1/ACC:T81.2/ACC:T81.3 结果即失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T81.1 阶段B范围锁定后，结果中必须显式包含范围内/范围外判定与 ACC:T81.1 的 pass|fail；任一字段缺失或范围外用例被计为通过即失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "ACC:T81.2 在固定初始状态与固定输入序列下重复执行边界与异常分支校验，两次在状态迁移、拒绝原因与输出事件上必须一致，并记录 ACC:T81.2 的 pass|fail；任一不一致即失败。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "ACC:T81.3 每次阶段B执行结束后，logs/e2e/<date>/playability-route81-B-summary.json 必须可解析，且包含 ACC:T81.1、ACC:T81.2、ACC:T81.3 三个锚点的 pass|fail；任一锚点缺失或值非法即失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T81.1 阶段B范围锁定的确定性检查必须以 ACC:T81.1 为锚点输出 pass|fail；同一输入重复执行若结论不一致，则本次阶段B验收失败。 Refs: Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "ACC:T81.2 阶段B行为实现的确定性检查必须以 ACC:T81.2 为锚点，并同时覆盖边界输入处理与异常分支拒绝两类可观察结果；任一缺失或不可重复即失败。 Refs: Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "ACC:T81.3 阶段B证据持久化检查必须以 ACC:T81.3 为锚点，且可由该次 summary.json 回溯到 ACC:T81.1 与 ACC:T81.2 的当次判定；无法回溯即失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
     ],
     "test_strategy": [
       "xUnit + GdUnit4 deterministic route checks.",
       "TDD (red->green->refactor) with logs/** replay artifacts."
     ],
     "test_refs": [
-      "Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd"
+      "Tests.Godot/tests/UI/test_guild_panel_recruitment_apply_approve.gd",
+      "Game.Core.Tests/Contracts/V11GameplayDepthEventContractsTests.cs",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
+      "Game.Core.Tests/Contracts/Phase2ContentAndEventsContractsTests.cs",
+      "Tests.Godot/tests/Playability/Phase2/test_phase2_save_load.gd"
     ],
     "contractRefs": [
       "core.recruitment.offer.presented",
@@ -3462,7 +3454,8 @@
     ],
     "contract_refs": [
       "core.activity.feed.appended"
-    ]
+    ],
+    "evidence_refs": []
   },
   {
     "id": "GM-0338",
@@ -3493,8 +3486,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0337"
@@ -3564,8 +3556,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0338"
@@ -3640,8 +3631,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0339"
@@ -3711,8 +3701,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0340"
@@ -3784,8 +3773,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0341"
@@ -3853,8 +3841,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0342"
@@ -3920,8 +3907,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0343"
@@ -3988,8 +3974,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Social.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0344"
@@ -4066,8 +4051,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0345"
@@ -4148,8 +4132,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Observability.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0346"
@@ -4214,8 +4197,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0347"
@@ -4285,8 +4267,7 @@
       "ADR-0005"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0348"
@@ -4360,8 +4341,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0349"
@@ -4433,8 +4413,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Recruitment.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0350"
@@ -4503,8 +4482,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Member-Management.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0351"
@@ -4572,8 +4550,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0352"
@@ -4640,8 +4617,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0353"
@@ -4704,8 +4680,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-Media-Reputation.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0354"
@@ -4772,8 +4747,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0355"
@@ -4840,8 +4814,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0356"
@@ -4918,8 +4891,7 @@
       "ADR-0018"
     ],
     "overlay_refs": [
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
     ],
     "depends_on": [
       "GM-0357"

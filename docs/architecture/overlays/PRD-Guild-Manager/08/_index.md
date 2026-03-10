@@ -190,3 +190,28 @@ Arch-Refs:
 - ?????`.taskmaster/tasks/tasks.json` + `.taskmaster/tasks/tasks_back.json` + `.taskmaster/tasks/tasks_gameplay.json`
 - ?????2026-03-09
 <!-- END:T53-T102-MAP -->
+
+## Scope
+
+Defines execution scope for PRD-Guild-Manager overlay pages and task-to-overlay linkage.
+
+## Canonical Pages
+
+- `docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md`
+- `docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md`
+- `docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md`
+- `docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md`
+- `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md`
+
+## Execution Invariants
+
+- Keep `tasks.json` as SSoT and sync view overlay refs through deterministic scripts.
+- Keep overlay links concrete and filesystem-resolvable.
+- Keep task execution serial for governance tasks (T53-T102).
+
+## Validation Commands (Windows)
+
+- `py -3 scripts/python/check_tasks_all_refs.py`
+- `py -3 scripts/python/validate_task_master_triplet.py`
+- `py -3 scripts/python/validate_task_overlays.py`
+- `py -3 scripts/python/validate_overlay_execution.py --prd-id PRD-Guild-Manager`

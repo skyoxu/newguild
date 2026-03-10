@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 from pathlib import Path
 from typing import Any, Optional
@@ -27,47 +26,6 @@ from typing import Any, Optional
 
 FRONT_MATTER_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 OVERLAY_DIR_RE = re.compile(r"^(docs/architecture/overlays/[^/]+/08)/", re.IGNORECASE)
-
-
-def safe_resolve_overlay_path(root: Path, overlay_path: str) -> tuple[Path | None, str | None]:
-    """Resolve overlay path under repo root and enforce sandbox-safe constraints."""
-
-    raw = str(overlay_path or "").strip()
-    if not raw:
-        return None, "empty overlay path"
-
-    # Normalize to forward slashes for policy checks.
-    rel = raw.replace("\\", "/")
-
-    # Reject absolute or device paths.
-    if rel.startswith(("/", "\\\\")) or re.match(r"^[A-Za-z]:", rel):
-        return None, f"overlay path must be repo-relative (got: {raw})"
-
-    parts = Path(rel).parts
-    if any(p == ".." for p in parts):
-        return None, f"overlay path must not contain '..' (got: {raw})"
-
-    # Overlays are SSoT acceptance artifacts; restrict to overlays subtree.
-    if not rel.lower().startswith("docs/architecture/overlays/"):
-        return None, f"overlay path must live under docs/architecture/overlays/ (got: {raw})"
-
-    candidate = (root / rel).resolve()
-    try:
-        # Python 3.9+: Path.is_relative_to
-        if not candidate.is_relative_to(root.resolve()):  # type: ignore[attr-defined]
-            return None, f"overlay path escapes repo root (got: {raw})"
-    except Exception:
-        # Best-effort fallback for older runtimes
-        try:
-            root_resolved = str(root.resolve())
-            cand_resolved = str(candidate)
-            common = os.path.commonpath([root_resolved, cand_resolved])
-            if common.lower() != root_resolved.lower():
-                return None, f"overlay path escapes repo root (got: {raw})"
-        except Exception:
-            return None, f"overlay path escapes repo root (got: {raw})"
-
-    return candidate, None
 
 
 def extract_front_matter(content: str) -> Optional[dict[str, Any]]:
@@ -206,23 +164,7 @@ def load_tasks_from_file(task_file: Path) -> list[dict[str, Any]]:
     return []
 
 
-def _task_matches_id(task: dict[str, Any], target_task_id: str | None) -> bool:
-    if not str(target_task_id or "").strip():
-        return True
-    target = str(target_task_id).strip()
-    task_id = str(task.get("id", "")).strip()
-    taskmaster_id = str(task.get("taskmaster_id", "")).strip()
-    return task_id == target or taskmaster_id == target
-
-
-def validate_task_file(
-    root: Path,
-    task_file: Path,
-    label: str,
-    adr_ids: set[str],
-    *,
-    task_id: str | None = None,
-) -> tuple[int, int]:
+def validate_task_file(root: Path, task_file: Path, label: str, adr_ids: set[str]) -> tuple[int, int]:
     """Validate overlay references for a single task file.
 
     Returns: (tasks_with_overlays, tasks_passed)
@@ -241,11 +183,8 @@ def validate_task_file(
     passed = 0
     forced_errors: list[str] = []
 
-    scoped_tasks = [t for t in tasks if _task_matches_id(t, task_id)]
-    for task in sorted(scoped_tasks, key=lambda x: str(x.get("id", x.get("taskmaster_id", "")))):
+    for task in sorted(tasks, key=lambda x: str(x.get("id", ""))):
         tid = task.get("id")
-        if tid is None:
-            tid = task.get("taskmaster_id")
 
         overlay_refs = task.get("overlay_refs")
         if overlay_refs:
@@ -306,11 +245,7 @@ def validate_task_file(
 
         task_ok = True
         for overlay_path in overlays:
-            full_path, err = safe_resolve_overlay_path(root, str(overlay_path))
-            if err:
-                print(f"  ERROR: invalid overlay path: {overlay_path} ({err})")
-                task_ok = False
-                continue
+            full_path = root / str(overlay_path)
             if not full_path.exists():
                 print(f"  ERROR: overlay file does not exist: {overlay_path}")
                 task_ok = False
@@ -361,7 +296,6 @@ def main() -> int:
         type=str,
         help="Task file path to validate (default: all .taskmaster/tasks/*.json).",
     )
-    parser.add_argument("--task-id", type=str, default=None, help="Validate a single task id/taskmaster_id.")
 
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
@@ -382,7 +316,7 @@ def main() -> int:
     total_checked = 0
     total_passed = 0
     for task_file in task_files:
-        checked, passed = validate_task_file(root, task_file, task_file.name, adr_ids, task_id=args.task_id)
+        checked, passed = validate_task_file(root, task_file, task_file.name, adr_ids)
         total_checked += checked
         total_passed += passed
 

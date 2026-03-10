@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0-baseline",
+  "generated_at": "2026-03-10T05:59:05+00:00",
+  "source": {
+    "summary_file": "logs/ci/2026-03-10/stage3/sc-llm-obligations-jitter-batch5x3-summary.synthetic.json",
+    "method": "llm_extract_task_obligations batch_size=5 rounds=3"
+  },
+  "policy": {
+    "default_mode": "single_run",
+    "jitter_mode": "three_run_majority",
+    "majority_pass_rule": "at least 2/3 runs verdict=ok",
+    "majority_fail_rule": "at least 2/3 runs verdict=fail",
+    "tie_rule": "mark_unknown_and_recheck",
+    "freeze_invalidation": [
+      "acceptance_changed",
+      "master_details_changed",
+      "tooling_or_prompt_changed"
+    ]
+  },
+  "task_sets": {
+    "stable_ok": [
+      54,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      65,
+      66,
+      67,
+      68,
+      70,
+      72,
+      73,
+      75,
+      77,
+      78,
+      79,
+      80,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102
+    ],
+    "jitter_ok_majority": [],
+    "jitter_fail_majority": [],
+    "stable_fail": [
+      53,
+      55,
+      64,
+      69,
+      71,
+      74,
+      76,
+      81
+    ]
+  },
+  "ops_recommendation": {
+    "watchlist": [
+      53,
+      55,
+      64,
+      69,
+      71,
+      74,
+      76,
+      81
+    ],
+    "auto_rerun_on_single_fail": [],
+    "blocked_until_fix": [
+      53,
+      55,
+      64,
+      69,
+      71,
+      74,
+      76,
+      81
+    ],
+    "notes": [
+      "This is a draft whitelist baseline, not a permanent gate bypass.",
+      "Any acceptance/content change invalidates the freeze baseline."
+    ]
+  },
+  "promoted_at": "2026-03-10T05:59:05+00:00",
+  "promoted_from": ".taskmaster/config/obligations-freeze-whitelist.draft.json",
+  "baseline": {
+    "id": "obligations-freeze-whitelist-2026-03-10-t53-t102-r1",
+    "date": "2026-03-10",
+    "tag": "t53-t102-r1",
+    "immutable": true,
+    "baseline_file": ".taskmaster/config/obligations-freeze-baselines/obligations-freeze-whitelist-2026-03-10-t53-t102-r1.json"
+  },
+  "current_pointer": {
+    "updated_at": "2026-03-10T05:59:05+00:00",
+    "baseline_file": ".taskmaster/config/obligations-freeze-baselines/obligations-freeze-whitelist-2026-03-10-t53-t102-r1.json",
+    "baseline_sha256": "f934cbb387245a1f62bb103da983844d04d745d36f7a7091b6cf42e5ff1bc75f"
+  }
+}

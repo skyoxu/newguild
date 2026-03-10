@@ -1,0 +1,11 @@
+{
+  "prd_id": "PRD-Guild-Manager",
+  "files": {
+    "index": "_index.md",
+    "feature": "08-Feature-Slice-T2-Core-Loop.md",
+    "contracts": "08-Contracts-T2.md",
+    "testing": "08-Testing-T2.md",
+    "observability": "08-Observability-T2.md",
+    "acceptance": "ACCEPTANCE_CHECKLIST.md"
+  }
+}
