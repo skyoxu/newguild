@@ -119,6 +119,14 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Fail pipeline if evaluation aggregate.freeze_gate_pass is false.",
     )
+    parser.add_argument(
+        "--allow-stable-fail-freeze-pass",
+        action="store_true",
+        help=(
+            "When requiring freeze pass, accept judgable stable_fail-only blocks as pass "
+            "(uses evaluate flag --pass-when-blocked-stable-fail-only)."
+        ),
+    )
 
     parser.add_argument(
         "--approve-promote",
@@ -380,6 +388,8 @@ def main() -> int:
             "--out-dir",
             str(eval_dir),
         ]
+        if bool(args.allow_stable_fail_freeze_pass):
+            eval_cmd.append("--pass-when-blocked-stable-fail-only")
         if bool(args.allow_draft_eval):
             eval_cmd.append("--allow-draft")
         step = run_step("evaluate", eval_cmd, out_dir, timeout_sec=max(60, args.step_timeout_sec))
@@ -397,11 +407,23 @@ def main() -> int:
             write_pipeline_summary(out_dir, pipeline)
             print("ERROR: evaluation aggregate.judgable is false")
             return 2
-        if bool(args.require_freeze_pass) and (not eval_aggregate or not bool(eval_aggregate.get("freeze_gate_pass"))):
+        freeze_pass_value = None
+        if isinstance(eval_aggregate, dict):
+            if bool(args.allow_stable_fail_freeze_pass):
+                freeze_pass_value = bool(eval_aggregate.get("freeze_gate_pass_effective"))
+            else:
+                freeze_pass_value = bool(eval_aggregate.get("freeze_gate_pass"))
+        if bool(args.require_freeze_pass) and not bool(freeze_pass_value):
             pipeline["status"] = "fail"
-            pipeline["error"] = "evaluation aggregate.freeze_gate_pass is false"
+            pipeline["error"] = (
+                "evaluation aggregate freeze gate is false "
+                f"(allow_stable_fail_freeze_pass={bool(args.allow_stable_fail_freeze_pass)})"
+            )
             write_pipeline_summary(out_dir, pipeline)
-            print("ERROR: evaluation aggregate.freeze_gate_pass is false")
+            print(
+                "ERROR: evaluation aggregate freeze gate is false "
+                f"(allow_stable_fail_freeze_pass={bool(args.allow_stable_fail_freeze_pass)})"
+            )
             return 2
 
         if bool(args.approve_promote):

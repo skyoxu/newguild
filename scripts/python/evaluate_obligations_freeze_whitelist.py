@@ -70,6 +70,14 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Allow evaluating a draft whitelist file. Disabled by default as stop-loss.",
     )
+    parser.add_argument(
+        "--pass-when-blocked-stable-fail-only",
+        action="store_true",
+        help=(
+            "Treat freeze gate as pass when judgable=true and all BLOCK tasks are in whitelist stable_fail bucket. "
+            "Use for controlled freeze stop-loss only."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -152,7 +160,11 @@ def evaluate_all(whitelist: dict, summary: dict) -> tuple[list[TaskEvalResult], 
 
 
 def build_summary_payload(
-    results: list[TaskEvalResult], missing_in_observed: list[int], whitelist_path: Path, summary_path: Path
+    results: list[TaskEvalResult],
+    missing_in_observed: list[int],
+    whitelist_path: Path,
+    summary_path: Path,
+    pass_when_blocked_stable_fail_only: bool,
 ) -> dict:
     pass_count = sum(1 for result in results if result.decision == "PASS")
     block_count = sum(1 for result in results if result.decision == "BLOCK")
@@ -160,6 +172,21 @@ def build_summary_payload(
     unknown_count = sum(1 for result in results if result.decision == "UNKNOWN")
     judgable = review_count == 0 and unknown_count == 0 and len(missing_in_observed) == 0
     freeze_gate_pass = judgable and block_count == 0
+    blocked_task_ids = [result.task_id for result in results if result.decision == "BLOCK"]
+    blocked_non_stable_fail = [
+        result.task_id
+        for result in results
+        if result.decision == "BLOCK" and result.whitelist_bucket != "stable_fail"
+    ]
+    freeze_gate_pass_effective = (
+        freeze_gate_pass
+        or (
+            pass_when_blocked_stable_fail_only
+            and judgable
+            and len(blocked_task_ids) > 0
+            and len(blocked_non_stable_fail) == 0
+        )
+    )
     root = repo_root()
     return {
         "source": {
@@ -175,6 +202,10 @@ def build_summary_payload(
             "missing_in_observed": len(missing_in_observed),
             "judgable": judgable,
             "freeze_gate_pass": freeze_gate_pass,
+            "freeze_gate_pass_effective": freeze_gate_pass_effective,
+            "pass_when_blocked_stable_fail_only": pass_when_blocked_stable_fail_only,
+            "blocked_task_ids": blocked_task_ids,
+            "blocked_non_stable_fail": blocked_non_stable_fail,
         },
         "missing_in_observed": missing_in_observed,
         "rows": [
@@ -204,6 +235,8 @@ def build_report_markdown(payload: dict) -> str:
     lines.append(f"- missing_in_observed: {aggregate['missing_in_observed']}")
     lines.append(f"- judgable: {aggregate['judgable']}")
     lines.append(f"- freeze_gate_pass: {aggregate['freeze_gate_pass']}")
+    lines.append(f"- freeze_gate_pass_effective: {aggregate['freeze_gate_pass_effective']}")
+    lines.append(f"- pass_when_blocked_stable_fail_only: {aggregate['pass_when_blocked_stable_fail_only']}")
     lines.append("")
     if payload["missing_in_observed"]:
         lines.append("## Missing In Observed")
@@ -242,7 +275,13 @@ def main() -> int:
     whitelist = load_json(whitelist_path)
     summary = load_json(summary_path)
     results, missing_in_observed = evaluate_all(whitelist, summary)
-    payload = build_summary_payload(results, missing_in_observed, whitelist_path, summary_path)
+    payload = build_summary_payload(
+        results,
+        missing_in_observed,
+        whitelist_path,
+        summary_path,
+        pass_when_blocked_stable_fail_only=bool(args.pass_when_blocked_stable_fail_only),
+    )
 
     out_dir = (
         resolve_repo_path(args.out_dir)
@@ -259,6 +298,7 @@ def main() -> int:
     print(f"wrote {report_file.as_posix()}")
     print(f"judgable={payload['aggregate']['judgable']}")
     print(f"freeze_gate_pass={payload['aggregate']['freeze_gate_pass']}")
+    print(f"freeze_gate_pass_effective={payload['aggregate']['freeze_gate_pass_effective']}")
     return 0
 
 
