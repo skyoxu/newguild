@@ -94,7 +94,7 @@ Artifact-Refs:
   - Tests.Godot：GdUnit4 场景与集成测试工程
 - [ ] 事件与契约：
   - 领域事件与 UI 事件命名遵循 `${DOMAIN_PREFIX}.<entity>.<action>`（见 ADR‑0004）
-  - Contracts SSoT 位于 `Game.Core/Contracts/**`（纯 C#，不依赖 Godot）
+  - Contracts SSoT 位于 `Game.Core/Contracts/`（纯 C#，不依赖 Godot）
   - 示例契约文件：`Game.Core/Contracts/Guild/GuildMemberJoined.cs`（per ADR-0020）
   - 当前 T2 最小事件集合（已落盘）：GuildCreated / GuildMemberJoined / GuildMemberLeft 已在 Overlay 08 登记，并已落盘到 Game.Core/Contracts/Guild/GuildCreated.cs、Game.Core/Contracts/Guild/GuildMemberJoined.cs、Game.Core/Contracts/Guild/GuildMemberLeft.cs
 - [ ] 事件命名规范验证（ADR-0004）：
@@ -321,3 +321,26 @@ Artifact-Refs:
 - ?????`.taskmaster/tasks/tasks.json` + `.taskmaster/tasks/tasks_back.json` + `.taskmaster/tasks/tasks_gameplay.json`
 - ?????2026-03-09
 <!-- END:T53-T102-MAP -->
+
+## Quantified Pass/Fail Criteria
+
+| Check ID | Pass Criterion | Fail Condition | Evidence |
+|---|---|---|---|
+| AC-01 | Overlay refs resolve for all task triplet files | Any missing or broken overlay path | `logs/ci/<YYYY-MM-DD>/task-links` |
+| AC-02 | Overlay execution validator returns status ok | Any required page/section missing | `logs/ci/<YYYY-MM-DD>/overlay-lint/report.json` |
+| AC-03 | Taskmaster triplet validator returns overall OK | Mapping/dependency errors detected | `logs/ci/<YYYY-MM-DD>/task-links/taskmaster-triplet-summary.json` |
+| AC-04 | Acceptance checks reference concrete contract paths | Wildcard or non-existent paths found | `docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md` |
+| AC-05 | Core contract path exists and is testable | Missing `Game.Core/Contracts/` | `Game.Core/Contracts/` |
+
+## Required Commands (Windows)
+
+- `py -3 scripts/python/check_tasks_all_refs.py`
+- `py -3 scripts/python/validate_task_master_triplet.py`
+- `py -3 scripts/python/validate_task_overlays.py`
+- `py -3 scripts/python/validate_overlay_execution.py --prd-id PRD-Guild-Manager`
+
+## DoD Anchors
+
+- Overlay execution report status is `ok`.
+- Task links and triplet checks are all green.
+- Required contracts/tests paths are concrete and exist.

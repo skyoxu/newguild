@@ -25,7 +25,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -78,6 +79,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -134,6 +137,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -194,7 +199,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -263,6 +269,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -329,6 +338,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -552,8 +564,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -622,7 +634,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -691,8 +704,11 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md"
     ],
     "labels": [
       "docs",
@@ -757,9 +773,6 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Guild-Manager-Events.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -875,6 +888,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1092,6 +1108,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1699,7 +1718,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1765,7 +1785,8 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1826,7 +1847,6 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1892,7 +1912,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -1952,7 +1974,9 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -2075,7 +2099,6 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
@@ -2150,14 +2173,10 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Security.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-CloudEvents-Core.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Contracts-Quality-Metrics.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Guild-Manager.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-DataSchema.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-SaveLoad-UI.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Feature-Slice-T2-Core-Loop.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Testing-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/08-Observability-T2.md",
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "labels": [
       "save",
@@ -2281,7 +2300,6 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Core-Game-Loop.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "depends_on": [
@@ -2350,7 +2368,6 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "depends_on": [
@@ -2430,7 +2447,6 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-Phase2-Tactical-Rewards.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "depends_on": [
@@ -2501,7 +2517,6 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/08-FeatureSlice-T3-PVE-Raid.md",
       "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "depends_on": [
@@ -2700,30 +2715,26 @@
       "ACC:T54.1 验收口径与引用链完整且可解析。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
       "ACC:T54.2 关键行为可通过确定性测试验证，不依赖人工判读。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
       "ACC:T54.3 产出 logs/ci/<date>/v11-task-54/summary.json。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd",
-      "ACC:T54.4 Headless 执行出现 flaky 时，必须采集并落盘可复现样本（至少包含用例标识、输入种子或等价确定性输入、环境摘要、失败症状）；未出现 flaky 时，summary.json 必须明确 flaky_samples=0，且不得写入虚假样本。",
-      "ACC:T54.5 每个 flaky 样本必须完成根因分类并写入结果；分类值不得为空，无法归类时必须标记为 unknown 且附 reason_code。",
-      "ACC:T54.6 每个已分类样本必须附带可回放证据，并在相同输入下可复现同类结论；若回放结论与分类不一致则验收失败。",
-      "ACC:T54.7 summary.json 必须给出假红率统计口径及 before/after 对比；当 after 不低于 before 时，必须输出未达标状态且不得判定通过。",
-      "ACC:T54.8 summary.json 必须包含 samples 数组；每个样本至少包含 sample_id、classification、replay_result、evidence_path，且当 classification=unknown 时必须包含 reason_code，任一字段缺失则验收失败。",
-      "ACC:T54.9 每个根因分类结果必须可回链到原始失败观测（断言名、错误码、日志症状三者至少其一）；不可回链的样本不得计入已分类统计。",
-      "ACC:T54.10 假红率 before/after 对比必须基于同一统计窗口、同一分母定义与同一用例集合；任一口径不一致时必须标记 comparison_invalid 且不得判定通过。",
-      "ACC:T54.11 对同一确定性输入至少进行两次 Headless 回放时，分类结论与回放结论必须一致；出现漂移必须标记为 nondeterministic 且任务不得判定通过。",
-      "ACC:T54.12 ACC:T54.1 对应的验收边界必须在 summary.json 中以机器可读方式落盘并可被校验；仅文档描述但无可解析证据视为未完成。",
-      "ACC:T54.13 ACC:T54.2 对应的确定性验证必须输出每个 case_id 的机器可读 verdict（pass|fail）；缺少 case 级结果时不得判定通过。",
-      "ACC:T54.14 ACC:T54.3 对应的证据落盘必须可验证 summary.json 存在且非空；文件缺失、空文件或不可读取时验收失败。",
-      "ACC:T54.15 当 flaky_samples>0 时，samples 中每个 evidence_path 必须存在且可读取；任一证据缺失时该样本不得计入统计且任务不得判定通过。",
-      "ACC:T54.16 假红率压降结论必须可由 summary.json 内原始计数字段复算；复算结果与声明不一致时必须标记 comparison_invalid 且不得判定通过。",
-      "ACC:T54.17 在相同确定性输入与环境摘要下重复执行一次 Headless 流程时，flaky_samples 与分类汇总结果必须一致；不一致必须标记 nondeterministic 且不得判定通过。",
-      "ACC:T54.18 Headless 流程必须在 SECURITY_PROFILE=host-safe 下执行，并在 summary.json 中落盘 security_profile=\"host-safe\"；缺失或不一致时验收失败。",
-      "ACC:T54.19 每个样本在采集、分类、回放三个阶段必须使用同一 sample_id 串联，并包含 deterministic_input_hash（或等价稳定输入标识）；任一阶段无法关联时该样本不得计入统计且任务不得判定通过。",
-      "ACC:T54.20 根因分类必须使用受控枚举（含 unknown），且 summary.json 必须输出各分类计数；出现枚举外值或计数与 samples 明细不一致时验收失败。",
-      "ACC:T54.21 每个回放证据必须可反查到原始失败样本，并包含回放时间戳与回放结论；无法反查或字段缺失时验收失败。",
-      "ACC:T54.22 假红率压降必须输出可复算字段 before_false_red_count、before_total、after_false_red_count、after_total 与 reduction_rate；当 reduction_rate<=0 时必须标记未达标且任务不得判定通过。",
-      "ACC:T54.23 确定性证据工件必须能区分 red、green、refactor 三阶段结果并可机器判定；任一阶段缺失时不得判定通过。",
-      "ADR Refs: ADR-0005; ADR-0003 —— 验收证据必须可回链到 ADR-0005 与 ADR-0003。",
-      "Chapters: CH03; CH07; CH09 —— 验收证据必须可回链到 CH03、CH07、CH09。",
-      "Overlays: docs/architecture/overlays/PRD-Guild-Manager/08/_index.md; docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md —— 验收证据必须可解析回链到 overlay 索引与清单文件。",
-      "Test Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd —— 确定性验证回链必须同时覆盖两个 Test Refs。"
+      "ACC:T54.4 Headless 执行出现 flaky 时，必须采集并落盘可复现样本（至少包含用例标识、输入种子或等价确定性输入、环境摘要、失败症状）；未出现 flaky 时，summary.json 必须明确 flaky_samples=0，且不得写入虚假样本。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.5 每个 flaky 样本必须完成根因分类并写入结果；分类值不得为空，无法归类时必须标记为 unknown 且附 reason_code。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.6 每个已分类样本必须附带可回放证据，并在相同输入下可复现同类结论；若回放结论与分类不一致则验收失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.7 summary.json 必须给出假红率统计口径及 before/after 对比；当 after 不低于 before 时，必须输出未达标状态且不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.8 summary.json 必须包含 samples 数组；每个样本至少包含 sample_id、classification、replay_result、evidence_path，且当 classification=unknown 时必须包含 reason_code，任一字段缺失则验收失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.9 每个根因分类结果必须可回链到原始失败观测（断言名、错误码、日志症状三者至少其一）；不可回链的样本不得计入已分类统计。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.10 假红率 before/after 对比必须基于同一统计窗口、同一分母定义与同一用例集合；任一口径不一致时必须标记 comparison_invalid 且不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.11 对同一确定性输入至少进行两次 Headless 回放时，分类结论与回放结论必须一致；出现漂移必须标记为 nondeterministic 且任务不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.12 ACC:T54.1 对应的验收边界必须在 summary.json 中以机器可读方式落盘并可被校验；仅文档描述但无可解析证据视为未完成。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.13 ACC:T54.2 对应的确定性验证必须输出每个 case_id 的机器可读 verdict（pass|fail）；缺少 case 级结果时不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.14 ACC:T54.3 对应的证据落盘必须可验证 summary.json 存在且非空；文件缺失、空文件或不可读取时验收失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.15 当 flaky_samples>0 时，samples 中每个 evidence_path 必须存在且可读取；任一证据缺失时该样本不得计入统计且任务不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.16 假红率压降结论必须可由 summary.json 内原始计数字段复算；复算结果与声明不一致时必须标记 comparison_invalid 且不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.17 在相同确定性输入与环境摘要下重复执行一次 Headless 流程时，flaky_samples 与分类汇总结果必须一致；不一致必须标记 nondeterministic 且不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.18 Headless 流程必须在 SECURITY_PROFILE=host-safe 下执行，并在 summary.json 中落盘 security_profile=\"host-safe\"；缺失或不一致时验收失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.19 每个样本在采集、分类、回放三个阶段必须使用同一 sample_id 串联，并包含 deterministic_input_hash（或等价稳定输入标识）；任一阶段无法关联时该样本不得计入统计且任务不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.20 根因分类必须使用受控枚举（含 unknown），且 summary.json 必须输出各分类计数；出现枚举外值或计数与 samples 明细不一致时验收失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.21 每个回放证据必须可反查到原始失败样本，并包含回放时间戳与回放结论；无法反查或字段缺失时验收失败。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.22 假红率压降必须输出可复算字段 before_false_red_count、before_total、after_false_red_count、after_total 与 reduction_rate；当 reduction_rate<=0 时必须标记未达标且任务不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd",
+      "ACC:T54.23 确定性证据工件必须能区分 red、green、refactor 三阶段结果并可机器判定；任一阶段缺失时不得判定通过。 Refs: Tests.Godot/tests/Playability/Phase2/test_phase2_play_route.gd Tests.Godot/tests/UI/test_activity_feed_scene.gd"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2781,14 +2792,14 @@
       "ACC:T55.1 的验收边界定义、锚点绑定与引用链在一次运行内可被程序完整解析，任一环节缺失即判定失败。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
       "ACC:T55.2 的核心行为必须由确定性自动化测试给出可复算结论，不能依赖人工主观判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
       "ACC:T55.3 必须产出 logs/ci/<date>/v11-task-55/summary.json 作为该轮证据汇总文件。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "同一次治理运行中，unit、godot、acceptance 三类测试必须全部被统一编排并实际执行，且仅输出一个总通过/失败结论；任一类别未执行则总结果必须为失败。",
-      "evidence 消费结论只能由可机读工件计算得出；对同一输入重复执行时输出必须一致，否则该轮验收失败。",
-      "当 evidence 缺失、不可解析或路径与预期不匹配时，流程必须立即显式失败，并把可定位失败原因写入 logs/ci/<date>/v11-task-55/summary.json。",
-      "最终汇总必须分别给出 ACC:T55.1、ACC:T55.2、ACC:T55.3 的判定结果并可追踪来源；缺少任一锚点结果即验收不通过。",
-      "该轮聚合结论必须严格由该轮 unit/godot/acceptance 的实际执行结果与 evidence 解析结果共同决定；任一类别失败则总体失败。",
-      "ACC:T55.1 对应边界必须在治理流程中被显式加载、绑定并参与判定；未定义、未绑定或未消费任一情况均直接失败。",
-      "ACC:T55.2 对应实现验证必须输出自动化、确定性、可机读结果；仅有人工说明、截图结论或不可复算输出时 ACC:T55.2 必须失败。",
-      "ACC:T55.3 对应证据持久化必须在流程结束前写入 logs/ci/<date>/v11-task-55/summary.json，且包含 ACC:T55.1/ACC:T55.2/ACC:T55.3 判定字段；文件不存在、为空或缺字段即失败。"
+      "同一次治理运行中，unit、godot、acceptance 三类测试必须全部被统一编排并实际执行，且仅输出一个总通过/失败结论；任一类别未执行则总结果必须为失败。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "evidence 消费结论只能由可机读工件计算得出；对同一输入重复执行时输出必须一致，否则该轮验收失败。 Refs: Game.Core.Tests/CI/V11EvidenceConsumptionDeterminismTests.cs",
+      "当 evidence 缺失、不可解析或路径与预期不匹配时，流程必须立即显式失败，并把可定位失败原因写入 logs/ci/<date>/v11-task-55/summary.json。 Refs: Game.Core.Tests/CI/V11EvidenceFailureReportingTests.cs",
+      "最终汇总必须分别给出 ACC:T55.1、ACC:T55.2、ACC:T55.3 的判定结果并可追踪来源；缺少任一锚点结果即验收不通过。 Refs: Game.Core.Tests/CI/V11AcceptanceAnchorTraceabilityTests.cs",
+      "该轮聚合结论必须严格由该轮 unit/godot/acceptance 的实际执行结果与 evidence 解析结果共同决定；任一类别失败则总体失败。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
+      "ACC:T55.1 对应边界必须在治理流程中被显式加载、绑定并参与判定；未定义、未绑定或未消费任一情况均直接失败。 Refs: Game.Core.Tests/CI/V11AcceptanceAnchorBindingTests.cs",
+      "ACC:T55.2 对应实现验证必须输出自动化、确定性、可机读结果；仅有人工说明、截图结论或不可复算输出时 ACC:T55.2 必须失败。 Refs: Game.Core.Tests/CI/V11EvidenceConsumptionDeterminismTests.cs",
+      "ACC:T55.3 对应证据持久化必须在流程结束前写入 logs/ci/<date>/v11-task-55/summary.json，且包含 ACC:T55.1/ACC:T55.2/ACC:T55.3 判定字段；文件不存在、为空或缺字段即失败。 Refs: Game.Core.Tests/CI/V11EvidenceSummaryPersistenceTests.cs"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2796,7 +2807,12 @@
     ],
     "test_refs": [
       "Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "Tests.Godot/tests/Integration/test_backup_restore_savegame.gd"
+      "Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
+      "Game.Core.Tests/CI/V11EvidenceConsumptionDeterminismTests.cs",
+      "Game.Core.Tests/CI/V11EvidenceFailureReportingTests.cs",
+      "Game.Core.Tests/CI/V11AcceptanceAnchorTraceabilityTests.cs",
+      "Game.Core.Tests/CI/V11AcceptanceAnchorBindingTests.cs",
+      "Game.Core.Tests/CI/V11EvidenceSummaryPersistenceTests.cs"
     ],
     "contractRefs": [
       "core.activity.feed.appended",
@@ -2807,7 +2823,8 @@
       "logs/ci/<date>/v11-task-55/summary.json"
     ],
     "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
-    "contract_refs": []
+    "contract_refs": [],
+    "evidence_refs": []
   },
   {
     "id": "NG-0056",
@@ -2837,7 +2854,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "depends_on": [
       "NG-0055"
@@ -3131,7 +3148,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "depends_on": [
       "NG-0059"
@@ -3207,18 +3224,24 @@
       "ACC:T64.1 必须定义可解析的验收口径与引用链；任一引用不可解析即判定不通过。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
       "ACC:T64.2 关键行为必须可由确定性测试直接判定通过/失败，且不依赖人工主观判读。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
       "ACC:T64.3 必须产出 logs/ci/<date>/v11-task-64/summary.json 作为证据工件。 Refs: Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
-      "ACC:T64.3 summary.json 必须同时包含“诊断摘要”和“修复建议模板”两个可机读区块，且字段命名与层级在不同 CI 失败样本间保持一致。",
-      "ACC:T64.2 对同一输入连续至少两次运行时，除显式可变字段外输出必须一致；当输入缺失必需失败信息或不可解析时，必须返回明确拒绝原因，不得返回空结果或默认成功状态。",
-      "ACC:T64.1 必须定义并可验证诊断边界：仅对约定失败类型生成摘要与修复建议；对边界外输入必须拒绝，且不得覆盖既有工件状态。",
-      "ACC:T64.3 summary.json 必须包含 ACC:T64.1、ACC:T64.2、ACC:T64.3 的可追溯证据键（可定位来源片段或等价定位信息），用于确定性审计。",
-      "ACC:T64.2 对每个可解析失败样本，修复建议模板必须包含可执行止损信息（至少含触发条件、立即处置动作、恢复或回滚检查点）；任一要素缺失时必须显式标记 rejected 并给出原因。"
+      "ACC:T64.3 summary.json 必须同时包含“诊断摘要”和“修复建议模板”两个可机读区块，且字段命名与层级在不同 CI 失败样本间保持一致。 Refs: Game.Core.Tests/CI/ArtifactsLoggingTests.cs Game.Core.Tests/CI/LogArtifactsConventionsTests.cs",
+      "ACC:T64.2 对同一输入连续至少两次运行时，除显式可变字段外输出必须一致；当输入缺失必需失败信息或不可解析时，必须返回明确拒绝原因，不得返回空结果或默认成功状态。 Refs: Game.Core.Tests/CI/ArtifactsEvidenceTests.cs Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T64.1 必须定义并可验证诊断边界：仅对约定失败类型生成摘要与修复建议；对边界外输入必须拒绝，且不得覆盖既有工件状态。 Refs: Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs Game.Core.Tests/CI/Task28ArtifactRefsAcceptanceTests.cs",
+      "ACC:T64.3 summary.json 必须包含 ACC:T64.1、ACC:T64.2、ACC:T64.3 的可追溯证据键（可定位来源片段或等价定位信息），用于确定性审计。 Refs: Game.Core.Tests/CI/ArtifactsEvidenceTests.cs Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "ACC:T64.2 对每个可解析失败样本，修复建议模板必须包含可执行止损信息（至少含触发条件、立即处置动作、恢复或回滚检查点）；任一要素缺失时必须显式标记 rejected 并给出原因。 Refs: Game.Core.Tests/CI/InteractionArtifactsLoggingTests.cs Game.Core.Tests/CI/ArtifactsLoggingTests.cs"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
       "TDD (red->green->refactor) with reproducible logs/**."
     ],
     "test_refs": [
-      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs"
+      "Game.Core.Tests/CI/ActivityFeedArtifactsTests.cs",
+      "Game.Core.Tests/CI/ArtifactsLoggingTests.cs",
+      "Game.Core.Tests/CI/LogArtifactsConventionsTests.cs",
+      "Game.Core.Tests/CI/ArtifactsEvidenceTests.cs",
+      "Game.Core.Tests/CI/Task23QualityGatesAcceptanceTests.cs",
+      "Game.Core.Tests/CI/Task28ArtifactRefsAcceptanceTests.cs",
+      "Game.Core.Tests/CI/InteractionArtifactsLoggingTests.cs"
     ],
     "contractRefs": [
       "core.activity.feed.appended",
@@ -3229,7 +3252,8 @@
       "logs/ci/<date>/v11-task-64/summary.json"
     ],
     "details": "Security Profile: SECURITY_PROFILE=host-safe. tasks_back only governance/security tasks.",
-    "contract_refs": []
+    "contract_refs": [],
+    "evidence_refs": []
   },
   {
     "id": "NG-0062",
@@ -3257,7 +3281,7 @@
     ],
     "overlay_refs": [
       "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md",
-      "docs/architecture/overlays/PRD-Guild-Manager/08/_index.md"
+      "docs/architecture/overlays/PRD-Guild-Manager/08/ACCEPTANCE_CHECKLIST.md"
     ],
     "depends_on": [
       "NG-0061"

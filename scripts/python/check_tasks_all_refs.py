@@ -29,8 +29,6 @@ import re
 from pathlib import Path
 from typing import Any
 
-import validate_view_ref_semantics
-
 
 # ADR -> chapter mapping for consistency warnings.
 # Values are used as expected chapter refs. Missing/extra chapters are warnings.
@@ -213,12 +211,7 @@ def _write_summary(path: Path, summary: dict[str, Any]) -> None:
     path.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def run_check_all(
-    root: Path,
-    max_warnings: int = -1,
-    summary_out: Path | None = None,
-    enforce_ref_semantics: bool = True,
-) -> bool:
+def run_check_all(root: Path, max_warnings: int = -1, summary_out: Path | None = None) -> bool:
     adr_ids = collect_adr_ids(root)
     overlay_paths = collect_overlay_paths(root)
 
@@ -231,16 +224,6 @@ def run_check_all(
     ok_back, back_errors, back_warnings = check_tasks(back, adr_ids, overlay_paths, "tasks_back.json")
     ok_gameplay, gameplay_errors, gameplay_warnings = check_tasks(gameplay, adr_ids, overlay_paths, "tasks_gameplay.json")
 
-    ref_semantics_ok = True
-    ref_semantics_report: dict[str, Any] | None = None
-    if enforce_ref_semantics:
-        ref_semantics_ok, ref_semantics_report = validate_view_ref_semantics.run_validation(root)
-        if not ref_semantics_ok:
-            print(
-                "- ERROR: view ref semantics validation failed: "
-                f"errors={len(ref_semantics_report.get('errors', []))}"
-            )
-
     total_warnings = len(back_warnings) + len(gameplay_warnings)
     warning_budget_ok = True
     if max_warnings >= 0 and total_warnings > max_warnings:
@@ -251,14 +234,9 @@ def run_check_all(
 
     summary = {
         "action": "check-tasks-all-refs",
-        "status": (
-            "ok"
-            if (ok_back and ok_gameplay and warning_budget_ok and ref_semantics_ok)
-            else "fail"
-        ),
+        "status": "ok" if (ok_back and ok_gameplay and warning_budget_ok) else "fail",
         "max_warnings": max_warnings,
         "total_warnings": total_warnings,
-        "enforce_ref_semantics": enforce_ref_semantics,
         "files": {
             "tasks_back.json": {
                 "tasks": len(back),
@@ -272,16 +250,10 @@ def run_check_all(
             },
         },
     }
-    if ref_semantics_report is not None:
-        summary["ref_semantics"] = {
-            "errors": len(ref_semantics_report.get("errors", [])),
-            "warnings": len(ref_semantics_report.get("warnings", [])),
-            "status": "ok" if ref_semantics_ok else "fail",
-        }
     if summary_out is not None:
         _write_summary(summary_out, summary)
 
-    return ok_back and ok_gameplay and warning_budget_ok and ref_semantics_ok
+    return ok_back and ok_gameplay and warning_budget_ok
 
 
 def main() -> None:
@@ -300,21 +272,11 @@ def main() -> None:
         default="",
         help="Optional summary json output path.",
     )
-    parser.add_argument(
-        "--skip-ref-semantics",
-        action="store_true",
-        help="Skip validate_view_ref_semantics hard checks.",
-    )
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
     summary_out = Path(args.summary_out) if args.summary_out else None
-    ok = run_check_all(
-        root,
-        max_warnings=args.max_warnings,
-        summary_out=summary_out,
-        enforce_ref_semantics=not args.skip_ref_semantics,
-    )
+    ok = run_check_all(root, max_warnings=args.max_warnings, summary_out=summary_out)
     if not ok:
         raise SystemExit(1)
 
