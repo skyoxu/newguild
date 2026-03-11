@@ -3,7 +3,7 @@ extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 # ACC:T33.5 activity feed navigation clickable
 func test_activity_feed_navigation_clickable_smoke() -> void:
     var root := Control.new()
-    add_child_autofree(root)
+    add_child(auto_free(root))
     var button := Button.new()
     button.text = "Activity"
     root.add_child(button)
