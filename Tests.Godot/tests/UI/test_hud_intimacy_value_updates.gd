@@ -1,11 +1,22 @@
 extends "res://addons/gdUnit4/src/GdUnitTestSuite.gd"
 
 var _bus: Node
+var _store: Node
 
 func before() -> void:
 	_bus = preload("res://Game.Godot/Adapters/EventBusAdapter.cs").new()
 	_bus.name = "EventBus"
 	get_tree().get_root().add_child(auto_free(_bus))
+	_store = _ensure_data_store()
+
+func _ensure_data_store() -> Node:
+	var existing := get_node_or_null("/root/DataStore")
+	if existing != null:
+		return existing
+	var store := preload("res://Game.Godot/Adapters/DataStoreAdapter.cs").new()
+	store.name = "DataStore"
+	get_tree().get_root().add_child(auto_free(store))
+	return store
 
 
 # ACC:T18.3

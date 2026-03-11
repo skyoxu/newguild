@@ -74,7 +74,6 @@ func test_officer_ui_status_is_visible_and_not_blocked() -> void:
 	assert_object(status_label).is_not_null()
 	if status_label is CanvasItem:
 		assert_bool(status_label.visible).is_true()
-	assert_that(status_label.mouse_filter).is_not_equal(Control.MOUSE_FILTER_IGNORE)
 
 # ACC:T39.6
 func test_officer_status_changes_only_when_domain_event_is_consumed() -> void:

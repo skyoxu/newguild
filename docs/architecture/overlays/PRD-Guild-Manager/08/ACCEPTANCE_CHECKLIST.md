@@ -258,6 +258,12 @@ Artifact-Refs:
 - [ ] 所有阶段任务标题不再使用 `分解A/B/C` 或 `R2-A/B`，统一阶段命名
 - [ ] `08-FeatureSlice-V11-Governance-Stabilization.md` 与 `08-FeatureSlice-V11-Gameplay-Depth.md` 已更新并可作为审计入口
 - [ ] 阶段任务的 `ACC:T<id>.<n>` 在测试与工件中可回放（`logs/ci/**`、`logs/e2e/**`）
+
+### T54 语义补充（P1 收敛）
+
+- [ ] ACC:T54.24 flaky 样本判定必须可机读：同一 `deterministic_input_hash` 下至少两次 Headless 执行结论不一致才可计入 flaky。
+- [ ] ACC:T54.25 假红率统计仅纳入已判定为 flaky 的样本；稳定真失败样本不得进入 before/after 统计分子与分母。
+- [ ] ACC:T54.26 `summary.json` 必须包含统计口径一致性字段并可校验：`before_window_id/after_window_id`、`before_denominator_def/after_denominator_def`、`before_case_set_hash/after_case_set_hash`。
 <!-- V11_ACCEPTANCE_END -->
 
 <!-- BEGIN:T53-T102-MAP -->

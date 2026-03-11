@@ -164,7 +164,13 @@ def load_tasks_from_file(task_file: Path) -> list[dict[str, Any]]:
     return []
 
 
-def validate_task_file(root: Path, task_file: Path, label: str, adr_ids: set[str]) -> tuple[int, int]:
+def validate_task_file(
+    root: Path,
+    task_file: Path,
+    label: str,
+    adr_ids: set[str],
+    task_id_filter: Optional[str] = None,
+) -> tuple[int, int]:
     """Validate overlay references for a single task file.
 
     Returns: (tasks_with_overlays, tasks_passed)
@@ -185,6 +191,8 @@ def validate_task_file(root: Path, task_file: Path, label: str, adr_ids: set[str
 
     for task in sorted(tasks, key=lambda x: str(x.get("id", ""))):
         tid = task.get("id")
+        if task_id_filter is not None and str(tid) != task_id_filter:
+            continue
 
         overlay_refs = task.get("overlay_refs")
         if overlay_refs:
@@ -296,6 +304,11 @@ def main() -> int:
         type=str,
         help="Task file path to validate (default: all .taskmaster/tasks/*.json).",
     )
+    parser.add_argument(
+        "--task-id",
+        type=str,
+        help="Optional task id filter (e.g. 54).",
+    )
 
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
@@ -315,8 +328,9 @@ def main() -> int:
 
     total_checked = 0
     total_passed = 0
+    task_id_filter = args.task_id.strip() if isinstance(args.task_id, str) and args.task_id.strip() else None
     for task_file in task_files:
-        checked, passed = validate_task_file(root, task_file, task_file.name, adr_ids)
+        checked, passed = validate_task_file(root, task_file, task_file.name, adr_ids, task_id_filter)
         total_checked += checked
         total_passed += passed
 
