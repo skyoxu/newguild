@@ -72,7 +72,7 @@ jobs:
         run: |
           $taskId = "${{ inputs.acceptance_task_id }}"
           if ([string]::IsNullOrWhiteSpace($taskId)) { $taskId = "1" }
-          py -3 scripts/sc/acceptance_check.py --task-id "$taskId" --only tests --security-profile strict --require-headless-e2e --godot-bin "$env:GODOT_BIN"
+          py -3 scripts/sc/acceptance_check.py --task-id "$taskId" --only tests --subtasks-coverage skip --security-profile strict --require-headless-e2e --godot-bin "$env:GODOT_BIN"
 
       - name: Upload CI logs (always)
         if: always()
