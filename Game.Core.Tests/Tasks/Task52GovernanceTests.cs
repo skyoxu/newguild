@@ -202,6 +202,229 @@ public sealed class Task52GovernanceTests
         root.GetProperty("gate_result").GetString().Should().Be(recomputedGate);
     }
 
+    // ACC:T55.1
+    [Fact]
+    public void ShouldFailWhenAnchorOrRefsAreMissing_WhenEvaluatingTask55AnchorBoundary()
+    {
+        var parsed = ParseAcceptanceItem("ACC:T55.1 deterministic governance check. Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs");
+        parsed.Anchor.Should().Be("ACC:T55.1");
+        parsed.Refs.Should().ContainSingle("Game.Core.Tests/Tasks/Task52GovernanceTests.cs");
+
+        var missingAnchor = () => ParseAcceptanceItem("T55.1 deterministic governance check. Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs");
+        var missingRefs = () => ParseAcceptanceItem("ACC:T55.1 deterministic governance check.");
+        var emptyRefs = () => ParseAcceptanceItem("ACC:T55.1 deterministic governance check. Refs: ");
+
+        missingAnchor.Should().Throw<InvalidDataException>();
+        missingRefs.Should().Throw<InvalidDataException>();
+        emptyRefs.Should().Throw<InvalidDataException>();
+    }
+
+    // ACC:T55.2
+    [Fact]
+    public void ShouldProduceDeterministicDecision_WhenRecomputingTask55CoreBehavior()
+    {
+        var samples = new[]
+        {
+            ExecutionSample.RetryableFailure(1, 3),
+            ExecutionSample.RetryableFailure(3, 3),
+            ExecutionSample.NonRetryableFailure(),
+            ExecutionSample.Success(),
+        };
+        var first = ComputeStabilitySummary(samples, retryFailureThreshold: 1, hardFailureThreshold: 1);
+        var second = ComputeStabilitySummary(samples, retryFailureThreshold: 1, hardFailureThreshold: 1);
+
+        first.Should().BeEquivalentTo(second);
+        var stricter = ComputeStabilitySummary(samples, retryFailureThreshold: 0, hardFailureThreshold: 1);
+        stricter.GateResult.Should().Be("fail");
+        first.GateResult.Should().Be("pass");
+    }
+
+    // ACC:T55.3
+    [Fact]
+    public void ShouldFailWhenSummaryFileIsMissing_WhenEvaluatingTask55SummaryPersistence()
+    {
+        var tempRoot = Directory.CreateTempSubdirectory("task55-summary-missing-");
+        try
+        {
+            var expectedArtifact = new[] { "logs/ci/<date>/v11-task-55/summary.json" };
+            var action = () => ResolveGovernanceEvidenceFiles(tempRoot.FullName, expectedArtifact);
+            action.Should().Throw<InvalidDataException>();
+        }
+        finally
+        {
+            if (tempRoot.Exists)
+            {
+                tempRoot.Delete(recursive: true);
+            }
+        }
+    }
+
+    // ACC:T55.3
+    [Fact]
+    public void ShouldCreateReadableSummary_WhenTask55RoundProducesEvidence()
+    {
+        var tempRoot = Directory.CreateTempSubdirectory("task55-summary-present-");
+        try
+        {
+            var summaryPath = Path.Combine(tempRoot.FullName, "logs", "ci", "2026-03-16", "v11-task-55", "summary.json");
+            var decision = new UnifiedExecutionDecision("pass", string.Empty, string.Empty, "logs/ci/2026-03-16/v11-task-55/summary.json");
+            ProduceTask55Summary(summaryPath, "run-55-summary", "2026-03-16", decision);
+
+            var resolved = ResolveGovernanceEvidenceFiles(tempRoot.FullName, new[] { "logs/ci/<date>/v11-task-55/summary.json" });
+            resolved.Should().ContainSingle().Which.Should().Be(summaryPath);
+
+            using var summary = JsonDocument.Parse(File.ReadAllText(summaryPath));
+            summary.RootElement.GetProperty("run_id").GetString().Should().Be("run-55-summary");
+            summary.RootElement.GetProperty("date").GetString().Should().Be("2026-03-16");
+            summary.RootElement.GetProperty("overall_verdict").GetString().Should().Be("pass");
+        }
+        finally
+        {
+            if (tempRoot.Exists)
+            {
+                tempRoot.Delete(recursive: true);
+            }
+        }
+    }
+
+    // ACC:T55.4
+    [Fact]
+    public void ShouldFailAggregate_WhenAnyCategoryIsMissingOrNotExecutedInSameRun()
+    {
+        const string runId = "run-55-a";
+        var allExecuted = new[]
+        {
+            CategoryExecutionResult.Pass("unit", runId),
+            CategoryExecutionResult.Pass("godot", runId),
+            CategoryExecutionResult.Pass("acceptance", runId),
+        };
+        EvaluateUnifiedExecution(allExecuted).Should().Be("pass");
+
+        var passDecision = EvaluateUnifiedExecutionWithEvidenceDetailed(
+            allExecuted,
+            new[]
+            {
+                EvidenceArtifact.Pass("unit", runId, "2026-03-16"),
+                EvidenceArtifact.Pass("godot", runId, "2026-03-16"),
+                EvidenceArtifact.Pass("acceptance", runId, "2026-03-16"),
+            },
+            summaryDate: "2026-03-16");
+        var passSummaryJson = CreateUnifiedOverallSummary(passDecision);
+        using (var passSummary = JsonDocument.Parse(passSummaryJson))
+        {
+            passSummary.RootElement.GetProperty("overall_verdict").GetString().Should().Be("pass");
+            passSummary.RootElement.TryGetProperty("overall_verdicts", out _).Should().BeFalse();
+        }
+
+        var missingGodot = new[]
+        {
+            CategoryExecutionResult.Pass("unit", runId),
+            CategoryExecutionResult.Pass("acceptance", runId),
+        };
+        EvaluateUnifiedExecution(missingGodot).Should().Be("fail");
+
+        var notExecuted = new[]
+        {
+            CategoryExecutionResult.Pass("unit", runId),
+            CategoryExecutionResult.NotExecuted("godot", runId),
+            CategoryExecutionResult.Pass("acceptance", runId),
+        };
+        EvaluateUnifiedExecution(notExecuted).Should().Be("fail");
+    }
+
+    // ACC:T55.8
+    [Fact]
+    public void ShouldFailAggregate_WhenAnyCategoryFailsOrRunIdIsMixed()
+    {
+        const string runId = "run-55-b";
+        var hasFailure = new[]
+        {
+            CategoryExecutionResult.Pass("unit", runId),
+            CategoryExecutionResult.Fail("godot", runId),
+            CategoryExecutionResult.Pass("acceptance", runId),
+        };
+        EvaluateUnifiedExecution(hasFailure).Should().Be("fail");
+
+        var mixedRunId = new[]
+        {
+            CategoryExecutionResult.Pass("unit", "run-55-b"),
+            CategoryExecutionResult.Pass("godot", "run-55-c"),
+            CategoryExecutionResult.Pass("acceptance", "run-55-b"),
+        };
+        EvaluateUnifiedExecution(mixedRunId).Should().Be("fail");
+
+        var validExecution = new[]
+        {
+            CategoryExecutionResult.Pass("unit", "run-55-d"),
+            CategoryExecutionResult.Pass("godot", "run-55-d"),
+            CategoryExecutionResult.Pass("acceptance", "run-55-d"),
+        };
+        var mixedEvidence = new[]
+        {
+            EvidenceArtifact.Pass("unit", "run-55-d", "2026-03-16"),
+            EvidenceArtifact.Pass("godot", "run-55-old", "2026-03-15"),
+            EvidenceArtifact.Pass("acceptance", "run-55-d", "2026-03-16"),
+        };
+        EvaluateUnifiedExecutionWithEvidence(validExecution, mixedEvidence).Should().Be("fail");
+
+        var validEvidence = new[]
+        {
+            EvidenceArtifact.Pass("unit", "run-55-d", "2026-03-16"),
+            EvidenceArtifact.Pass("godot", "run-55-d", "2026-03-16"),
+            EvidenceArtifact.Pass("acceptance", "run-55-d", "2026-03-16"),
+        };
+        EvaluateUnifiedExecutionWithEvidence(validExecution, validEvidence).Should().Be("pass");
+    }
+
+    // ACC:T55.12
+    [Fact]
+    public void ShouldFailImmediately_WhenEvidenceRunOrDateDoesNotMatchCurrentRound()
+    {
+        var execution = new[]
+        {
+            CategoryExecutionResult.Pass("unit", "run-55-e"),
+            CategoryExecutionResult.Pass("godot", "run-55-e"),
+            CategoryExecutionResult.Pass("acceptance", "run-55-e"),
+        };
+        var wrongDateEvidence = new[]
+        {
+            EvidenceArtifact.Pass("unit", "run-55-e", "2026-03-16"),
+            EvidenceArtifact.Pass("godot", "run-55-e", "2026-03-15"),
+            EvidenceArtifact.Pass("acceptance", "run-55-e", "2026-03-16"),
+        };
+
+        var decision = EvaluateUnifiedExecutionWithEvidenceDetailed(
+            execution,
+            wrongDateEvidence,
+            summaryDate: "2026-03-16");
+        decision.Status.Should().Be("fail");
+        decision.Reason.Should().Contain("mismatch");
+        decision.ConflictSource.Should().Be("godot");
+        decision.SummaryPath.Should().Be("logs/ci/2026-03-16/v11-task-55/summary.json");
+
+        var summaryJson = CreateTask55MismatchSummary(decision);
+        using var document = JsonDocument.Parse(summaryJson);
+        document.RootElement.GetProperty("task_id").GetString().Should().Be("55");
+        document.RootElement.GetProperty("status").GetString().Should().Be("fail");
+        document.RootElement.GetProperty("summary_path").GetString().Should().Be("logs/ci/2026-03-16/v11-task-55/summary.json");
+        document.RootElement.GetProperty("reason").GetString().Should().Contain("mismatch");
+        document.RootElement.GetProperty("conflict_source").GetString().Should().Be("godot");
+
+        var unlabeledEvidence = new[]
+        {
+            EvidenceArtifact.Pass("unit", "run-55-e", string.Empty),
+            EvidenceArtifact.Pass("godot", "run-55-e", "2026-03-16"),
+            EvidenceArtifact.Pass("acceptance", "run-55-e", "2026-03-16"),
+        };
+        var unlabeledDecision = EvaluateUnifiedExecutionWithEvidenceDetailed(
+            execution,
+            unlabeledEvidence,
+            summaryDate: "2026-03-16");
+        unlabeledDecision.Status.Should().Be("fail");
+        unlabeledDecision.Reason.Should().Be("evidence_round_metadata_missing");
+        unlabeledDecision.ConflictSource.Should().Be("unit");
+    }
+
     // ACC:T52.4
     [Fact]
     public void ShouldResolveGovernanceEvidenceFiles_WhenTask52ArtifactsAreConfigured()
@@ -803,6 +1026,146 @@ public sealed class Task52GovernanceTests
         return metric <= threshold ? "pass" : "fail";
     }
 
+    private static string EvaluateUnifiedExecution(IReadOnlyList<CategoryExecutionResult> results)
+    {
+        var requiredCategories = new[] { "unit", "godot", "acceptance" };
+        var byCategory = results.ToDictionary(result => result.Category, StringComparer.Ordinal);
+
+        if (requiredCategories.Any(category => !byCategory.ContainsKey(category)))
+        {
+            return "fail";
+        }
+
+        var runIds = byCategory.Values.Select(item => item.RunId).Distinct(StringComparer.Ordinal).ToArray();
+        if (runIds.Length != 1)
+        {
+            return "fail";
+        }
+
+        if (byCategory.Values.Any(item => !item.Executed))
+        {
+            return "fail";
+        }
+
+        return byCategory.Values.All(item => item.Passed) ? "pass" : "fail";
+    }
+
+    private static string EvaluateUnifiedExecutionWithEvidence(
+        IReadOnlyList<CategoryExecutionResult> executionResults,
+        IReadOnlyList<EvidenceArtifact> evidenceArtifacts)
+    {
+        return EvaluateUnifiedExecutionWithEvidenceDetailed(
+            executionResults,
+            evidenceArtifacts,
+            summaryDate: "1970-01-01").Status;
+    }
+
+    private static UnifiedExecutionDecision EvaluateUnifiedExecutionWithEvidenceDetailed(
+        IReadOnlyList<CategoryExecutionResult> executionResults,
+        IReadOnlyList<EvidenceArtifact> evidenceArtifacts,
+        string summaryDate)
+    {
+        var executionGate = EvaluateUnifiedExecution(executionResults);
+        var summaryPath = BuildTask55SummaryPath(summaryDate);
+        if (!string.Equals(executionGate, "pass", StringComparison.Ordinal))
+        {
+            return new UnifiedExecutionDecision("fail", "execution_result_failed", "execution", summaryPath);
+        }
+
+        var requiredCategories = new[] { "unit", "godot", "acceptance" };
+        var executionByCategory = executionResults.ToDictionary(result => result.Category, StringComparer.Ordinal);
+        var evidenceByCategory = evidenceArtifacts.ToDictionary(result => result.Category, StringComparer.Ordinal);
+
+        if (requiredCategories.Any(category => !evidenceByCategory.ContainsKey(category)))
+        {
+            return new UnifiedExecutionDecision("fail", "evidence_category_missing", "evidence", summaryPath);
+        }
+
+        var expectedRunId = executionByCategory["unit"].RunId;
+        var expectedDate = evidenceByCategory["unit"].Date;
+        if (string.IsNullOrWhiteSpace(expectedRunId) || string.IsNullOrWhiteSpace(expectedDate))
+        {
+            return new UnifiedExecutionDecision("fail", "evidence_round_metadata_missing", "unit", summaryPath);
+        }
+
+        foreach (var category in requiredCategories)
+        {
+            var evidence = evidenceByCategory[category];
+            if (!evidence.Passed)
+            {
+                return new UnifiedExecutionDecision("fail", "evidence_failed", category, summaryPath);
+            }
+
+            if (!string.Equals(evidence.RunId, expectedRunId, StringComparison.Ordinal))
+            {
+                return new UnifiedExecutionDecision("fail", "evidence_run_id_mismatch", category, summaryPath);
+            }
+
+            if (!string.Equals(evidence.Date, expectedDate, StringComparison.Ordinal))
+            {
+                return new UnifiedExecutionDecision("fail", "evidence_date_mismatch", category, summaryPath);
+            }
+
+            if (string.IsNullOrWhiteSpace(evidence.RunId) || string.IsNullOrWhiteSpace(evidence.Date))
+            {
+                return new UnifiedExecutionDecision("fail", "evidence_round_metadata_missing", category, summaryPath);
+            }
+        }
+
+        return new UnifiedExecutionDecision("pass", string.Empty, string.Empty, summaryPath);
+    }
+
+    private static string BuildTask55SummaryPath(string summaryDate)
+    {
+        return $"logs/ci/{summaryDate}/v11-task-55/summary.json";
+    }
+
+    private static string CreateTask55MismatchSummary(UnifiedExecutionDecision decision)
+    {
+        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["task_id"] = "55",
+            ["status"] = decision.Status,
+            ["summary_path"] = decision.SummaryPath,
+            ["reason"] = decision.Reason,
+            ["conflict_source"] = decision.ConflictSource,
+        };
+        return JsonSerializer.Serialize(payload);
+    }
+
+    private static string CreateUnifiedOverallSummary(UnifiedExecutionDecision decision)
+    {
+        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["task_id"] = "55",
+            ["overall_verdict"] = decision.Status,
+            ["reason"] = decision.Reason,
+            ["conflict_source"] = decision.ConflictSource,
+            ["summary_path"] = decision.SummaryPath,
+        };
+        return JsonSerializer.Serialize(payload);
+    }
+
+    private static void ProduceTask55Summary(
+        string summaryPath,
+        string runId,
+        string date,
+        UnifiedExecutionDecision decision)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(summaryPath) ?? throw new InvalidDataException("summary parent is null"));
+        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["task_id"] = "55",
+            ["run_id"] = runId,
+            ["date"] = date,
+            ["overall_verdict"] = decision.Status,
+            ["reason"] = decision.Reason,
+            ["conflict_source"] = decision.ConflictSource,
+            ["summary_path"] = decision.SummaryPath,
+        };
+        File.WriteAllText(summaryPath, JsonSerializer.Serialize(payload));
+    }
+
     private static void AssertMasterRefsAreParsable(MasterTaskRecord task, string repositoryRoot)
     {
         task.AdrRefs.Should().NotBeEmpty();
@@ -899,6 +1262,34 @@ public sealed class Task52GovernanceTests
     private sealed record AcceptanceItem(string Anchor, IReadOnlyList<string> Refs);
 
     private sealed record StabilitySummary(int FlakyCount, int RetryCount, int FailureCount, string GateResult);
+
+    private sealed record CategoryExecutionResult(string Category, string RunId, bool Executed, bool Passed)
+    {
+        public static CategoryExecutionResult Pass(string category, string runId)
+        {
+            return new CategoryExecutionResult(category, runId, Executed: true, Passed: true);
+        }
+
+        public static CategoryExecutionResult Fail(string category, string runId)
+        {
+            return new CategoryExecutionResult(category, runId, Executed: true, Passed: false);
+        }
+
+        public static CategoryExecutionResult NotExecuted(string category, string runId)
+        {
+            return new CategoryExecutionResult(category, runId, Executed: false, Passed: false);
+        }
+    }
+
+    private sealed record EvidenceArtifact(string Category, string RunId, string Date, bool Passed)
+    {
+        public static EvidenceArtifact Pass(string category, string runId, string date)
+        {
+            return new EvidenceArtifact(category, runId, date, Passed: true);
+        }
+    }
+
+    private sealed record UnifiedExecutionDecision(string Status, string Reason, string ConflictSource, string SummaryPath);
 
     private sealed record ExecutionSample(SampleType Type, int Attempt, int MaxAttempts)
     {

@@ -2793,14 +2793,15 @@
       "ACC:T55.1 的验收边界定义、锚点绑定与引用链在一次运行内可被程序完整解析，任一环节缺失即判定失败。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
       "ACC:T55.2 的核心行为必须由确定性自动化测试给出可复算结论，不能依赖人工主观判读。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
       "ACC:T55.3 必须产出 logs/ci/<date>/v11-task-55/summary.json 作为该轮证据汇总文件。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "同一次治理运行中，unit、godot、acceptance 三类测试必须全部被统一编排并实际执行，且仅输出一个总通过/失败结论；任一类别未执行则总结果必须为失败。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "evidence 消费结论只能由可机读工件计算得出；对同一输入重复执行时输出必须一致，否则该轮验收失败。 Refs: Game.Core.Tests/CI/V11EvidenceConsumptionDeterminismTests.cs",
-      "当 evidence 缺失、不可解析或路径与预期不匹配时，流程必须立即显式失败，并把可定位失败原因写入 logs/ci/<date>/v11-task-55/summary.json。 Refs: Game.Core.Tests/CI/V11EvidenceFailureReportingTests.cs",
-      "最终汇总必须分别给出 ACC:T55.1、ACC:T55.2、ACC:T55.3 的判定结果并可追踪来源；缺少任一锚点结果即验收不通过。 Refs: Game.Core.Tests/CI/V11AcceptanceAnchorTraceabilityTests.cs",
-      "该轮聚合结论必须严格由该轮 unit/godot/acceptance 的实际执行结果与 evidence 解析结果共同决定；任一类别失败则总体失败。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "ACC:T55.1 对应边界必须在治理流程中被显式加载、绑定并参与判定；未定义、未绑定或未消费任一情况均直接失败。 Refs: Game.Core.Tests/CI/V11AcceptanceAnchorBindingTests.cs",
-      "ACC:T55.2 对应实现验证必须输出自动化、确定性、可机读结果；仅有人工说明、截图结论或不可复算输出时 ACC:T55.2 必须失败。 Refs: Game.Core.Tests/CI/V11EvidenceConsumptionDeterminismTests.cs",
-      "ACC:T55.3 对应证据持久化必须在流程结束前写入 logs/ci/<date>/v11-task-55/summary.json，且包含 ACC:T55.1/ACC:T55.2/ACC:T55.3 判定字段；文件不存在、为空或缺字段即失败。 Refs: Game.Core.Tests/CI/V11EvidenceSummaryPersistenceTests.cs"
+      "ACC:T55.4 同一次治理运行中，unit、godot、acceptance 三类测试必须全部被统一编排并实际执行，且仅输出一个总通过/失败结论；任一类别未执行则总结果必须为失败。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs, Tests.Godot/tests/Integration/test_t55_unified_orchestration_semantics.gd",
+      "ACC:T55.5 evidence 消费结论只能由可机读工件计算得出；对同一输入重复执行时输出必须一致，否则该轮验收失败。 Refs: Game.Core.Tests/CI/V11EvidenceConsumptionDeterminismTests.cs",
+      "ACC:T55.6 当 evidence 缺失、不可解析或路径与预期不匹配时，流程必须立即显式失败，并把可定位失败原因写入 logs/ci/<date>/v11-task-55/summary.json。 Refs: Game.Core.Tests/CI/V11EvidenceFailureReportingTests.cs",
+      "ACC:T55.7 最终汇总必须分别给出 ACC:T55.1、ACC:T55.2、ACC:T55.3 的判定结果并可追踪来源；缺少任一锚点结果即验收不通过。 Refs: Game.Core.Tests/CI/V11AcceptanceAnchorTraceabilityTests.cs",
+      "ACC:T55.8 该轮聚合结论必须严格由该轮 unit/godot/acceptance 的实际执行结果与 evidence 解析结果共同决定；所有 evidence 必须与该轮运行标识（run-id/round/date）一致，任一类别失败或任一 evidence 非同轮即总体失败。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs, Game.Core.Tests/CI/V11EvidenceFailureReportingTests.cs, Tests.Godot/tests/Integration/test_t55_unified_orchestration_semantics.gd",
+      "ACC:T55.9 对应边界必须在治理流程中被显式加载、绑定并参与判定；未定义、未绑定或未消费任一情况均直接失败。 Refs: Game.Core.Tests/CI/V11AcceptanceAnchorBindingTests.cs",
+      "ACC:T55.10 对应实现验证必须输出自动化、确定性、可机读结果；仅有人工说明、截图结论或不可复算输出时 ACC:T55.10 必须失败。 Refs: Game.Core.Tests/CI/V11EvidenceConsumptionDeterminismTests.cs",
+      "ACC:T55.11 对应证据持久化必须在流程结束前写入 logs/ci/<date>/v11-task-55/summary.json，且包含 ACC:T55.1/ACC:T55.2/ACC:T55.3 判定字段；文件不存在、为空或缺字段即失败。 Refs: Game.Core.Tests/CI/V11EvidenceSummaryPersistenceTests.cs",
+      "ACC:T55.12 当 evidence 工件来自历史轮次、不同 run-id 或未标注轮次时，流程必须立即显式失败，并在 logs/ci/<date>/v11-task-55/summary.json 写入 mismatch 原因与冲突来源。 Refs: Game.Core.Tests/Tasks/Task52GovernanceTests.cs, Game.Core.Tests/CI/V11EvidenceFailureReportingTests.cs"
     ],
     "test_strategy": [
       "Deterministic hard checks first.",
@@ -2808,12 +2809,12 @@
     ],
     "test_refs": [
       "Game.Core.Tests/Tasks/Task52GovernanceTests.cs",
-      "Tests.Godot/tests/Integration/test_backup_restore_savegame.gd",
       "Game.Core.Tests/CI/V11EvidenceConsumptionDeterminismTests.cs",
       "Game.Core.Tests/CI/V11EvidenceFailureReportingTests.cs",
       "Game.Core.Tests/CI/V11AcceptanceAnchorTraceabilityTests.cs",
       "Game.Core.Tests/CI/V11AcceptanceAnchorBindingTests.cs",
-      "Game.Core.Tests/CI/V11EvidenceSummaryPersistenceTests.cs"
+      "Game.Core.Tests/CI/V11EvidenceSummaryPersistenceTests.cs",
+      "Tests.Godot/tests/Integration/test_t55_unified_orchestration_semantics.gd"
     ],
     "contractRefs": [
       "core.activity.feed.appended",
