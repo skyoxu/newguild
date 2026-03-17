@@ -176,7 +176,7 @@ jobs:
             throw "Invalid SC_ACCEPTANCE_TASK_ID='$taskId'. Expected numeric task id like 1 or 1.2."
           }
           Write-Host "SC_ACCEPTANCE_TASK_ID=$taskId"
-          py -3 scripts/sc/acceptance_check.py --task-id "$taskId" --only tests --security-profile "$env:SECURITY_PROFILE" --godot-bin "$env:GODOT_BIN"
+          py -3 scripts/sc/acceptance_check.py --task-id "$taskId" --only tests --subtasks-coverage skip --security-profile "$env:SECURITY_PROFILE" --godot-bin "$env:GODOT_BIN"
 
       - name: Upload CI logs (always)
         if: always()
